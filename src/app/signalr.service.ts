@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
    @Injectable({
      providedIn: 'root'
@@ -12,7 +13,7 @@ import { Observable, Subject } from 'rxjs';
 
      constructor() {
        this.hubConnection = new signalR.HubConnectionBuilder()
-         .withUrl('https://localhost:7068/Myhub') // URL de tu servidor SignalR
+         .withUrl(environment.signalRUrl) // URL de tu servidor SignalR
          .build();
      }
 
@@ -27,6 +28,7 @@ import { Observable, Subject } from 'rxjs';
           
         }))
          .catch(err => console.log('Error al conectar con SignalR: ' + err));
+         
          
          
      }

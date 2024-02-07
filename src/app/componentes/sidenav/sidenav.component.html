@@ -1,0 +1,156 @@
+<ng-container *ngIf="logeado">
+    <mat-toolbar color="primary" >
+        <div>
+            <button mat-icon-button  aria-label="Mostrar Menu" (click)="sidenav.toggle()">
+                <img src="./assets/RydentLogo.ico" />
+            </button>
+            {{titulo}} 
+        </div>
+        <div fxFlex fxLayout fxLayoutAlign="flex-end"  fxHide.xs>
+            
+            <ng-container *ngFor="let objMenu of filtrarMenu(0)">
+                <a class="mat-button-class" *ngIf="objMenu.esNodo" mat-button [matMenuTriggerFor]="menu">
+                    <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
+                    {{ objMenu.nombre }}
+                </a>
+                <mat-menu #menu="matMenu">
+                    <ng-container *ngFor="let subMenu of filtrarMenu(objMenu.idMenu); let i = index">
+                        <ng-container *ngIf="subMenu.esNodo" >
+                            <ng-container *ngTemplateOutlet="menuItemTool; context: { objMenu: objMenu}"></ng-container>
+                        </ng-container>
+                        <a *ngIf="!subMenu.esNodo" mat-menu-item routerLink="/{{subMenu.nombreController}}/">
+                            <mat-icon *ngIf="subMenu.nombreAction != ''" class="icon">{{subMenu.nombreAction}}</mat-icon>
+                            <span>  {{subMenu.nombre}} </span>
+                            
+                        </a>
+
+                    </ng-container>
+                </mat-menu>
+            </ng-container>
+            <a routerLink="/" class="mat-button-class" mat-button>
+                <mat-icon class="icon">home</mat-icon>
+                <span > Inicio </span>
+            </a>
+            <a routerLink="/dashboard" class="mat-button-class" mat-button>
+                <mat-icon class="icon">dashboard</mat-icon>
+                <span > Dashboard </span>
+            </a>
+            <a class="mat-button-class" mat-button (click)="cerrarSesion()">
+                <mat-icon class="icon">input</mat-icon>
+                <span > Cerrar </span>
+            </a>
+            
+        </div>
+    </mat-toolbar>
+    <mat-sidenav-container autosize>
+        <mat-sidenav  #sidenav mode="side">
+            <mat-nav-list>
+                <div style="padding: 1rem">  
+                    <mat-icon class="mr-8">brightness_5</mat-icon>
+                    <mat-slide-toggle [formControl]="toggleControl" class="mr-8">
+                    </mat-slide-toggle>
+                    <mat-icon>bedtime</mat-icon>  
+                </div>
+                <app-sidenav-link routerLink="/">
+                    <mat-icon class="icon">home</mat-icon>
+                    <span> Inicio </span>
+                </app-sidenav-link>
+                <mat-accordion>
+                    <ng-container *ngFor="let objMenu of filtrarMenu(0)">
+                        <mat-expansion-panel *ngIf="objMenu.esNodo">
+                            <mat-expansion-panel-header >
+                                <mat-panel-title>
+                                    <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
+                                    <span>  {{objMenu.nombre}} </span>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <ng-container *ngTemplateOutlet="menuItem; context: { objMenu: objMenu}"></ng-container>
+                        </mat-expansion-panel>
+                        <app-sidenav-link *ngIf="!objMenu.esNodo" routerLink="/{{objMenu.nombreController}}/">
+                            <mat-icon class="icon">{{objMenu.nombreAction}}</mat-icon>
+                            <span>  {{objMenu.nombre}} </span>
+                        </app-sidenav-link>
+                    </ng-container>
+                </mat-accordion>
+                <app-sidenav-link routerLink="/dashboard">
+                    <mat-icon class="icon">dashboard</mat-icon>
+                    <span> dashboard </span>
+                </app-sidenav-link>
+            </mat-nav-list>
+        </mat-sidenav>
+        <mat-sidenav-content>
+            <main>
+                <div style="padding: 1rem"></div>
+                <router-outlet>
+                     
+                </router-outlet>
+            </main>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</ng-container>
+  <ng-container *ngIf="!logeado">
+    <mat-toolbar color="primary">
+        <div>
+            <button mat-icon-button  aria-label="Mostrar Menu" >
+                <img src="./assets/RydentLogo.ico" />
+            </button>
+            {{titulo}} 
+        </div>
+        <span class="spacer"></span>
+        <div style="display: flex; align-items: center;">
+            <mat-label>Correo Electrónico</mat-label>
+            <input matInput type="email" [(ngModel)]="correo">
+            <button mat-raised-button color="primary" (click)="iniciarSesion()">Iniciar Sesión</button>
+        </div>
+    </mat-toolbar>
+    <main >
+        <div style="padding: 1rem"></div>
+        <router-outlet>
+            
+        </router-outlet>        
+    </main>
+</ng-container>
+
+  <ng-template #menuItem let-idPadre="objMenu">
+    <ng-container *ngFor="let objMenu of filtrarMenu(idPadre.idMenu)">
+        <mat-expansion-panel *ngIf="objMenu.esNodo">
+            <mat-expansion-panel-header >
+                <mat-panel-title>
+                    <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
+                    <span>  {{objMenu.nombre}} </span>
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <ng-container *ngTemplateOutlet="menuItem; context: { objMenu: objMenu}"></ng-container>
+        </mat-expansion-panel>
+        <app-sidenav-link *ngIf="!objMenu.esNodo" routerLink="/{{objMenu.nombreController}}/">
+            <mat-icon class="icon">{{objMenu.nombreAction}}</mat-icon>
+            <span>  {{objMenu.nombre}} </span>
+        </app-sidenav-link>
+    </ng-container>
+  </ng-template>
+  
+  <ng-template #menuItemTool let-idPadre="objMenu">
+    <ng-container *ngFor="let objMenu of filtrarMenu(idPadre.idMenu)">
+        <a class="mat-button-class" *ngIf="objMenu.esNodo" mat-menu-item [matMenuTriggerFor]="menuAlterno" >
+            <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
+            {{ objMenu.nombre }}
+        </a>
+        <mat-menu #menuAlterno="matMenu">
+            <ng-container *ngFor="let subMenu of filtrarMenu(objMenu.idMenu); let i = index">
+                <a mat-menu-item *ngIf="subMenu.esNodo" >
+                    <span>   
+                        <mat-icon *ngIf="subMenu.nombreAction != ''" class="icon">{{subMenu.nombreAction}}</mat-icon>
+                        {{subMenu.nombre}}          
+                    </span>
+                    
+                </a>
+                <a *ngIf="!subMenu.esNodo" mat-menu-item routerLink="/{{subMenu.nombreController}}/">
+                    <mat-icon *ngIf="subMenu.nombreAction != ''" class="icon">{{subMenu.nombreAction}}</mat-icon>
+                    <span>  {{subMenu.nombre}} </span>
+                    
+                </a>
+
+            </ng-container>
+        </mat-menu>
+    </ng-container>
+  </ng-template>
