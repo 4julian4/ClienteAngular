@@ -1,0 +1,79 @@
+
+.contenedor {
+    display: flex;
+    height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la pantalla */
+    .contenedor-izquierdo {
+        width: 22%;
+        //flex: 0.57;
+        //display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Distribuye el espacio entre el calendario y el formulario */
+        height: 100%; /* Asegura que el contenedor izquierdo ocupe toda la altura del contenedor */
+    
+        .selector-fecha {
+            mat-form-field {
+            width: 100%; /* Asegura que el campo de formulario ocupe todo el ancho disponible */
+            }
+        }
+        
+        .formulario-cita {
+            .fila2 {
+                display: flex; /* Coloca los elementos en una fila */
+                justify-content: space-between; /* Añade espacio entre los elementos */
+                gap: 10px;
+                .telefono-celular {
+                    flex: 1; /* Asegura que los campos ocupen el mismo espacio */
+                }
+            }
+            margin-top: 20px;
+            border: 1px solid #000; /* Añade un borde alrededor del formulario */
+            padding: 10px; /* Añade un espacio alrededor del contenido del formulario */
+            display: flex;
+            flex-direction: column;
+            gap: 1px; /* Añade un espacio entre los campos del formulario */
+        
+            mat-form-field {
+            width: 100%; /* Asegura que los campos de formulario ocupen todo el ancho disponible */
+            }
+        } 
+    }
+    
+    
+    .contenedor-derecho {
+        flex: 2;
+        height: 100%;
+        overflow-y: auto; /* Añade un scroll cuando el contenido excede la altura del contenedor */
+        .tabla-horarios {
+            height: 100%; /* Asegura que la tabla ocupe toda la altura del contenedor derecho */
+            border-collapse: collapse; /* Combina los bordes adyacentes de las celdas en un solo borde */
+            border: 1px solid black; /* Añade un borde a la tabla */
+        }
+        .hora-column {
+            color: white; /* Cambia 'red' al color que prefieras */
+            background-color:rgba(13, 8, 159, 0.904); /* Cambia 'red' al color que prefieras */
+          }
+        
+        .tabla-horarios tbody tr td {
+            border: 1px solid rgb(162, 158, 158); /* Añade un borde a las celdas */
+        }
+        .tabla-horarios tbody tr td:nth-child(n+2) {
+            background-color: #cff3f3; /* Otro color de fondo pastel para las demás columnas */
+        }
+              
+        .tabla-horarios tbody tr td input {
+             border: none; /* Elimina los bordes de los inputs */
+             background-color: inherit; /* Hace que los inputs tengan el color de fondo de su celda */
+        }
+
+        mat-cell input {
+            border: none;
+            background-color: transparent;
+        }
+        
+        .selected {
+            background-color: #20cffb;
+        }
+        
+    }
+}
+

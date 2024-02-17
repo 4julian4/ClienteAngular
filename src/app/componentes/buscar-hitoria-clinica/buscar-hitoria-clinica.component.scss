@@ -1,0 +1,24 @@
+.contenedorBusqueda{
+    display: flex; 
+    justify-content: space-between; 
+    width: 100%;
+    .divBuscadorSelect, .divBuscadorInput {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 450px;
+        .labelBuscador {
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+    }
+}
+
+.columnaIdAnamnesis{
+    display: none;
+}
+
+
+.selectEscogerTipoBusqueda {
+    min-width: 150px;
+}

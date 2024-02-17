@@ -39,3 +39,16 @@
     width: 200px; /* Ajusta este valor según tus necesidades */
     height: 36px; /* Ajusta este valor según tus necesidades */
   }
+
+  .mat-option.mat-selected {
+    color: white !important;
+  }
+
+  mat-select {
+    background-color: white;
+    margin-right: 10px;
+}
+
+mat-label {
+    margin-right: 10px;
+}

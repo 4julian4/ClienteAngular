@@ -1,0 +1,103 @@
+<div class="contenedor">
+    <div class="contenedor-izquierdo">
+        <div class="selector-fecha">
+            <select [(ngModel)]="intervaloDeTiempoSeleccionado" (ngModelChange)="generarIntervalosDeTiempo()">
+                <option value="10">10 minutos</option>
+                <option value="15">15 minutos</option>
+                <option value="20">20 minutos</option>
+                <option value="30">30 minutos</option>
+            </select>
+            <br>
+            <mat-form-field appearance="fill">
+                <mat-label>Choose a date</mat-label>
+                <input matInput [matDatepicker]="picker" [(ngModel)]="fechaSeleccionada" (ngModelChange)="generarIntervalosDeTiempo()">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+            
+            <form class="formulario-cita">
+                <div class="fila1">
+                    <mat-form-field>
+                        <mat-label>Nombre</mat-label>
+                        <input matInput placeholder="Nombre" [(ngModel)]="nombre" name="nombre">
+                    </mat-form-field>
+                </div>
+                <div class="fila2">            
+                    <mat-form-field class="telefono-celular">
+                        <mat-label>Teléfono</mat-label>
+                        <input matInput placeholder="Teléfono" [(ngModel)]="telefono" name="telefono">
+                    </mat-form-field>
+                    
+                    <mat-form-field class="telefono-celular">
+                        <mat-label>Celular</mat-label>
+                        <input matInput placeholder="Celular" [(ngModel)]="celular" name="celular">
+                    </mat-form-field>
+                </div>
+                
+                <div class="fila3">
+                    <mat-form-field>
+                        <mat-label>N° Historia</mat-label>
+                        <input matInput placeholder="N° Historia" [(ngModel)]="historia" name="historia">
+                    </mat-form-field>
+                </div>
+                
+                <div class="fila4">
+                    <mat-form-field>
+                        <mat-label>Observaciones</mat-label>
+                        <input matInput placeholder="Observaciones" [(ngModel)]="observaciones" name="observaciones">
+                    </mat-form-field>
+                </div>  
+                
+                <div class="botones-formulario">
+                    <button mat-raised-button color="primary" (click)="insertar()">Insertar</button>
+                    <button mat-raised-button color="accent">Editar</button>
+                    <button mat-raised-button color="warn">Borrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="contenedor-derecho">
+        <mat-table [dataSource]="intervalosDeTiempo">
+
+            <!-- Hora Column -->
+            <ng-container matColumnDef="hora">
+              <mat-header-cell *matHeaderCellDef class="hora-column"> Hora </mat-header-cell>
+              <mat-cell *matCellDef="let intervalo" class="hora-column"> {{intervalo.hora | date:'shortTime'}} </mat-cell>
+            </ng-container>
+          
+            <!-- Nombre Column -->
+            <ng-container matColumnDef="nombre">
+              <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.nombre" placeholder="Nombre"> </mat-cell>
+            </ng-container>
+          
+            <!-- Telefono Column -->
+            <ng-container matColumnDef="telefono">
+              <mat-header-cell *matHeaderCellDef> Telefono </mat-header-cell>
+              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.telefono" placeholder="Telefono"> </mat-cell>
+            </ng-container>
+          
+            <!-- Celular Column -->
+            <ng-container matColumnDef="celular">
+              <mat-header-cell *matHeaderCellDef> Celular </mat-header-cell>
+              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.celular" placeholder="Celular"> </mat-cell>
+            </ng-container>
+          
+            <!-- Historia Column -->
+            <ng-container matColumnDef="historia">
+              <mat-header-cell *matHeaderCellDef> N° Historia </mat-header-cell>
+              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.historia" placeholder="N° Historia"> </mat-cell>
+            </ng-container>
+          
+            <!-- Observaciones Column -->
+            <ng-container matColumnDef="observaciones">
+              <mat-header-cell *matHeaderCellDef> Observaciones </mat-header-cell>
+              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.observaciones" placeholder="Observaciones"> </mat-cell>
+            </ng-container>
+          
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClicked(row)" [class.selected]="row?.hora?.getTime() === selectedRow?.hora?.getTime()"></mat-row>
+          </mat-table>
+    </div>    
+</div>
+

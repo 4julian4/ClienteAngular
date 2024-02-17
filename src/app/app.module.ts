@@ -14,12 +14,29 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { SpinnerComponent } from './componentes/spinner/spinner.component';
 import { SidenavComponent } from './componentes/sidenav/sidenav.component';
+import { PedirPinComponent } from './componentes/pedir-pin/pedir-pin.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MensajesUsuariosComponent } from './componentes/mensajes-usuarios/mensajes-usuarios.component';
+import { AgendaComponent } from './componentes/agenda/agenda.component';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { CitasComponent } from './componentes/citas/citas.component';
+import { DetalleCitasComponent } from './componentes/detalle-citas/detalle-citas.component';
+import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clinica/buscar-hitoria-clinica.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SpinnerComponent,
-    SidenavComponent
+    SidenavComponent,
+    //PedirPin,
+    PedirPinComponent,
+    MensajesUsuariosComponent,
+    AgendaComponent,
+    CitasComponent,
+    DetalleCitasComponent,
+    BuscarHitoriaClinicaComponent,
+   
     
   ],
   imports: [
@@ -30,11 +47,16 @@ import { SidenavComponent } from './componentes/sidenav/sidenav.component';
     HttpClientModule,
     MaterialModule,
     ReactiveFormsModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
+  
   providers: [
     DatePipe,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+
 })
 export class AppModule { }
