@@ -1,7 +1,10 @@
-<app-sidenav>
-  
+<app-sidenav [sedes]="sedes" [sedesConectadas]="sedesConectadas">
+   
 </app-sidenav>
+<app-buscar-hitoria-clinica [idSedeActualSignalR]="idSedeActualSignalR"></app-buscar-hitoria-clinica>
+<app-agenda></app-agenda>
 <app-spinner></app-spinner>
+
 
 <div>
   <h3>Mensajes en Tiempo Real</h3>

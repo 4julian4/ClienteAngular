@@ -1,0 +1,120 @@
+<mat-accordion>
+    <mat-expansion-panel class="buscarPaciente">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                {{nombreDoctor}}
+            </mat-panel-title>
+            <mat-panel-description>
+                {{totalPacientes}}
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div class="contenedorBusqueda">
+
+            <div class="divBuscadorSelect">
+                <mat-label class="labelBuscarPor">BUSCAR POR </mat-label>
+                <mat-select class="selectEscogerTipoBusqueda" [value]="opcionSeleccionada"
+                    (selectionChange)="buscarNombreValorSeleccionado()">
+                    <mat-option *ngFor="let opcion of opciones" [value]="opcion.id"> {{opcion.nombre}} </mat-option>
+                </mat-select>
+            </div>
+
+            <div class="divBuscadorInput">
+                <mat-label> {{nombreValorSeleccionado}} </mat-label>
+                <input matInput placeholder="Buscar" #valorABuscar name="buscar">
+                <button mat-raised-button color="primary" (click)="buscarPaciente()">Buscar</button>
+            </div>
+        </div>
+        <table mat-table [dataSource]="resultadosBusqueda" class="tablaBusquedaPaciente">
+            <!-- Definición de las columnas de la tabla -->
+
+            <ng-container matColumnDef="idAnamnesis">
+                <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> N° Historia </th>
+                <td mat-cell *matCellDef="let datosPaciente" class="columnaIdAnamnesis"> {{datosPaciente.IDANAMNESIS}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="numHistoria">
+                <th mat-header-cell *matHeaderCellDef> N° Historia </th>
+                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.IDANAMNESISTEXTO}} </td>
+            </ng-container>
+            <ng-container matColumnDef="nombre">
+                <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NOMBRE_PACIENTE}} </td>
+            </ng-container>
+            <ng-container matColumnDef="cedula">
+                <th mat-header-cell *matHeaderCellDef> Cedula </th>
+                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMDOCUMENTO}} </td>
+            </ng-container>
+            <ng-container matColumnDef="telefono">
+                <th mat-header-cell *matHeaderCellDef> Telefono </th>
+                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.TELEFONO}} </td>
+            </ng-container>
+            <ng-container matColumnDef="perfil">
+                <th mat-header-cell *matHeaderCellDef> Perfil </th>
+                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.PERFIL}} </td>
+            </ng-container>
+            <ng-container matColumnDef="numAfiliacion">
+                <th mat-header-cell *matHeaderCellDef> N° Afiliacion </th>
+                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMAFILIACION}} </td>
+            </ng-container>
+
+            <!-- Aquí puedes agregar más columnas según sea necesario -->
+
+            <!-- Fila de encabezado y filas de datos -->
+            <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
+            <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradas;"
+                (click)="onRowClicked(filaSeleccionada)"></tr>
+        </table>
+
+    </mat-expansion-panel>
+    <mat-expansion-panel class="buscarDatosPersonalesCompletosPaciente">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                {{nombrePaciente}}
+            </mat-panel-title>
+            <mat-panel-description>
+                Datos personales
+            </mat-panel-description>
+
+        </mat-expansion-panel-header>
+        <form>
+            <!-- Campos de texto 
+            <mat-form-field>
+                <input matInput placeholder="Nota Importante"
+                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.NOTA_IMPORTANTE" name="notaImportante">
+            </mat-form-field>
+
+            <mat-form-field>
+                <input matInput placeholder="Nombres" [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.NOMBRES"
+                    name="nombres">
+            </mat-form-field>
+
+            <mat-form-field>
+                <input matInput placeholder="Apellidos"
+                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.APELLIDOS" name="apellidos">
+            </mat-form-field>
+
+            <mat-form-field>
+                <input matInput placeholder="Nombre del Paciente"
+                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE" name="nombrePaciente">
+            </mat-form-field> -->
+
+            <!-- Campos numéricos 
+            <mat-form-field>
+                <input matInput type="number" placeholder="Comparación"
+                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.COMPARACION" name="comparacion">
+            </mat-form-field> -->
+
+            <!-- Campos de fecha 
+            <mat-form-field>
+                <input matInput [matDatepicker]="fechaIngresoPicker" placeholder="Fecha Ingreso"
+                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.FECHA_INGRESO" name="fechaIngreso">
+                <mat-datepicker-toggle matSuffix [for]="fechaIngresoPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaIngresoPicker></mat-datepicker>
+            </mat-form-field> -->
+
+            
+            <button mat-button type="submit">Guardar</button>
+        </form>
+    </mat-expansion-panel>
+
+</mat-accordion>
