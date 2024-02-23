@@ -15,45 +15,63 @@
                 <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
             
-            <form class="formulario-cita">
-                <div class="fila1">
-                    <mat-form-field>
-                        <mat-label>Nombre</mat-label>
-                        <input matInput placeholder="Nombre" [(ngModel)]="nombre" name="nombre">
-                    </mat-form-field>
-                </div>
-                <div class="fila2">            
-                    <mat-form-field class="telefono-celular">
-                        <mat-label>Teléfono</mat-label>
-                        <input matInput placeholder="Teléfono" [(ngModel)]="telefono" name="telefono">
-                    </mat-form-field>
-                    
-                    <mat-form-field class="telefono-celular">
-                        <mat-label>Celular</mat-label>
-                        <input matInput placeholder="Celular" [(ngModel)]="celular" name="celular">
-                    </mat-form-field>
-                </div>
-                
-                <div class="fila3">
-                    <mat-form-field>
-                        <mat-label>N° Historia</mat-label>
-                        <input matInput placeholder="N° Historia" [(ngModel)]="historia" name="historia">
-                    </mat-form-field>
-                </div>
-                
-                <div class="fila4">
-                    <mat-form-field>
-                        <mat-label>Observaciones</mat-label>
-                        <input matInput placeholder="Observaciones" [(ngModel)]="observaciones" name="observaciones">
-                    </mat-form-field>
-                </div>  
-                
-                <div class="botones-formulario">
-                    <button mat-raised-button color="primary" (click)="insertar()">Insertar</button>
-                    <button mat-raised-button color="accent">Editar</button>
-                    <button mat-raised-button color="warn">Borrar</button>
-                </div>
-            </form>
+            <mat-tab-group>
+                <mat-tab label="Buscar">
+                    <mat-card class="cardBuscarCita">
+                        <mat-form-field>
+                            <mat-label> Nombre, Cedula o Telefono</mat-label>
+                            <input matInput placeholder="Buscar por" [(ngModel)]="nombre" name="nombre">
+                        </mat-form-field>
+                    </mat-card>
+                    <mat-card class="cardBuscarEspacioAgenda">
+
+                    </mat-card>
+                  <!-- Aquí va el contenido para buscar -->
+                </mat-tab>
+                <mat-tab label="Insertar">
+                    <form class="formulario-cita">
+                        <div class="fila1">
+                            <mat-form-field>
+                                <mat-label>Nombre</mat-label>
+                                <input matInput placeholder="Nombre" [(ngModel)]="nombre" name="nombre">
+                            </mat-form-field>
+                        </div>
+                        <div class="fila2">            
+                            <mat-form-field class="telefono-celular">
+                                <mat-label>Teléfono</mat-label>
+                                <input matInput placeholder="Teléfono" [(ngModel)]="telefono" name="telefono">
+                            </mat-form-field>
+                            
+                            <mat-form-field class="telefono-celular">
+                                <mat-label>Celular</mat-label>
+                                <input matInput placeholder="Celular" [(ngModel)]="celular" name="celular">
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="fila3">
+                            <mat-form-field>
+                                <mat-label>N° Historia</mat-label>
+                                <input matInput placeholder="N° Historia" [(ngModel)]="historia" name="historia">
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="fila4">
+                            <mat-form-field>
+                                <mat-label>Observaciones</mat-label>
+                                <input matInput placeholder="Observaciones" [(ngModel)]="observaciones" name="observaciones">
+                            </mat-form-field>
+                        </div>  
+                        
+                        <div class="botones-formulario">
+                            <button mat-raised-button color="primary" (click)="insertar()">Confirmar</button>
+                        </div>
+                    </form>
+                </mat-tab>
+                <mat-tab label="Editar">
+                  <!-- Aquí va el contenido para editar -->
+                </mat-tab>
+            </mat-tab-group>
+            
         </div>
     </div>
     <div class="contenedor-derecho">

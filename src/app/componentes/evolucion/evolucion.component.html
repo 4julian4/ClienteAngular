@@ -1,0 +1,88 @@
+<table mat-table [dataSource]="resultadoBusquedaEvolucion" class="mat-elevation-z8">
+    <!-- Columna de ejemplo -->
+    <ng-container matColumnDef="IDEVOLUCION">
+        <th mat-header-cell *matHeaderCellDef> Evolución </th>
+        <td mat-cell *matCellDef="let evolucionPaciente">
+            <br>
+            <form class="formularioEvolucion" [formGroup]="formularioEvolucion">
+                <div class="scrollable-content">
+                    <div class="divFormularioFila1">
+                        <mat-form-field appearance="fill" class="campoFila11" style="flex: 1;">
+                            <mat-label>Fecha</mat-label>
+                            <input matInput value={{evolucionPaciente.evolucion.FECHA}} placeholder="E-mail">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Hora de entrada</mat-label>
+                            <input matInput value={{evolucionPaciente.evolucion.HORA_LLEGADA}}
+                                placeholder="Telefono Oficina">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Hora de salida</mat-label>
+                            <input matInput value={{evolucionPaciente.evolucion.HORA_FIN}} placeholder="Celular">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Atendido por</mat-label>
+                            <input matInput value={{evolucionPaciente.evolucion.DOCTOR}} placeholder="Celular">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Nota</mat-label>
+                            <input matInput value={{evolucionPaciente.evolucion.NOTA}} placeholder="Celular">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="divFormularioFila2">
+                        <mat-form-field appearance="fill" class="campoFila2">
+                            <mat-label>Evolucion</mat-label>
+                            <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                                value={{evolucionPaciente.evolucion.EVOLUCION}}
+                                placeholder="Motivo De La Consulta"></textarea>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="divFormularioFila3">
+                        <mat-form-field appearance="fill" class="campoFila3">
+                            <mat-label>Proxima Cita</mat-label>
+                            <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                                value={{evolucionPaciente.evolucion.PROXIMA_CITA}}
+                                placeholder="Motivo De La Consulta"></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div class="divFormularioFila4">
+                        <div>
+                            <img *ngIf="evolucionPaciente.imgFirmaPaciente != ''"
+                                src="{{evolucionPaciente.imgFirmaPaciente}}" alt="Red dot" />
+                        </div>
+
+                        <div>
+                            <img *ngIf="evolucionPaciente.imgFirmaDoctor != ''"
+                                src="{{evolucionPaciente.imgFirmaDoctor}}" alt="Red dot" />
+                        </div>
+
+                    </div>
+                    <div class="divFormularioFila4">
+                        <div>
+                            <strong *ngIf="evolucionPaciente.imgFirmaPaciente != ''">Firma del paciente</strong>
+                        </div>
+
+                        <div>
+                            <strong *ngIf="evolucionPaciente.imgFirmaDoctor != ''">Firma del doctor</strong>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+            <br>
+        </td>
+    </ng-container>
+
+    <!-- Encabezado de la tabla y filas de la tabla -->
+    <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnasMostradas;"></tr>
+</table>
+
+<!-- Botones para guardar y cancelar -->
+<div class="button-container">
+    <button mat-raised-button color="primary" (click)="guardarEvolucion()">Guardar</button>
+    <button mat-raised-button color="warn" (click)="cancelarEvolucion()">Cancelar</button>
+
+</div>

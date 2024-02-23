@@ -10,6 +10,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MaterialModule} from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 import { SpinnerComponent } from './componentes/spinner/spinner.component';
@@ -23,6 +24,16 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { CitasComponent } from './componentes/citas/citas.component';
 import { DetalleCitasComponent } from './componentes/detalle-citas/detalle-citas.component';
 import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clinica/buscar-hitoria-clinica.component';
+import { DatosPersonales } from './conexiones/rydent/modelos/datos-personales';
+import { DatosPersonalesComponent } from './componentes/datos-personales/datos-personales.component';
+import { Antecedentes } from './conexiones/rydent/modelos/antecedentes';  
+import { MatMenuModule } from '@angular/material/menu';
+import { AntecedentesComponent } from './componentes/antecedentes/antecedentes.component';
+import { EvolucionComponent } from './componentes/evolucion/evolucion.component';
+import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agregar-evolucion.component';
+
+
+
 
 @NgModule({
   declarations: [
@@ -36,6 +47,11 @@ import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clin
     CitasComponent,
     DetalleCitasComponent,
     BuscarHitoriaClinicaComponent,
+    DatosPersonalesComponent,
+    AntecedentesComponent,
+    EvolucionComponent,
+    AgregarEvolucionComponent
+    
    
     
   ],
@@ -50,7 +66,11 @@ import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clin
     MatFormFieldModule,
     MatDialogModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatTabsModule,
+    MatMenuModule
+
+
   ],
   
   providers: [

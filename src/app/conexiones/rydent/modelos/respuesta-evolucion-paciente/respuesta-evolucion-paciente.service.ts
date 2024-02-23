@@ -1,11 +1,17 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { RespuestaEvolucionPaciente } from './respuesta-evolucion-paciente.model';
 import { SignalRService } from 'src/app/signalr.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RespuestaEvolucionPacienteService {
+  private anamnesisData = new BehaviorSubject<number | null>(null);
+  sharedAnamnesisData = this.anamnesisData.asObservable();
+
+  private sedeData = new BehaviorSubject<string | null>(null);
+  sharedSedeData = this.sedeData.asObservable();
   @Output() respuestaEvolucionPacienteEmit: EventEmitter<RespuestaEvolucionPaciente[]> = new EventEmitter<RespuestaEvolucionPaciente[]>();
 
   constructor(
@@ -23,5 +29,13 @@ export class RespuestaEvolucionPacienteService {
         this.signalRService.hubConnection.invoke('ObtenerDatosEvolucion', clienteId, idAnanesis).catch(err => console.error(err));
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
+  }
+
+  updateAnamnesisData(data: number) {
+    this.anamnesisData.next(data);
+  }
+
+  updateSedeData(data: string) {
+    this.sedeData.next(data);
   }
 }

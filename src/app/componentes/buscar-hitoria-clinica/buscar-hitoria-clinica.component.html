@@ -1,5 +1,6 @@
 <mat-accordion>
-    <mat-expansion-panel class="buscarPaciente">
+    <mat-expansion-panel *ngIf="mostrarPanelBuscarPaciente" class="buscarPaciente"
+        [expanded]="openorclosePanelBuscarPaciente" (opened)="panelBuscarPacienteOpen()">
         <mat-expansion-panel-header>
             <mat-panel-title>
                 {{nombreDoctor}}
@@ -8,22 +9,23 @@
                 {{totalPacientes}}
             </mat-panel-description>
         </mat-expansion-panel-header>
-        <div class="contenedorBusqueda">
-
-            <div class="divBuscadorSelect">
-                <mat-label class="labelBuscarPor">BUSCAR POR </mat-label>
-                <mat-select class="selectEscogerTipoBusqueda" [value]="opcionSeleccionada"
-                    (selectionChange)="buscarNombreValorSeleccionado()">
-                    <mat-option *ngFor="let opcion of opciones" [value]="opcion.id"> {{opcion.nombre}} </mat-option>
-                </mat-select>
+        <mat-card class="cardContenedorBusqueda">
+            <div class="contenedorBusqueda">
+                <div class="divBuscadorSelect">
+                    <mat-label class="labelBuscarPor">BUSCAR POR: </mat-label>
+                    <mat-select class="selectEscogerTipoBusqueda"  [(value)]="opcionSeleccionada" (selectionChange)="buscarNombreValorSeleccionado()">
+                        <mat-option *ngFor="let opcion of opciones" [value]="opcion.id"> {{opcion.nombre}} </mat-option>
+                    </mat-select>
+                </div>
+                
+                <div class="divBuscadorInput">
+                <!--    <mat-label> {{nombreValorSeleccionado}} </mat-label>-->
+                    <input matInput placeholder="Buscar" #valorABuscar name="buscar" class="inputBuscar">
+                    <button mat-raised-button class="botonBuscarPaciente" color="primary" (click)="buscarPaciente()">Buscar</button>
+                    <button mat-raised-button class="botonCancelarBuscarPaciente" color="warn" (click)="buscarPaciente()">Cancelar</button>
+                </div>
             </div>
-
-            <div class="divBuscadorInput">
-                <mat-label> {{nombreValorSeleccionado}} </mat-label>
-                <input matInput placeholder="Buscar" #valorABuscar name="buscar">
-                <button mat-raised-button color="primary" (click)="buscarPaciente()">Buscar</button>
-            </div>
-        </div>
+        </mat-card>
         <table mat-table [dataSource]="resultadosBusqueda" class="tablaBusquedaPaciente">
             <!-- Definición de las columnas de la tabla -->
 
@@ -66,7 +68,9 @@
         </table>
 
     </mat-expansion-panel>
-    <mat-expansion-panel class="buscarDatosPersonalesCompletosPaciente">
+    <mat-expansion-panel *ngIf="mostrarPanelMostrarDatosPersonalesPaciente"
+        class="mostrarDatosPersonalesCompletosPaciente" [expanded]="openorclosePanelMostrarDatosPersonalesPaciente"
+        (opened)="panelMostrarDatosPersonalesOpen()">
         <mat-expansion-panel-header>
             <mat-panel-title>
                 {{nombrePaciente}}
@@ -76,44 +80,43 @@
             </mat-panel-description>
 
         </mat-expansion-panel-header>
-        <form>
-            <!-- Campos de texto 
-            <mat-form-field>
-                <input matInput placeholder="Nota Importante"
-                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.NOTA_IMPORTANTE" name="notaImportante">
+        <form class="example-form" [formGroup]="formularioDatosPersonales">
+
+
+            <!-- NOMBRES y APELLIDOS -->
+            <div class="name-fields">
+                <mat-form-field appearance="fill" class="name-field">
+                    <mat-label>N° Historia</mat-label>
+                    <input matInput formControlName="IDANAMNESIS_TEXTO" placeholder="N° Historia">
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="name-field">
+                    <mat-label>N° Afiliacion</mat-label>
+                    <input matInput formControlName="NRO_AFILIACION" placeholder="N° Afiliacion">
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="name-field">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput formControlName="NOMBRE_PACIENTE" placeholder="Nombres">
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="name-field">
+                    <mat-label>Cedula</mat-label>
+                    <input matInput formControlName="CEDULA_NUMERO" placeholder="Cedula">
+                </mat-form-field>
+            </div>
+            <!-- NOTA_IMPORTANTE -->
+            <mat-form-field appearance="fill">
+                <mat-label>Telefono</mat-label>
+                <input matInput formControlName="TELF_P" placeholder="Telefono">
             </mat-form-field>
 
-            <mat-form-field>
-                <input matInput placeholder="Nombres" [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.NOMBRES"
-                    name="nombres">
-            </mat-form-field>
+            <!-- Otros campos aquí, sigue el mismo patrón -->
 
-            <mat-form-field>
-                <input matInput placeholder="Apellidos"
-                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.APELLIDOS" name="apellidos">
-            </mat-form-field>
-
-            <mat-form-field>
-                <input matInput placeholder="Nombre del Paciente"
-                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE" name="nombrePaciente">
-            </mat-form-field> -->
-
-            <!-- Campos numéricos 
-            <mat-form-field>
-                <input matInput type="number" placeholder="Comparación"
-                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.COMPARACION" name="comparacion">
-            </mat-form-field> -->
-
-            <!-- Campos de fecha 
-            <mat-form-field>
-                <input matInput [matDatepicker]="fechaIngresoPicker" placeholder="Fecha Ingreso"
-                    [(ngModel)]="resultadoBusquedaDatosPersonalesCompletos.FECHA_INGRESO" name="fechaIngreso">
-                <mat-datepicker-toggle matSuffix [for]="fechaIngresoPicker"></mat-datepicker-toggle>
-                <mat-datepicker #fechaIngresoPicker></mat-datepicker>
-            </mat-form-field> -->
-
-            
-            <button mat-button type="submit">Guardar</button>
+            <!-- Botones para guardar y cancelar -->
+            <div class="button-container">
+                <button mat-raised-button color="primary" (click)="guardarDatosPersonales()">Guardar</button>
+                <button mat-raised-button color="warn" (click)="cancelarDatosPersonales()">Cancelar</button>
+                <button mat-raised-button color="primary" (click)="mostrarAntecedentes()">Antecedentes</button>
+                <button mat-raised-button color="warn" (click)="mostrarEvolucion()">Evolucion</button>
+            </div>
         </form>
     </mat-expansion-panel>
 

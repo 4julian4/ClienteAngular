@@ -1,24 +1,69 @@
-.contenedorBusqueda{
-    display: flex; 
-    justify-content: space-between; 
-    width: 100%;
-    .divBuscadorSelect, .divBuscadorInput {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-width: 450px;
-        .labelBuscador {
-            white-space: nowrap;
-            margin-right: 10px;
-        }
-    }
+.cardContenedorBusqueda{
+    
+    border-radius: 10px; /* Ajusta este valor a tus necesidades */
+    border: 1px solid; /* Añade un borde para que el border-radius sea visible */
+    margin: 5px;
+    
+}
+.contenedorBusqueda {
+    display: flex;
+    justify-content: space-between; /* Alinea los elementos a la derecha */
+    align-items: center; /* Alinea verticalmente los elementos */
 }
 
-.columnaIdAnamnesis{
-    display: none;
+.divBuscadorSelect,
+.divBuscadorInput {
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos dentro de estos divs */
 }
+
+.labelBuscarPor {
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    color: white; /* Cambia el color del texto a blanco */
+    background-color:rgba(13, 8, 159, 0.904); /* Cambia el color de fondo a primary */
+    padding: 5px; /* Añade espacio alrededor del texto */
+    margin-right: 10px; /* Añade espacio entre el texto y el input/select */
+    border-radius: 10px; /* Ajusta este valor a tus necesidades */
+    border: 1px solid; /* Añade un borde para que el border-radius sea visible */
+}
+
+.inputBuscar{
+    border-radius: 10px; /* Ajusta este valor a tus necesidades */
+    border: 1px solid; /* Añade un borde para que el border-radius sea visible */
+    width: 790px; /* Ajusta este valor a tus necesidades */
+}
+
+.botonBuscarPaciente {
+    margin-right: 2px; /* Añade un margen a la derecha del botón Buscar */
+    margin-left: 3px;
+  }
+  
+  .botonCancelarBuscarPaciente {
+    margin-left: 2px; /* Añade un margen a la izquierda del botón Cancelar */
+    margin-right: 3px;
+  }
+
+
 
 
 .selectEscogerTipoBusqueda {
     min-width: 150px;
 }
+
+.name-fields {
+    display: flex;
+  }
+  
+  .name-field:not(:last-child) {
+    margin-right: 10px; /* Define el espacio horizontal entre los campos */
+  }
+
+  .divBuscadorSelect mat-label,
+.divBuscadorSelect mat-select,
+.divBuscadorInput mat-label,
+.divBuscadorInput input {
+  height: 30px; /* Ajusta este valor a tus necesidades */
+  font-family: Arial, sans-serif; /* Ajusta este valor a tus necesidades */
+  font-size: 14px; /* Ajusta este valor a tus necesidades */
+}
+
