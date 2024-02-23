@@ -52,3 +52,13 @@
 mat-label {
     margin-right: 10px;
 }
+
+.divMenuContainer {
+  position: relative;
+}
+
+button[mat-button] {
+  position: absolute;
+  top: 0;
+  left: 0;
+}

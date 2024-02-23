@@ -1,0 +1,96 @@
+<form class="formularioAgregarEvolucion" [formGroup]="formularioAgregarEvolucion">
+
+    <div class="scrollable-content">
+        <!-- NOMBRES y APELLIDOS -->
+        <div class="divFormularioFila1">
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Atendido por</mat-label>
+                <mat-select value="DOCTOR">
+                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="divFormularioFila2">
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Anotacion</mat-label>
+                <mat-select value="NOTA">
+                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Plantilla</mat-label>
+                <mat-select value="COMPLICACION">
+                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="divFormularioFila2">
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Fecha</mat-label>
+                <mat-select value="FECHA">
+                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Hora</mat-label>
+                <mat-select value="HORA_LLEGADA">
+                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Hora fin</mat-label>
+                <mat-select value="HORA_FIN">
+                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="divFormularioFila3">
+            <mat-form-field appearance="fill" class="campoFila3">
+                <mat-label>Tratamiento</mat-label>
+                <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                    formControlName="EVOLUCION" placeholder="Tratamiento"></textarea>
+            </mat-form-field>
+        </div>
+
+        <div class="divFormularioFila4">
+            <mat-form-field appearance="fill" class="campoFila4">
+                <mat-label>Proxima cita</mat-label>
+                <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                    formControlName="PROXIMA_CITA" placeholder="Proxima cita"></textarea>
+            </mat-form-field>
+        </div>
+
+        <div class="divFormularioFila5">
+            <mat-form-field appearance="fill" class="campoFila5">
+                <mat-label>Insumos</mat-label>
+                <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                    formControlName="SALIDA" placeholder="Insumos"></textarea>
+            </mat-form-field>
+        </div>
+    </div>
+    <div class="divContenedorDeBotones">
+        <button class="BotonGuardar" mat-raised-button (click)="guardarEvolucion()">Guardar</button>
+        <button class="BotonCancelar" mat-raised-button (click)="cancelarEvolucion()">Cancelar</button>
+    </div>
+</form>

@@ -1,17 +1,24 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { SignalRService } from 'src/app/signalr.service';
 import { Antecedentes } from './antecedentes.model';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AntecedentesService {
-  @Output() respuestaAntecedentesEmit: EventEmitter<Antecedentes> = new EventEmitter<Antecedentes>();
+  private anamnesisData = new BehaviorSubject<number | null>(null);
+  sharedAnamnesisData = this.anamnesisData.asObservable();
 
+  private sedeData = new BehaviorSubject<string | null>(null);
+  sharedSedeData = this.sedeData.asObservable();
+  
+  @Output() respuestaAntecedentesEmit: EventEmitter<Antecedentes> = new EventEmitter<Antecedentes>();
+  
   constructor(
     private signalRService: SignalRService,
   ) { }
-  async startConnectionRespuestaBusquedaPaciente(clienteId: string, idAnanesis: string) {
+  async startConnectionRespuestaBusquedaAntecedentes(clienteId: string, idAnanesis: string) {
     await this.signalRService.hubConnection.start().then(
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
@@ -24,4 +31,13 @@ export class AntecedentesService {
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
   }
+
+  updateAnamnesisData(data: number) {
+    this.anamnesisData.next(data);
+  }
+
+  updateSedeData(data: string) {
+    this.sedeData.next(data);
+  }
+
 }

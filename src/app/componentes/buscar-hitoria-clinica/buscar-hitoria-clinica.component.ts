@@ -1,10 +1,13 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatExpansionPanel } from '@angular/material/expansion';
 import { Antecedentes, AntecedentesService } from 'src/app/conexiones/rydent/modelos/antecedentes';
 import { DatosPersonales, DatosPersonalesService } from 'src/app/conexiones/rydent/modelos/datos-personales';
 import { RespuestaBusquedaPaciente, RespuestaBusquedaPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
 import { RespuestaEvolucionPaciente, RespuestaEvolucionPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-evolucion-paciente';
 import { RespuestaObtenerDoctor, RespuestaObtenerDoctorService } from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
 import { SedesConectadas } from 'src/app/conexiones/sedes-conectadas';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-buscar-hitoria-clinica',
@@ -12,15 +15,21 @@ import { SedesConectadas } from 'src/app/conexiones/sedes-conectadas';
   styleUrls: ['./buscar-hitoria-clinica.component.scss']
 })
 export class BuscarHitoriaClinicaComponent implements OnInit {
+ // @ViewChildren(MatExpansionPanel) paneles: QueryList<MatExpansionPanel>;
   @Input() idSedeActualSignalR: string = '';
+  @Output() resultadoBusquedaDatosPersonalesCompletos: DatosPersonales = new DatosPersonales();
+  formularioDatosPersonales!: FormGroup;
   sedeConectadaActual: SedesConectadas = new SedesConectadas();
   respuestaObtenerDoctorModel: RespuestaObtenerDoctor = new RespuestaObtenerDoctor();
   resultadosBusqueda: RespuestaBusquedaPaciente[] = [];
-  resultadoBusquedaDatosPersonalesCompletos: DatosPersonales = new DatosPersonales();
+  
   resultadoBusquedaAntecedentes: Antecedentes = new Antecedentes();
   resultadoBusquedaEvolucionPaciente: RespuestaEvolucionPaciente = new RespuestaEvolucionPaciente();
-
-  columnasMostradas = ['idAnamnesis','numHistoria','nombre', 'cedula', 'telefono', 'perfil', 'numAfiliacion']; // Añade aquí los nombres de las columnas que quieres mostrar
+  mostrarPanelBuscarPaciente = true;
+  openorclosePanelBuscarPaciente = false;
+  mostrarPanelMostrarDatosPersonalesPaciente = false;
+  openorclosePanelMostrarDatosPersonalesPaciente = false;
+  columnasMostradas = ['idAnamnesis', 'numHistoria', 'nombre', 'cedula', 'telefono', 'perfil', 'numAfiliacion']; // Añade aquí los nombres de las columnas que quieres mostrar
   nombreDoctor: string = 'Nombre Doctor';
   nombrePaciente: string = 'Nombre Paciente';
   totalPacientes: number = 0;
@@ -28,7 +37,10 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   opcionSeleccionada: string = '1';
   nombreValorSeleccionado: string = '';
   @ViewChild('valorABuscar') valorABuscar: ElementRef | undefined;
+  idAnamnesisParaMenu: number = 0;
+  idSedeActualSignalRMenu: string = '';
   
+
   opciones = [
     { id: '1', nombre: 'NOMBRE' },
     { id: '2', nombre: 'CEDULA' },
@@ -40,12 +52,16 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   constructor(
     private respuestaObtenerDoctorService: RespuestaObtenerDoctorService,
     private respuestaBusquedaPacienteService: RespuestaBusquedaPacienteService,
-    private datosPersonalesService:DatosPersonalesService,
-    private antecedentesService:AntecedentesService,
-    private respuestaEvolucionPacienteService:RespuestaEvolucionPacienteService
+    private datosPersonalesService: DatosPersonalesService,
+    private antecedentesService: AntecedentesService,
+    private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
+    private formBuilder: FormBuilder,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    this.inicializarFormulario();
+
     this.opcionSeleccionada = this.opciones[0].id;
     this.buscarNombreValorSeleccionado();
     this.respuestaObtenerDoctorService.respuestaObtenerDoctorModel.subscribe(async (respuestaObtenerDoctor: RespuestaObtenerDoctor) => {
@@ -53,6 +69,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       this.respuestaObtenerDoctorModel = respuestaObtenerDoctor;
       this.nombreDoctor = respuestaObtenerDoctor.doctor.NOMBRE;
       this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
+      this.panelBuscarPacienteOpen();
     });
 
     this.respuestaBusquedaPacienteService.respuestaBuquedaPacienteModel.subscribe(async (respuestaBusquedaPaciente: RespuestaBusquedaPaciente[]) => {
@@ -61,13 +78,17 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     });
 
     //Datos Personales
-    this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales:DatosPersonales) => {
+    this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales: DatosPersonales) => {
       console.log(respuestaBusquedaDatosPersonales);
       this.resultadoBusquedaDatosPersonalesCompletos = respuestaBusquedaDatosPersonales;
+      console.log(this.resultadoBusquedaDatosPersonalesCompletos);
+      this.nombrePaciente = this.resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE;
+      this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
+      //this.inicializarFormulario();
     });
 
     //Antecedentes
-    this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes:Antecedentes) => {
+    this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
       console.log(respuestaBusquedaAntecedentes);
       this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
     });
@@ -88,6 +109,89 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     }
   }
 
+  panelBuscarPacienteOpen(){
+    this.openorclosePanelBuscarPaciente = true
+  }
+
+  panelMostrarDatosPersonalesOpen(){
+    this.openorclosePanelMostrarDatosPersonalesPaciente = true
+  }
+
+
+  inicializarFormulario() {
+    this.formularioDatosPersonales = this.formBuilder.group({
+      IDANAMNESIS: [''],
+      IDANAMNESIS_TEXTO: [''],
+      NOTA_IMPORTANTE: [''],
+      COMPARACION: [0],
+      FECHA_INGRESO: [''],
+      FECHA_INGRESO_DATE: [new Date()],
+      HORA_INGRESO: [new Date()],
+      NOMBRES: [''],
+      APELLIDOS: [''],
+      NOMBRE_PACIENTE: [''],
+      FECHAN_DIA: [''],
+      FECHAN_MES: [''],
+      FECHAN_ANO: [''],
+      DOCUMENTO_IDENTIDAD: [''],
+      SEXO: [''],
+      EDAD: [''],
+      EDADMES: [''],
+      DIRECCION_PACIENTE: [''],
+      TELF_P: [''],
+      TELF_P_OTRO: [''],
+      CELULAR_P: [''],
+      NOMBRE_RESPONS: [''],
+      DIRECCION_RESPONSABLE: [''],
+      TELF_RESP: [''],
+      TELF_OF_RESP: [''],
+      CELULAR_RESPONSABLE: [''],
+      BEEPER_RESPONSABLE: ['0'],
+      COD_BEEPR_RESP: ['0'],
+      E_MAIL_RESP: [''],
+      REFERIDO_POR: [''],
+      NRO_AFILIACION: [''],
+      CONVENIO: [''],
+      ESTADO_TRATAMIENTO: [''],
+      TIPO_PACIENTE: [''],
+      CEDULA_NUMERO: [''],
+      ESTADOCIVIL: [''],
+      PARENTESCO: [''],
+      NIVELESCOLAR: [''],
+      ZONA_RECIDENCIAL: [''],
+      PARENTESCO_RESPONSABLE: [''],
+      DOMICILIO: [''],
+      EMERGENCIA: [''],
+      ACOMPANATE_TEL: [''],
+      ACOMPANATE: [''],
+      BARRIO: [''],
+      LUGAR: [''],
+      DOCUMENTO_RESPONS: [''],
+      ACTIVIDAD_ECONOMICA: [''],
+      ESTRATO: [''],
+      LUGAR_NACIMIENTO: [''],
+      CODIGO_CIUDAD: [''],
+      CODIGO_DEPARTAMENTO: [''],
+      CODIGO_EPS: [''],
+      CODIGO_EPS_LISTADO: [''],
+      NUMERO_TTITULAR: [''],
+      NOMBREPADRE: [''],
+      TELEFONOPADRE: [''],
+      NOMBRE_MADRE: [''],
+      TELEFONOMADRE: [''],
+      CEL_PADRE: [''],
+      CEL_MADRE: [''],
+      OCUPACION_PADRE: [''],
+      OCUPACION_MADRE: [''],
+      NUMEROHERMANOS: [''],
+      RELACIONPADRES: [''],
+      ACTIVO: ['0'],
+      IDREFERIDOPOR: ['0']
+    });
+    // Llena el formulario con los datos de resultadoBusquedaDatosPersonalesCompletos
+    //this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
+  }
+
   async buscarPaciente() {
     if (this.idSedeActualSignalR != '') {
       console.log(this.idSedeActualSignalR);
@@ -103,15 +207,63 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
 
     if (this.idSedeActualSignalR != '') {
       await this.datosPersonalesService.startConnectionRespuestaDatosPersonales(this.idSedeActualSignalR, idAnamnesis.toString());
-      console.log(this.resultadoBusquedaDatosPersonalesCompletos);
-      this.nombrePaciente = this.resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE;
     }
   }
 
-  onRowClicked(filaSeleccionada: DatosPersonales) {
-    console.log('Row clicked: ', filaSeleccionada);
-    this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
+  async obtenerAntecedentesPaciente(idAnamnesis: number) {
+    console.log(this.idSedeActualSignalR);
+    console.log(idAnamnesis);
+
+    if (this.idSedeActualSignalR != '') {
+      await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(this.idSedeActualSignalR, idAnamnesis.toString());
+    }
   }
+
+  async obtenerEvolucionPaciente(idAnamnesis: number) {
+    console.log(this.idSedeActualSignalR);
+    console.log(idAnamnesis);
+
+    if (this.idSedeActualSignalR != '') {
+      await this.respuestaEvolucionPacienteService.startConnectionRespuestaEvolucionPaciente(this.idSedeActualSignalR, idAnamnesis.toString());
+    }
+  }
+    
+
+  async onRowClicked(filaSeleccionada: DatosPersonales) {
+    console.log('Row clicked: ', filaSeleccionada);
+    this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
+    this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
+    this.datosPersonalesService.updateAnamnesisData(this.idAnamnesisParaMenu);
+    this.datosPersonalesService.updateSedeData(this.idSedeActualSignalRMenu);
+
+    this.antecedentesService.updateAnamnesisData(this.idAnamnesisParaMenu);
+    this.antecedentesService.updateSedeData(this.idSedeActualSignalRMenu);
+
+    this.respuestaEvolucionPacienteService.updateAnamnesisData(this.idAnamnesisParaMenu);
+    this.respuestaEvolucionPacienteService.updateSedeData(this.idSedeActualSignalRMenu);
+
+    await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
+    this.openorclosePanelBuscarPaciente = !this.openorclosePanelBuscarPaciente;
+    this.router.navigate(['/datos-personales']);
+    //this.mostrarPanelMostrarDatosPersonalesPaciente=true;
+   // this.panelMostrarDatosPersonalesOpen();
+  }
+
+  guardarDatosPersonales() {
+    // Lógica para guardar los datos del formulario
+  }
+
+  cancelarDatosPersonales() {
+    // Lógica para cancelar la edición del formulario
+  }
+
+  async mostrarAntecedentes() {
+    this.obtenerAntecedentesPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);  
+  }
+
+  async mostrarEvolucion() {
+    this.obtenerEvolucionPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);
+  } 
 
 
 }

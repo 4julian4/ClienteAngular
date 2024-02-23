@@ -1,0 +1,262 @@
+
+
+.divFila1DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila1 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+
+.divFila2DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila2 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+.divFila3DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila3 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila4DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila4 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila5DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila5 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila6DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila6 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila7DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila7 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila8DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila8 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila9DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila9 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila10DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila10 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila11DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila11 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila12DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila12 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFila13DatosPersonales {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila13 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.scrollable-content{
+    max-height: calc(100vh - 200px);
+    /* Ajusta este valor según el tamaño de tus botones */
+    overflow-y: auto;
+}
+
+.formularioAntecedentes {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    /* Esto redondea las esquinas */
+    padding: 20px;
+    width: 90%;
+    /* Ajusta esto a lo que necesites */
+    margin: 0 auto;
+    /* Centra la caja en la página */
+
+    .divContenedorDeBotones {
+        text-align: right;
+
+        .BotonGuardar {
+            margin: 5px;
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+
+        .BotonCancelar {
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+    }
+
+
+}

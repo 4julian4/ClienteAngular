@@ -1,0 +1,109 @@
+img {
+    width: 100%;
+    max-width: 400px;
+    min-width: 400px;
+}
+
+.divFormularioFila1 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila1 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila2 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila2 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila3 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila3 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+
+
+
+.divFormularioFila4 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .campoFila4 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila4>div {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scrollable-content {
+    max-height: calc(100vh - 200px);
+    /* Ajusta este valor según el tamaño de tus botones */
+    overflow-y: auto;
+}
+
+.formularioEvolucion {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    /* Esto redondea las esquinas */
+    padding: 20px;
+    width: 90%;
+    /* Ajusta esto a lo que necesites */
+    margin: 0 auto;
+    /* Centra la caja en la página */
+
+
+
+
+}
