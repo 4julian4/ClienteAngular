@@ -1,0 +1,25 @@
+.divCapturarFirma {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60%;
+    width: 95%;
+    margin: 0 auto;
+    border-radius: 10px;
+
+    .canvasDibujo {
+        width: 1300px; // Cambia estos valores por los que necesites
+        height: 400px;
+        border: 1px solid #000;
+    }
+
+
+    button {
+        margin: 5px;
+        background-color: rgb(28, 197, 244);
+        color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+    }
+}

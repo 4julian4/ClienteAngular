@@ -1,121 +1,181 @@
 <div class="contenedor">
-    <div class="contenedor-izquierdo">
-        <div class="selector-fecha">
-            <select [(ngModel)]="intervaloDeTiempoSeleccionado" (ngModelChange)="generarIntervalosDeTiempo()">
-                <option value="10">10 minutos</option>
-                <option value="15">15 minutos</option>
-                <option value="20">20 minutos</option>
-                <option value="30">30 minutos</option>
-            </select>
-            <br>
-            <mat-form-field appearance="fill">
-                <mat-label>Choose a date</mat-label>
-                <input matInput [matDatepicker]="picker" [(ngModel)]="fechaSeleccionada" (ngModelChange)="generarIntervalosDeTiempo()">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-            
-            <mat-tab-group>
-                <mat-tab label="Buscar">
-                    <mat-card class="cardBuscarCita">
-                        <mat-form-field>
-                            <mat-label> Nombre, Cedula o Telefono</mat-label>
-                            <input matInput placeholder="Buscar por" [(ngModel)]="nombre" name="nombre">
-                        </mat-form-field>
-                    </mat-card>
-                    <mat-card class="cardBuscarEspacioAgenda">
+    <div class="contenedorArriba">
+        <div class="barra-superior">
+            <div class="custom-select">
+                <!--  <label for="sillaSeleccionada">{{ sillaSeleccionada }}</label> -->
+                <select id="sillaSeleccionada" [(ngModel)]="sillaSeleccionada" (ngModelChange)="onSillaChange($event)">
+                    <option *ngFor="let silla of lstHorariosAgenda" [value]="silla.SILLA">{{ silla.DESCRIPCION }}
+                    </option>
+                </select>
+            </div>
 
-                    </mat-card>
-                  <!-- Aquí va el contenido para buscar -->
-                </mat-tab>
-                <mat-tab label="Insertar">
-                    <form class="formulario-cita">
-                        <div class="fila1">
-                            <mat-form-field>
-                                <mat-label>Nombre</mat-label>
-                                <input matInput placeholder="Nombre" [(ngModel)]="nombre" name="nombre">
-                            </mat-form-field>
-                        </div>
-                        <div class="fila2">            
-                            <mat-form-field class="telefono-celular">
-                                <mat-label>Teléfono</mat-label>
-                                <input matInput placeholder="Teléfono" [(ngModel)]="telefono" name="telefono">
-                            </mat-form-field>
-                            
-                            <mat-form-field class="telefono-celular">
-                                <mat-label>Celular</mat-label>
-                                <input matInput placeholder="Celular" [(ngModel)]="celular" name="celular">
-                            </mat-form-field>
-                        </div>
-                        
-                        <div class="fila3">
-                            <mat-form-field>
-                                <mat-label>N° Historia</mat-label>
-                                <input matInput placeholder="N° Historia" [(ngModel)]="historia" name="historia">
-                            </mat-form-field>
-                        </div>
-                        
-                        <div class="fila4">
-                            <mat-form-field>
-                                <mat-label>Observaciones</mat-label>
-                                <input matInput placeholder="Observaciones" [(ngModel)]="observaciones" name="observaciones">
-                            </mat-form-field>
-                        </div>  
-                        
-                        <div class="botones-formulario">
-                            <button mat-raised-button color="primary" (click)="insertar()">Confirmar</button>
-                        </div>
-                    </form>
-                </mat-tab>
-                <mat-tab label="Editar">
-                  <!-- Aquí va el contenido para editar -->
-                </mat-tab>
-            </mat-tab-group>
-            
+
+            <div class="buscarAgenda">
+                <input type="text" placeholder="Dijita nombre, cedula, telefono o numero de historia a buscar"
+                    [(ngModel)]="sillaSeleccionada" name="busqueda">
+                <button mat-icon-button>
+                    <mat-icon>search</mat-icon>
+                </button>
+            </div>
         </div>
     </div>
-    <div class="contenedor-derecho">
-        <mat-table [dataSource]="intervalosDeTiempo">
+    <div class="contenedorAbajo">
 
-            <!-- Hora Column -->
-            <ng-container matColumnDef="hora">
-              <mat-header-cell *matHeaderCellDef class="hora-column"> Hora </mat-header-cell>
-              <mat-cell *matCellDef="let intervalo" class="hora-column"> {{intervalo.hora | date:'shortTime'}} </mat-cell>
-            </ng-container>
-          
-            <!-- Nombre Column -->
-            <ng-container matColumnDef="nombre">
-              <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
-              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.nombre" placeholder="Nombre"> </mat-cell>
-            </ng-container>
-          
-            <!-- Telefono Column -->
-            <ng-container matColumnDef="telefono">
-              <mat-header-cell *matHeaderCellDef> Telefono </mat-header-cell>
-              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.telefono" placeholder="Telefono"> </mat-cell>
-            </ng-container>
-          
-            <!-- Celular Column -->
-            <ng-container matColumnDef="celular">
-              <mat-header-cell *matHeaderCellDef> Celular </mat-header-cell>
-              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.celular" placeholder="Celular"> </mat-cell>
-            </ng-container>
-          
-            <!-- Historia Column -->
-            <ng-container matColumnDef="historia">
-              <mat-header-cell *matHeaderCellDef> N° Historia </mat-header-cell>
-              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.historia" placeholder="N° Historia"> </mat-cell>
-            </ng-container>
-          
-            <!-- Observaciones Column -->
-            <ng-container matColumnDef="observaciones">
-              <mat-header-cell *matHeaderCellDef> Observaciones </mat-header-cell>
-              <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.observaciones" placeholder="Observaciones"> </mat-cell>
-            </ng-container>
-          
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClicked(row)" [class.selected]="row?.hora?.getTime() === selectedRow?.hora?.getTime()"></mat-row>
-          </mat-table>
-    </div>    
+        <div class="contenedor-izquierdo">
+            <div class="scrollable-content-izquierdo">
+                <div class="divCalendario">
+                    <mat-calendar class="mi-calendario" [(selected)]="fechaSeleccionada"
+                        (selectedChange)="cambiarFecha()"></mat-calendar>
+                </div>
+                <div class="divBotonAgendarCita">
+                    <button class="boton-agendar" (click)="toggleFormVisibility()">Agendar Cita</button>
+
+                </div>
+                <form *ngIf="showForm" class="formulario-cita" [formGroup]="formularioAgregarCita">
+                    <div class="fila">
+                        <div class="campo-formulario nombre">
+                            <input type="hidden" formControlName="hora" name="hora">
+                            <input type="text" class="form-control" placeholder="Nombre" formControlName="nombre"
+                                name="nombre">
+                        </div>
+                    </div>
+                    <div class="fila">
+                        <div class="campo-formulario telefono">
+                            <input type="tel" class="form-control" placeholder="Teléfono" formControlName="telefono"
+                                name="telefono">
+                        </div>
+
+                        <div class="campo-formulario duracion">
+                            <select type="tel" class="form-control" placeholder="Duracion" formControlName="duracion"
+                                name="duracion">
+                                <option *ngFor="let intervalo of intervalos" [value]="intervalo">{{ intervalo }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fila">
+                        <div class="campo-formulario historia">
+                            <select type="text" class="form-control" placeholder="Doctor" formControlName="doctor"
+                                name="doctor">
+                                <option *ngFor="let doc of lstDoctores" [value]="doc.nombre">{{ doc.nombre }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="fila">
+                        <div class="campo-formulario observaciones">
+                            <input type="text" class="form-control" placeholder="Historia" formControlName="numHistoria"
+                                name="numHistoria">
+                        </div>
+                    </div>
+
+                    <div class="fila">
+                        <div class="campo-formulario observaciones">
+                            <input type="text" class="form-control" placeholder="Asunto" formControlName="observaciones"
+                                name="observaciones">
+                        </div>
+                    </div>
+                    <button class="boton-generar-cita" (click)="agendarCita()">Agendar</button>
+                    <button class="boton-editar" (click)="editarCita()">Editar</button>
+                </form>
+            </div>
+        </div>
+        <div class="contenedor-derecho">
+            <div class="scrollable-content-derecho">
+                <mat-table #myTable class="tabla-horarios" [dataSource]="resultadosBusquedaAgendaPorFecha">
+
+                    <!-- Hora Column -->
+                    <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
+                        <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo" class="hora-column">
+                            {{fechaHoraHelperService.convertirHora(intervalo.OUT_HORA)}}
+                        </mat-cell>
+                    </ng-container>
+
+
+                    <ng-container class="otro-Campo" matColumnDef="OUT_NOMBRE">
+                        <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo; let i = index">
+                            <ng-container
+                                *ngIf="i === 0 || intervalo.OUT_NOMBRE !== resultadosBusquedaAgendaPorFecha[i-1].OUT_NOMBRE">
+                                <input [(ngModel)]="intervalo.OUT_NOMBRE" placeholder="">
+                            </ng-container>
+                            <ng-container
+                                *ngIf="i !== 0 && intervalo.OUT_NOMBRE === resultadosBusquedaAgendaPorFecha[i-1].OUT_NOMBRE">
+                                <!-- Aquí puedes poner lo que quieras mostrar cuando la condición es verdadera -->
+                            </ng-container>
+                        </mat-cell>
+                    </ng-container>
+
+
+
+                    <!-- Telefono Column -->
+                    <ng-container class="otro-Campo" matColumnDef="OUT_TELEFONO">
+                        <mat-header-cell *matHeaderCellDef> Telefono </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo; let i = index">
+                            <input [(ngModel)]="intervalo.OUT_TELEFONO" placeholder="">
+                            <!--<ng-container *ngIf="intervalo.OUT_HORA_CITA !== horaCitaSeleccionada">
+                                
+                            </ng-container>-->
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Celular Column -->
+                    <ng-container class="otro-Campo" matColumnDef="OUT_CELULAR">
+                        <mat-header-cell *matHeaderCellDef> Celular </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_CELULAR"
+                                placeholder="">
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Historia Column -->
+                    <ng-container class="otro-Campo" matColumnDef="OUT_DOCTOR">
+                        <mat-header-cell *matHeaderCellDef> N° Historia </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_DOCTOR" placeholder="">
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Observaciones Column -->
+                    <ng-container class="otro-Campo" matColumnDef="OUT_ASUNTO">
+                        <mat-header-cell *matHeaderCellDef> Observaciones </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_ASUNTO" placeholder="">
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container class="otro-Campo" matColumnDef="OUT_HORA_CITA">
+                        <mat-header-cell *matHeaderCellDef> Hora Cita </mat-header-cell>
+                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_HORA_CITA"
+                                placeholder="">
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row class="fila-superior" *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+                    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClicked(row)"
+                        [ngStyle]="{'background-color': getColor(row)}"
+                        [class.selected]="row?.hora?.getTime() === selectedRow?.hora?.getTime()">
+
+                        <mat-cell *matCellDef="let element">{{element.OUT_HORA}}</mat-cell>
+                        <mat-cell *matCellDef="let element">
+                            <ng-container *ngIf="element.OUT_HORA_CITA.toString() !== horaCitaSeleccionada; else empty">
+                                {{log(element.OUT_HORA_CITA)}}
+                                {{element.OUT_NOMBRE}}
+                            </ng-container>
+                            <ng-template #empty></ng-template>
+                        </mat-cell>
+                        <mat-cell *matCellDef="let element">
+                            <ng-container *ngIf="element.OUT_HORA_CITA.toString() !== horaCitaSeleccionada; else empty">
+                                {{element.OUT_TELEFONO}}
+                            </ng-container>
+                            <ng-template #empty></ng-template>
+                        </mat-cell>
+                        <!-- Repite este patrón para el resto de las celdas -->
+                    </mat-row>
+
+
+                </mat-table>
+            </div>
+        </div>
+
+    </div>
 </div>
-

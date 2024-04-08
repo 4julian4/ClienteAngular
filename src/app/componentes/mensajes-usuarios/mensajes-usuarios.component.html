@@ -1,7 +1,9 @@
 <h2 mat-dialog-title>Hola {{data.name}}</h2>
 <mat-dialog-content>
-  <p>La Sede Esta Desconectada</p>
+  <p>{{data.mensaje}}</p>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-button [mat-dialog-close]="data.pin" cdkFocusInitial>Ok</button>
+  <button mat-button *ngIf="data.opcion1" (click)="cerrar(data.valor1)">{{data.opcion1}}</button>
+  <button mat-button *ngIf="data.opcion2" (click)="cerrar(data.valor2)">{{data.opcion2}}</button>
+  <button mat-button *ngIf="data.opcion3" (click)="cerrar(data.valor3)">{{data.opcion3}}</button>
 </mat-dialog-actions>

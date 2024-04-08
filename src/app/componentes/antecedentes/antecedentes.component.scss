@@ -225,6 +225,9 @@
     max-height: calc(100vh - 200px);
     /* Ajusta este valor según el tamaño de tus botones */
     overflow-y: auto;
+    mat-seelect :disabled{
+        background-color: #f5f5f5;
+    }
 }
 
 .formularioAntecedentes {

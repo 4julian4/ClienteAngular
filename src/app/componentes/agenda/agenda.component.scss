@@ -1,79 +1,299 @@
-
 .contenedor {
     display: flex;
-    height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la pantalla */
-    .contenedor-izquierdo {
-        width: 22%;
-        //flex: 0.57;
-        //display: flex;
-        flex-direction: column;
-        justify-content: space-between; /* Distribuye el espacio entre el calendario y el formulario */
-        height: 100%; /* Asegura que el contenedor izquierdo ocupe toda la altura del contenedor */
-    
-        .selector-fecha {
-            mat-form-field {
-            width: 100%; /* Asegura que el campo de formulario ocupe todo el ancho disponible */
-            }
-        }
-        
-        .formulario-cita {
-            .fila2 {
-                display: flex; /* Coloca los elementos en una fila */
-                justify-content: space-between; /* Añade espacio entre los elementos */
-                gap: 10px;
-                .telefono-celular {
-                    flex: 1; /* Asegura que los campos ocupen el mismo espacio */
-                }
-            }
-            margin-top: 20px;
-            border: 1px solid #000; /* Añade un borde alrededor del formulario */
-            padding: 10px; /* Añade un espacio alrededor del contenido del formulario */
-            display: flex;
-            flex-direction: column;
-            gap: 1px; /* Añade un espacio entre los campos del formulario */
-        
-            mat-form-field {
-            width: 100%; /* Asegura que los campos de formulario ocupen todo el ancho disponible */
-            }
-        } 
-    }
-    
-    
-    .contenedor-derecho {
-        flex: 2;
-        height: 100%;
-        overflow-y: auto; /* Añade un scroll cuando el contenido excede la altura del contenedor */
-        .tabla-horarios {
-            height: 100%; /* Asegura que la tabla ocupe toda la altura del contenedor derecho */
-            border-collapse: collapse; /* Combina los bordes adyacentes de las celdas en un solo borde */
-            border: 1px solid black; /* Añade un borde a la tabla */
-        }
-        .hora-column {
-            color: white; /* Cambia 'red' al color que prefieras */
-            background-color:rgba(13, 8, 159, 0.904); /* Cambia 'red' al color que prefieras */
-          }
-        
-        .tabla-horarios tbody tr td {
-            border: 1px solid rgb(162, 158, 158); /* Añade un borde a las celdas */
-        }
-        .tabla-horarios tbody tr td:nth-child(n+2) {
-            background-color: #cff3f3; /* Otro color de fondo pastel para las demás columnas */
-        }
-              
-        .tabla-horarios tbody tr td input {
-             border: none; /* Elimina los bordes de los inputs */
-             background-color: inherit; /* Hace que los inputs tengan el color de fondo de su celda */
-        }
+    flex-direction: column;
+    height: 100%;
+}
 
-        mat-cell input {
-            border: none;
-            background-color: transparent;
-        }
-        
-        .selected {
-            background-color: #20cffb;
-        }
-        
+
+
+.contenedorArriba {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 35px;
+    background-color: rgb(28, 197, 244);
+    border-radius: 8px; 
+    padding: 3px 10px; // Espaciado opcional
+}
+
+
+
+.barra-superior {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: rgb(28, 197, 244);
+    border-radius: 8px; 
+    height: 20px;
+    width: 100%;
+}
+
+.selector-silla {
+    flex: 1;
+}
+
+.custom-select {
+    position: relative;
+    width: 16%; 
+    height: 30px; 
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+
+
+.custom-select select {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: transparent;
+    padding: 8px; /* Ajuste del espaciado interno */
+    font-size: 14px; /* Tamaño de fuente */
+    cursor: pointer;
+    outline: none;
+   // appearance: none; /* Oculta la flecha del select nativo */
+}
+
+.custom-select label {
+    position: absolute;
+    top: 50%;
+    left: 5px; /* Espacio a la izquierda del label */
+    transform: translateY(-50%);
+    font-size: 14px; /* Tamaño de fuente */
+    color: #6c757d;
+}
+
+
+
+.buscarAgenda {
+    margin-left: auto; // Esto empujará la búsqueda a la derecha
+    margin-right: 5px; // Esto despegará la búsqueda 10px del margen derecho
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px; 
+    padding: 5px 5px; 
+    max-width: 50%;
+    flex: 1;
+    height: 100%; 
+}
+
+
+
+.buscarAgenda input {
+    border: none;
+    flex: 1;
+    margin-left: 5px; // Reducir el margen izquierdo
+    font-size: 14px; // Reducir el tamaño de la fuente
+    height: 100%; // Asegurar que no se desborde del contenedor
+    outline: none; // Eliminar el recuadro de borde negro al hacer clic
+}
+
+
+.buscarAgenda button {
+    //align-items: center;
+    background-color: transparent;
+    border: none;
+    height: 100%; // Asegurar que no se desborde del contenedor
+    position: relative;
+    top: -5px;
+}
+
+.contenedorAbajo {
+    display: flex;
+    //flex: 1; // Para que los contenedores se expandan para llenar el espacio disponible
+}
+
+.contenedor-izquierdo {
+    width: 18%; // Establece el ancho del elemento al 20% del ancho de su contenedor.
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    //flex: 1; // Permite que el elemento crezca y se encoja para utilizar el espacio disponible en su contenedor flex.
+    //display: flex; // Establece el tipo de visualización del elemento a flex, permitiendo la disposición flexible de sus hijos.
+    flex-direction: column; // Los hijos del elemento se apilarán verticalmente.
+    //justify-content: center; 
+    //align-items: center; 
+    margin-right: 5px; // Añade un margen a la derecha del elemento de 5px. Este es un espaciado opcional.
+    border-radius: 8px; // Redondea las esquinas del elemento con un radio de 8px.
+}
+
+.scrollable-content-izquierdo {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}
+
+.divCalendario{
+    width: 90%;
+    height: 30%;
+    //display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px; // Añade un margen superior de 10px
+}
+
+.mi-calendario {
+    width: 90%;
+    height: 20%; // Cambiado para ocupar todo el espacio disponible
+}
+
+.divBotonAgendarCita {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px; // Añade un margen superior de 10px
+}
+
+
+.boton-agendar {
+    padding: 5px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: transparent; // Botón transparente
+    color:rgb(28, 197, 244); /* Color de fondo del botón */ // Color de texto del botón
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease; 
+
+    &:hover {
+        background-color:rgb(28, 197, 244); /* Color de fondo del botón */ // Cambio de color de fondo al pasar el mouse
+        color: #fff; // C
+    }
+    //#ff4081; /* Color de fondo del botón */
+}
+
+.formulario-cita {
+    background-color: #f9f9f9; // Fondo del formulario
+    padding: 10px; // Espacio interno del formulario
+    border-radius: 10px; // Bordes redondeados
+
+    .fila {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 5px; // Espacio entre filas
+    }
+
+    .campo-formulario {
+        flex: 1; // Cada campo ocupa un tercio del ancho total
+        margin-right: 10px; // Espacio entre campos
+        margin-bottom: 5px; // Espacio inferior del campo
+    }
+
+    label {
+        display: none;
+    }
+
+    input[type="text"], select[type="text"], select[type="tel"],
+    input[type="tel"]{
+        width: 100%; // Ocupa todo el ancho del campo
+        padding: 10px; // Espacio interno del campo
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.3s; // Transición suave para el borde
+    }
+
+    input[type="text"]:focus, select[type="text"]:focus, select[type="tel"]:focus, 
+    input[type="tel"]:focus{
+        outline: none; // Elimina el contorno de enfoque
+        border-color: #5cace1; // Cambia el color del borde al enfocar el campo
     }
 }
+
+.boton-generar-cita {
+    border: 2px solid transparent;
+    background-color: transparent;
+    color: #007bff; /* Color del texto */
+    font-size: 16px;
+    padding: 5px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  }
+  
+  .boton-generar-cita:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Color de fondo al pasar el ratón */
+    border-color: #007bff; /* Color del borde al pasar el ratón */
+    color: #0056b3; /* Color del texto al pasar el ratón */
+  }
+
+
+
+.contenedor-derecho {
+    width: 75%;
+    flex: 4;
+    padding: 10px; // Espaciado opcional
+    mat-cell input {
+        border: none;
+        background-color: transparent;
+    }
+}
+
+.scrollable-content-derecho {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}
+
+
+
+
+.tabla-horarios {
+    height: 100%;
+    border-collapse: collapse;
+    border: none;
+    outline: none;
+    border-radius: 8px; 
+    
+    //background-color: white;
+}
+
+
+
+
+/* Estilo para la fila del encabezado de la tabla */
+.fila-superior {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+}
+
+.seleccionado {
+    background-color: white;
+    //background-color: rgb(28, 197, 244);
+}
+
+
+
+
+.hora-column-contenedor {
+    width: 100px;
+    min-width: 100px;
+}
+
+.hora-column-header {
+    color: black;
+    background-color: rgb(28, 197, 244);
+}
+
+.hora-column {
+    color: white;
+    background-color: rgb(28, 197, 244);
+}
+
+.hora-column:hover {
+    background-color: rgb(28, 197, 244);
+}
+
+//.otro-Campo {
+//    background-color: white;//
+//}
+
+
+/* Clase para filas con borde */
+
 
