@@ -2,67 +2,93 @@
 
     <div class="scrollable-content">
         <!-- NOMBRES y APELLIDOS -->
-        <div class="divFormularioFila1">
-            <mat-form-field appearance="fill" class="name-field" style="flex: 1;">
-                <mat-label>N° Historia</mat-label>
-                <input matInput formControlName="IDANAMNESIS_TEXTO" placeholder="N° Historia">
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="name-field" style="flex: 1;">
-                <mat-label>N° Afiliacion</mat-label>
-                <input matInput formControlName="NRO_AFILIACION" placeholder="N° Afiliacion">
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="name-field" style="flex: 2;">
-                <mat-label>Nombre</mat-label>
-                <input matInput formControlName="NOMBRE_PACIENTE" placeholder="Nombre Paciente">
-            </mat-form-field>
+        <div style="display: flex; flex-direction: row;">
+            
+
+
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div class="divFormularioFila1">
+                    <mat-form-field appearance="fill" class="name-field" style="flex: 1;">
+                        <mat-label>N° Historia</mat-label>
+                        <input matInput formControlName="IDANAMNESIS_TEXTO" placeholder="N° Historia">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="name-field" style="flex: 1;">
+                        <mat-label>N° Afiliacion</mat-label>
+                        <input matInput formControlName="NRO_AFILIACION" placeholder="N° Afiliacion">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="name-field" style="flex: 2;">
+                        <mat-label>Nombre</mat-label>
+                        <input matInput formControlName="NOMBRE_PACIENTE" placeholder="Nombre Paciente">
+                    </mat-form-field>
+                </div>
+
+                <div class="divFormularioFila2">
+                    <mat-form-field appearance="fill" class="campoFila2">
+                        <mat-label>Fecha Ingreso</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="FECHA_INGRESO"
+                            placeholder="Fecha Ingreso">
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="campoFila2">
+                        <mat-label>Hora Ingreso</mat-label>
+                        <input matInput formControlName="HORA_INGRESO" placeholder="Hora Ingreo">
+                    </mat-form-field>
+                </div>
+
+                <div class="divFormularioFila3">
+                    <mat-form-field appearance="fill" class="campoFila3">
+                        <mat-label>Convenios, Mercadeo y Publicidad</mat-label>
+                        <mat-select formControlName="CONVENIO">
+                            <mat-option value="CONVENIOS">CONVENIOS</mat-option>
+                            <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
+                            <mat-option value="ECOPETROL">ECOPETROL</mat-option>
+                            <mat-option value="EMPRESA1">EMPRESA1</mat-option>
+                            <mat-option value="FAMILIA">FAMILIA</mat-option>
+                            <mat-option value="NINGUNO">NINGUNO</mat-option>
+                            <mat-option value="PARTICULAR">PARTICULAR</mat-option>
+                            <mat-option value="SUPER">SUPER</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="campoFila3">
+                        <mat-label>Referido Por</mat-label>
+                        <mat-select formControlName="REFERIDO_POR">
+                            <mat-option value="FAMILIAR">FAMILIAR</mat-option>
+                            <mat-option value="AMIGO">AMIGO</mat-option>
+                            <mat-option value="RADIO">RADIO</mat-option>
+                            <mat-option value="TV">TV</mat-option>
+                            <mat-option value="REDES SOCIALES">REDES SOCIALES</mat-option>
+                            <mat-option value="WEB">WEB</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+            </div>
+            <div class="divFotoFrontal" style="flex: 0 0 20%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <img *ngIf="fotoFrontalBase64 != ''"
+                    src="{{fotoFrontalBase64}}" alt="Red dot" style="max-width: 100%; max-height: 100%; object-fit: cover;" />
+            </div>
         </div>
 
-        <div class="divFormularioFila2">
-            <mat-form-field appearance="fill" class="campoFila2">
-                <mat-label>Fecha Ingreso</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="FECHA_INGRESO_DATE"
-                    placeholder="Fecha Ingreso">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
 
-            <mat-form-field appearance="fill" class="campoFila2">
-                <mat-label>Hora Ingreso</mat-label>
-                <input matInput formControlName="HORA_INGRESO" placeholder="Hora Ingreo">
-            </mat-form-field>
-        </div>
 
-        <div class="divFormularioFila3">
-            <mat-form-field appearance="fill" class="campoFila3">
-                <mat-label>Convenios, Mercadeo y Publicidad</mat-label>
-                <mat-select formControlName="CONVENIO">
-                    <mat-option value="CONVENIOS">CONVENIOS</mat-option>
-                    <mat-option value="DESCUENTO 15%">DESCUENTO 15%</mat-option>
-                    <mat-option value="ECOPETROL">ECOPETROL</mat-option>
-                    <mat-option value="EMPRESA1">EMPRESA1</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="campoFila3">
-                <mat-label>Referido Por</mat-label>
-                <mat-select formControlName="REFERIDO_POR">
-                    <mat-option value="AVISO">AVISO</mat-option>
-                    <mat-option value="BONO">BONO</mat-option>
-                    <mat-option value="FACE">FACE</mat-option>
-                    <mat-option value="OTRO">OTRO</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
+
 
 
         <div class="divFormularioFila4">
             <mat-form-field appearance="fill" class="campoFila4">
                 <mat-label>Tipo Paciente</mat-label>
                 <mat-select formControlName="TIPO_PACIENTE">
-                    <mat-option value="EMPRESA">EMPRESA</mat-option>
-                    <mat-option value="FAMILIAR">FAMILIAR</mat-option>
-                    <mat-option value="G">G</mat-option>
-                    <mat-option value="JJG">JJG</mat-option>
+                    <mat-option value="BENEFICIARIO">BENEFICIARIO</mat-option>
+                    <mat-option value="CONTRIBUTIVO">CONTRIBUTIVO</mat-option>
+                    <mat-option value="CORPORATIVO">CORPORATIVO</mat-option>
+                    <mat-option value="ESTUDIANTIL">ESTUDIANTIL</mat-option>
+                    <mat-option value="OTRO">OTRO</mat-option>
                     <mat-option value="PARTICULAR">PARTICULAR</mat-option>
+                    <mat-option value="PREFERENCIAL">PREFERENCIAL</mat-option>
+                    <mat-option value="SUBSIDIADO">SUBSIDIADO</mat-option>
+                    <mat-option value="VINCULADO">VINCULADO</mat-option>
                     <mat-option value="PEDIATRICO">PEDIATRICO</mat-option>
                 </mat-select>
             </mat-form-field>
@@ -73,6 +99,9 @@
                     <mat-option value="CONTROL">CONTROL</mat-option>
                     <mat-option value="INACTIVO">INACTIVO</mat-option>
                     <mat-option value="INICIO">INICIO</mat-option>
+                    <mat-option value="SIN INICIAR">SIN INICIAR</mat-option>
+                    <mat-option value="TERMINO TRATAMIENTO">TERMINO TRATAMIENTO</mat-option>
+                    <mat-option value="TRATAMIENTO EN CURSO">TRATAMIENTO EN CURSO</mat-option>
                 </mat-select>
             </mat-form-field>
         </div>
@@ -81,30 +110,28 @@
             <mat-form-field appearance="fill" class="campoFila5">
                 <mat-label>Aseguradora</mat-label>
                 <mat-select formControlName="CODIGO_EPS_LISTADO">
-                    <mat-option value="EMPRESA">EMPRESA</mat-option>
-                    <mat-option value="FAMILIAR">FAMILIAR</mat-option>
-                    <mat-option value="G">G</mat-option>
-                    <mat-option value="JJG">JJG</mat-option>
-                    <mat-option value="PARTICULAR">PARTICULAR</mat-option>
-                    <mat-option value="PEDIATRICO">PEDIATRICO</mat-option>
+                    <mat-option *ngFor="let eps of listaEps" [value]="eps.NOMBRE">
+                        {{ eps.NOMBRE }}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila5">
                 <mat-label>Codigo</mat-label>
                 <mat-select formControlName="CODIGO_EPS">
-                    <mat-option value="ACTIVO">ACTIVO</mat-option>
-                    <mat-option value="CONTROL">CONTROL</mat-option>
-                    <mat-option value="INACTIVO">INACTIVO</mat-option>
-                    <mat-option value="INICIO">INICIO</mat-option>
+                    <mat-option *ngFor="let eps of listaEps" [value]="eps.CODIGO">
+                        {{ eps.CODIGO }}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila5">
                 <mat-label>Tipo De Afiliacion</mat-label>
-                <mat-select formControlName="NRO_AFILIACION">
-                    <mat-option value="ACTIVO">ACTIVO</mat-option>
-                    <mat-option value="CONTROL">CONTROL</mat-option>
-                    <mat-option value="INACTIVO">INACTIVO</mat-option>
-                    <mat-option value="INICIO">INICIO</mat-option>
+                <mat-select formControlName="PARENTESCO">
+                    <mat-option value="COTIZANTE">COTIZANTE</mat-option>
+                    <mat-option value="CONTRIBUTIVO">CONTRIBUTIVO</mat-option>
+                    <mat-option value="BENEFICIARIO">BENEFICIARIO</mat-option>
+                    <mat-option value="SUBSIDIADO">SUBSIDIADO</mat-option>
+                    <mat-option value="PARTICULAR">PARTICULAR</mat-option>
+                    <mat-option value="OTRO">OTRO</mat-option>
                 </mat-select>
             </mat-form-field>
         </div>
@@ -119,6 +146,31 @@
                     <mat-option value="04">04</mat-option>
                     <mat-option value="05">05</mat-option>
                     <mat-option value="06">06</mat-option>
+                    <mat-option value="07">07</mat-option>
+                    <mat-option value="08">08</mat-option>
+                    <mat-option value="09">09</mat-option>
+                    <mat-option value="10">10</mat-option>
+                    <mat-option value="11">11</mat-option>
+                    <mat-option value="12">12</mat-option>
+                    <mat-option value="13">13</mat-option>
+                    <mat-option value="14">14</mat-option>
+                    <mat-option value="15">15</mat-option>
+                    <mat-option value="16">16</mat-option>
+                    <mat-option value="17">17</mat-option>
+                    <mat-option value="18">18</mat-option>
+                    <mat-option value="19">19</mat-option>
+                    <mat-option value="20">20</mat-option>
+                    <mat-option value="21">21</mat-option>
+                    <mat-option value="22">22</mat-option>
+                    <mat-option value="23">23</mat-option>
+                    <mat-option value="24">24</mat-option>
+                    <mat-option value="25">25</mat-option>
+                    <mat-option value="26">26</mat-option>
+                    <mat-option value="27">27</mat-option>
+                    <mat-option value="28">28</mat-option>
+                    <mat-option value="29">29</mat-option>
+                    <mat-option value="30">30</mat-option>
+                    <mat-option value="31">31</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila6">
@@ -128,6 +180,14 @@
                     <mat-option value="Feb">Feb</mat-option>
                     <mat-option value="Mar">Mar</mat-option>
                     <mat-option value="Abr">Abr</mat-option>
+                    <mat-option value="May">May</mat-option>
+                    <mat-option value="Jun">Jun</mat-option>
+                    <mat-option value="Jul">Jul</mat-option>
+                    <mat-option value="Ago">Ago</mat-option>
+                    <mat-option value="Sep">Sep</mat-option>
+                    <mat-option value="Oct">Oct</mat-option>
+                    <mat-option value="Nov">Nov</mat-option>
+                    <mat-option value="Dic">Dic</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila6">
@@ -149,21 +209,25 @@
             <mat-form-field appearance="fill" class="campoFila7">
                 <mat-label>Sexo</mat-label>
                 <mat-select formControlName="SEXO">
-                    <mat-option value="01">01</mat-option>
-                    <mat-option value="02">02</mat-option>
-                    <mat-option value="03">03</mat-option>
-                    <mat-option value="04">04</mat-option>
-                    <mat-option value="05">05</mat-option>
-                    <mat-option value="06">06</mat-option>
+                    <mat-option value="FEMENINO">FEMENINO</mat-option>
+                    <mat-option value="MASCULINO">MASCULINO</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila7">
                 <mat-label>Doc Identidad</mat-label>
                 <mat-select formControlName="DOCUMENTO_IDENTIDAD">
-                    <mat-option value="Ene">Ene</mat-option>
-                    <mat-option value="Feb">Feb</mat-option>
-                    <mat-option value="Mar">Mar</mat-option>
-                    <mat-option value="Abr">Abr</mat-option>
+                    <mat-option value="CC">CC</mat-option>
+                    <mat-option value="CE">CE</mat-option>
+                    <mat-option value="CD">CD</mat-option>
+                    <mat-option value="PA">PA</mat-option>
+                    <mat-option value="SC">SC</mat-option>
+                    <mat-option value="PE">PE</mat-option>
+                    <mat-option value="RC">RC</mat-option>
+                    <mat-option value="TI">TI</mat-option>
+                    <mat-option value="CN">CN</mat-option>
+                    <mat-option value="AS">AS</mat-option>
+                    <mat-option value="DE">DE</mat-option>
+                    <mat-option value="MS">MS</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila7">
@@ -173,10 +237,11 @@
             <mat-form-field appearance="fill" class="campoFila7">
                 <mat-label>Estado Civil</mat-label>
                 <mat-select formControlName="ESTADOCIVIL">
-                    <mat-option value="Ene">Ene</mat-option>
-                    <mat-option value="Feb">Feb</mat-option>
-                    <mat-option value="Mar">Mar</mat-option>
-                    <mat-option value="Abr">Abr</mat-option>
+                    <mat-option value="SOLTERO (A)">SOLTERO (A)</mat-option>
+                    <mat-option value="SEPARADO (A)">SEPARADO (A)</mat-option>
+                    <mat-option value="CASADO (A)">CASADO (A)</mat-option>
+                    <mat-option value="VIUDO (A)">VIUDO (A)</mat-option>
+                    <mat-option value="UNIÓN LIBRE">UNIÓN LIBRE</mat-option>
                 </mat-select>
             </mat-form-field>
 
@@ -186,21 +251,17 @@
             <mat-form-field appearance="fill" class="campoFila8">
                 <mat-label>Departamento</mat-label>
                 <mat-select formControlName="CODIGO_DEPARTAMENTO">
-                    <mat-option value="01">01</mat-option>
-                    <mat-option value="02">02</mat-option>
-                    <mat-option value="03">03</mat-option>
-                    <mat-option value="04">04</mat-option>
-                    <mat-option value="05">05</mat-option>
-                    <mat-option value="06">06</mat-option>
+                    <mat-option *ngFor="let departamento of listaDepartamentos" [value]="departamento.NOMBRE">
+                        {{ departamento.NOMBRE }}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila8">
                 <mat-label>Ciudad</mat-label>
                 <mat-select formControlName="CODIGO_CIUDAD">
-                    <mat-option value="Ene">Ene</mat-option>
-                    <mat-option value="Feb">Feb</mat-option>
-                    <mat-option value="Mar">Mar</mat-option>
-                    <mat-option value="Abr">Abr</mat-option>
+                    <mat-option *ngFor="let ciudad of listaCiudades" [value]="ciudad.NOMBRE">
+                        {{ ciudad.NOMBRE }}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila8">
@@ -216,10 +277,8 @@
             <mat-form-field appearance="fill" class="campoFila8">
                 <mat-label>Zona</mat-label>
                 <mat-select formControlName="ZONA_RECIDENCIAL">
-                    <mat-option value="Ene">Ene</mat-option>
-                    <mat-option value="Feb">Feb</mat-option>
-                    <mat-option value="Mar">Mar</mat-option>
-                    <mat-option value="Abr">Abr</mat-option>
+                    <mat-option value="URBANA">URBANA</mat-option>
+                    <mat-option value="RURAL">RURAL</mat-option>
                 </mat-select>
             </mat-form-field>
         </div>
@@ -235,15 +294,18 @@
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila9" style="flex: 1;">
                 <mat-label>Lugar De Residencia</mat-label>
-                <input matInput formControlName="LUGAR" placeholder="Lugar De Residencia">
+                <input matInput formControlName="DOMICILIO" placeholder="Lugar De Residencia">
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila9">
                 <mat-label>Estrato</mat-label>
                 <mat-select formControlName="ESTRATO">
-                    <mat-option value="Ene">Ene</mat-option>
-                    <mat-option value="Feb">Feb</mat-option>
-                    <mat-option value="Mar">Mar</mat-option>
-                    <mat-option value="Abr">Abr</mat-option>
+                    <mat-option value="N/A">N/A</mat-option>
+                    <mat-option value="1">1</mat-option>
+                    <mat-option value="2">2</mat-option>
+                    <mat-option value="3">3</mat-option>
+                    <mat-option value="4">4</mat-option>
+                    <mat-option value="5">5</mat-option>
+                    <mat-option value="6">6</mat-option>
                 </mat-select>
             </mat-form-field>
         </div>
@@ -251,11 +313,17 @@
         <div class="divFormularioFila10">
             <mat-form-field appearance="fill" class="campoFila10">
                 <mat-label>Ocupacion</mat-label>
-                <mat-select formControlName="OCUPACION_PADRE">
-                    <mat-option value="Ene">Ene</mat-option>
-                    <mat-option value="Feb">Feb</mat-option>
-                    <mat-option value="Mar">Mar</mat-option>
-                    <mat-option value="Abr">Abr</mat-option>
+                <mat-select formControlName="NIVELESCOLAR">
+                    <mat-option value="ADMINISTRACIÓN">ADMINISTRACIÓN</mat-option>
+                    <mat-option value="AMA DE CASA">AMA DE CASA</mat-option>
+                    <mat-option value="COMERCIANTE">COMERCIANTE</mat-option>
+                    <mat-option value="CONSULTORIA">CONSULTORIA</mat-option>
+                    <mat-option value="CONTABILIDAD">CONTABILIDAD</mat-option>
+                    <mat-option value="DESEMPLEADO (A)">DESEMPLEADO (A)</mat-option>
+                    <mat-option value="ESTUDIANTE">ESTUDIANTE</mat-option>
+                    <mat-option value="INGENIERIA">INGENIERIA</mat-option>
+                    <mat-option value="JUBILADO">JUBILADO</mat-option>
+                    <mat-option value="MENOR DE EDAD">MENOR DE EDAD</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila10" style="flex: 1;">
@@ -271,7 +339,7 @@
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila11" style="flex: 1;">
                 <mat-label>Telefono Oficina</mat-label>
-                <input matInput formControlName="TELF_OF_RESP" placeholder="Telefono Oficina">
+                <input matInput formControlName="TELF_P_OTRO" placeholder="Telefono Oficina">
             </mat-form-field>
             <mat-form-field appearance="fill" class="campoFila11" style="flex: 1;">
                 <mat-label>Celular</mat-label>
@@ -279,7 +347,7 @@
             </mat-form-field>
         </div>
     </div>
-    
+
 
     <!-- Botones para guardar y cancelar -->
     <div class="divContenedorDeBotones">

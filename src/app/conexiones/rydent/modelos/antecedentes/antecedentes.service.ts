@@ -7,11 +7,6 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class AntecedentesService {
-  private anamnesisData = new BehaviorSubject<number | null>(null);
-  sharedAnamnesisData = this.anamnesisData.asObservable();
-
-  private sedeData = new BehaviorSubject<string | null>(null);
-  sharedSedeData = this.sedeData.asObservable();
   
   @Output() respuestaAntecedentesEmit: EventEmitter<Antecedentes> = new EventEmitter<Antecedentes>();
   
@@ -32,12 +27,6 @@ export class AntecedentesService {
 
   }
 
-  updateAnamnesisData(data: number) {
-    this.anamnesisData.next(data);
-  }
-
-  updateSedeData(data: string) {
-    this.sedeData.next(data);
-  }
+  
 
 }

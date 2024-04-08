@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 
  
 import { Antecedentes, AntecedentesService } from 'src/app/conexiones/rydent/modelos/antecedentes';
+import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 
 @Component({
   selector: 'app-antecedentes',
@@ -18,18 +19,19 @@ export class AntecedentesComponent implements OnInit{
   constructor(
     private formBuilder: FormBuilder,
     private antecedentesService: AntecedentesService,
+    private respuestaPinService:RespuestaPinService
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
-    this.antecedentesService.sharedAnamnesisData.subscribe(data => {
+    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
       if (data != null)
       {
         this.idAnamnesisPacienteSeleccionado = data;
       }
     });
   
-    this.antecedentesService.sharedSedeData.subscribe(data => {
+    this.respuestaPinService.sharedSedeData.subscribe(data => {
       if (data != null) {
         this.idSedeActualSignalR = data;
       }
@@ -41,6 +43,7 @@ export class AntecedentesComponent implements OnInit{
       console.log(respuestaBusquedaAntecedentes);
       this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
       this.formularioAntecedentes.patchValue(this.resultadoBusquedaAntecedentes);
+      //this.formularioAntecedentes.disable();
     });
   }
 

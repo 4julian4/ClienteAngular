@@ -2,29 +2,20 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { SignalRService } from 'src/app/signalr.service';
 import { DatosPersonales } from './datos-personales.model';
 import { BehaviorSubject } from 'rxjs';
+import { RespuestaDatosPersonales } from '../respuesta-datos-personales';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatosPersonalesService {
-  private anamnesisData = new BehaviorSubject<number | null>(null);
-  sharedAnamnesisData = this.anamnesisData.asObservable();
-
-  private sedeData = new BehaviorSubject<string | null>(null);
-  sharedSedeData = this.sedeData.asObservable();
-  @Output() respuestaDatosPersonalesEmit: EventEmitter<DatosPersonales> = new EventEmitter<DatosPersonales>();
+  
+  @Output() respuestaDatosPersonalesEmit: EventEmitter<RespuestaDatosPersonales> = new EventEmitter<RespuestaDatosPersonales>();
 
   constructor(
     private signalRService: SignalRService,
   ) { }
 
-  updateAnamnesisData(data: number) {
-    this.anamnesisData.next(data);
-  }
-
-  updateSedeData(data: string) {
-    this.sedeData.next(data);
-  }
+ 
 
   async startConnectionRespuestaDatosPersonales(clienteId: string, idAnanesis: string) {
     await this.signalRService.hubConnection.start().then(

@@ -1,0 +1,42 @@
+export class TDetalleCitas {
+    ID: string="0";
+    FECHA: Date = new Date();
+    SILLA: number=0;
+    NOMBRE: string="";
+    HORA1?: Date;
+    HORA: Date = new Date();
+    TELEFONO: string="";
+    OBSERVACIONES: string="";
+    CEDULA?: string;
+    ASISTENCIA?: string;
+    TIPO_CITA?: string;
+    ASUNTO: string="";
+    FECHA_TEXTO?: string;
+    DOCTOR: string="";
+    DURACION: string="";
+    CANCELADO: string="";
+    CASOS: number=0;
+    ABONO: string="";
+    HORA_ING_CITA_TEXTO: string="";
+    CONFIRMAR: string="";
+    RETARDO: number=0;
+    CITACONMORA: string="";
+    CITANUEVA: string="";
+    FECHASUCESO?: Date;
+    IDCONSECUTIVO: number=0;
+    FECHA_OBSERVACION?: Date;
+    HORA_OBSERVACION?: Date;
+    CANCELADA_POR: string="";
+    HORA_LLEGADA_CITA?: Date;
+    HORA_ING_CITA?: Date;
+    HORA_FIN_CITA?: Date;
+    COLOR: string="";
+    ALARMAR: string="";
+    TARDANZA: number=0;
+    ANESTECIA: string="";
+    HORA_INI_ATENCION?: Date;
+    CELULAR: string="";
+    MEDICAMENTOS: string="";
+    IDCALENDARIO: string="";
+}
+

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -20,7 +21,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MensajesUsuariosComponent } from './componentes/mensajes-usuarios/mensajes-usuarios.component';
 import { AgendaComponent } from './componentes/agenda/agenda.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { CitasComponent } from './componentes/citas/citas.component';
 import { DetalleCitasComponent } from './componentes/detalle-citas/detalle-citas.component';
 import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clinica/buscar-hitoria-clinica.component';
@@ -31,8 +31,21 @@ import { MatMenuModule } from '@angular/material/menu';
 import { AntecedentesComponent } from './componentes/antecedentes/antecedentes.component';
 import { EvolucionComponent } from './componentes/evolucion/evolucion.component';
 import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agregar-evolucion.component';
-
-
+import { AgregarFirmasComponent } from './componentes/agregar-firmas/agregar-firmas.component';
+import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
+import { NativeDateAdapter } from '@angular/material/core';
+//-----------------Formato de fecha-------------------
+export const MY_DATE_FORMATS = {
+  parse: {
+      dateInput: 'DD/MM/YYYY',
+  },
+  display: {
+      dateInput: 'DD/MM/YYYY',
+      monthYearLabel: 'MMM YYYY',
+      dateA11yLabel: 'LL',
+      monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 
 
 @NgModule({
@@ -50,7 +63,8 @@ import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agreg
     DatosPersonalesComponent,
     AntecedentesComponent,
     EvolucionComponent,
-    AgregarEvolucionComponent
+    AgregarEvolucionComponent,
+    AgregarFirmasComponent
     
    
     
@@ -68,14 +82,19 @@ import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agreg
     MatDatepickerModule,
     MatNativeDateModule,
     MatTabsModule,
-    MatMenuModule
+    MatMenuModule,
+    NgxMaterialTimepickerModule,
+    
 
 
   ],
   
   providers: [
     DatePipe,
-  ],
+    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
+    { provide: DateAdapter, useClass: NativeDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
+],
   bootstrap: [AppComponent],
 
 })

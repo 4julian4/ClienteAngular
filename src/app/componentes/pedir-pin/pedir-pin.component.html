@@ -3,10 +3,10 @@
   <p>Por favor, ingrese su PIN</p>
   <mat-form-field>
     <mat-label>PIN</mat-label>
-    <input matInput [(ngModel)]="data.pin" type="password" cdkFocusInitial>
+    <input matInput [(ngModel)]="data.pin" type="password" cdkFocusInitial (keyup.enter)="confirmar()">
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions class="matdialogPedirPin">
-  <button mat-button (click)="onNoClick()">Cancelar</button>
-  <button mat-button (click)="confirmar()">Confirmar</button>
+  <button mat-raised-button (click)="onNoClick()">Cancelar</button>
+  <button mat-raised-button (click)="confirmar()">Confirmar</button>
 </mat-dialog-actions>

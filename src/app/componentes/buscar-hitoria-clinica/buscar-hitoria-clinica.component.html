@@ -10,62 +10,73 @@
             </mat-panel-description>
         </mat-expansion-panel-header>
         <mat-card class="cardContenedorBusqueda">
+            <div class="divTituloFila1">
+                <h1>Escoja la opcion de busqueda</h1>
+            </div>
+            <br>
             <div class="contenedorBusqueda">
-                <div class="divBuscadorSelect">
-                    <mat-label class="labelBuscarPor">BUSCAR POR: </mat-label>
-                    <mat-select class="selectEscogerTipoBusqueda"  [(value)]="opcionSeleccionada" (selectionChange)="buscarNombreValorSeleccionado()">
+
+                <div class="divBuscadorSelectFila2">
+                    <mat-select class="selectEscogerTipoBusqueda" [(value)]="opcionSeleccionada"
+                        (selectionChange)="buscarNombreValorSeleccionado()">
                         <mat-option *ngFor="let opcion of opciones" [value]="opcion.id"> {{opcion.nombre}} </mat-option>
                     </mat-select>
                 </div>
-                
+
                 <div class="divBuscadorInput">
-                <!--    <mat-label> {{nombreValorSeleccionado}} </mat-label>-->
-                    <input matInput placeholder="Buscar" #valorABuscar name="buscar" class="inputBuscar">
-                    <button mat-raised-button class="botonBuscarPaciente" color="primary" (click)="buscarPaciente()">Buscar</button>
-                    <button mat-raised-button class="botonCancelarBuscarPaciente" color="warn" (click)="buscarPaciente()">Cancelar</button>
+                    <!--    <mat-label> {{nombreValorSeleccionado}} </mat-label>-->
+                    <input matInput placeholder="Buscar" #valorABuscar name="buscar" class="inputBuscar" (keyup.enter)="buscarPaciente()">
+                    <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente()">Buscar</button>
+                    <button mat-raised-button class="botonCancelarBuscarPaciente"
+                        (click)="buscarPaciente()">Cancelar</button>
+                </div>
+            </div>
+            <div class="divContenedorDatosEncontrados">
+                <div class="scrollable-content">
+                    <table mat-table [dataSource]="resultadosBusqueda" class="tablaBusquedaPaciente">
+                        <!-- Definición de las columnas de la tabla -->
+
+                        <ng-container matColumnDef="idAnamnesis">
+                            <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> N° Historia </th>
+                            <td mat-cell *matCellDef="let datosPaciente" class="columnaIdAnamnesis">
+                                {{datosPaciente.IDANAMNESIS}}
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="numHistoria">
+                            <th mat-header-cell *matHeaderCellDef> N° Historia </th>
+                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.IDANAMNESISTEXTO}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NOMBRE_PACIENTE}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="cedula">
+                            <th mat-header-cell *matHeaderCellDef> Cedula </th>
+                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMDOCUMENTO}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="telefono">
+                            <th mat-header-cell *matHeaderCellDef> Telefono </th>
+                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.TELEFONO}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="perfil">
+                            <th mat-header-cell *matHeaderCellDef> Perfil </th>
+                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.PERFIL}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="numAfiliacion">
+                            <th mat-header-cell *matHeaderCellDef> N° Afiliacion </th>
+                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMAFILIACION}} </td>
+                        </ng-container>
+
+                        <!-- Aquí puedes agregar más columnas según sea necesario -->
+
+                        <!-- Fila de encabezado y filas de datos -->
+                        <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
+                        <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradas;"
+                            (click)="onRowClicked(filaSeleccionada)"></tr>
+                    </table>
                 </div>
             </div>
         </mat-card>
-        <table mat-table [dataSource]="resultadosBusqueda" class="tablaBusquedaPaciente">
-            <!-- Definición de las columnas de la tabla -->
-
-            <ng-container matColumnDef="idAnamnesis">
-                <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> N° Historia </th>
-                <td mat-cell *matCellDef="let datosPaciente" class="columnaIdAnamnesis"> {{datosPaciente.IDANAMNESIS}}
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="numHistoria">
-                <th mat-header-cell *matHeaderCellDef> N° Historia </th>
-                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.IDANAMNESISTEXTO}} </td>
-            </ng-container>
-            <ng-container matColumnDef="nombre">
-                <th mat-header-cell *matHeaderCellDef> Nombre </th>
-                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NOMBRE_PACIENTE}} </td>
-            </ng-container>
-            <ng-container matColumnDef="cedula">
-                <th mat-header-cell *matHeaderCellDef> Cedula </th>
-                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMDOCUMENTO}} </td>
-            </ng-container>
-            <ng-container matColumnDef="telefono">
-                <th mat-header-cell *matHeaderCellDef> Telefono </th>
-                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.TELEFONO}} </td>
-            </ng-container>
-            <ng-container matColumnDef="perfil">
-                <th mat-header-cell *matHeaderCellDef> Perfil </th>
-                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.PERFIL}} </td>
-            </ng-container>
-            <ng-container matColumnDef="numAfiliacion">
-                <th mat-header-cell *matHeaderCellDef> N° Afiliacion </th>
-                <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMAFILIACION}} </td>
-            </ng-container>
-
-            <!-- Aquí puedes agregar más columnas según sea necesario -->
-
-            <!-- Fila de encabezado y filas de datos -->
-            <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
-            <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradas;"
-                (click)="onRowClicked(filaSeleccionada)"></tr>
-        </table>
 
     </mat-expansion-panel>
     <mat-expansion-panel *ngIf="mostrarPanelMostrarDatosPersonalesPaciente"

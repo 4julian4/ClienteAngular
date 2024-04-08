@@ -8,6 +8,8 @@ import { RespuestaEvolucionPaciente, RespuestaEvolucionPacienteService } from 's
 import { RespuestaObtenerDoctor, RespuestaObtenerDoctorService } from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
 import { SedesConectadas } from 'src/app/conexiones/sedes-conectadas';
 import { Router } from '@angular/router';
+import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { RespuestaDatosPersonales } from 'src/app/conexiones/rydent/modelos/respuesta-datos-personales';
 
 @Component({
   selector: 'app-buscar-hitoria-clinica',
@@ -16,7 +18,7 @@ import { Router } from '@angular/router';
 })
 export class BuscarHitoriaClinicaComponent implements OnInit {
  // @ViewChildren(MatExpansionPanel) paneles: QueryList<MatExpansionPanel>;
-  @Input() idSedeActualSignalR: string = '';
+  //@Input() idSedeActualSignalR: string = '';
   @Output() resultadoBusquedaDatosPersonalesCompletos: DatosPersonales = new DatosPersonales();
   formularioDatosPersonales!: FormGroup;
   sedeConectadaActual: SedesConectadas = new SedesConectadas();
@@ -38,6 +40,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   nombreValorSeleccionado: string = '';
   @ViewChild('valorABuscar') valorABuscar: ElementRef | undefined;
   idAnamnesisParaMenu: number = 0;
+  idSedeActualSignalR: string = '';
   idSedeActualSignalRMenu: string = '';
   
 
@@ -56,11 +59,18 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     private antecedentesService: AntecedentesService,
     private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
     private formBuilder: FormBuilder,
+    private respuestaPinService: RespuestaPinService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
+    this.respuestaPinService.sharedSedeData.subscribe(data => {
+      if (data != null) {
+        this.idSedeActualSignalR = data;
+      }
+    });
     this.inicializarFormulario();
+
 
     this.opcionSeleccionada = this.opciones[0].id;
     this.buscarNombreValorSeleccionado();
@@ -78,9 +88,9 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     });
 
     //Datos Personales
-    this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales: DatosPersonales) => {
+    this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales: RespuestaDatosPersonales) => {
       console.log(respuestaBusquedaDatosPersonales);
-      this.resultadoBusquedaDatosPersonalesCompletos = respuestaBusquedaDatosPersonales;
+      this.resultadoBusquedaDatosPersonalesCompletos = respuestaBusquedaDatosPersonales.datosPersonales;
       console.log(this.resultadoBusquedaDatosPersonalesCompletos);
       this.nombrePaciente = this.resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE;
       this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
@@ -233,14 +243,16 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     console.log('Row clicked: ', filaSeleccionada);
     this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
     this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
-    this.datosPersonalesService.updateAnamnesisData(this.idAnamnesisParaMenu);
-    this.datosPersonalesService.updateSedeData(this.idSedeActualSignalRMenu);
+    // Aca se actualizara idSignalR para todos y idAnanesis estos servicios estaran en 
+    // Las conexiones rydent modelos respuesta pin
+    this.respuestaPinService.updateAnamnesisData(this.idAnamnesisParaMenu);
+    //this.respuestaPinService.updateSedeData(this.idSedeActualSignalRMenu);
 
-    this.antecedentesService.updateAnamnesisData(this.idAnamnesisParaMenu);
-    this.antecedentesService.updateSedeData(this.idSedeActualSignalRMenu);
+    //this.antecedentesService.updateAnamnesisData(this.idAnamnesisParaMenu);
+    //this.antecedentesService.updateSedeData(this.idSedeActualSignalRMenu);
 
-    this.respuestaEvolucionPacienteService.updateAnamnesisData(this.idAnamnesisParaMenu);
-    this.respuestaEvolucionPacienteService.updateSedeData(this.idSedeActualSignalRMenu);
+    //this.respuestaEvolucionPacienteService.updateAnamnesisData(this.idAnamnesisParaMenu);
+    //this.respuestaEvolucionPacienteService.updateSedeData(this.idSedeActualSignalRMenu);
 
     await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
     this.openorclosePanelBuscarPaciente = !this.openorclosePanelBuscarPaciente;

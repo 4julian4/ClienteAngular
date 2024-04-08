@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { RespuestaEvolucionPaciente, RespuestaEvolucionPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-evolucion-paciente';
+import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 
 @Component({
   selector: 'app-evolucion',
@@ -14,30 +15,33 @@ export class EvolucionComponent implements OnInit{
   idSedeActualSignalR: string = "";
   idAnamnesisPacienteSeleccionado: number = 0;
   resultadosEvolucion: RespuestaEvolucionPaciente[] = [];
- // columnasMostradas = ['IDEVOLUCION', 'IDEVOLUSECUND', 'PROXIMA_CITA','FECHA_PROX_CITA','FECHA_ORDEN','ENTRADA', 'SALIDA', 'FECHA', 
+ // columnasMostradas = ['IDEVOLUCION', 'IDEVOLUSECUND', 'PROXIMA_CITAstr','FECHA_PROX_CITA','FECHA_ORDEN','ENTRADAstr', 'SALIDAstr', 'FECHA', 
  //                      'HORA', 'DOCTOR','FIRMA','COMPLICACION','HORA_FIN','COLOR','NOTA',
  //                      'EVOLUCION','URGENCIAS','HORA_LLEGADA','imgFirmaPaciente','imgFirmaDoctor']; 
   columnasMostradas = ['IDEVOLUCION']; 
-  //columnasMostradas = ['IDEVOLUCION', 'FECHA','HORA_LLEGADA','HORA_FIN','DOCTOR', 'NOTA','EVOLUCION','PROXIMA_CITA','imgFirmaPaciente','imgFirmaDoctor']; 
+  //columnasMostradas = ['IDEVOLUCION', 'FECHA','HORA_LLEGADA','HORA_FIN','DOCTOR', 'NOTA','EVOLUCION','PROXIMA_CITAstr','imgFirmaPaciente','imgFirmaDoctor']; 
     
   
   constructor(
     private formBuilder: FormBuilder,
     private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
+    private respustaPinService: RespuestaPinService
+    
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
-    this.respuestaEvolucionPacienteService.sharedAnamnesisData.subscribe(data => {
+    this.respustaPinService.sharedAnamnesisData.subscribe(data => {
       if (data != null)
       {
         this.idAnamnesisPacienteSeleccionado = data;
       }
     });
   
-    this.respuestaEvolucionPacienteService.sharedSedeData.subscribe(data => {
+    this.respustaPinService.sharedSedeData.subscribe(data => {
       if (data != null) {
         this.idSedeActualSignalR = data;
+        
       }
     });
 
@@ -45,7 +49,13 @@ export class EvolucionComponent implements OnInit{
     this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(async (respuestaBusquedaEvolucion: RespuestaEvolucionPaciente[]) => {
       console.log(respuestaBusquedaEvolucion);
       this.resultadoBusquedaEvolucion = respuestaBusquedaEvolucion;
+      if (this.resultadoBusquedaEvolucion.length > 0) {
+        this.resultadoBusquedaEvolucion.sort((b, a) => {
+          return a.evolucion.IDEVOLUCION- b.evolucion.IDEVOLUCION;
+        });
+      }
      // this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucion);
+     //this.formularioEvolucion.disable();
     });
     await this.obtenerEvolucionPaciente(this.idAnamnesisPacienteSeleccionado);
   }
@@ -63,11 +73,11 @@ export class EvolucionComponent implements OnInit{
     this.formularioEvolucion = this.formBuilder.group({
       IDEVOLUCION: [''],
       IDEVOLUSECUND: [''],
-      PROXIMA_CITA: [''],
+      PROXIMA_CITAstr: [''],
       FECHA_PROX_CITA: [''],
       FECHA_ORDEN: [''],
-      ENTRADA: [''],
-      SALIDA: [''],
+      ENTRADAstr: [''],
+      SALIDAstr: [''],
       FECHA: [''],
       HORA: [''],
       DOCTOR: [''],

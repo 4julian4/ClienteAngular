@@ -107,3 +107,42 @@ img {
 
 
 }
+
+.campoFila2 {
+    flex: 1;
+
+    &:not(:last-child) {
+        margin-right: 5px;
+    }
+
+    &:not(:first-child) {
+        margin-left: 5px;
+    }
+}
+
+
+.divContenedorDeBotones {
+    padding: 20px; // Agrega un espacio de 20px alrededor del contenido del formulario, dentro del borde.
+    width: 90%; // Establece el ancho del formulario al 90% del ancho de su contenedor.
+    margin: 0 auto; // Centra el formulario horizontalmente en su contenedor. '0' es el margen superior e inferior y 'auto' es el margen izquierdo y derecho.
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .BotonGuardar {
+
+        margin: 5px;
+        background-color: rgb(28, 197, 244);
+        color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+    }
+
+ 
+}
+
+.tituloEvolucion {
+    margin: 0;
+    /* Elimina el margen predeterminado del título */
+}

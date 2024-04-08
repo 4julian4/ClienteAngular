@@ -81,7 +81,51 @@
             margin-left: 5px;
         }
     }
+
+    .campoFila6 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 6px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
 }
+
+.divFormularioFila6 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .campoFila6 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila6>div {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    img {
+        max-width: 100%; // Asegura que la imagen no sea más grande que su contenedor
+        height: auto; // Mantiene la relación de aspecto de la imagen
+    }
+}
+
 
 .scrollable-content {
     max-height: calc(100vh - 200px);
@@ -112,6 +156,14 @@
         }
 
         .BotonCancelar {
+            margin: 5px;
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+        .BotonFirmar {
             background-color: rgb(28, 197, 244);
             color: white;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);

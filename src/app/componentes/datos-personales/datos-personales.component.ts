@@ -1,6 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DatosPersonales, DatosPersonalesService } from 'src/app/conexiones/rydent/modelos/datos-personales';
+import { RespuestaDatosPersonales } from 'src/app/conexiones/rydent/modelos/respuesta-datos-personales';
+import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { CodigosCiudades } from 'src/app/conexiones/rydent/tablas/codigos-ciudades';
+import { CodigosDepartamentos } from 'src/app/conexiones/rydent/tablas/codigos-departamentos';
+import { CodigosEps } from 'src/app/conexiones/rydent/tablas/codigos-eps';
 
 @Component({
   selector: 'app-datos-personales',
@@ -11,22 +16,40 @@ export class DatosPersonalesComponent implements OnInit {
   @Input() resultadoBusquedaDatosPersonalesCompletos: DatosPersonales = new DatosPersonales();
   formularioDatosPersonales!: FormGroup;
   idSedeActualSignalR: string = "";
+  listaEps: CodigosEps[] = [];
+  listaDepartamentos: CodigosDepartamentos[] = [];
+  listaCiudades:CodigosCiudades[]= [];
   idAnamnesisPacienteSeleccionado: number = 0;
+  fotoFrontalBase64: string = '';
+  formularioDeshabilitado: boolean = false; // Establecer a true para deshabilitar el formulario, false para habilitarlo
   constructor(
     private formBuilder: FormBuilder,
     private datosPersonalesService: DatosPersonalesService,
+    private respuestaPinService: RespuestaPinService
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
-    this.datosPersonalesService.sharedAnamnesisData.subscribe(data => {
+    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
       if (data != null)
       {
         this.idAnamnesisPacienteSeleccionado = data;
       }
     });
+
+    this.respuestaPinService.shareddatosRespuestaPinData.subscribe(data => {
+      if (data != null) {
+        this.listaEps = data.lstEps;
+        this.listaDepartamentos = data.lstDepartamentos;
+        this.listaCiudades = data.lstCiudades;
+        //this.lstDoctores = this.listaDoctores.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
+        //console.log(this.listaDoctores);
+      }
+    });
+
+    
   
-    this.datosPersonalesService.sharedSedeData.subscribe(data => {
+    this.respuestaPinService.sharedSedeData.subscribe(data => {
       if (data != null) {
         this.idSedeActualSignalR = data;
       }
@@ -34,14 +57,36 @@ export class DatosPersonalesComponent implements OnInit {
     await this.obtenerDatosCompletosPaciente(this.idAnamnesisPacienteSeleccionado);
 
     //Datos Personales
-    this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales: DatosPersonales) => {
+    this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales: RespuestaDatosPersonales) => {
       console.log(respuestaBusquedaDatosPersonales);
-      this.resultadoBusquedaDatosPersonalesCompletos = respuestaBusquedaDatosPersonales;
+      this.resultadoBusquedaDatosPersonalesCompletos = respuestaBusquedaDatosPersonales.datosPersonales;
+      this.fotoFrontalBase64 = respuestaBusquedaDatosPersonales.strFotoFrontal;
       console.log(this.resultadoBusquedaDatosPersonalesCompletos);
       //this.nombrePaciente = this.resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE;
       this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
+      this.formularioDatosPersonales.disable();
+      this.formularioDeshabilitado
       //this.inicializarFormulario();
     });
+
+    console.log(this.formularioDatosPersonales);
+    if (this.formularioDatosPersonales) {
+      this.formularioDatosPersonales.get('CODIGO_EPS_LISTADO')?.valueChanges.subscribe(nombre => {
+        console.log(`Nombre cambiado a ${nombre}`);
+        const eps = this.listaEps.find(eps => eps.NOMBRE === nombre);
+        console.log(`EPS encontrado: ${JSON.stringify(eps)}`);
+        if (eps) {
+          this.formularioDatosPersonales.get('CODIGO_EPS')?.setValue(eps.CODIGO, {emitEvent: false});
+        }
+      });
+  
+      this.formularioDatosPersonales.get('CODIGO_EPS')?.valueChanges.subscribe(codigo => {
+        const eps = this.listaEps.find(eps => eps.CODIGO === codigo);
+        if (eps) {
+          this.formularioDatosPersonales.get('CODIGO_EPS_LISTADO')?.setValue(eps.NOMBRE, {emitEvent: false});
+        }
+      });
+    }
   }
 
   async obtenerDatosCompletosPaciente(idAnamnesis: number) {
@@ -86,7 +131,7 @@ export class DatosPersonalesComponent implements OnInit {
       E_MAIL_RESP: [''],
       REFERIDO_POR: [''],
       NRO_AFILIACION: [''],
-      CONVENIO: [''],
+      CONVENIO: [{ value: '', disabled: true }],
       ESTADO_TRATAMIENTO: [''],
       TIPO_PACIENTE: [''],
       CEDULA_NUMERO: [''],
