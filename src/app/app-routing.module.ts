@@ -8,6 +8,8 @@ import { AgendaComponent } from './componentes/agenda';
 import { AgregarFirmasComponent } from './componentes/agregar-firmas/agregar-firmas.component';
 import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agregar-evolucion.component';
 import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clinica/buscar-hitoria-clinica.component';
+import { EstadoCuentaComponent } from './componentes/estado-cuenta';
+import { RipsComponent } from './componentes/rips';
 
 const routes: Routes = [
   {path: 'datos-personales', component: DatosPersonalesComponent},
@@ -16,7 +18,9 @@ const routes: Routes = [
   {path: 'agenda', component: AgendaComponent},
   {path: 'agregar-evolucion', component: AgregarEvolucionComponent},
   {path: 'agregar-firmas', component: AgregarFirmasComponent},
-  {path: 'buscar-historia-clinica', component: BuscarHitoriaClinicaComponent}
+  {path: 'buscar-historia-clinica', component: BuscarHitoriaClinicaComponent},
+  {path: 'estado-cuenta', component: EstadoCuentaComponent},
+  {path: 'rips', component: RipsComponent}
   
 ];
 

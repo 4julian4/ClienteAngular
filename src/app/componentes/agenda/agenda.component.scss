@@ -2,21 +2,27 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 3px;
 }
 
 
 
 .contenedorArriba {
+    position: relative; // Necesario para que z-index funcione
+    z-index: 2; // Ajusta este valor según tus necesidades
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
-    height: 35px;
+    width: 99.7%;
+    height: 22px;
     background-color: rgb(28, 197, 244);
-    border-radius: 8px; 
-    padding: 3px 10px; // Espaciado opcional
+    border-radius: 20px;
+    //border-top-left-radius: 10px;
+    //border-top-right-radius: 10px;
+    padding: 8px 2px; // Espaciado opcional
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
+    transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
-
 
 
 .barra-superior {
@@ -24,9 +30,11 @@
     align-items: center;
     padding: 10px;
     background-color: rgb(28, 197, 244);
-    border-radius: 8px; 
+    border-radius: 20px;
     height: 20px;
     width: 100%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
+    transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
 
 .selector-silla {
@@ -35,12 +43,14 @@
 
 .custom-select {
     position: relative;
-    width: 16%; 
-    height: 30px; 
+    width: 16%;
+    height: 30px;
     background-color: #ffffff;
     border: 1px solid #ced4da;
-    border-radius: 8px;
+    border-radius: 20px;
     overflow: hidden;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
+    transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
 
 
@@ -50,19 +60,23 @@
     height: 100%;
     border: none;
     background-color: transparent;
-    padding: 8px; /* Ajuste del espaciado interno */
-    font-size: 14px; /* Tamaño de fuente */
+    padding: 8px;
+    /* Ajuste del espaciado interno */
+    font-size: 14px;
+    /* Tamaño de fuente */
     cursor: pointer;
     outline: none;
-   // appearance: none; /* Oculta la flecha del select nativo */
+    // appearance: none; /* Oculta la flecha del select nativo */
 }
 
 .custom-select label {
     position: absolute;
     top: 50%;
-    left: 5px; /* Espacio a la izquierda del label */
+    left: 5px;
+    /* Espacio a la izquierda del label */
     transform: translateY(-50%);
-    font-size: 14px; /* Tamaño de fuente */
+    font-size: 14px;
+    /* Tamaño de fuente */
     color: #6c757d;
 }
 
@@ -74,11 +88,13 @@
     display: flex;
     align-items: center;
     background-color: #fff;
-    border-radius: 8px; 
-    padding: 5px 5px; 
+    border-radius: 20px;
+    padding: 5px 5px;
     max-width: 50%;
     flex: 1;
-    height: 100%; 
+    height: 100%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
+    transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
 
 
@@ -90,6 +106,7 @@
     font-size: 14px; // Reducir el tamaño de la fuente
     height: 100%; // Asegurar que no se desborde del contenedor
     outline: none; // Eliminar el recuadro de borde negro al hacer clic
+    transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
 
 
@@ -100,9 +117,15 @@
     height: 100%; // Asegurar que no se desborde del contenedor
     position: relative;
     top: -5px;
+    transition: 0.3s;
 }
 
+
+
+
 .contenedorAbajo {
+    position: relative; // Necesario para que z-index funcione
+    z-index: 1; // Ajusta este valor según tus necesidades
     display: flex;
     //flex: 1; // Para que los contenedores se expandan para llenar el espacio disponible
 }
@@ -113,12 +136,13 @@
     justify-content: center;
     align-items: center;
     //flex: 1; // Permite que el elemento crezca y se encoja para utilizar el espacio disponible en su contenedor flex.
-    //display: flex; // Establece el tipo de visualización del elemento a flex, permitiendo la disposición flexible de sus hijos.
+    display: flex; // Establece el tipo de visualización del elemento a flex, permitiendo la disposición flexible de sus hijos.
     flex-direction: column; // Los hijos del elemento se apilarán verticalmente.
-    //justify-content: center; 
-    //align-items: center; 
+    justify-content: center;
+    align-items: center;
     margin-right: 5px; // Añade un margen a la derecha del elemento de 5px. Este es un espaciado opcional.
     border-radius: 8px; // Redondea las esquinas del elemento con un radio de 8px.
+    overflow-x: hidden;
 }
 
 .scrollable-content-izquierdo {
@@ -126,17 +150,17 @@
     overflow-y: auto;
 }
 
-.divCalendario{
-    width: 90%;
-    height: 30%;
-    //display: flex;
+.divCalendario {
+    width: 100%;
+    height: 25%;
+    display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 10px; // Añade un margen superior de 10px
+    margin-top: 5px; // Añade un margen superior de 10px
 }
 
 .mi-calendario {
-    width: 90%;
+    width: 77%;
     height: 20%; // Cambiado para ocupar todo el espacio disponible
 }
 
@@ -152,90 +176,129 @@
     padding: 5px 20px;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 12px;
     background-color: transparent; // Botón transparente
-    color:rgb(28, 197, 244); /* Color de fondo del botón */ // Color de texto del botón
+    color: rgb(28, 197, 244);
+    /* Color de fondo del botón */
+    // Color de texto del botón
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease; 
+    transition: background-color 0.3s ease, color 0.3s ease;
 
     &:hover {
-        background-color:rgb(28, 197, 244); /* Color de fondo del botón */ // Cambio de color de fondo al pasar el mouse
+        background-color: rgb(28, 197, 244);
+        /* Color de fondo del botón */
+        // Cambio de color de fondo al pasar el mouse
         color: #fff; // C
     }
+
     //#ff4081; /* Color de fondo del botón */
 }
 
 .formulario-cita {
+    height: 215px; // Ajusta este valor según tus necesidades
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     background-color: #f9f9f9; // Fondo del formulario
-    padding: 10px; // Espacio interno del formulario
+    padding: 0.5px; // Espacio interno del formulario
     border-radius: 10px; // Bordes redondeados
+    overflow: auto; // Muestra una barra de desplazamiento si es necesario
+
+    * {
+        box-sizing: border-box; // Incluye el padding y los bordes en el tamaño total de los elementos
+    }
 
     .fila {
         display: flex;
+        justify-content: center;
         flex-wrap: wrap;
-        margin-bottom: 5px; // Espacio entre filas
+        margin-bottom: 8px; // Reduce el espacio entre filas
     }
 
     .campo-formulario {
         flex: 1; // Cada campo ocupa un tercio del ancho total
-        margin-right: 10px; // Espacio entre campos
-        margin-bottom: 5px; // Espacio inferior del campo
+        margin-right: 2px; // Reduce el espacio entre campos
+        margin-bottom: 1px; // Reduce el espacio inferior del campo
     }
 
     label {
         display: none;
     }
 
-    input[type="text"], select[type="text"], select[type="tel"],
-    input[type="tel"]{
+    input[type="text"],
+    select[type="text"],
+    select[type="tel"],
+    input[type="tel"] {
         width: 100%; // Ocupa todo el ancho del campo
-        padding: 10px; // Espacio interno del campo
+        padding: 5px; // Espacio interno del campo
         border: 1px solid #ccc;
         border-radius: 5px;
-        font-size: 14px;
+        font-size: 12px;
         box-sizing: border-box;
         transition: border-color 0.3s; // Transición suave para el borde
     }
 
-    input[type="text"]:focus, select[type="text"]:focus, select[type="tel"]:focus, 
-    input[type="tel"]:focus{
+    input[type="text"]:focus,
+    select[type="text"]:focus,
+    select[type="tel"]:focus,
+    input[type="tel"]:focus {
         outline: none; // Elimina el contorno de enfoque
         border-color: #5cace1; // Cambia el color del borde al enfocar el campo
+    }
+
+    select:disabled {
+        background-color: #fff;
+        /* Cambia esto al color de fondo de tus otros campos de entrada */
+        color: #ccc;
+        /* Cambia esto al color de texto de tus otros campos de entrada */
     }
 }
 
 .boton-generar-cita {
     border: 2px solid transparent;
     background-color: transparent;
-    color: #007bff; /* Color del texto */
-    font-size: 16px;
+    color: #007bff;
+    /* Color del texto */
+    font-size: 12px;
     padding: 5px 20px;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-  }
-  
-  .boton-generar-cita:hover {
-    background-color: rgba(0, 123, 255, 0.1); /* Color de fondo al pasar el ratón */
-    border-color: #007bff; /* Color del borde al pasar el ratón */
-    color: #0056b3; /* Color del texto al pasar el ratón */
-  }
+    //justify-content: center;
+    //align-items: center;
+}
+
+.boton-generar-cita:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    /* Color de fondo al pasar el ratón */
+    border-color: #007bff;
+    /* Color del borde al pasar el ratón */
+    color: #0056b3;
+    /* Color del texto al pasar el ratón */
+}
 
 
 
 .contenedor-derecho {
+    overflow-x: auto;
     width: 75%;
     flex: 4;
-    padding: 10px; // Espaciado opcional
+    //padding: 10px; // Espaciado opcional
+
     mat-cell input {
         border: none;
+        outline: none;
+        pointer-events: none;
         background-color: transparent;
     }
 }
 
+
+
 .scrollable-content-derecho {
     max-height: calc(100vh - 150px);
     overflow-y: auto;
+    background-color: transparent;
 }
 
 
@@ -246,8 +309,8 @@
     border-collapse: collapse;
     border: none;
     outline: none;
-    border-radius: 8px; 
-    
+    border-radius: 8px;
+
     //background-color: white;
 }
 
@@ -259,41 +322,64 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    background-color: white;
+    //background-color: white;
+    background-color: transparent; // Hace que el fondo sea transparente
 }
 
 .seleccionado {
-    background-color: white;
-    //background-color: rgb(28, 197, 244);
+    //background-color: rgb(32, 244, 28);
+    background-color: rgb(28, 197, 244);
+}
+
+.selected-row {
+    box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.5);
 }
 
 
-
-
-.hora-column-contenedor {
-    width: 100px;
-    min-width: 100px;
+/* Estilo cuando se selecciona una fila */
+.mat-row.selected {
+    background-color: rgb(28, 197, 244);
+    /* Cambia el color de fondo cuando se selecciona */
 }
+
+/* Estilo cuando se resalta una fila */
+.mat-row.highlighted {
+    background-color: rgba(28, 197, 244, 0.5);
+    /* Cambia el color de fondo con un poco de transparencia cuando se resalta */
+}
+
+/* Estilo al pasar el mouse sobre una fila */
+.mat-row {
+    font-size: 14px; // Reduce el tamaño de la fuente
+    transition: background-color 0.3s;
+}
+
+.hora-column {
+    font-size: 14px; // Reduce el tamaño de la fuente
+    //padding: 1px 1; // Reduce el padding vertical
+    //line-height: 0.5;
+    color: white;
+    background-color: rgb(28, 197, 244);
+}
+
+
+.highlighted {
+    background-color: rgb(28, 197, 244);
+    /* Cambia esto al color que prefieras */
+}
+
+
+// .hora-column-contenedor {
+//     width: 100px;
+//     min-width: 100px;
+// }
 
 .hora-column-header {
     color: black;
     background-color: rgb(28, 197, 244);
 }
 
-.hora-column {
-    color: white;
-    background-color: rgb(28, 197, 244);
-}
 
 .hora-column:hover {
     background-color: rgb(28, 197, 244);
 }
-
-//.otro-Campo {
-//    background-color: white;//
-//}
-
-
-/* Clase para filas con borde */
-
-

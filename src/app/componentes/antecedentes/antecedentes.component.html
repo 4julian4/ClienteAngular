@@ -1,9 +1,10 @@
 <form class="formularioAntecedentes" [formGroup]="formularioAntecedentes">
     <div class="scrollable-content">
+
         <div class="divFila1DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila1">
                 <mat-label>Nota Importante</mat-label>
-                <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
                     formControlName="IMPORTANTE" placeholder="Nota Importante"></textarea>
             </mat-form-field>
         </div>
@@ -11,15 +12,15 @@
         <div class="divFila2DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila2">
                 <mat-label>Motivo De La Consulta</mat-label>
-                <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
                     formControlName="MOTIVO_DE_CONSULTA" placeholder="Motivo De La Consulta"></textarea>
             </mat-form-field>
-        </div>  
+        </div>
 
         <div class="divFila3DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila3">
                 <mat-label>Enfermedad Actual</mat-label>
-                <textarea matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
+                <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
                     formControlName="ENFERMEDAD_ACTUAL" placeholder="Enfermedad Actual"></textarea>
             </mat-form-field>
         </div>
@@ -27,136 +28,91 @@
         <div class="divFila4DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila4">
                 <mat-label>Sufre alguna enfermedad diferente al motivo de consulta?</mat-label>
-                <mat-select formControlName="PADC_ENFERM_CUALES_S">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput readonly formControlName="PADC_ENFERM_CUALES_S">
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="campoFila4">
                 <mat-label>Sufre patologias gastrica renal o respiratorias?</mat-label>
-                <mat-select formControlName="GASTRICOS">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput readonly formControlName="GASTRICOS">
             </mat-form-field>
         </div>
 
         <div class="divFila5DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila5">
                 <mat-label>Se encuentra actualmente en algun tratamiento medico u odontologico?</mat-label>
-                <mat-select formControlName="TRAT_ODONT_PREV_CUALES_S">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput readonly formControlName="TRAT_ODONT_PREV_CUALES_S">
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="campoFila5">
                 <mat-label>Ha sido sometido a algun tipo de cirugia general u oral?</mat-label>
-                <mat-select formControlName="CIRUGIAS_S">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput readonly formControlName="CIRUGIAS_S">
             </mat-form-field>
         </div>
 
         <div class="divFila6DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila6">
                 <mat-label>Ingiere algun medicamento o sustancia natural?</mat-label>
-                <mat-select formControlName="RECIBE_ALGUN_MEDIC_CUAL">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="RECIBE_ALGUN_MEDIC_CUAL" readonly>
             </mat-form-field>
-
+        
             <mat-form-field appearance="fill" class="campoFila6">
                 <mat-label>Patologias hepaticas o infecciones inmunosuprimidas o sida?</mat-label>
-                <mat-select formControlName="HEPATITIS">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="HEPATITIS" readonly>
             </mat-form-field>
         </div>
-
+        
         <div class="divFila7DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila7">
                 <mat-label>Es alergico a alguna sustancia?</mat-label>
-                <mat-select formControlName="REACC_ALERGIC_CUALES_S">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="REACC_ALERGIC_CUALES_S" readonly>
             </mat-form-field>
-
+        
             <mat-form-field appearance="fill" class="campoFila7">
                 <mat-label>Ha tenido complicaciones en algun procedimiento medico u odontologico?</mat-label>
-                <mat-select formControlName="COMPLICACIONES_TTO">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="COMPLICACIONES_TTO" readonly>
             </mat-form-field>
         </div>
-
+        
         <div class="divFila8DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila8">
                 <mat-label>Ha sufrido accidentes de importancia?</mat-label>
-                <mat-select formControlName="A_ESTADO_HOSPIT_MOTIVO_S">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="A_ESTADO_HOSPIT_MOTIVO_S" readonly>
             </mat-form-field>
-
+        
             <mat-form-field appearance="fill" class="campoFila8">
                 <mat-label>Fuma o tiene algun otro habito?</mat-label>
-                <mat-select formControlName="FUMA">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="FUMA" readonly>
             </mat-form-field>
         </div>
-
+        
         <div class="divFila9DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila9">
                 <mat-label>Sufre alteraciones hematologicas o leucemia?</mat-label>
-                <mat-select formControlName="ALTERACIONES_HEMATOLOGICAS">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="ALTERACIONES_HEMATOLOGICAS" readonly>
             </mat-form-field>
-
+        
             <mat-form-field appearance="fill" class="campoFila9">
                 <mat-label>Ha sufrido trastornos emocionales o depresivos?</mat-label>
-                <mat-select formControlName="TRASTORNO_EMOCIONAL">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="TRASTORNO_EMOCIONAL" readonly>
             </mat-form-field>
         </div>
-
+        
         <div class="divFila10DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila10">
                 <mat-label>Sufre alteraciones de la presion arterial o cardiopatias?</mat-label>
-                <mat-select formControlName="CARDIOP">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="CARDIOP" readonly>
             </mat-form-field>
-
+        
             <mat-form-field appearance="fill" class="campoFila10">
                 <mat-label>Si es mujer esta en embarazo?</mat-label>
-                <mat-select formControlName="EMBARAZO">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="EMBARAZO" readonly>
             </mat-form-field>
         </div>
-
+        
         <div class="divFila11DatosPersonales">
             <mat-form-field appearance="fill" class="campoFila11">
                 <mat-label>Sufre alteraciones endocrinas o diabetes?</mat-label>
-                <mat-select formControlName="DIABETES">
-                    <mat-option value="NO">NO</mat-option>
-                    <mat-option value="SI">SI</mat-option>
-                </mat-select>
+                <input matInput formControlName="DIABETES" readonly>
             </mat-form-field>
         </div>
 
@@ -176,7 +132,7 @@
             </mat-form-field>
         </div>
     </div>
-   
+
     <!-- Botones para guardar y cancelar -->
 
 

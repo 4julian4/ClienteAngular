@@ -1,0 +1,61 @@
+.dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+
+    .widget {
+        width: calc(25% - 20px); /* Ancho para 4 cajones por fila */
+        margin-bottom: 20px;
+        box-sizing: border-box; /* Incluye el padding en el cálculo del ancho */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .metrics {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%; /* Ocupa toda la altura del cajón */
+            padding: 10px; /* Espaciado interno adicional para las gráficas */
+
+            canvas {
+                max-width: 100%; /* Asegura que la gráfica no se desborde del contenedor */
+                max-height: 100%; /* Asegura que la gráfica no se desborde del contenedor */
+            }
+        }
+    }
+
+    /* Agrega colores para los diferentes tipos de cajones aquí */
+    .pacientes-atendidos {
+        background-color: #ffdd59; /* Amarillo */
+    }
+    .pacientes-nuevos {
+        background-color: #ff85a2; /* Rosa */
+    }
+    .pacientes-terminaron {
+        background-color: #4caf50; /* Verde */
+    }
+    .pacientes-abonaron {
+        background-color: #03a9f4; /* Azul claro */
+    }
+    .pacientes-mora {
+        background-color: #ff5722; /* Naranja */
+    }
+    .pacientes-inasistentes {
+        background-color: #9c27b0; /* Morado */
+    }
+    .pacientes-cancelaron {
+        background-color: #e91e63; /* Rosa fuerte */
+    }
+    .pacientes-inician-tratamiento {
+        background-color: #8bc34a; /* Verde claro */
+    }
+}

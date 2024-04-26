@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas';
   providedIn: 'root'
 })
 export class ImagenHelperService {
-
+//imagenPorDefecto: string = '';
   constructor() { }
 
   //recortar imagen
