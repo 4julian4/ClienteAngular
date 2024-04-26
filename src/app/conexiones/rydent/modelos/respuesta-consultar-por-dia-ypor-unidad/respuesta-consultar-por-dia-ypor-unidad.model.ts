@@ -4,6 +4,7 @@ import { ConfirmacionesPedidas } from "../confirmaciones-pedidas";
 
 export class RespuestaConsultarPorDiaYPorUnidad {
     citas:TCitas = new TCitas();
+    detalleCitaEditar?:TDetalleCitas;
     lstDetallaCitas:TDetalleCitas[] = [];
     lstP_AGENDA1:P_Agenda1Model[] = [];
     esFestivo: boolean = false;

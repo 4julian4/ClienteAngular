@@ -1,0 +1,116 @@
+<form class="formularioAgregarRips" [formGroup]="formularioAgregarRips">
+    <div class="divFormularioFila1">
+        <mat-form-field appearance="fill" class="campoFila1">
+            <mat-label>Fecha</mat-label>
+            <input matInput readonly [matDatepicker]="picker" formControlName="FECHA" placeholder="Fecha">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="campoFila1">
+            <mat-label>Entidad</mat-label>
+            <input type="text" matInput [formControl]="entidadControl" [matAutocomplete]="autoEntidad"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoEntidad="matAutocomplete">
+                <mat-option *ngFor="let eps of filteredEntidad | async" [value]="eps.nombre">
+                    {{ eps.nombre }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+
+        <mat-form-field appearance="fill" class="campoFila1">
+            <mat-label>N° Factura</mat-label>
+            <input matInput formControlName="NFACTURA" placeholder="N° Factura">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="campoFila1">
+            <mat-label>Valor total</mat-label>
+            <!-- <input matInput formControlName="VALOR_TOTAL" placeholder="Valor total"> -->
+            <input matInput formControlName="VALOR_TOTAL" placeholder="Valor total">
+        </mat-form-field>
+    </div>
+
+    <div class="divFormularioFila2">
+        <mat-form-field appearance="fill" class="campoFila2">
+            <mat-label>Tipo Consulta</mat-label>
+            <input type="text" matInput [formControl]="tipoConsultaControl" [matAutocomplete]="autoTipoConsulta"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoTipoConsulta="matAutocomplete">
+                <mat-option *ngFor="let tipoConsulta of filteredTiposDeConsultas | async" [value]="tipoConsulta.nombre">
+                    {{ tipoConsulta.nombre }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="campoFila2">
+            <mat-label>Codigo</mat-label>
+            <input type="text" matInput [formControl]="codigoConsultaControl" [matAutocomplete]="autoCodigoTipoConsulta"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoCodigoTipoConsulta="matAutocomplete">
+                <mat-option *ngFor="let codigoConsulta of filteredCodigosTiposDeConsultas | async"
+                    [value]="codigoConsulta.id">
+                    {{ codigoConsulta.id }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+        
+    </div>
+
+    <div class="divFormularioFila3">
+        <mat-form-field appearance="fill" class="campoFila3">
+            <mat-label>D. Principal</mat-label>
+            <input type="text" matInput [formControl]="diagnosticoPrincipalControl" [matAutocomplete]="autoDiagnosticoPrincipal"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoDiagnosticoPrincipal="matAutocomplete">
+                <mat-option *ngFor="let diagnosticoPrincipal of filteredDiagnosticoPrincipal | async" [value]="diagnosticoPrincipal.nombre">
+                    {{ diagnosticoPrincipal.nombre }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="campoFila3">
+            <mat-label>Codigo</mat-label>
+            <input type="text" matInput [formControl]="codigoDiagnosticoPrincipalControl" [matAutocomplete]="autoCodigoDiagnosticoPrincipal"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoCodigoDiagnosticoPrincipal="matAutocomplete">
+                <mat-option *ngFor="let codigoDiagnosticoP of filteredCodigosDiagnosticoPrincipal | async"
+                    [value]="codigoDiagnosticoP.id">
+                    {{ codigoDiagnosticoP.id }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        
+    </div>
+
+    <div class="divFormularioFila4">
+        <mat-form-field appearance="fill" class="campoFila4">
+            <mat-label>Procedimiento</mat-label>
+            <input type="text" matInput [formControl]="procedimientoControl" [matAutocomplete]="autoProcedimiento"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoProcedimiento="matAutocomplete">
+                <mat-option *ngFor="let procedimiento of filteredProcedimientos | async" [value]="procedimiento.nombre">
+                    {{ procedimiento.nombre }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="campoFila4">
+            <mat-label>Codigo</mat-label>
+            <input type="text" matInput [formControl]="codigoProcedimientoControl" [matAutocomplete]="autoCodigoProcedimiento"
+                style="text-transform: uppercase;">
+            <mat-autocomplete #autoCodigoProcedimiento="matAutocomplete">
+                <mat-option *ngFor="let codigoProcedimiento of filteredCodigosProcedimientos | async"
+                    [value]="codigoProcedimiento.id">
+                    {{ codigoProcedimiento.id }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        
+    </div>
+    <div class="divContenedorDeBotones">
+        <button class="BotonGuardar" mat-raised-button (click)="guardarRips()">Guardar</button>
+        <button class="BotonCancelar" mat-raised-button (click)="cancelarGuardarRips()">Cancelar</button>
+    </div>
+</form>

@@ -10,6 +10,7 @@ import { RespuestaObtenerDoctorService } from './conexiones/rydent/modelos/respu
 })
 export class SignalRService {
   public hubConnection: signalR.HubConnection;
+  public HubConnectionStateConnected = signalR.HubConnectionState.Connected;
   private mensajeSubject = new Subject<string>();
 
 
@@ -38,10 +39,10 @@ export class SignalRService {
   async obtenerPin(clienteId: string, pin: string) {
     await this.hubConnection.invoke('ObtenerPin', clienteId, pin)
       .catch(err => console.error(err));
+      console.log('ObtenerPin');
   }
 
-  enviarMensaje(mensaje: string) {
-
+  async enviarMensaje(mensaje: string) {
     this.hubConnection.invoke('ObtenerPin', mensaje, '123')
       .catch(err => console.error(err));
     return this.hubConnection

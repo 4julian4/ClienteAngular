@@ -14,24 +14,29 @@
 
 
             <mat-menu #menu="matMenu">
-                <button mat-menu-item routerLink="/datos-personales">
+                <button mat-menu-item routerLink="/datos-personales" (click)="setMostrarBuscarHistoriaClinica(true)">
                     <mat-icon class="icon">person</mat-icon>
                     <span class="menu-text">Datos Personales</span>
-                </button>
-
-                <button mat-menu-item routerLink="/antecedentes">
+                  </button>
+                  
+                  <button mat-menu-item routerLink="/antecedentes" (click)="setMostrarBuscarHistoriaClinica(true)">
                     <mat-icon class="icon">history_edu</mat-icon>
                     <span class="menu-text">Antecedentes</span>
-                </button>
-
-                <button mat-menu-item routerLink="/evolucion">
+                  </button>
+                  
+                  <button mat-menu-item routerLink="/evolucion" (click)="setMostrarBuscarHistoriaClinica(false)">
                     <mat-icon class="icon">update</mat-icon>
                     <span class="menu-text">Evolución</span>
-                </button> 
+                  </button>
 
-                <button mat-menu-item routerLink="/agenda">
+                <button mat-menu-item routerLink="/agenda" (click)="setMostrarBuscarHistoriaClinica(false)">
                     <mat-icon class="icon">calendar_today</mat-icon>
                     <span class="menu-text">Agenda</span>
+                </button>
+
+                <button mat-menu-item routerLink="/estado-cuenta" (click)="setMostrarBuscarHistoriaClinica(false)">
+                    <mat-icon class="icon">equalizer</mat-icon>
+                    <span class="menu-text">Estado Cuenta</span>
                 </button>
             </mat-menu>
         </div>
@@ -65,6 +70,7 @@
 
 
     </mat-toolbar>
+    <app-buscar-hitoria-clinica *ngIf="mostrarBuscarHistoriaClinica"></app-buscar-hitoria-clinica>
     <mat-sidenav-container autosize>
         <mat-sidenav #sidenav mode="side">
             <mat-nav-list>

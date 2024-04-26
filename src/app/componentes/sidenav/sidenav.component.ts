@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { SidenavService } from './';
 import { environment } from 'src/environments/environment';
 import { FormControl } from '@angular/forms';
@@ -17,6 +17,8 @@ import { ConsoleLogger } from '@microsoft/signalr/dist/esm/Utils';
 import { RespuestaObtenerDoctorService } from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
 import { BuscarHitoriaClinicaComponent } from '../buscar-hitoria-clinica';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { InterruptionService } from 'src/app/helpers/interruption';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -24,7 +26,7 @@ import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss']
 })
-export class SidenavComponent implements OnInit {
+export class SidenavComponent implements OnInit, OnDestroy {
   correo: string = "";
   @Input() sedes: Sedes[] = [];
   @Input() sedesConectadas: SedesConectadas[] = [];
@@ -41,6 +43,8 @@ export class SidenavComponent implements OnInit {
   totalPacientesDoctorSeleccionado = 0;
   lstDoctores: { id: number, nombre: string }[] = [];
   sedeConectadaActual: SedesConectadas = new SedesConectadas();
+  private subscription: Subscription;
+  public mostrarBuscarHistoriaClinica: boolean = false;
 
 
 
@@ -57,9 +61,17 @@ export class SidenavComponent implements OnInit {
     private signalRService: SignalRService,
     private respuestaObtenerDoctorService: RespuestaObtenerDoctorService,
     private respuestaPinService: RespuestaPinService,
-    private mensajesUsuariosService: MensajesUsuariosService
+    private mensajesUsuariosService: MensajesUsuariosService,
+    private interruptionService: InterruptionService
   ) {
+    this.subscription = this.interruptionService.onInterrupt().subscribe(() => {
+      this.iniciarSesion();
+    });
   }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
 
   cerrarSesion() {
 
@@ -126,6 +138,9 @@ export class SidenavComponent implements OnInit {
       return;
     }
   }
+  setMostrarBuscarHistoriaClinica(value: boolean) {
+    this.mostrarBuscarHistoriaClinica = value;
+  }
 
   async onDoctorSeleccionado(idDoctor: number) {
 
@@ -135,7 +150,8 @@ export class SidenavComponent implements OnInit {
       this.doctorEscogido = this.lstDoctores.filter(x => x.id == idDoctor)[0].nombre;
       console.log(this.doctorEscogido);
       this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
-      this.router.navigate(['/buscar-historia-clinica']);
+      this.mostrarBuscarHistoriaClinica = true;
+      //this.router.navigate(['/buscar-historia-clinica']);
       //this.router.navigate(['/buscar-hitoria-clinica']);
 
     }

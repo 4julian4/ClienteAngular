@@ -23,12 +23,44 @@
                     </mat-select>
                 </div>
 
-                <div class="divBuscadorInput">
-                    <!--    <mat-label> {{nombreValorSeleccionado}} </mat-label>-->
-                    <input matInput placeholder="Buscar" #valorABuscar name="buscar" class="inputBuscar" (keyup.enter)="buscarPaciente()">
+                <!-- <div class="divBuscadorInput">
+                    <input matInput placeholder="Buscar" #valorABuscar name="buscar" class="inputBuscar"
+                        (keyup.enter)="buscarPaciente()">
                     <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente()">Buscar</button>
                     <button mat-raised-button class="botonCancelarBuscarPaciente"
                         (click)="buscarPaciente()">Cancelar</button>
+                </div> -->
+                <!-- <div class="divBuscadorInput">
+                    <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
+                        [matAutocomplete]="autoDatosPacienteParaBuscar" class="example-input" style="text-transform: uppercase;">
+                    <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
+                        <mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
+                            {{ datosPaciente.datoBuscar }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </div> -->
+
+                <div class="divBuscadorInput">
+                    <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
+                        [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;">
+                    <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
+                        <mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
+                            {{ datosPaciente.datoBuscar }}
+                        </mat-option>
+                    </mat-autocomplete>
+                    <!-- <mat-form-field appearance="fill" class="inputBuscar">
+                        <mat-label>Consultar</mat-label>
+                        <input type="text" matInput [formControl]="datoPacienteParaBuscarControl" [matAutocomplete]="autoEntidad"
+                            style="text-transform: uppercase;">
+                        <mat-autocomplete #autoEntidad="matAutocomplete">
+                            <mat-option *ngFor="let nombrePaciente of filteredDatoPacienteParaBuscar | async" [value]="nombrePaciente.datoBuscar">
+                                {{ nombrePaciente.datoBuscar }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field> -->
+                    <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Buscar</button>
+                    <button mat-raised-button class="botonCancelarBuscarPaciente"
+                        (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Cancelar</button>
                 </div>
             </div>
             <div class="divContenedorDatosEncontrados">
@@ -38,33 +70,41 @@
 
                         <ng-container matColumnDef="idAnamnesis">
                             <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> N° Historia </th>
-                            <td mat-cell *matCellDef="let datosPaciente" class="columnaIdAnamnesis">
+                            <td mat-cell *matCellDef="let datosPaciente" class="columnaIdAnamnesis"
+                                matTooltip="Haz clic para más detalles">
                                 {{datosPaciente.IDANAMNESIS}}
                             </td>
+
                         </ng-container>
                         <ng-container matColumnDef="numHistoria">
                             <th mat-header-cell *matHeaderCellDef> N° Historia </th>
-                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.IDANAMNESISTEXTO}} </td>
+                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
+                                {{datosPaciente.IDANAMNESISTEXTO}} </td>
                         </ng-container>
                         <ng-container matColumnDef="nombre">
                             <th mat-header-cell *matHeaderCellDef> Nombre </th>
-                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NOMBRE_PACIENTE}} </td>
+                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
+                                {{datosPaciente.NOMBRE_PACIENTE}} </td>
                         </ng-container>
                         <ng-container matColumnDef="cedula">
                             <th mat-header-cell *matHeaderCellDef> Cedula </th>
-                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMDOCUMENTO}} </td>
+                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
+                                {{datosPaciente.NUMDOCUMENTO}} </td>
                         </ng-container>
                         <ng-container matColumnDef="telefono">
                             <th mat-header-cell *matHeaderCellDef> Telefono </th>
-                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.TELEFONO}} </td>
+                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
+                                {{datosPaciente.TELEFONO}} </td>
                         </ng-container>
                         <ng-container matColumnDef="perfil">
                             <th mat-header-cell *matHeaderCellDef> Perfil </th>
-                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.PERFIL}} </td>
+                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
+                                {{datosPaciente.PERFIL}} </td>
                         </ng-container>
                         <ng-container matColumnDef="numAfiliacion">
                             <th mat-header-cell *matHeaderCellDef> N° Afiliacion </th>
-                            <td mat-cell *matCellDef="let datosPaciente"> {{datosPaciente.NUMAFILIACION}} </td>
+                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
+                                {{datosPaciente.NUMAFILIACION}} </td>
                         </ng-container>
 
                         <!-- Aquí puedes agregar más columnas según sea necesario -->
@@ -72,7 +112,7 @@
                         <!-- Fila de encabezado y filas de datos -->
                         <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
                         <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradas;"
-                            (click)="onRowClicked(filaSeleccionada)"></tr>
+                            (click)="onRowClicked(filaSeleccionada)" class="filaClickeable"></tr>
                     </table>
                 </div>
             </div>

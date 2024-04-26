@@ -3,6 +3,7 @@ import { SignalRService } from 'src/app/signalr.service';
 import { DatosPersonales } from './datos-personales.model';
 import { BehaviorSubject } from 'rxjs';
 import { RespuestaDatosPersonales } from '../respuesta-datos-personales';
+import { InterruptionService } from 'src/app/helpers/interruption';
 
 @Injectable({
   providedIn: 'root'
@@ -13,15 +14,24 @@ export class DatosPersonalesService {
 
   constructor(
     private signalRService: SignalRService,
+    private interruptionService: InterruptionService
   ) { }
 
  
 
   async startConnectionRespuestaDatosPersonales(clienteId: string, idAnanesis: string) {
+    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
+      await this.signalRService.hubConnection.stop();
+    }
     await this.signalRService.hubConnection.start().then(
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+          this.interruptionService.interrupt();
+  
+        });
         this.signalRService.hubConnection.on('RespuestaObtenerDatosPersonalesCompletosPaciente', async (clienteId: string, objRespuestaDatosPersonalesEmit: string) => {
           this.respuestaDatosPersonalesEmit.emit(JSON.parse(objRespuestaDatosPersonalesEmit));
           await this.signalRService.stopConnection();

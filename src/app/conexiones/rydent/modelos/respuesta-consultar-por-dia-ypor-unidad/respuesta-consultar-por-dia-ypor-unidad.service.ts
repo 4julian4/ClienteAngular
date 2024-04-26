@@ -1,19 +1,31 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { RespuestaConsultarPorDiaYPorUnidad } from './respuesta-consultar-por-dia-ypor-unidad.model';
 import { SignalRService } from 'src/app/signalr.service';
+import { InterruptionService } from 'src/app/helpers/interruption';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RespuestaConsultarPorDiaYPorUnidadService {
   @Output() respuestaConsultarPorDiaYPorUnidadModel: EventEmitter<RespuestaConsultarPorDiaYPorUnidad> = new EventEmitter<RespuestaConsultarPorDiaYPorUnidad>();
-  constructor(private signalRService:SignalRService) { }
+  constructor(
+    private signalRService:SignalRService,
+    private interruptionService: InterruptionService
+  ) { }
 
   async startConnectionRespuestaConsultarPorDiaYPorUnidad(clienteId: string, silla:string, fecha: Date) {
+    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
+      await this.signalRService.hubConnection.stop();
+    }
     await this.signalRService.hubConnection.start().then(
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+          this.interruptionService.interrupt();
+  
+        });
         this.signalRService.hubConnection.on('RespuestaObtenerConsultaPorDiaYPorUnidad', async (clienteId: string, objRespuestaConsultarPorDiaYPorUnidadModel: string) => {
           this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(objRespuestaConsultarPorDiaYPorUnidadModel));
           await this.signalRService.stopConnection();

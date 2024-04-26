@@ -34,6 +34,10 @@ import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agreg
 import { AgregarFirmasComponent } from './componentes/agregar-firmas/agregar-firmas.component';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { NativeDateAdapter } from '@angular/material/core';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { EstadoCuentaComponent } from './componentes/estado-cuenta/estado-cuenta.component';
+import { MatCardModule } from '@angular/material/card';
+import {RipsComponent} from './componentes/rips/rips.component';
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
   parse: {
@@ -64,7 +68,9 @@ export const MY_DATE_FORMATS = {
     AntecedentesComponent,
     EvolucionComponent,
     AgregarEvolucionComponent,
-    AgregarFirmasComponent
+    AgregarFirmasComponent,
+    EstadoCuentaComponent,
+    RipsComponent
     
    
     
@@ -84,6 +90,8 @@ export const MY_DATE_FORMATS = {
     MatTabsModule,
     MatMenuModule,
     NgxMaterialTimepickerModule,
+    MatAutocompleteModule,
+    MatCardModule
     
 
 

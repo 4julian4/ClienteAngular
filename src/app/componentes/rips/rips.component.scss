@@ -1,0 +1,131 @@
+.divFormularioFila1 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila1 {
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+    .campoFila1:nth-child(1) { // Entidad
+        flex: 0.4; // Hace este campo más grande
+    }
+
+    .campoFila1:nth-child(3), .campoFila1:nth-child(4) { // Fecha y Numero de Factura
+        flex: 0.3; // Hace estos campos más pequeños
+    }
+
+    .campoFila1:nth-child(2) { // Entidad
+        flex: 1.65; // Hace este campo más grande
+    }
+}
+
+.divFormularioFila2 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila2 {
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+
+    .campoFila2:nth-child(1) { // Fecha y Numero de Factura
+        flex: 1.54; // Hace estos campos más pequeños
+    }
+
+    .campoFila2:nth-child(2) { // Entidad
+        flex: 0.46; // Hace este campo más grande
+    }
+}
+
+.divFormularioFila3 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila3 {
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+
+    .campoFila3:nth-child(1) { // Fecha y Numero de Factura
+        flex: 1.54; // Hace estos campos más pequeños
+    }
+
+    .campoFila3:nth-child(2) { // Entidad
+        flex: 0.46; // Hace este campo más grande
+    }
+}
+
+.divFormularioFila4 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila4 {
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+
+    .campoFila4:nth-child(1) { // Fecha y Numero de Factura
+        flex: 1.54; // Hace estos campos más pequeños
+    }
+
+    .campoFila4:nth-child(2) { // Entidad
+        flex: 0.46; // Hace este campo más grande
+    }
+}
+
+.formularioAgregarRips {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    /* Esto redondea las esquinas */
+    padding: 20px;
+    width: 90%;
+    //height: 90%;
+    /* Ajusta esto a lo que necesites */
+    margin: 40px auto 0;
+    /* Centra la caja en la página */
+
+    .divContenedorDeBotones {
+        text-align: right;
+
+        .BotonGuardar {
+            margin: 5px;
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+
+        .BotonCancelar {
+            margin: 5px;
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+        
+    }
+
+
+}

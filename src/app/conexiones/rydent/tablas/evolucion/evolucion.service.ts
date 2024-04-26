@@ -27,6 +27,9 @@ export class EvolucionService {
     private router: Router
   ) { }
   async startConnectionGuardarDatosEvolucion(clienteId: string, idAnanesis: string) {
+    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
+      await this.signalRService.hubConnection.stop();
+    }
     await this.signalRService.hubConnection.start().then(
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara

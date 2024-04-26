@@ -3,6 +3,7 @@ import { RespuestaPin } from './respuesta-pin.model';
 import { SignalRService } from 'src/app/signalr.service';
 import { BehaviorSubject } from 'rxjs';
 import { CodigosEps } from '../../tablas/codigos-eps';
+import { InterruptionService } from 'src/app/helpers/interruption';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class RespuestaPinService {
 
   private sedeData = new BehaviorSubject<string | null>(null);
   sharedSedeData = this.sedeData.asObservable();
-  
+
   private datosRespuestaPin = new BehaviorSubject<RespuestaPin | null>(null);
   shareddatosRespuestaPinData = this.datosRespuestaPin.asObservable();
 
@@ -26,24 +27,35 @@ export class RespuestaPinService {
   private listadoEps = new BehaviorSubject<CodigosEps | null>(null);
   sharedlistadoEpsData = this.listadoEps.asObservable();
 
- 
- //-------------------------------------------------------------------------------//
+
+  //-------------------------------------------------------------------------------//
   @Output() respuestaPinModel: EventEmitter<RespuestaPin> = new EventEmitter<RespuestaPin>();
-  @Output() idSedeActualSignalREmit:  EventEmitter<string> = new EventEmitter<string>();
+  @Output() idSedeActualSignalREmit: EventEmitter<string> = new EventEmitter<string>();
 
   constructor(
-    private signalRService:SignalRService,
+    private signalRService: SignalRService,
+    private interruptionService: InterruptionService
   ) { }
 
   async startConnectionRespuestaObtenerPin() {
+    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
+      await this.signalRService.hubConnection.stop();
+    }
     await this.signalRService.hubConnection
       .start()
-      .then(async () =>{
-       this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
+      .then(async () => {
+
+        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+          this.interruptionService.interrupt();
+
+        });
+        this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
           this.respuestaPinModel.emit(JSON.parse(objRespuestaObtenerDoctor));
 
-        }) 
-      } )
+        });
+
+      })
       .catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
   // Aca actualizamos variables para que sean usadas por los componenetes
@@ -63,6 +75,6 @@ export class RespuestaPinService {
   updateListadoEps(data: CodigosEps) {
     this.listadoEps.next(data);
   }
- 
+
   //-----------------------------------------------------------------------//
 }
