@@ -1,6 +1,7 @@
 export class DatosPersonales {
     IDANAMNESIS: number=0;
     IDANAMNESIS_TEXTO: string="";
+    IMPORTANTE: string="";
     NOTA_IMPORTANTE: string="";
     COMPARACION: number=0;
     FECHA_INGRESO: string="";

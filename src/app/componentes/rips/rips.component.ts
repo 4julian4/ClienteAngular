@@ -4,7 +4,7 @@ import { DatosGuardarRips } from 'src/app/conexiones/rydent/modelos/datos-guarda
 import { RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { TConfiguracionesRydent } from 'src/app/conexiones/rydent/tablas/tconfiguraciones-rydent';
 import { RipsService } from './rips.service';
-import { Observable, map, startWith, take } from 'rxjs';
+import { Observable, debounceTime, map, startWith, take } from 'rxjs';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 
 @Component({
@@ -30,7 +30,7 @@ export class RipsComponent implements OnInit {
   lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
   filteredEntidad?: Observable<{ id: string, nombre: string }[]>;
   entidadControl = new FormControl();
-  
+
   filteredTiposDeConsultas?: Observable<{ id: string, nombre: string }[]>;
   tipoConsultaControl = new FormControl();
   filteredCodigosTiposDeConsultas?: Observable<{ id: string, nombre: string }[]>;
@@ -43,6 +43,7 @@ export class RipsComponent implements OnInit {
   procedimientoControl = new FormControl();
   filteredCodigosProcedimientos?: Observable<{ id: string, nombre: string }[]>;
   codigoProcedimientoControl = new FormControl();
+  valorTotalRips = new FormControl('');
 
   constructor(
     private respuestaPinService: RespuestaPinService,
@@ -52,7 +53,13 @@ export class RipsComponent implements OnInit {
 
 
   ngOnInit(): void {
-
+    //suscripcion para poner el valor en formato de moneda
+    this.valorTotalRips.valueChanges.subscribe(value => {
+      if (value) {
+        const newValue = value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        this.valorTotalRips.setValue(newValue, { emitEvent: false });
+      }
+    });
 
 
     this.respuestaPinService.sharedSedeData.subscribe(data => {
@@ -89,10 +96,10 @@ export class RipsComponent implements OnInit {
             startWith(''),
             map(value => this._filterNombre(value, this.lstEps))
           );
-        
-          if (this.lstEps && this.lstEps.length > 0) {
-            this.entidadControl.setValue(this.lstEps[0].nombre);
-          }
+
+        if (this.lstEps && this.lstEps.length > 0) {
+          this.entidadControl.setValue(this.lstEps[0].nombre);
+        }
 
         //obtenemos los tipos de consultas para aplicar Rips que se sacan de la tabla procedimientos
         this.listaProcedimientos = data;
@@ -291,6 +298,13 @@ export class RipsComponent implements OnInit {
     }
   }
 
+  validateAndClearIfInvalid(control: FormControl, validOptions: any[]): void {
+    const inputValue = control.value;
+    const isValid = validOptions.some(option => option.nombre === inputValue || option.id === inputValue);
+    if (!isValid) {
+      control.setValue('');
+    }
+  }
 
   cancelarGuardarRips() { }
   async guardarRips() {

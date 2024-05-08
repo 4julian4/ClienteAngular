@@ -1,5 +1,5 @@
 import { Time } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { P_Agenda1Model, RespuestaConsultarPorDiaYPorUnidad, RespuestaConsultarPorDiaYPorUnidadService } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
@@ -14,21 +14,36 @@ import { ConfirmacionesPedidas } from 'src/app/conexiones/rydent/modelos/confirm
 import { FechaHoraHelperService } from 'src/app/helpers/fecha-hora-helper/fecha-hora-helper.service';
 import { TDetalleCitas } from 'src/app/conexiones/rydent/tablas/tdetalle-citas';
 import { AgendaService } from './agenda.service';
-import { MatTable } from '@angular/material/table';
+import { MatRow, MatTable } from '@angular/material/table';
 import { RespuestaRealizarAccionesEnCitaAgendada, RespuestaRealizarAccionesEnCitaAgendadaService } from 'src/app/conexiones/rydent/modelos/respuesta-realizar-acciones-en-cita-agendada';
 import { Observable, map, startWith } from 'rxjs';
+import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
+import { MatCalendar } from '@angular/material/datepicker';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-agenda',
   templateUrl: './agenda.component.html',
   styleUrls: ['./agenda.component.scss']
 })
+
 export class AgendaComponent implements OnInit, AfterViewInit {
   //contextMenuPosition = { x: '0px', y: '0px' };
   //@ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
   @ViewChild('myTable') myTable!: MatTable<any>;
+  //@ViewChild(MatTable) table: MatTable<any>;
+  @ViewChild('miCalendario') miCalendario!: MatCalendar<Date>;
+  @ViewChildren('row', { read: ElementRef }) rows!: QueryList<ElementRef>;
+  @ViewChildren('cell', { read: ElementRef }) cells!: QueryList<ElementRef>;
+  @ViewChild('miPanelBucarCitas') miPanelBucarCitas!: MatExpansionPanel;
+  @ViewChild('tablaBusquedaPaciente') tablaBusquedaPaciente!: ElementRef;
+  @ViewChild('panelBuscarPersona') panelBuscarPersona!: MatAccordion;
   intervalosDeTiempo: any[] = [];
   intervaloDeTiempoSeleccionado: number = 0; // Valor por defecto
+
+
   fechaSeleccionada: Date = new Date(); // Fecha seleccionada
   nombre: string = '';
   telefono: string = '';
@@ -36,6 +51,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   historia: string = '';
   observaciones: string = '';
   selectedRow: any;
+  selectedRowBuscarCita: any;
   showSearch = false;
   searchTerm = '';
   resultadosBusquedaAgendaPorFecha: P_Agenda1Model[] = [];
@@ -57,9 +73,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   lstDoctores: { id: number, nombre: string }[] = [];
   lstDuracion: { id: number, intervalo: string }[] = [];
   duracion = new FormControl();
+  invalidSelection = false;
+
   doctorSeleccionado = "";
   doctorProgramadoCronograma = "";
   horaCitaSeleccionada = "";
+  resultadosBusquedaCitaPacienteAgenda: RespuestaBusquedaCitasPaciente[] = [];
 
   listaNombrePacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
   lstNombrePacienteParaAgendar: { id: string, nombre: string }[] = [];
@@ -92,11 +111,14 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   filteredHistoriaPacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
   historiaPacienteParaAgendarControl = new FormControl();
 
+  localizandoCita: boolean = false;
+  panelBuscarCitaDeshabilitado: boolean = true;
+  //resultadosBusquedaCita: boolean = false;
 
 
+  columnasMostradasCitasEncontradas = ['fecha', 'hora', 'numHistoria', 'nombre', 'cedula', 'telefono', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
 
-
-  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE', 'OUT_TELEFONO', 'OUT_CELULAR', 'OUT_DOCTOR', 'OUT_ASUNTO', 'OUT_HORA_CITA', 'OUT_ASISTENCIA', 'OUT_CONFIRMAR', 'OUT_ALARMAR', 'ACCIONES'];
+  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE', 'OUT_TELEFONO', 'OUT_CELULAR', 'OUT_DOCTOR', 'OUT_ASUNTO', 'ACCIONES'];
 
   constructor(
     private respuestaConsultarPorDiaYPorUnidadService: RespuestaConsultarPorDiaYPorUnidadService,
@@ -112,14 +134,32 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   ) {
 
   }
+  stopAccordionToggle(event: KeyboardEvent) {
+    if (event.key === ' ') {
+      event.stopPropagation();
+    }
+  }
+
+  abrirpanelBuscarPersona() {
+    this.panelBuscarPersona.openAll();
+  }
+
+  cerrarpanelBuscarPersona() {
+    this.panelBuscarPersona.closeAll();
+  }
 
   ngAfterViewInit() {
     //this.inicializarFormulario();
     // Aquí puedes poner el código que quieres que se ejecute después de que las vistas del componente y las vistas de sus hijos se hayan inicializado.
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    let lstFecha = this.fechaSeleccionada.toLocaleDateString().split('/');
 
+    let dia = parseInt(lstFecha[0]);
+    let mes = parseInt(lstFecha[1]) - 1;
+    let anio = parseInt(lstFecha[2]);
+    this.fechaSeleccionada = new Date(anio, mes, dia);
 
     this.respuestaPinService.sharedSedeData.subscribe(data => {
       if (data != null) {
@@ -268,7 +308,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         //----------------------------------------------------------------------------//
 
         this.lstHorariosAgenda = data.lstHorariosAgenda.sort((a, b) => a.SILLA - b.SILLA);
-        console.log(this.lstHorariosAgenda);
         if (this.lstHorariosAgenda.length > 0) {
           this.sillaSeleccionada = this.lstHorariosAgenda[0].SILLA;
           this.horaInicial = this.lstHorariosAgenda[0].HORAINICIAL;
@@ -291,40 +330,93 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       }
     });
 
-
-
-
-
-
-
     this.respuestaConsultarPorDiaYPorUnidadService.respuestaConsultarPorDiaYPorUnidadModel.subscribe(async (respuestaConsultarPorDiaYPorUnidad: RespuestaConsultarPorDiaYPorUnidad) => {
       this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
       this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
+      if (this.localizandoCita) {
+        let intervaloCita = this.resultadosBusquedaAgendaPorFecha.find(r =>
+          r.OUT_IDCONSECUTIVO === this.selectedRowBuscarCita.IDCONSECUTIVO
+        );
+      
+        if (intervaloCita) {
+          const index = this.resultadosBusquedaAgendaPorFecha.indexOf(intervaloCita);
+          if (index >= 0 && index < this.rows.length) {
+            const element = this.rows.toArray()[index].nativeElement;
+      
+            // Utiliza scrollIntoView para desplazar el elemento a la vista
+            element.scrollIntoView({ behavior: 'auto', block: 'center' });
+      
+            // Luego de desplazar el elemento a la vista, llama a onRowClickedAgenda
+            setTimeout(() => this.onRowClickedAgenda(intervaloCita), 300);
+            //await this.onRowClickedAgenda(intervaloCita);
+          } else {
+            console.log('Índice fuera de rango');
+          }
+        } else {
+          console.log('No se encontró un intervalo que cumpla con las condiciones especificadas');
+        }
+      
+        this.localizandoCita = false;
+        this.showSearch = true;
+      }
     });
-    this.fechaSeleccionada = new Date();
-    this.cambiarFecha();
+    await this.cambiarFecha();
     this.recibirRespuestaAgendarCitaEmitida();
 
     this.respuestaRealizarAccionesEnCitaAgendadaService.respuestaRealizarAccionesEnCitaAgendadaEmit.subscribe(async (respuestaRealizarAccionesEnCitaAgendada: boolean) => {
       if (respuestaRealizarAccionesEnCitaAgendada) {
         await this.cambiarFecha();
-        console.log('cambio fecha');
       }
+    });
+
+    this.agendaService.respuestaBuscarCitasPacienteAgendaEmit.subscribe(async (respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[]) => {
+      this.resultadosBusquedaCitaPacienteAgenda = respuestaBuscarCitasPacienteAgenda;
+      if (this.resultadosBusquedaCitaPacienteAgenda.length > 0) {
+        //this.miPanelBucarCitas.disabled = false;
+        this.miPanelBucarCitas.open();
+        this.panelBuscarCitaDeshabilitado = false;
+      }
+      
     });
 
   }
 
-  private _filterBuscarAgenda(nombre: string): { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] {
-    const filterValue = nombre.toLowerCase();
 
-    return this.lstDatosPacienteParaBuscarAgenda.filter(option =>
-      option.nombre.toLowerCase().includes(filterValue) ||
-      option.idAnamnesis.toLowerCase().includes(filterValue) ||
-      option.idAnamenesisTexto.toLowerCase().includes(filterValue)||
-      option.telefono.toLowerCase().includes(filterValue)
-    );
+  deshabilitarPanelBuscarCita() {
+    this.panelBuscarCitaDeshabilitado = true;
   }
 
+  // private _filterBuscarAgenda(nombre: string): { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] {
+  //   const filterValue = nombre.toLowerCase();
+
+  //   return this.lstDatosPacienteParaBuscarAgenda.filter(option =>
+  //     option.nombre.toLowerCase().includes(filterValue) ||
+  //     option.idAnamnesis.toLowerCase().includes(filterValue) ||
+  //     option.idAnamenesisTexto.toLowerCase().includes(filterValue)||
+  //     option.telefono.toLowerCase().includes(filterValue)
+  //   );
+  // }
+  scrollToFila(index: number) {
+    // Seleccionar la fila en el MatTable
+    //this.myTable.select(index);
+    // Obtener el elemento HTML de la fila seleccionada
+    const selectedRow = document.querySelector('.mat-row.mat-selected') as HTMLElement;
+
+    // Asegurarse de que el elemento esté presente y visible en la pantalla
+    if (selectedRow) {
+      selectedRow.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+  }
+
+
+  private _filterBuscarAgenda(nombre: string): { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] {
+    const filterValues = nombre.toLowerCase().split(' ');
+
+    return this.lstDatosPacienteParaBuscarAgenda.filter(option => {
+      const optionText = (option.nombre + ' ' + option.idAnamnesis + ' ' + option.idAnamenesisTexto + ' ' + option.telefono).toLowerCase();
+      return filterValues.every(value => optionText.includes(value));
+    });
+  }
 
   private _filterNombre(value: string, list: { id: string, nombre: string }[]): { id: string, nombre: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
@@ -402,7 +494,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     if (this.selectedRow.OUT_NOMBRE) {
       this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
-      console.log(this.horaCitaSeleccionada);
       this.formularioAgregarCita.patchValue({
         fechaEditar: this.fechaSeleccionada,
         sillaEditar: this.sillaSeleccionada,
@@ -417,7 +508,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         duracion: this.selectedRow.OUT_DURACION,
         observaciones: this.selectedRow.OUT_OBSERVACIONES
       });
-      console.log(this.formularioAgregarCita.value);
       this.showForm = true;
       for (let resultado of this.resultadosBusquedaAgendaPorFecha.filter(x => x.OUT_HORA_CITA?.toString() === this.horaCitaSeleccionada)) {
         resultado.OUT_NOMBRE = '';
@@ -456,18 +546,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     var pacienteCitaRepetida = this.aplicarConfiguracion("CITA_REPETIDA");
     var proximaCitaAsunto = this.aplicarConfiguracion("PROXIMA_CITA_ASUNTO");
     var notaImportanteCitas = this.aplicarConfiguracion("NOTA_IMPORTANTE_CITAS");
-    console.log(confirmarFestivos + "confirmarFestivos");
-    console.log(doctorCoincideCronograma + "doctorCoincideCronograma");
-    console.log(variosDoctoresPorUnidad + "variosDoctoresPorUnidad");
-    console.log(doctorPorCita + "doctorPorCita");
-    console.log(pacienteCitaRepetida + "pacienteCitaRepetida");
-    console.log(proximaCitaAsunto + "proximaCitaAsunto");
-    console.log(notaImportanteCitas + "notaImportanteCitas");
     //var hayCronograma = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "HAY_CRONOGRAMA");
     //var confirmarDoctorenCita = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "CONFIRMAR_DOCTOR_EN_CITA");
 
     if (this.idSedeActualSignalR != '') {
-      console.log(this.idSedeActualSignalR);
 
       if (nombre && telefono && nombre != ' ') {
 
@@ -477,7 +559,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         }
         if (this.esFestivo && confirmarFestivos) {
           if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('El día es festivo, ¿aún así quieres dar la cita?')) {
-            console.log('es festivo salio');
             return;
           }
         }
@@ -529,7 +610,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           });
         }
 
-        console.log(lstConfirmacionesPedidas);
         await this.guardarCita(lstConfirmacionesPedidas);
       }
       else if (!nombre) {
@@ -591,7 +671,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendadaObservacion);
         }
 
-        console.log(mensajeParaGuardar);
       } else {
         // El usuario canceló la cita.
       }
@@ -615,7 +694,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
 
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-      console.log("sin confirmar");
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     }
     else {
@@ -638,7 +716,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoIngresarEvolucion('Desea registrar la inasistencia en la evolucion del paciente?');
       if (resultado) {
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
-        console.log(mensajeParaGuardar);
       }
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     }
@@ -722,9 +799,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
 
   async buscarDoctorCoincidaCronograma(doctor: string, horaInicialCita: string, horaFinalCita: string): Promise<boolean> {
-    console.log(doctor);
-    console.log(horaInicialCita);
-    console.log(horaFinalCita);
     // Asegúrate de que this.resultadosBusquedaAgendaPorFecha esté definido
     if (!this.resultadosBusquedaAgendaPorFecha) {
       return false;
@@ -733,16 +807,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     // Convierte las cadenas de hora a objetos Date
     var horaInicial = new Date(`1970-01-01T${horaInicialCita}`);
     var horaFinal = new Date(`1970-01-01T${horaFinalCita}:00`);
-    console.log(horaInicial);
-    console.log(horaFinal);
-    console.log(this.resultadosBusquedaAgendaPorFecha);
 
     // Filtra los resultados para obtener los que cumplen con los criterios de tiempo
     var resultadosFiltrados = this.resultadosBusquedaAgendaPorFecha.filter(resultado => {
       var horaResultado = new Date(`1970-01-01T${resultado.OUT_HORA}`);
       return horaResultado >= horaInicial && horaResultado <= horaFinal;
     });
-    console.log(resultadosFiltrados);
 
     // Comprueba si alguno de los resultados filtrados tiene un OUT_CRONOGRAMA diferente al doctor
     for (let resultado of resultadosFiltrados) {
@@ -777,7 +847,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
     let formulario = this.formularioAgregarCita.value;
-    console.log(formulario);
     var nombre = formulario.nombre;
     var telefono = formulario.telefono;
     let datosParaGurdarEnAgenda: RespuestaConsultarPorDiaYPorUnidad = new RespuestaConsultarPorDiaYPorUnidad();
@@ -792,7 +861,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     if (lstConfirmacionesPedidas && lstConfirmacionesPedidas.length > 0) {
       datosParaGurdarEnAgenda.lstConfirmacionesPedidas = lstConfirmacionesPedidas;
     }
-    console.log(this.fechaSeleccionada);
     datosParaGurdarEnAgenda.citas.FECHA = this.fechaSeleccionada;
     datosParaGurdarEnAgenda.citas.SILLA = this.sillaSeleccionada;
     datosParaGurdarEnAgenda.citas.FECHA_TEXTO = this.intervaloDeTiempoSeleccionado.toString();
@@ -808,9 +876,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     detalleCita.DURACION = this.formularioAgregarCita.value.duracion;
     datosParaGurdarEnAgenda.lstDetallaCitas.push(detalleCita);
     datosParaGurdarEnAgenda.lstConfirmacionesPedidas = lstConfirmacionesPedidas;
-    console.log(lstConfirmacionesPedidas);
     let respuesta = JSON.stringify(datosParaGurdarEnAgenda);
-    console.log(respuesta);
     await this.agendaService.startConnectionRespuestaAgendarCita(this.idSedeActualSignalR, respuesta);
 
     let strPaciente = "";
@@ -866,20 +932,42 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     return 'white';
   }
 
+  async onRowClickedAgenda(intervalo: any) {
 
-
-
-
-  onRowClicked(intervalo: any) {
     this.selectedRow = intervalo;
+    console.log(intervalo);
     this.toggleFormVisibility();
     if (intervalo.OUT_HORA_CITA !== 0 && intervalo.OUT_HORA_CITA !== null) {
       this.highlightedRows = this.resultadosBusquedaAgendaPorFecha.filter(r => r.OUT_HORA_CITA === intervalo.OUT_HORA_CITA);
     } else {
       this.highlightedRows = [intervalo];
     }
-    console.log(this.selectedRow);
   }
+
+
+
+
+
+  async onRowClickedBuscarAgenda(intervalo: any) {
+    this.selectedRowBuscarCita = intervalo;
+    let sillaComoNumero = Number(this.selectedRowBuscarCita.SILLA_CITA);
+    this.sillaSeleccionada = sillaComoNumero;
+    this.fechaSeleccionada = new Date(this.selectedRowBuscarCita.FECHA_CITA);
+
+    this.miCalendario.activeDate = this.fechaSeleccionada;
+    console.log(this.fechaSeleccionada);
+    this.changeDetectorRef.detectChanges();
+    this.localizandoCita = true;
+    await this.cambiarFecha();
+    this.miPanelBucarCitas.close();
+    //this.resultadosBusquedaCita = false;
+  }
+
+  onOptionSelected(event: MatAutocompleteSelectedEvent) {
+    //this.miPanelBucarCitas.close();
+    this.datosPacienteParaBuscarAgendaControl.setValue(event.option.value);
+  }
+
 
   onSillaChange(sillaSeleccionada: number) {
     let silla = this.lstHorariosAgenda.find(s => Number(s.SILLA) === Number(sillaSeleccionada));
@@ -908,6 +996,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async cambiarFecha() {
     if (this.idSedeActualSignalR != '') {
+      console.log(this.fechaSeleccionada);
       await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
     }
   }
@@ -968,5 +1057,13 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
   }
 
+  async buscarCitasPaciente(valorBuscarAgenda: string) {
+    if (this.idSedeActualSignalR != '') {
+      await this.agendaService.startConnectionRespuestaBuscarCitasPacienteAgenda(this.idSedeActualSignalR, valorBuscarAgenda);
+      
+
+
+    }
+  }
 
 }

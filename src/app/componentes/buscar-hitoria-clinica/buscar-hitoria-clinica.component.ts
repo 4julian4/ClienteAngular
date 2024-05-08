@@ -34,7 +34,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   openorclosePanelMostrarDatosPersonalesPaciente = false;
   columnasMostradas = ['idAnamnesis', 'numHistoria', 'nombre', 'cedula', 'telefono', 'perfil', 'numAfiliacion']; // Añade aquí los nombres de las columnas que quieres mostrar
   nombreDoctor: string = 'Nombre Doctor';
-  nombrePaciente: string = 'Nombre Paciente';
+  nombrePaciente: string = '';
+  numeroHistoria: string = '';
   totalPacientes: number = 0;
   panelOpenState = false;
   opcionSeleccionada: string = '1';
@@ -43,6 +44,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   idAnamnesisParaMenu: number = 0;
   idSedeActualSignalR: string = '';
   idSedeActualSignalRMenu: string = '';
+  mensajeNotaImportante: string = '';
+  notaImportante: string = '';
   
   listaDatosPacienteParaBuscar?: RespuestaDatosPacientesParaLaAgenda[] = [];
   lstDatosPacienteParaBuscar: { idAnamnesis: number, datoBuscar: string }[] = [];
@@ -91,6 +94,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       this.respuestaObtenerDoctorModel = respuestaObtenerDoctor;
       this.nombreDoctor = respuestaObtenerDoctor.doctor.NOMBRE;
       this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
+      this.respuestaPinService.updateNumPacientesPorDoctor(this.totalPacientes);
 
       
       this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
@@ -125,6 +129,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       console.log(this.resultadoBusquedaDatosPersonalesCompletos);
       this.nombrePaciente = this.resultadoBusquedaDatosPersonalesCompletos.NOMBRE_PACIENTE;
       this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
+      if (this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE != '' && this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE != 'no' && this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE != 'NO' && this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE != null) {
+        this.mensajeNotaImportante = "El Paciente Tiene Nota Importante";
+        this.notaImportante= this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE;
+      }
+      else {
+        this.mensajeNotaImportante = '';
+        this.notaImportante= '';
+      }
+
       //this.inicializarFormulario();
     });
 
@@ -132,6 +145,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
       console.log(respuestaBusquedaAntecedentes);
       this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
+      
     });
 
     //Evolucion Paciente

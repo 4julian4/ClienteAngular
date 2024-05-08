@@ -1,17 +1,19 @@
 <mat-accordion>
-    <mat-expansion-panel *ngIf="mostrarPanelBuscarPaciente" class="buscarPaciente"
+    <mat-expansion-panel #panelBuscarPaciente *ngIf="mostrarPanelBuscarPaciente" class="buscarPaciente"
         [expanded]="openorclosePanelBuscarPaciente" (opened)="panelBuscarPacienteOpen()">
         <mat-expansion-panel-header>
             <mat-panel-title>
-                {{nombreDoctor}}
+                {{nombrePaciente}} {{numeroHistoria}}
             </mat-panel-title>
             <mat-panel-description>
-                {{totalPacientes}}
+                <span style="color: red; font-size: 1.2em;" matTooltip="{{notaImportante}}"> {{mensajeNotaImportante}}</span>
             </mat-panel-description>
+            <mat-icon class="custom-mat-icon" mat-expansion-indicator matTooltip="click aca para buscar paciente">search</mat-icon>
+            
         </mat-expansion-panel-header>
         <mat-card class="cardContenedorBusqueda">
             <div class="divTituloFila1">
-                <h1>Escoja la opcion de busqueda</h1>
+                <h1>Buscar Paciente</h1>
             </div>
             <br>
             <div class="contenedorBusqueda">
@@ -23,23 +25,7 @@
                     </mat-select>
                 </div>
 
-                <!-- <div class="divBuscadorInput">
-                    <input matInput placeholder="Buscar" #valorABuscar name="buscar" class="inputBuscar"
-                        (keyup.enter)="buscarPaciente()">
-                    <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente()">Buscar</button>
-                    <button mat-raised-button class="botonCancelarBuscarPaciente"
-                        (click)="buscarPaciente()">Cancelar</button>
-                </div> -->
-                <!-- <div class="divBuscadorInput">
-                    <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
-                        [matAutocomplete]="autoDatosPacienteParaBuscar" class="example-input" style="text-transform: uppercase;">
-                    <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
-                        <mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
-                            {{ datosPaciente.datoBuscar }}
-                        </mat-option>
-                    </mat-autocomplete>
-                </div> -->
-
+                
                 <div class="divBuscadorInput">
                     <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
                         [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;">
@@ -48,16 +34,7 @@
                             {{ datosPaciente.datoBuscar }}
                         </mat-option>
                     </mat-autocomplete>
-                    <!-- <mat-form-field appearance="fill" class="inputBuscar">
-                        <mat-label>Consultar</mat-label>
-                        <input type="text" matInput [formControl]="datoPacienteParaBuscarControl" [matAutocomplete]="autoEntidad"
-                            style="text-transform: uppercase;">
-                        <mat-autocomplete #autoEntidad="matAutocomplete">
-                            <mat-option *ngFor="let nombrePaciente of filteredDatoPacienteParaBuscar | async" [value]="nombrePaciente.datoBuscar">
-                                {{ nombrePaciente.datoBuscar }}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </mat-form-field> -->
+                    
                     <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Buscar</button>
                     <button mat-raised-button class="botonCancelarBuscarPaciente"
                         (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Cancelar</button>

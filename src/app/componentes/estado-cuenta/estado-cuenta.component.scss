@@ -1,61 +1,76 @@
-.dashboard {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-top: 20px;
+.mat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
 
-    .widget {
-        width: calc(25% - 20px); /* Ancho para 4 cajones por fila */
-        margin-bottom: 20px;
-        box-sizing: border-box; /* Incluye el padding en el cálculo del ancho */
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        background-color: #fff;
+/* Estilo para las celdas de la tabla */
+.mat-cell, .mat-header-cell {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: left;
+  width: auto; /* Añade esta línea */
+}
 
-        h2 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #333;
-        }
+/* Estilo para las celdas de encabezado */
+.mat-header-cell {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
 
-        .metrics {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%; /* Ocupa toda la altura del cajón */
-            padding: 10px; /* Espaciado interno adicional para las gráficas */
+/* Estilo para filas impares */
+.mat-row:nth-child(odd) {
+  background-color: #f9f9f9;
+}
 
-            canvas {
-                max-width: 100%; /* Asegura que la gráfica no se desborde del contenedor */
-                max-height: 100%; /* Asegura que la gráfica no se desborde del contenedor */
-            }
-        }
-    }
+/* Estilo para filas al pasar el mouse */
+.mat-row:hover {
+  background-color: #f0f0f0;
+}
 
-    /* Agrega colores para los diferentes tipos de cajones aquí */
-    .pacientes-atendidos {
-        background-color: #ffdd59; /* Amarillo */
-    }
-    .pacientes-nuevos {
-        background-color: #ff85a2; /* Rosa */
-    }
-    .pacientes-terminaron {
-        background-color: #4caf50; /* Verde */
-    }
-    .pacientes-abonaron {
-        background-color: #03a9f4; /* Azul claro */
-    }
-    .pacientes-mora {
-        background-color: #ff5722; /* Naranja */
-    }
-    .pacientes-inasistentes {
-        background-color: #9c27b0; /* Morado */
-    }
-    .pacientes-cancelaron {
-        background-color: #e91e63; /* Rosa fuerte */
-    }
-    .pacientes-inician-tratamiento {
-        background-color: #8bc34a; /* Verde claro */
-    }
+.divFormularioFila1 {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0px;
+
+  .campoFila1 {
+      flex: 1;
+
+      &:not(:last-child) {
+          margin-right: 5px;
+      }
+
+      &:not(:first-child) {
+          margin-left: 5px;
+      }
+  }
+}
+
+.divFormularioFila2 {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+
+  .campoFila2 {
+      flex: 1;
+
+      &:not(:last-child) {
+          margin-right: 5px;
+      }
+
+      &:not(:first-child) {
+          margin-left: 5px;
+      }
+  }
+}
+
+.contenedorEstadoCuenta{
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  margin: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  padding: 20px;
+   // width: 90%;
 }

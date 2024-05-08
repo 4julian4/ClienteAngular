@@ -1,5 +1,8 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, Input } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Chart, LineController, LineElement, LinearScale,PointElement, BarController, BarElement, PieController, ArcElement, CategoryScale, Tooltip, Legend } from 'chart.js';
+import { P_CONSULTAR_ESTACUENTA, P_CONSULTAR_ESTACUENTAPACIENTE, RespuestaConsultarEstadoCuenta, RespuestaConsultarEstadoCuentaService, RespuestaSaldoPorDoctor } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-estado-cuenta';
+import { RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 
 Chart.register(PieController, LineController,PointElement, LineElement, LinearScale, BarController, BarElement, ArcElement, CategoryScale, Tooltip, Legend);
 
@@ -8,124 +11,152 @@ Chart.register(PieController, LineController,PointElement, LineElement, LinearSc
   templateUrl: './estado-cuenta.component.html',
   styleUrls: ['./estado-cuenta.component.scss']
 })
-export class EstadoCuentaComponent implements AfterViewInit {
-  constructor() { }
+export class EstadoCuentaComponent implements OnInit {
+  @Input() respuestaConsultarEstadoCuentaEmit: RespuestaConsultarEstadoCuenta = new RespuestaConsultarEstadoCuenta();
+  formularioEstadoCuenta!: FormGroup;
+  formularioEstadoCuentaFinanciado!: FormGroup;
+  resultadoConsultaEstadoCuenta: RespuestaConsultarEstadoCuenta = new RespuestaConsultarEstadoCuenta();
+  resultadosBusquedaEstadoCuentaSinFinanciar: P_CONSULTAR_ESTACUENTA[] = [];
+  resultadosBusquedaEstadoCuentaFinanciado: P_CONSULTAR_ESTACUENTA[] = [];
 
-  ngAfterViewInit(): void {
-    this.initPieChart();
-    this.initBarChart();
-    this.initLineChart();
-  }
+  idSedeActualSignalR: string = "";
+  idAnamnesisPacienteSeleccionado: number = 0;
+  listaDoctores: RespuestaPin = new RespuestaPin();
+  lstDoctores: { id: number, nombre: string }[] = [];
+  doctorSeleccionado:string = '';
+  idDoctor: number = 0;
+  fase: number = 0;
+  listaFases: RespuestaConsultarEstadoCuenta = new RespuestaConsultarEstadoCuenta();
+  lstFases: { id: number }[] = [];
+  selectedFase: number = 0;
+  fechaInicio!: Date;
+  descripcionTratamiento: string = '';
+  tipoEstadoCuenta:boolean = false;
+  costoTratamiento: number = 0;
+  cuotaInicial: number = 0;
+  numeroCuotas: number = 0;
+  valorCuota: number = 0;
+  saldoMora: number = 0;
+  saldoTotal: number = 0;
+  mostrarMensajeSinEstadoCuenta:boolean = false;
+  lstRespuestaSaldoPorDoctor: RespuestaSaldoPorDoctor[] = [];
+  lstRespuestaEstadoCuentaPorPaciente:P_CONSULTAR_ESTACUENTAPACIENTE[] = [];
+  lstRespuestaEstadoCuentaPorPacientePorDoctor:P_CONSULTAR_ESTACUENTAPACIENTE[] = [];
+  columnasMostradasEstadoCuentaSinFinanciar: string[] = [
+    'FECHA', 'FACTURA', 'VALOR_FACTURA','RECIBIDO','DESCRIPCION','ADICIONAL','ABONO',
+    'NOTACREDITO','SALDO_PARCIAL','RECIBIDO_X_NOMBRE','NOMBRE_RECIBE','CODIGO_DESCRIPCION'
+  ];
+  
+  columnasMostradasEstadoCuentaFinanciado: string[] = [
+    'N_CUOTA', 'FECHA', 'FACTURA','VALOR_FACTURA','RECIBIDO','DEBEABONAR','ABONO','ADICIONAL',
+    'NOTACREDITO','CODIGO_DESCRIPCION','DESCRIPCION','PARCIAL','SALDO_PARCIAL','RECIBIDO_X_NOMBRE',
+    'NOMBRE_RECIBE'
+  ];
 
-  initLineChart(): void {
-    const lineChartCanvas = document.getElementById('pacientesNuevosChart') as HTMLCanvasElement | null;
-    if (lineChartCanvas === null) {
-      console.error('No se encontró el elemento con el ID "pacientesNuevosChart".');
-      return;
-    }
+  columnasMostradasEstadoCuentaTratamientosPorDoctor: string[] = [
+    'FECHA', 'FASE', 'ABONO','MORA_ACTUAL','MORATOTAL','NUMERO_HISTORIA','TELEFONO','FECHA_INICIO','VALOR_TRATAMIENTO',
+  ];
 
-    const lineChartCtx = lineChartCanvas.getContext('2d');
-    if (lineChartCtx === null) {
-      console.error('No se pudo obtener el contexto 2D del canvas.');
-      return;
-    }
-
-    new Chart(lineChartCtx, {
-      type: 'line',
-      data: {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
-        datasets: [{
-          label: 'Número de pacientes',
-          data: [12, 19, 3, 5, 2],
-          fill: false,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1
-        }]
-      },
-      options: {
-        // Tus opciones aquí...
+  columnasMostradasRespuestaSaldoPorDoctor: string[] = [
+    'DOCTOR', 'VALOR_TOTAL', 'ABONOS'
+  ];
+  constructor(
+    private formBuilder: FormBuilder,
+    private respuestaPinService: RespuestaPinService,
+    private respuestaConsultarEstadoCuentaService: RespuestaConsultarEstadoCuentaService
+  ) { }
+  ngOnInit(): void {
+    this.respuestaPinService.sharedSedeData.subscribe(data => {
+      if (data != null) {
+        this.idSedeActualSignalR = data;
+        
       }
     });
-  }
-
-  initPieChart(): void {
-    const pieChartCanvas = document.getElementById('pieChart') as HTMLCanvasElement | null;
-    if (pieChartCanvas === null) {
-      console.error('No se encontró el elemento con el ID "pieChart".');
-      return;
-    }
-
-    const pieChartCtx = pieChartCanvas.getContext('2d');
-    if (pieChartCtx === null) {
-      console.error('No se pudo obtener el contexto 2D del canvas.');
-      return;
-    }
-
-    new Chart(pieChartCtx, {
-      type: 'pie',
-      data: {
-        labels: ['Atendidos', 'En Mora', 'Pendientes'],
-        datasets: [{
-          data: [300, 50, 100],
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(255, 206, 86, 0.2)'
-          ],
-          borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(255, 206, 86, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        // Tus opciones aquí...
+    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
+      if (data != null)
+      {
+        this.idAnamnesisPacienteSeleccionado = data;
       }
     });
-  }
 
-  initBarChart(): void {
-    const barChartCanvas = document.getElementById('barChart') as HTMLCanvasElement | null;
-    if (barChartCanvas === null) {
-      console.error('No se encontró el elemento con el ID "barChart".');
-      return;
-    }
-
-    const barChartCtx = barChartCanvas.getContext('2d');
-    if (barChartCtx === null) {
-      console.error('No se pudo obtener el contexto 2D del canvas.');
-      return;
-    }
-
-    new Chart(barChartCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
-        datasets: [{
-          label: 'Número de pacientes',
-          data: [12, 19, 3, 5, 2],
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        // Tus opciones aquí...
+    this.respuestaPinService.shareddatosRespuestaPinData.subscribe(data => {
+      if (data != null) {
+        this.listaDoctores = data;
+        this.lstDoctores = this.listaDoctores.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
       }
     });
+
+    this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
+      if (data != null) {
+        this.doctorSeleccionado = data;
+        this.lstDoctores.filter(item => item.nombre === this.doctorSeleccionado).map(item => this.idDoctor = item.id);
+      }
+    });
+
+    this.respuestaConsultarEstadoCuentaService.respuestaConsultarEstadoCuentaEmit.subscribe(async (respuestaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta) => {
+      this.resultadoConsultaEstadoCuenta = respuestaConsultarEstadoCuenta;
+      console.log(this.resultadoConsultaEstadoCuenta);
+      this.mostrarMensajeSinEstadoCuenta=false;
+      console.log(this.mostrarMensajeSinEstadoCuenta);
+      if (this.resultadoConsultaEstadoCuenta.mensajeSinTratamiento) {
+        this.mostrarMensajeSinEstadoCuenta=true;
+        console.log(this.mostrarMensajeSinEstadoCuenta);
+      }
+      else {
+        console.log(this.mostrarMensajeSinEstadoCuenta);
+        this.lstFases = this.resultadoConsultaEstadoCuenta.lstFases!.map(id => ({ id: Number(id) }));
+        console.log(this.lstFases)
+        console.log(this.resultadoConsultaEstadoCuenta);
+        this.selectedFase=this.resultadoConsultaEstadoCuenta.FASE ?? 0;
+        this.resultadosBusquedaEstadoCuentaSinFinanciar = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA!;
+        this.resultadosBusquedaEstadoCuentaFinanciado = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA!;
+        this.tipoEstadoCuenta = this.resultadoConsultaEstadoCuenta.tratamientoSinFinanciar ?? false;
+        this.fechaInicio = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.FECHA_INICIO ?? new Date();
+        this.descripcionTratamiento = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.DESCRIPCION ?? "";
+        this.costoTratamiento = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.VALOR_TRATAMIENTO ?? 0;
+        this.cuotaInicial = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.VALOR_CUOTA_INI ?? 0; 
+        this.numeroCuotas = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.NUMERO_CUOTAS ?? 0;
+        this.valorCuota = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.VALOR_CUOTA ?? 0;
+        this.saldoMora = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.MORA_ACTUAL ?? 0;
+        this.saldoTotal = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0]?.MORATOTAL ?? 0;
+        this.lstRespuestaSaldoPorDoctor = this.resultadoConsultaEstadoCuenta.RespuestaSaldoPorDoctor ?? [];
+        this.lstRespuestaEstadoCuentaPorPaciente = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTAPACIENTE ?? [];
+        this.lstRespuestaEstadoCuentaPorPacientePorDoctor = this.lstRespuestaEstadoCuentaPorPaciente.filter(item => item.NOMBRE_DOCTOR === this.doctorSeleccionado);
+        console.log(this.lstRespuestaEstadoCuentaPorPacientePorDoctor);
+      }
+    });
+    
+    this.buscarEstadoCuenta();
+    //this.paciente.nombre = 'Juan';
+    //this.paciente.apellido = 'Perez';
+    //this.paciente.numeroHistoria = '123456789';
+
+    //throw new Error('Method not implemented.');
   }
+
+  onFaseChange(event: any) {
+    this.buscarEstadoCuenta();
+    console.log(this.selectedFase);
+  }
+
+  
+
+  async buscarEstadoCuenta() {
+    console.log(this.idSedeActualSignalR);
+    console.log(this.idAnamnesisPacienteSeleccionado);
+    console.log(this.idDoctor);
+    this.fase = this.selectedFase;
+    console.log(this.fase);
+    //let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
+    let objDatosParaDatosParaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta = new RespuestaConsultarEstadoCuenta();
+    objDatosParaDatosParaConsultarEstadoCuenta.ID = this.idAnamnesisPacienteSeleccionado;
+    objDatosParaDatosParaConsultarEstadoCuenta.IDDOCTOR = this.idDoctor;
+    objDatosParaDatosParaConsultarEstadoCuenta.FASE = this.fase;
+    console.log(objDatosParaDatosParaConsultarEstadoCuenta);
+    //lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+    //await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
+    await this.respuestaConsultarEstadoCuentaService.startConnectionRespuestaConsultarEstadoCuenta(this.idSedeActualSignalR, JSON.stringify(objDatosParaDatosParaConsultarEstadoCuenta));
+  }
+  
+  
 }

@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap'); // Importa la fuente Poppins de Google Fonts
+
+.dashboard {
+    font-family: 'Poppins', sans-serif; // Usa la fuente Poppins
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 0 10px; // Agrega padding para evitar que las tarjetas toquen los bordes de la pantalla en dispositivos pequeños
+
+    .widget {
+        //flex: 1 0 100%;
+        width: 100%; // Hace que las tarjetas ocupen todo el ancho en dispositivos pequeños
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        transition: transform 0.3s ease; // Agrega una transición para el hover effect
+
+        &:hover {
+            transform: scale(1.02); // Agrega un hover effect para hacer las tarjetas más interactivas
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .metrics {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 10px;
+
+            canvas {
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+
+        @media (min-width: 600px) {
+            //flex: 1 0 calc(50% - 20px);
+            width: calc(50% - 20px);
+        }
+
+        @media (min-width: 900px) {
+            //flex: 1 0 calc(25% - 20px);
+            width: calc(25% - 20px);
+        }
+        .number-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em; // Ajusta esto a lo que necesites
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    }
+
+    .date-range-form {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 20px;
+
+        mat-form-field {
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 600px) {
+            flex-direction: row;
+
+            mat-form-field {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    /* Agrega colores para los diferentes tipos de cajones aquí */
+    .pacientes-atendidos {
+        background-color: #C8FACD;
+    }
+    
+    .pacientes-nuevos {
+        background-color: #B2F7EF;
+    }
+    
+    .pacientes-terminaron {
+        background-color: #A6E3E9;
+    }
+    
+    .pacientes-abonaron {
+        background-color: #AEE1E1;
+    }
+    
+    .pacientes-mora {
+        background-color: #AED9E0;
+    }
+    
+    .pacientes-inasistentes {
+        background-color: #AEC3B0;
+    }
+    
+    .pacientes-cancelaron {
+        background-color: #AEB7BA;
+    }
+    
+    .pacientes-inician-tratamiento {
+        background-color: #B4AED9;
+    }
+    
+    .total-mora {
+        background-color: #D6BEF4;
+    }
+    
+    .total-egresos {
+        background-color: #E4B1F4;
+    }
+    
+    .total-ingresos {
+        background-color: #E8B5CE;
+    }
+    
+    .total-caja {
+        background-color: #EAB8C3;
+    }
+}
+

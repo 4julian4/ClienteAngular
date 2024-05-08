@@ -10,6 +10,7 @@ import { AgregarEvolucionComponent } from './componentes/agregar-evolucion/agreg
 import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clinica/buscar-hitoria-clinica.component';
 import { EstadoCuentaComponent } from './componentes/estado-cuenta';
 import { RipsComponent } from './componentes/rips';
+import { DatosAdministrativosComponent } from './componentes/datos-administrativos';
 
 const routes: Routes = [
   {path: 'datos-personales', component: DatosPersonalesComponent},
@@ -20,7 +21,8 @@ const routes: Routes = [
   {path: 'agregar-firmas', component: AgregarFirmasComponent},
   {path: 'buscar-historia-clinica', component: BuscarHitoriaClinicaComponent},
   {path: 'estado-cuenta', component: EstadoCuentaComponent},
-  {path: 'rips', component: RipsComponent}
+  {path: 'rips', component: RipsComponent},
+  {path: 'datos-administrativos', component: DatosAdministrativosComponent}
   
 ];
 
