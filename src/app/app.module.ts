@@ -38,6 +38,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EstadoCuentaComponent } from './componentes/estado-cuenta/estado-cuenta.component';
 import { MatCardModule } from '@angular/material/card';
 import {RipsComponent} from './componentes/rips/rips.component';
+import { DatosAdministrativos, DatosAdministrativosComponent } from './componentes/datos-administrativos';
+import { HideColumnDirective } from './directives/hide-column.directive';
+
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
   parse: {
@@ -70,7 +73,9 @@ export const MY_DATE_FORMATS = {
     AgregarEvolucionComponent,
     AgregarFirmasComponent,
     EstadoCuentaComponent,
-    RipsComponent
+    RipsComponent,
+    DatosAdministrativosComponent,
+    HideColumnDirective
     
    
     

@@ -1,0 +1,97 @@
+
+<div class="dashboard">
+    <form class="date-range-form">
+        <mat-form-field appearance="fill">
+            <mat-label>Fecha de inicio</mat-label>
+            <input matInput [matDatepicker]="picker1" [(ngModel)]="fechaInicio" name="fechaInicio">
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+          </mat-form-field>
+          
+          <mat-form-field appearance="fill">
+            <mat-label>Fecha de fin</mat-label>
+            <input matInput [matDatepicker]="picker2" [(ngModel)]="fechaFin" name="fechaFin">
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" (click)="consultarDatosAdministrativos(fechaInicio, fechaFin)">Consultar</button>
+    </form>
+
+    <mat-card class="widget pacientes-atendidos">
+        <h2>Pacientes Atendidos</h2>
+        <div class="metrics">
+            <canvas id="pieChart"></canvas>
+        </div>
+
+        <div class="number-display">123</div> <!-- Aquí está el nuevo elemento -->
+    </mat-card>
+    
+    <mat-card class="widget pacientes-nuevos">
+        <h2>Pacientes Nuevos</h2>
+        <div class="metrics">
+            <canvas id="pacientesNuevosChart"></canvas>
+        </div>
+    </mat-card>
+    <mat-card class="widget pacientes-terminaron">
+        <h2>Pacientes Terminaron Tratamiento</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes que terminaron tratamiento -->
+        </div>
+    </mat-card>
+    <mat-card class="widget pacientes-abonaron">
+        <h2>Pacientes Abonaron</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes que abonaron -->
+        </div>
+    </mat-card>
+    <mat-card class="widget pacientes-mora">
+        <h2>Pacientes en Mora</h2>
+        <div class="metrics">
+            <canvas id="barChart"></canvas>
+        </div>
+    </mat-card>
+    <mat-card class="widget pacientes-inasistentes">
+        <h2>Pacientes no Asistieron</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes inasistentes -->
+        </div>
+    </mat-card>
+    <mat-card class="widget pacientes-cancelaron">
+        <h2>Pacientes Cancelaron Cita</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes que cancelaron cita -->
+        </div>
+    </mat-card>
+    <mat-card class="widget pacientes-inician-tratamiento">
+        <h2>Pacientes Inician Tratamiento</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes que inician tratamiento -->
+        </div>
+    </mat-card>
+
+    <mat-card class="widget total-mora">
+        <h2>Total Mora</h2>
+        <div class="metrics">
+            <canvas id="barChart"></canvas>
+        </div>
+    </mat-card>
+    <mat-card class="widget total-egresos">
+        <h2>Total Egresos</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes inasistentes -->
+        </div>
+    </mat-card>
+    <mat-card class="widget total-ingresos">
+        <h2>Total Ingresos</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes que cancelaron cita -->
+        </div>
+    </mat-card>
+    <mat-card class="widget total-caja">
+        <h2>Total Caja</h2>
+        <div class="metrics">
+            <!-- Métricas de pacientes que inician tratamiento -->
+        </div>
+    </mat-card>
+</div>

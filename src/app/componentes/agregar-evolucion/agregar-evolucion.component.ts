@@ -24,7 +24,7 @@ declare var webkitSpeechRecognition: any;
 export class AgregarEvolucionComponent implements OnInit {
   @ViewChild('tratamiento') tratamiento!: ElementRef;
   recognizing: boolean = false; // Agrega esta línea
-  
+
 
 
 
@@ -56,8 +56,8 @@ export class AgregarEvolucionComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
-    
-    
+
+
 
     this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
       if (data != null) {
@@ -81,7 +81,7 @@ export class AgregarEvolucionComponent implements OnInit {
       }
     });
 
-    
+
 
     this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
@@ -233,19 +233,33 @@ export class AgregarEvolucionComponent implements OnInit {
     this.fraseSeleccionada = event.value;
   }
 
+  // ponerFraceEvolucion() {
+  //   if (this.formularioAgregarEvolucion && this.fraseSeleccionada) {
+  //       this.formularioAgregarEvolucion.get('EVOLUCION')?.setValue(this.fraseSeleccionada.CONTENIDO);
+  //   }
+  // }
   ponerFraceEvolucion() {
     if (this.formularioAgregarEvolucion && this.fraseSeleccionada) {
-        this.formularioAgregarEvolucion.get('EVOLUCION')?.setValue(this.fraseSeleccionada.CONTENIDO);
+      const evolucionActual = this.formularioAgregarEvolucion.get('EVOLUCION')?.value || '';
+      const nuevaEvolucion = evolucionActual + '\n' + this.fraseSeleccionada.CONTENIDO;
+      this.formularioAgregarEvolucion.get('EVOLUCION')?.setValue(nuevaEvolucion);
     }
   }
+
+  // ponerFraceProximaCita() {
+  //   if (this.formularioAgregarEvolucion && this.fraseSeleccionada) {
+  //     this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(this.fraseSeleccionada.CONTENIDO);
+  //   }
+  // }
 
   ponerFraceProximaCita() {
     if (this.formularioAgregarEvolucion && this.fraseSeleccionada) {
-        this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(this.fraseSeleccionada.CONTENIDO);
+      const proximaCitaActual = this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.value || '';
+      const nuevaProximaCita = proximaCitaActual + '\n' + this.fraseSeleccionada.CONTENIDO;
+      this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(nuevaProximaCita);
+      //this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(this.fraseSeleccionada.CONTENIDO);
     }
   }
-
-
 
 
   async cancelarEvolucion() {
@@ -256,7 +270,7 @@ export class AgregarEvolucionComponent implements OnInit {
   async agregarFirmas() {
     this.respuestaPinService.datosDelFormulario = this.formularioAgregarEvolucion.value;
     this.router.navigate(['/agregar-firmas']);
-    
+
     //this.obtenerEvolucionPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);
   }
 

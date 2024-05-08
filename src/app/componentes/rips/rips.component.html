@@ -10,7 +10,7 @@
         <mat-form-field appearance="fill" class="campoFila1">
             <mat-label>Entidad</mat-label>
             <input type="text" matInput [formControl]="entidadControl" [matAutocomplete]="autoEntidad"
-                style="text-transform: uppercase;">
+                (blur)="validateAndClearIfInvalid(entidadControl, lstEps)" style="text-transform: uppercase;">
             <mat-autocomplete #autoEntidad="matAutocomplete">
                 <mat-option *ngFor="let eps of filteredEntidad | async" [value]="eps.nombre">
                     {{ eps.nombre }}
@@ -27,7 +27,8 @@
         <mat-form-field appearance="fill" class="campoFila1">
             <mat-label>Valor total</mat-label>
             <!-- <input matInput formControlName="VALOR_TOTAL" placeholder="Valor total"> -->
-            <input matInput formControlName="VALOR_TOTAL" placeholder="Valor total">
+            <input matInput [formControl]="valorTotalRips" placeholder="Valor total">
+            <!-- <input matInput formControlName="VALOR_TOTAL | number:'1.0-0'" placeholder="Valor total"> -->
         </mat-form-field>
     </div>
 
@@ -35,6 +36,7 @@
         <mat-form-field appearance="fill" class="campoFila2">
             <mat-label>Tipo Consulta</mat-label>
             <input type="text" matInput [formControl]="tipoConsultaControl" [matAutocomplete]="autoTipoConsulta"
+                (blur)="validateAndClearIfInvalid(tipoConsultaControl, lstTiposDeConsultas)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoTipoConsulta="matAutocomplete">
                 <mat-option *ngFor="let tipoConsulta of filteredTiposDeConsultas | async" [value]="tipoConsulta.nombre">
@@ -46,6 +48,7 @@
         <mat-form-field appearance="fill" class="campoFila2">
             <mat-label>Codigo</mat-label>
             <input type="text" matInput [formControl]="codigoConsultaControl" [matAutocomplete]="autoCodigoTipoConsulta"
+                (blur)="validateAndClearIfInvalid(codigoConsultaControl, lstTiposDeConsultas)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoCodigoTipoConsulta="matAutocomplete">
                 <mat-option *ngFor="let codigoConsulta of filteredCodigosTiposDeConsultas | async"
@@ -55,16 +58,19 @@
             </mat-autocomplete>
         </mat-form-field>
 
-        
+
     </div>
 
     <div class="divFormularioFila3">
         <mat-form-field appearance="fill" class="campoFila3">
             <mat-label>D. Principal</mat-label>
-            <input type="text" matInput [formControl]="diagnosticoPrincipalControl" [matAutocomplete]="autoDiagnosticoPrincipal"
+            <input type="text" matInput [formControl]="diagnosticoPrincipalControl"
+                [matAutocomplete]="autoDiagnosticoPrincipal"
+                (blur)="validateAndClearIfInvalid(diagnosticoPrincipalControl, lstConsultas)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoDiagnosticoPrincipal="matAutocomplete">
-                <mat-option *ngFor="let diagnosticoPrincipal of filteredDiagnosticoPrincipal | async" [value]="diagnosticoPrincipal.nombre">
+                <mat-option *ngFor="let diagnosticoPrincipal of filteredDiagnosticoPrincipal | async"
+                    [value]="diagnosticoPrincipal.nombre">
                     {{ diagnosticoPrincipal.nombre }}
                 </mat-option>
             </mat-autocomplete>
@@ -72,7 +78,9 @@
 
         <mat-form-field appearance="fill" class="campoFila3">
             <mat-label>Codigo</mat-label>
-            <input type="text" matInput [formControl]="codigoDiagnosticoPrincipalControl" [matAutocomplete]="autoCodigoDiagnosticoPrincipal"
+            <input type="text" matInput [formControl]="codigoDiagnosticoPrincipalControl"
+                [matAutocomplete]="autoCodigoDiagnosticoPrincipal"
+                (blur)="validateAndClearIfInvalid(codigoDiagnosticoPrincipalControl, lstConsultas)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoCodigoDiagnosticoPrincipal="matAutocomplete">
                 <mat-option *ngFor="let codigoDiagnosticoP of filteredCodigosDiagnosticoPrincipal | async"
@@ -81,13 +89,14 @@
                 </mat-option>
             </mat-autocomplete>
         </mat-form-field>
-        
+
     </div>
 
     <div class="divFormularioFila4">
         <mat-form-field appearance="fill" class="campoFila4">
             <mat-label>Procedimiento</mat-label>
             <input type="text" matInput [formControl]="procedimientoControl" [matAutocomplete]="autoProcedimiento"
+                (blur)="validateAndClearIfInvalid(procedimientoControl, lstProcedimientos)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoProcedimiento="matAutocomplete">
                 <mat-option *ngFor="let procedimiento of filteredProcedimientos | async" [value]="procedimiento.nombre">
@@ -98,7 +107,9 @@
 
         <mat-form-field appearance="fill" class="campoFila4">
             <mat-label>Codigo</mat-label>
-            <input type="text" matInput [formControl]="codigoProcedimientoControl" [matAutocomplete]="autoCodigoProcedimiento"
+            <input type="text" matInput [formControl]="codigoProcedimientoControl"
+                [matAutocomplete]="autoCodigoProcedimiento"
+                (blur)="validateAndClearIfInvalid(codigoProcedimientoControl, lstProcedimientos)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoCodigoProcedimiento="matAutocomplete">
                 <mat-option *ngFor="let codigoProcedimiento of filteredCodigosProcedimientos | async"
@@ -107,7 +118,7 @@
                 </mat-option>
             </mat-autocomplete>
         </mat-form-field>
-        
+
     </div>
     <div class="divContenedorDeBotones">
         <button class="BotonGuardar" mat-raised-button (click)="guardarRips()">Guardar</button>

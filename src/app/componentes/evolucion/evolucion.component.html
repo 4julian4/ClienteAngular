@@ -1,92 +1,97 @@
 <table mat-table [dataSource]="resultadoBusquedaEvolucion" class="mat-elevation-z8">
     <!-- Columna de ejemplo -->
     <ng-container matColumnDef="IDEVOLUCION">
-        
-            <th mat-header-cell *matHeaderCellDef>
-                <div class="divContenedorDeBotones">
-                    <div>
-                        <h1 class="tituloEvolucion">Evolución</h1>
-                    </div>
-                    <div>
-                        <button class="BotonGuardar" mat-raised-button color="primary"
+
+        <th mat-header-cell *matHeaderCellDef>
+            <div class="divContenedorDeBotones">
+                <div>
+                    <h1 class="tituloEvolucion">Evolución</h1>
+                </div>
+                <div>
+                    <button class="BotonGuardar" mat-raised-button color="primary"
                         [routerLink]="'/agregar-evolucion'">Agregar Evolucion</button>
-                        <button class="BotonGuardar" mat-raised-button color="primary"
-                        [routerLink]="'/rips'">Agregar Rips</button>
+                    <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/rips'">Agregar
+                        Rips</button>
+                </div>
+            </div>
+        </th>
+        <td mat-cell *matCellDef="let evolucionPaciente">
+            <br>
+            <form class="formularioEvolucion" [formGroup]="formularioEvolucion">
+                <div class="scrollable-content">
+                    
+                    <div class="divFormularioFila1">
+                        <mat-form-field appearance="fill" class="campoFila11" style="flex: 1;">
+                            <mat-label>Fecha</mat-label>
+                            <input matInput readonly value={{evolucionPaciente.evolucion.FECHA}} placeholder="E-mail">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Hora de entrada</mat-label>
+                            <input matInput readonly value={{evolucionPaciente.evolucion.HORA}}
+                                placeholder="Hora Entrada">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Hora de salida</mat-label>
+                            <input matInput readonly value={{evolucionPaciente.evolucion.HORA_FIN}}
+                                placeholder="Hora Salida">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Atendido por</mat-label>
+                            <input matInput readonly value={{evolucionPaciente.evolucion.DOCTOR}}
+                                placeholder="Atendido Por">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
+                            <mat-label>Nota</mat-label>
+                            <input matInput readonly value={{evolucionPaciente.evolucion.NOTA}} placeholder="Nota">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="divFormularioFila2">
+                        <mat-form-field appearance="fill" class="campoFila2">
+                            <mat-label>Evolucion</mat-label>
+                            <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3"
+                                matAutosizeMaxRows="6" value={{evolucionPaciente.evolucion.EVOLUCION}}
+                                placeholder="Evolucion"></textarea>
+                        </mat-form-field>
+                    </div>
+                    
+                    
+
+                    <div class="divFormularioFila3">
+                        <mat-form-field appearance="fill" class="campoFila3">
+                            <mat-label>Proxima Cita</mat-label>
+                            <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3"
+                                matAutosizeMaxRows="6" value={{evolucionPaciente.evolucion.PROXIMA_CITAstr}}
+                                placeholder="Proxima Cita"></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div class="divFormularioFila4">
+                        <div>
+                            <img *ngIf="evolucionPaciente.imgFirmaPaciente != ''"
+                                src="{{evolucionPaciente.imgFirmaPaciente}}" alt="Red dot" />
+                        </div>
+
+                        <div>
+                            <img *ngIf="evolucionPaciente.imgFirmaDoctor != ''"
+                                src="{{evolucionPaciente.imgFirmaDoctor}}" alt="Red dot" />
+                        </div>
+
+                    </div>
+                    <div class="divFormularioFila4">
+                        <div>
+                            <strong *ngIf="evolucionPaciente.imgFirmaPaciente != ''">Firma del paciente</strong>
+                        </div>
+
+                        <div>
+                            <strong *ngIf="evolucionPaciente.imgFirmaDoctor != ''">Firma del doctor</strong>
+                        </div>
+
                     </div>
                 </div>
-            </th>
-            <td mat-cell *matCellDef="let evolucionPaciente">
-                <br>
-                <form class="formularioEvolucion" [formGroup]="formularioEvolucion">
-                    <div class="scrollable-content">
-                        <div class="divFormularioFila1">
-                            <mat-form-field appearance="fill" class="campoFila11" style="flex: 1;">
-                                <mat-label>Fecha</mat-label>
-                                <input matInput readonly value={{evolucionPaciente.evolucion.FECHA}} placeholder="E-mail">
-                            </mat-form-field>
-                            <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
-                                <mat-label>Hora de entrada</mat-label>
-                                <input matInput readonly value={{evolucionPaciente.evolucion.HORA}}
-                                    placeholder="Hora Entrada">
-                            </mat-form-field>
-                            <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
-                                <mat-label>Hora de salida</mat-label>
-                                <input matInput readonly value={{evolucionPaciente.evolucion.HORA_FIN}} placeholder="Hora Salida">
-                            </mat-form-field>
-                            <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
-                                <mat-label>Atendido por</mat-label>
-                                <input matInput readonly value={{evolucionPaciente.evolucion.DOCTOR}} placeholder="Atendido Por">
-                            </mat-form-field>
-                            <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
-                                <mat-label>Nota</mat-label>
-                                <input matInput readonly value={{evolucionPaciente.evolucion.NOTA}} placeholder="Nota">
-                            </mat-form-field>
-                        </div>
+            </form>
+            <br>
+        </td>
 
-                        <div class="divFormularioFila2">
-                            <mat-form-field appearance="fill" class="campoFila2">
-                                <mat-label>Evolucion</mat-label>
-                                <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
-                                    value={{evolucionPaciente.evolucion.EVOLUCION}}
-                                    placeholder="Evolucion"></textarea>
-                            </mat-form-field>
-                        </div>
-
-                        <div class="divFormularioFila3">
-                            <mat-form-field appearance="fill" class="campoFila3">
-                                <mat-label>Proxima Cita</mat-label>
-                                <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
-                                    value={{evolucionPaciente.evolucion.PROXIMA_CITAstr}}
-                                    placeholder="Proxima Cita"></textarea>
-                            </mat-form-field>
-                        </div>
-                        <div class="divFormularioFila4">
-                            <div>
-                                <img *ngIf="evolucionPaciente.imgFirmaPaciente != ''"
-                                    src="{{evolucionPaciente.imgFirmaPaciente}}" alt="Red dot" />
-                            </div>
-
-                            <div>
-                                <img *ngIf="evolucionPaciente.imgFirmaDoctor != ''"
-                                    src="{{evolucionPaciente.imgFirmaDoctor}}" alt="Red dot" />
-                            </div>
-
-                        </div>
-                        <div class="divFormularioFila4">
-                            <div>
-                                <strong *ngIf="evolucionPaciente.imgFirmaPaciente != ''">Firma del paciente</strong>
-                            </div>
-
-                            <div>
-                                <strong *ngIf="evolucionPaciente.imgFirmaDoctor != ''">Firma del doctor</strong>
-                            </div>
-
-                        </div>
-                    </div>
-                </form>
-                <br>
-            </td>
-        
 
 
     </ng-container>

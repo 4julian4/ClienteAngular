@@ -27,6 +27,8 @@ export class RespuestaPinService {
   private listadoEps = new BehaviorSubject<CodigosEps | null>(null);
   sharedlistadoEpsData = this.listadoEps.asObservable();
 
+  private numPacientesPorDoctor = new BehaviorSubject<number | null>(null);
+  sharedNumPacientesPorDoctorData = this.numPacientesPorDoctor.asObservable();
 
   //-------------------------------------------------------------------------------//
   @Output() respuestaPinModel: EventEmitter<RespuestaPin> = new EventEmitter<RespuestaPin>();
@@ -74,6 +76,9 @@ export class RespuestaPinService {
   }
   updateListadoEps(data: CodigosEps) {
     this.listadoEps.next(data);
+  }
+  updateNumPacientesPorDoctor(data: number) {
+    this.numPacientesPorDoctor.next(data);
   }
 
   //-----------------------------------------------------------------------//

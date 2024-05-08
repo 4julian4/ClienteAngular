@@ -86,6 +86,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
         this.overlay.getContainerElement().classList.remove(darkClassName);
       }
     });
+    this.respuestaPinService.sharedNumPacientesPorDoctorData.subscribe(data => {
+      if (data != null) {
+        this.totalPacientesDoctorSeleccionado = data;
+      }
+    });
 
   }
   filtrarMenu(idPadre?: number): any[] {
@@ -150,7 +155,9 @@ export class SidenavComponent implements OnInit, OnDestroy {
       this.doctorEscogido = this.lstDoctores.filter(x => x.id == idDoctor)[0].nombre;
       console.log(this.doctorEscogido);
       this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
+      
       this.mostrarBuscarHistoriaClinica = true;
+      
       //this.router.navigate(['/buscar-historia-clinica']);
       //this.router.navigate(['/buscar-hitoria-clinica']);
 
