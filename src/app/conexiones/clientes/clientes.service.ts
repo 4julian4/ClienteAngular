@@ -15,7 +15,6 @@ export  class ClientesService {
   
   public Get(idCliente : string): Observable<Clientes>{ 
     let url = urlPage + "/" + idCliente; 
-    console.log(url);  
     let obj =this.httpClient.get<Clientes>(url, environment.httpOptions);
     return obj;
   }

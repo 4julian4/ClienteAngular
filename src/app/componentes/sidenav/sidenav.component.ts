@@ -76,7 +76,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   cerrarSesion() {
 
   }
-  ngOnInit() {
+  async ngOnInit() {
     this.toggleControl.valueChanges.subscribe((darkMode) => {
       const darkClassName = 'darkMode';
       this.className = darkMode ? darkClassName : '';
@@ -91,6 +91,19 @@ export class SidenavComponent implements OnInit, OnDestroy {
         this.totalPacientesDoctorSeleccionado = data;
       }
     });
+
+    this.respuestaPinService.setOnDoctorSeleccionadoCallback(this.onDoctorSeleccionado.bind(this));
+
+
+    this.respuestaPinService.sharedcambiarDoctorSeleccionadoData.subscribe(data => {
+      if (data != null) {
+        console.log('sharedcambiarDoctorSeleccionadoData', data);
+        this.doctorSeleccionado = this.lstDoctores.filter(x => x.nombre == data)[0].id.toString();
+
+      }
+    });
+
+
 
   }
   filtrarMenu(idPadre?: number): any[] {
@@ -109,13 +122,12 @@ export class SidenavComponent implements OnInit, OnDestroy {
     }
     else {
       this.logeado = false;
-      console.log(resultadoConsultaUsuario.message);
+
     }
   }
 
   async pedirPinSedeSeleccionada(idSede: number) {
     if (this.sedesConectadas.length > 0 && this.sedesConectadas.filter(x => x.idSede == idSede).length > 0) {
-      console.log("sede conectada");
       this.sedeConectadaActual = this.sedesConectadas.filter(x => x.idSede == idSede)[0];
       if (this.sedeConectadaActual.idSede != undefined) {
         this.idSedeActualSignalR = this.sedeConectadaActual.idActualSignalR;
@@ -125,7 +137,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
         const dialogRef = this.dialog.open(PedirPinComponent, {
           data: data
         }).afterClosed().subscribe(result => {
-          console.log(result.obtenerPinRepuesta);
           this.lstDoctores = result.obtenerPinRepuesta.lstDoctores;
           if (this.lstDoctores.length > 0) {
             this.mostrarDoctores = true;
@@ -147,17 +158,25 @@ export class SidenavComponent implements OnInit, OnDestroy {
     this.mostrarBuscarHistoriaClinica = value;
   }
 
+
+
+
+
   async onDoctorSeleccionado(idDoctor: number) {
 
     // Aquí es donde haces la consulta a SignalR
     if (this.sedeConectadaActual.idSede != undefined) {
+
       await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSeleccionado(this.sedeConectadaActual.idActualSignalR, idDoctor);
       this.doctorEscogido = this.lstDoctores.filter(x => x.id == idDoctor)[0].nombre;
-      console.log(this.doctorEscogido);
-      this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
-      
+      if (this.doctorEscogido) {
+        this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
+      }
+      //this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
+      this.respuestaPinService.updateCambiarDoctorSeleccionado(this.doctorEscogido);
+
       this.mostrarBuscarHistoriaClinica = true;
-      
+
       //this.router.navigate(['/buscar-historia-clinica']);
       //this.router.navigate(['/buscar-hitoria-clinica']);
 

@@ -11,7 +11,7 @@ img {
 
     .campoFila1 {
         flex: 1;
-
+        
         &:not(:last-child) {
             margin-right: 5px;
         }
@@ -19,6 +19,7 @@ img {
         &:not(:first-child) {
             margin-left: 5px;
         }
+       
     }
 }
 
@@ -57,7 +58,6 @@ img {
         }
     }
 }
-
 
 
 

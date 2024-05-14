@@ -1,52 +1,105 @@
-.mat-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+.contenedorEstadoCuenta{
+  border-radius: 15px; // Bordes redondeados
+  border: 1px solid #ddd; // Borde del contenedor
+  margin: 10px; // Margen alrededor del contenedor
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); // Sombra alrededor del contenedor
+  transition: 0.3s; // Transiciones suaves de las propiedades
+  padding: 20px; // Espacio interior del contenedor
+   // width: 90%; // Ancho del contenedor (actualmente comentado)
+}
+.contenedor-de-la-tabla {
+  overflow-x: auto; /* Habilita el scroll horizontal */
+  white-space: nowrap; /* Evita que el contenido se envuelva a la siguiente línea */
+  max-width: 100%; /* Limita el ancho máximo del contenedor */
 }
 
-/* Estilo para las celdas de la tabla */
-.mat-cell, .mat-header-cell {
-  padding: 8px;
-  border: 1px solid #ddd;
-  text-align: left;
-  width: auto; /* Añade esta línea */
+// Estilo para la tabla completa
+// .mat-table {
+//   width: 100%; // La tabla ocupa el 100% del ancho del contenedor
+//   border-collapse: collapse; // Los bordes de las celdas se colapsan en un solo borde
+//   margin-bottom: 20px; // Margen inferior de la tabla
+// }
+
+// // Estilo para las celdas de la tabla y las celdas de encabezado
+// .mat-cell, .mat-header-cell {
+//   padding: 8px; // Espacio interior de las celdas
+//   border: 1px solid #ddd; // Borde de las celdas
+//   text-align: left; // Alineación del texto a la izquierda
+//   white-space: nowrap; // Evita que el texto se envuelva
+// }
+
+// Estilo para una celda específica
+.columna-FECHA {
+ // max-width: 150px; // Ancho máximo para una celda específica
+  overflow: hidden; // Oculta el contenido que desborda el ancho máximo
+  text-overflow: ellipsis; // Agrega puntos suspensivos para indicar contenido truncado
+  min-width: 14ch; // Ancho mínimo para la columna Fecha
+  max-width: 14ch; // Ancho máximo para la columna Fecha
 }
 
-/* Estilo para las celdas de encabezado */
+.columna-DESCRIPCION{
+  max-width: 20ch; // Ancho máximo para una celda específica
+  min-width: 20ch; // Ancho mínimo para la columna Fecha
+  //max-width: 50ch; // Ancho máximo para la columna Fecha
+  //width: auto;
+  //overflow: hidden; // Oculta el contenido que desborda el ancho máximo
+  //text-overflow: ellipsis; // Agrega puntos suspensivos para indicar contenido truncado
+  
+}
+
+.columna-NOMBREDOCTOR{
+  max-width: 25ch; // Ancho máximo para una celda específica
+  min-width: 25ch; // Ancho mínimo para la columna Fecha
+  //max-width: 50ch; // Ancho máximo para la columna Fecha
+  //width: auto;
+  //overflow: hidden; // Oculta el contenido que desborda el ancho máximo
+  //text-overflow: ellipsis; // Agrega puntos suspensivos para indicar contenido truncado
+  
+
+}
+
+
+
+// Estilo para las celdas de encabezado
 .mat-header-cell {
-  background-color: #f2f2f2;
-  font-weight: bold;
+  background-color: #f2f2f2; // Color de fondo de las celdas de encabezado
+  font-weight: bold; // Texto en negrita en las celdas de encabezado
 }
 
-/* Estilo para filas impares */
+// Estilo para filas impares
 .mat-row:nth-child(odd) {
-  background-color: #f9f9f9;
+  background-color: #f9f9f9; // Color de fondo para las filas impares
 }
 
-/* Estilo para filas al pasar el mouse */
+// Estilo para filas al pasar el mouse
 .mat-row:hover {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; // Color de fondo para las filas al pasar el mouse
 }
 
+// Estilo para el primer conjunto de campos del formulario
 .divFormularioFila1 {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0px;
+  width: 100%; // Ocupa el 100% del ancho del contenedor
+  display: flex; // Se usa flexbox para el diseño
+  justify-content: space-between; // Distribuye los elementos uniformemente en el eje horizontal
+  padding: 0px; // Sin espacio interior
 
+  // Estilo para cada campo en la primera fila
   .campoFila1 {
-      flex: 1;
+      flex: 1; // Cada campo ocupa un espacio igual en la fila
 
+      // Estilo para todos los campos excepto el último
       &:not(:last-child) {
-          margin-right: 5px;
+          margin-right: 5px; // Margen a la derecha
       }
 
+      // Estilo para todos los campos excepto el primero
       &:not(:first-child) {
-          margin-left: 5px;
+          margin-left: 5px; // Margen a la izquierda
       }
   }
 }
 
+// Estilo similar al anterior para el segundo conjunto de campos del formulario
 .divFormularioFila2 {
   width: 100%;
   display: flex;
@@ -65,12 +118,3 @@
   }
 }
 
-.contenedorEstadoCuenta{
-  border-radius: 15px;
-  border: 1px solid #ddd;
-  margin: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  padding: 20px;
-   // width: 90%;
-}

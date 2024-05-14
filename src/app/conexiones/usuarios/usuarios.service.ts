@@ -16,7 +16,6 @@ export class UsuariosService {
 
   public Get(idUsuario: string): Observable<Usuarios> {
     let url = urlPage + "/" + idUsuario;
-    console.log(url);
     let obj = this.httpClient.get<Usuarios>(url, environment.httpOptions);
     return obj;
   }

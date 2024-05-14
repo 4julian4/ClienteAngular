@@ -103,8 +103,6 @@ export class ImagenHelperService {
     const imgFirmaDoctor = document.getElementById('firmaDoctor') as HTMLImageElement;
 
     // Imprime las rutas de las imágenes en la consola
-    console.log(imgFirmaPaciente.src);
-    console.log(imgFirmaDoctor.src);
 
     // Verifica que ambas imágenes existan
     if (imgFirmaPaciente && imgFirmaDoctor) {

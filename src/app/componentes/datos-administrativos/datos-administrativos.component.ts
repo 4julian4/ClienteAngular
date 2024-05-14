@@ -31,7 +31,6 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
     });
     
     this.respuestaDatosAdministrativosService.respuestaDatosAdministrativosEmit.subscribe(async (respuestaDatosAdministrativos: RespuestaDatosAdministrativos[]) => {
-      console.log(respuestaDatosAdministrativos);
       this.resultadoDatosAdministrativos = respuestaDatosAdministrativos;
     });
   }

@@ -37,10 +37,8 @@ export class PedirPinComponent {
 
   async confirmar() {
     // Aquí puedes hacer algo con this.data.pin, como verificarlo o enviarlo a un servidor
-    console.log(this.data.pin);
     await this.respuestaPinService.startConnectionRespuestaObtenerPin();
     this.respuestaPinService.respuestaPinModel.subscribe(async (respuestaPin: RespuestaPin) => {
-      console.log(respuestaPin);
       this.obtenerPinRepuesta = respuestaPin;
       this.respuestaPinService.updatedatosRespuestaPin(this.obtenerPinRepuesta);
 

@@ -15,7 +15,6 @@ export  class CitasService {
   
   public Get(idCita : string): Observable<Citas>{ 
     let url = urlPage + "/" + idCita; 
-    console.log(url);  
     let obj =this.httpClient.get<Citas>(url, environment.httpOptions);
     return obj;
   }

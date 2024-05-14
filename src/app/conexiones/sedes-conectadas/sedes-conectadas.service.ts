@@ -15,7 +15,6 @@ export  class SedesConectadasService {
   
   public Get(idSedeConectada : string): Observable<SedesConectadas>{ 
     let url = urlPage + "/" + idSedeConectada; 
-    console.log(url);  
     let obj =this.httpClient.get<SedesConectadas>(url, environment.httpOptions);
     return obj;
   }

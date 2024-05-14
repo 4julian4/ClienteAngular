@@ -42,12 +42,10 @@ export class EvolucionService {
             // Navegar al componente de evolución
             this.router.navigate(['/evolucion']);
           }
-          console.log('#########################################');  
 
           await this.signalRService.stopConnection();
         });
         this.signalRService.hubConnection.invoke('GuardarDatosEvolucion', clienteId, idAnanesis).catch(err => console.error(err));
-        console.log('******************************************');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
   }

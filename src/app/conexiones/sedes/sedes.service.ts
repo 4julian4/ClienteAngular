@@ -15,7 +15,6 @@ export  class SedesService {
   
   public Get(idSede : string): Observable<Sedes>{ 
     let url = urlPage + "/" + idSede; 
-    console.log(url);  
     let obj =this.httpClient.get<Sedes>(url, environment.httpOptions);
     return obj;
   }

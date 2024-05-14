@@ -77,7 +77,6 @@ export class AgregarEvolucionComponent implements OnInit {
         this.listaDoctores = data;
         this.lstDoctores = this.listaDoctores.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
         this.listaFrasesXEvolucion = data.lstFrasesXEvolucion.filter(frase => frase.TIPO === 1);
-        //console.log(this.listaDoctores);
       }
     });
 
@@ -86,7 +85,6 @@ export class AgregarEvolucionComponent implements OnInit {
     this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
         this.doctorSeleccionado = data;
-        console.log(this.doctorSeleccionado);
       }
     });
     this.inicializarFormulario();
@@ -100,7 +98,6 @@ export class AgregarEvolucionComponent implements OnInit {
     this.evolucionService.respuestaGuardarDatosEvolucionEmit.subscribe(async (evolucion: Evolucion) => {
 
       this.resultadoGuardarEvolucion = evolucion;
-      console.log(this.resultadoGuardarEvolucion);
       if (this.resultadoGuardarEvolucion! || 0) {
         this.respuestaPinService.datosDelFormulario = null;
         this.router.navigate(['/evolucion']);
@@ -187,7 +184,6 @@ export class AgregarEvolucionComponent implements OnInit {
       //if (this.imagenHelperService.imagenTieneColorDistintoABlanco(imgFirmaPaciente)) {
       //  const imagenRecortadaPaciente = await this.imagenHelperService.recortarImagen(imgFirmaPaciente);
       //  strPaciente = imagenRecortadaPaciente.src.replace("data:image/png;base64,", "");
-      //  console.log(strPaciente );
       //}
     }
     if (imgFirmaDoctor) {
@@ -197,9 +193,7 @@ export class AgregarEvolucionComponent implements OnInit {
       //  strDoctor = imagenRecortadaDoctor.src.replace("data:image/png;base64,", "");
       //}
     }
-    // console.log(this.idSedeActualSignalR);
     if (this.idSedeActualSignalR != '') {
-      //   console.log(this.idSedeActualSignalR);
       let datosParaGuradarEnEvolucion: RespuestaEvolucionPaciente = new RespuestaEvolucionPaciente();
       datosParaGuradarEnEvolucion.evolucion.IDEVOLUSECUND = this.idAnamnesisPacienteSeleccionado;
       datosParaGuradarEnEvolucion.evolucion.PROXIMA_CITAstr = this.formularioAgregarEvolucion.value.PROXIMA_CITAstr;
@@ -208,8 +202,6 @@ export class AgregarEvolucionComponent implements OnInit {
       //datosParaGuradarEnEvolucion.evolucion.ENTRADAstr = this.formularioAgregarEvolucion.value.ENTRADAstr;
       //datosParaGuradarEnEvolucion.evolucion.SALIDAstr = this.formularioAgregarEvolucion.value.SALIDAstr;
       datosParaGuradarEnEvolucion.evolucion.FECHA = this.formularioAgregarEvolucion.value.FECHA;
-      console.log(this.formularioAgregarEvolucion.value.HORA);
-      console.log(this.fechaHoraHelperService.formatTimeForCSharp(this.formularioAgregarEvolucion.value.HORA));
       datosParaGuradarEnEvolucion.evolucion.HORA = this.fechaHoraHelperService.formatTimeForCSharp(this.formularioAgregarEvolucion.value.HORA);
       datosParaGuradarEnEvolucion.evolucion.DOCTOR = this.formularioAgregarEvolucion.value.DOCTOR;
       //datosParaGuradarEnEvolucion.evolucion.FIRMA = this.formularioAgregarEvolucion.value.FIRMA;
@@ -254,16 +246,17 @@ export class AgregarEvolucionComponent implements OnInit {
 
   ponerFraceProximaCita() {
     if (this.formularioAgregarEvolucion && this.fraseSeleccionada) {
-      const proximaCitaActual = this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.value || '';
-      const nuevaProximaCita = proximaCitaActual + '\n' + this.fraseSeleccionada.CONTENIDO;
-      this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(nuevaProximaCita);
-      //this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(this.fraseSeleccionada.CONTENIDO);
+        const proximaCitaActual = this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.value || '';
+        const nuevaProximaCita = proximaCitaActual 
+            ? proximaCitaActual + '\n' + this.fraseSeleccionada.CONTENIDO
+            : this.fraseSeleccionada.CONTENIDO;
+        this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(nuevaProximaCita);
     }
-  }
+}
 
 
   async cancelarEvolucion() {
-
+    this.router.navigate(['/evolucion']);
     // this.obtenerEvolucionPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);
   }
 

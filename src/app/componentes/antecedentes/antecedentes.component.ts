@@ -40,7 +40,6 @@ export class AntecedentesComponent implements OnInit{
 
     //Antecedente
     this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
-      console.log(respuestaBusquedaAntecedentes);
       this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
       this.formularioAntecedentes.patchValue(this.resultadoBusquedaAntecedentes);
       //this.formularioAntecedentes.disable();
@@ -48,8 +47,6 @@ export class AntecedentesComponent implements OnInit{
   }
 
   async obtenerAntecedentesPaciente(idAnamnesis: number) {
-    console.log(this.idSedeActualSignalR);
-    console.log(idAnamnesis);
 
     if (this.idSedeActualSignalR != '') {
       await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(this.idSedeActualSignalR, idAnamnesis.toString());
