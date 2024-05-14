@@ -1,7 +1,8 @@
-<div class="contenedor" #panelBuscarPersona >
+<div class="contenedor" #panelBuscarPersona>
 
     <mat-accordion>
-        <mat-expansion-panel #miPanelBucarCitas class="mat-expansion-panel" [disabled]="panelBuscarCitaDeshabilitado" (closed)="deshabilitarPanelBuscarCita()">
+        <mat-expansion-panel #miPanelBucarCitas class="mat-expansion-panel" [disabled]="panelBuscarCitaDeshabilitado"
+            (closed)="deshabilitarPanelBuscarCita()">
             <mat-expansion-panel-header>
 
                 <mat-panel-description class="mat-expansion-description-panel">
@@ -21,10 +22,9 @@
                                 <input type="text" placeholder="Dijita nombre, telefono o numero de historia a buscar"
                                     [formControl]="datosPacienteParaBuscarAgendaControl"
                                     [matAutocomplete]="autoDatosPacienteParaBuscarAgenda" class="example-input"
-                                    style="text-transform: uppercase;"
-                                    (keydown)="stopAccordionToggle($event)"
+                                    style="text-transform: uppercase;" (keydown)="stopAccordionToggle($event)"
                                     (input)="datosPacienteParaBuscarAgendaControl.setValue(datosPacienteParaBuscarAgendaControl.value.toUpperCase())">
-                                <mat-autocomplete #autoDatosPacienteParaBuscarAgenda="matAutocomplete" >
+                                <mat-autocomplete #autoDatosPacienteParaBuscarAgenda="matAutocomplete">
                                     <mat-option
                                         *ngFor="let datosPacienteBuscar of filteredDatosPacienteParaBuscarAgenda | async"
                                         [value]="datosPacienteBuscar.nombre">
@@ -48,7 +48,7 @@
             <!-- Aquí iría tu tabla con los resultados de la búsqueda -->
             <div class="divContenedorDatosEncontrados">
                 <div class="scrollable-content">
-                    <table mat-table [dataSource]="resultadosBusquedaCitaPacienteAgenda"  class="tablaBusquedaPaciente">
+                    <table mat-table [dataSource]="resultadosBusquedaCitaPacienteAgenda" class="tablaBusquedaPaciente">
                         <!-- Definición de las columnas de la tabla -->
 
                         <ng-container matColumnDef="fecha">
@@ -121,17 +121,9 @@
                 <input type="hidden" formControlName="sillaEditar" name="sillaEditar">
                 <input type="hidden" formControlName="nombreEditar" name="nombreEditar">
                 <div class="fila">
-                    <!-- <div class="campo-formulario historia">
-                            <select type="text" class="form-control" placeholder="Nombre" formControlName="nombre"
-                                name="nombre">
-                                <option value="" disabled selected>Nombre Paciente</option>
-                                <option *ngFor="let doc of lstDatosPacienteParaAgendar" [value]="doc.NOMBRE_PACIENTE">{{
-                                    doc.NOMBRE_PACIENTE }}</option>
-                            </select>
-                        </div> -->
+                 
                     <div class="campo-formulario historia">
-                        <input type="text" placeholder="Nombre Paciente"
-                            [formControl]="nombrePacienteParaAgendarControl"
+                        <input type="text" placeholder="Nombre Paciente" formControlName="nombre"
                             [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
                             style="text-transform: uppercase;">
                         <mat-autocomplete #autoDatosPacienteParaAgendar="matAutocomplete">
@@ -145,7 +137,7 @@
                 </div>
                 <div class="fila">
                     <div class="campo-formulario telefono">
-                        <input type="text" placeholder="Teléfono" [formControl]="telefonoPacienteParaAgendarControl"
+                        <input type="text" placeholder="Teléfono" formControlName="telefono"
                             [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
                             style="text-transform: uppercase;">
                         <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
@@ -158,23 +150,9 @@
                             </ng-container>
                         </mat-autocomplete>
                     </div>
-                    <!-- <div class="campo-formulario telefono">
-                        <input type="text" placeholder="Teléfono" [formControl]="telefonoPacienteParaAgendarControl"
-                            [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
-                            style="text-transform: uppercase;">
-                        <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
-                            <mat-option *ngFor="let telefonoPaciente of filteredTelefonoPacienteParaAgendar | async"
-                                [value]="telefonoPaciente.nombre">
-                                {{ telefonoPaciente.nombre }}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </div> -->
-                    <!-- <div class="campo-formulario telefono">
-                            <input type="tel" class="form-control" placeholder="Teléfono" formControlName="telefono"
-                                name="telefono" style="text-transform: uppercase;">
-                        </div> -->
+
                     <div class="campo-formulario telefono">
-                        <input type="text" placeholder="Celular" [formControl]="celularPacienteParaAgendarControl"
+                        <input type="text" placeholder="Celular" formControlName="celular"
                             [matAutocomplete]="autoCelularPacienteParaAgendar" class="form-control"
                             style="text-transform: uppercase;">
                         <mat-autocomplete #autoCelularPacienteParaAgendar="matAutocomplete">
@@ -187,15 +165,11 @@
                         </mat-autocomplete>
                     </div>
 
-                    <!-- <div class="campo-formulario celular">
-                            <input type="tel" class="form-control" placeholder="Celular" formControlName="celular"
-                                name="celular" style="text-transform: uppercase;">
-                        </div> -->
                 </div>
 
                 <div class="fila">
                     <div class="campo-formulario historia">
-                        <input type="text" placeholder="Doctor" [formControl]="doctorPacienteParaAgendarControl"
+                        <input type="text" placeholder="Doctor" formControlName="doctor"
                             [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
                             style="text-transform: uppercase;" (keydown)="$event.preventDefault()"
                             (click)="doctorPacienteParaAgendarControl.setValue('')">
@@ -208,18 +182,10 @@
                     </div>
 
 
-                    <!-- <div class="campo-formulario historia">
-                            <select type="text" class="form-control" placeholder="Doctor" formControlName="doctor"
-                                name="doctor" style="text-transform: uppercase;">
-                                <option value="" disabled selected>Doctor</option>
-                                <option *ngFor="let doc of lstDoctores" [value]="doc.nombre">{{ doc.nombre }}</option>
-                            </select>
-                        </div> -->
-
                 </div>
                 <div class="fila">
                     <div class="campo-formulario observaciones">
-                        <input type="text" placeholder="Historia" [formControl]="historiaPacienteParaAgendarControl"
+                        <input type="text" placeholder="Historia" formControlName="numHistoria"
                             [matAutocomplete]="autoHistoriaPacienteParaAgendar" class="form-control"
                             style="text-transform: uppercase;">
                         <mat-autocomplete #autoHistoriaPacienteParaAgendar="matAutocomplete">
@@ -247,7 +213,7 @@
                         </mat-autocomplete>
                     </div> -->
                     <div class="campo-formulario historia">
-                        <input type="text" placeholder="Duración" [formControl]="duracion"
+                        <input type="text" placeholder="Duración" formControlName="duracion"
                             [matAutocomplete]="autoDatosDuracionParaAgendar" class="form-control"
                             style="text-transform: uppercase;" (keydown)="$event.preventDefault()"
                             (click)="duracion.setValue('')">
@@ -280,6 +246,7 @@
                 <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
                     <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
                     <mat-cell *matCellDef="let intervalo" class="hora-column">
+                        <input [(ngModel)]="intervalo.OUT_CODIGO" type="hidden">
                         <input [(ngModel)]="intervalo.OUT_HORA_CITA" type="hidden">
                         <input [(ngModel)]="intervalo.OUT_ASISTENCIA" type="hidden">
                         <input [(ngModel)]="intervalo.OUT_CONFIRMAR" type="hidden">
@@ -403,8 +370,8 @@
 
 
                 <mat-header-row class="fila-superior" *matHeaderRowDef="displayedColumns"></mat-header-row>
-                
-                    <!-- contenido de la fila -->
+
+                <!-- contenido de la fila -->
                 <mat-row #row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClickedAgenda(row)"
                     [ngStyle]="{'background-color': getColor(row)}" [class.selected]="row === selectedRow"
                     [ngClass]="{'selected-row': highlightedRows.includes(row)}">

@@ -23,7 +23,7 @@
                     <div class="divFormularioFila1">
                         <mat-form-field appearance="fill" class="campoFila11" style="flex: 1;">
                             <mat-label>Fecha</mat-label>
-                            <input matInput readonly value={{evolucionPaciente.evolucion.FECHA}} placeholder="E-mail">
+                            <input matInput readonly [value]="evolucionPaciente.evolucion.FECHA | date:'dd-MM-yyyy'" placeholder="E-mail">
                         </mat-form-field>
                         <mat-form-field appearance="fill" class="campoFila1" style="flex: 1;">
                             <mat-label>Hora de entrada</mat-label>
@@ -49,9 +49,9 @@
                     <div class="divFormularioFila2">
                         <mat-form-field appearance="fill" class="campoFila2">
                             <mat-label>Evolucion</mat-label>
-                            <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3"
-                                matAutosizeMaxRows="6" value={{evolucionPaciente.evolucion.EVOLUCION}}
-                                placeholder="Evolucion"></textarea>
+                            <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="8"
+                                matAutosizeMaxRows="10" [value]="evolucionPaciente.evolucion.EVOLUCION"
+                                placeholder="Evolucion" style="min-height: 140px;"></textarea>
                         </mat-form-field>
                     </div>
                     

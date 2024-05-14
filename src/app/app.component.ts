@@ -44,10 +44,8 @@ export class AppComponent implements OnInit {
       this.usuarioActual = value;
       this.sedes = await this.sedesService.ConsultarPorIdCliente(this.usuarioActual.idCliente.toString());
       this.sedesConectadas = await this.sedesConectadasService.ConsultarSedesConectadasActivasPorCliente(this.usuarioActual.idCliente.toString());
-      console.log(this.sedes);
     });
     this.respuestaPinService.idSedeActualSignalREmit.subscribe(async (value: string) => {
-      console.log(value);
       this.idSedeActualSignalR = value;
     });
   }

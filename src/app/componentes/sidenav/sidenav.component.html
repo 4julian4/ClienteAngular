@@ -65,7 +65,7 @@
      style="display: flex; align-items: center;">
   <mat-label>Seleccione Doctor</mat-label>
   <div style="display: flex; flex-direction: column; align-items: center; margin-left: 30px;">
-    <mat-select [(value)]="doctorSeleccionado" (selectionChange)="onDoctorSeleccionado($event.value)"
+    <mat-select #selectDoctorSeleccionado [(value)]="doctorSeleccionado" (selectionChange)="onDoctorSeleccionado($event.value)"
                 style="min-width: 150px;">
       <mat-option *ngFor="let doctor of lstDoctores" [value]="doctor.id">{{doctor.nombre}}</mat-option>
     </mat-select>

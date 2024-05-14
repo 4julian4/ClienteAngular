@@ -95,4 +95,8 @@ export class AgregarFirmasComponent implements AfterViewInit {
     }
   }
 
+  cancelarFirmar() {
+    this.router.navigate(['/agregar-evolucion']);
+  }
+
 }

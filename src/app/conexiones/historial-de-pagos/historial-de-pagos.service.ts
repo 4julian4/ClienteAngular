@@ -16,7 +16,6 @@ export  class HistorialDePagosService {
   
   public Get(idHistorialDePago : string): Observable<HistorialDePagos>{ 
     let url = urlPage + "/" + idHistorialDePago; 
-    console.log(url);  
     let obj =this.httpClient.get<HistorialDePagos>(url, environment.httpOptions);
     return obj;
   }

@@ -95,18 +95,12 @@ export class EstadoCuentaComponent implements OnInit {
 
     this.respuestaConsultarEstadoCuentaService.respuestaConsultarEstadoCuentaEmit.subscribe(async (respuestaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta) => {
       this.resultadoConsultaEstadoCuenta = respuestaConsultarEstadoCuenta;
-      console.log(this.resultadoConsultaEstadoCuenta);
       this.mostrarMensajeSinEstadoCuenta=false;
-      console.log(this.mostrarMensajeSinEstadoCuenta);
       if (this.resultadoConsultaEstadoCuenta.mensajeSinTratamiento) {
         this.mostrarMensajeSinEstadoCuenta=true;
-        console.log(this.mostrarMensajeSinEstadoCuenta);
       }
       else {
-        console.log(this.mostrarMensajeSinEstadoCuenta);
         this.lstFases = this.resultadoConsultaEstadoCuenta.lstFases!.map(id => ({ id: Number(id) }));
-        console.log(this.lstFases)
-        console.log(this.resultadoConsultaEstadoCuenta);
         this.selectedFase=this.resultadoConsultaEstadoCuenta.FASE ?? 0;
         this.resultadosBusquedaEstadoCuentaSinFinanciar = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA!;
         this.resultadosBusquedaEstadoCuentaFinanciado = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA!;
@@ -122,7 +116,6 @@ export class EstadoCuentaComponent implements OnInit {
         this.lstRespuestaSaldoPorDoctor = this.resultadoConsultaEstadoCuenta.RespuestaSaldoPorDoctor ?? [];
         this.lstRespuestaEstadoCuentaPorPaciente = this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTAPACIENTE ?? [];
         this.lstRespuestaEstadoCuentaPorPacientePorDoctor = this.lstRespuestaEstadoCuentaPorPaciente.filter(item => item.NOMBRE_DOCTOR === this.doctorSeleccionado);
-        console.log(this.lstRespuestaEstadoCuentaPorPacientePorDoctor);
       }
     });
     
@@ -136,23 +129,17 @@ export class EstadoCuentaComponent implements OnInit {
 
   onFaseChange(event: any) {
     this.buscarEstadoCuenta();
-    console.log(this.selectedFase);
   }
 
   
 
   async buscarEstadoCuenta() {
-    console.log(this.idSedeActualSignalR);
-    console.log(this.idAnamnesisPacienteSeleccionado);
-    console.log(this.idDoctor);
     this.fase = this.selectedFase;
-    console.log(this.fase);
     //let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
     let objDatosParaDatosParaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta = new RespuestaConsultarEstadoCuenta();
     objDatosParaDatosParaConsultarEstadoCuenta.ID = this.idAnamnesisPacienteSeleccionado;
     objDatosParaDatosParaConsultarEstadoCuenta.IDDOCTOR = this.idDoctor;
     objDatosParaDatosParaConsultarEstadoCuenta.FASE = this.fase;
-    console.log(objDatosParaDatosParaConsultarEstadoCuenta);
     //lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
     //await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     await this.respuestaConsultarEstadoCuentaService.startConnectionRespuestaConsultarEstadoCuenta(this.idSedeActualSignalR, JSON.stringify(objDatosParaDatosParaConsultarEstadoCuenta));

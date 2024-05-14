@@ -70,7 +70,6 @@ export class RipsComponent implements OnInit {
     this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
         this.doctorSeleccionado = data;
-        console.log(this.doctorSeleccionado);
       }
     });
     this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
@@ -136,10 +135,8 @@ export class RipsComponent implements OnInit {
 
         //obtenemos diagnpsticos principales para aplicar Rips
         this.listaConsultas = data;
-        console.log(this.listaConsultas);
         this.lstConsultas = this.listaConsultas.lstConsultas
           .map(item => ({ id: item.CODIGO ? item.CODIGO : '', nombre: item.NOMBRE ? item.NOMBRE : '' }));
-        console.log(this.lstConsultas);
 
         this.filteredDiagnosticoPrincipal = this.diagnosticoPrincipalControl.valueChanges
           .pipe(
@@ -208,7 +205,6 @@ export class RipsComponent implements OnInit {
 
     this.ripsService.respuestaDatosGuardarRipsEmit.subscribe(async (respuestaGuardarRips: boolean) => {
       this.resultadoGuardarRips = respuestaGuardarRips;
-      console.log(this.resultadoGuardarRips + " resultado guardar rips");
     });
     this.inicializarFormulario();
   }
@@ -220,7 +216,6 @@ export class RipsComponent implements OnInit {
   }
 
   private _filterCodigo(value: string, list: { id: string, nombre: string }[]): { id: string, nombre: string }[] {
-    console.log(value);
     const filterValue = value ? value.toLowerCase() : '';
 
     return list.filter(option => option.id.toLowerCase().includes(filterValue));
@@ -309,7 +304,6 @@ export class RipsComponent implements OnInit {
   cancelarGuardarRips() { }
   async guardarRips() {
     if (this.idSedeActualSignalR != '') {
-      //   console.log(this.idSedeActualSignalR);
       let datosParaGurdarRips: DatosGuardarRips = new DatosGuardarRips();
       datosParaGurdarRips.IDANAMNESIS = this.idAnamnesisPacienteSeleccionado;
       let doctor = this.lstDoctores.find(x => x.nombre === this.doctorSeleccionado);

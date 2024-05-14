@@ -15,7 +15,6 @@ export  class HistorialesService {
   
   public Get(idHistorial : string): Observable<Historiales>{ 
     let url = urlPage + "/" + idHistorial; 
-    console.log(url);  
     let obj =this.httpClient.get<Historiales>(url, environment.httpOptions);
     return obj;
   }

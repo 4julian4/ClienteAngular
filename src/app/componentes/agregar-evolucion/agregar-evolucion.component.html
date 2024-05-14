@@ -4,6 +4,29 @@
         <!-- NOMBRES y APELLIDOS -->
         <div class="divFormularioFila1">
             <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Fecha</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="FECHA" placeholder="Choose a date">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Hora de entrada</mat-label>
+                <input matInput [ngxTimepicker]="myTimepicker1" formControlName="HORA"
+                    placeholder="Selecciona una hora">
+                <ngx-material-timepicker-toggle matSuffix [for]="myTimepicker1"></ngx-material-timepicker-toggle>
+                <ngx-material-timepicker #myTimepicker1></ngx-material-timepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Hora de salida</mat-label>
+                <input matInput [ngxTimepicker]="myTimepicker2" formControlName="HORA_FIN"
+                    placeholder="Selecciona una hora">
+                <ngx-material-timepicker-toggle matSuffix [for]="myTimepicker2"></ngx-material-timepicker-toggle>
+                <ngx-material-timepicker #myTimepicker2></ngx-material-timepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="campoFila1">
                 <mat-label>Atendido por</mat-label>
                 <mat-select formControlName="DOCTOR">
                     <mat-option *ngFor="let doctor of lstDoctores" [value]="doctor.nombre">
@@ -13,59 +36,41 @@
             </mat-form-field>
         </div>
 
-
         <div class="divFormularioFila2">
+
             <mat-form-field appearance="fill" class="campoFila2">
                 <mat-label>Anotacion</mat-label>
                 <input matInput formControlName="NOTA" placeholder="Anotacion">
             </mat-form-field>
-        
+
             <mat-form-field appearance="fill" class="campoFila2">
                 <mat-label>Plantilla</mat-label>
-                <mat-select [(value)]="fraseSeleccionada" (selectionChange)="onSelectionChange($event)" formControlName="COMPLICACION">
+                <mat-select [(value)]="fraseSeleccionada" (selectionChange)="onSelectionChange($event)"
+                    formControlName="COMPLICACION">
                     <mat-option *ngFor="let frase of listaFrasesXEvolucion" [value]="frase">
                         {{ frase.TITULO }}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                
-                <button mat-button color="primary" style="margin-left: 10px; height: 24px; line-height: 24px; padding: 0 8px;" (click)="ponerFraceEvolucion()">T</button>
-                <button mat-button color="primary" style="margin-left: 10px; height: 24px; line-height: 24px; padding: 0 8px;" (click)="ponerFraceProximaCita()">P</button>
+
+                <button mat-button color="primary"
+                    style="margin-left: 10px; height: 24px; line-height: 24px; padding: 0 4px; min-width: 24px;"
+                    (click)="ponerFraceEvolucion()">T</button>
+                <button mat-button color="primary"
+                    style="margin-left: 10px; height: 24px; line-height: 24px; padding: 0 4px; min-width: 24px;"
+                    (click)="ponerFraceProximaCita()">P</button>
             </div>
         </div>
 
-        <div class="divFormularioFila2">
-            <mat-form-field appearance="fill" class="campoFila2">
-                <mat-label>Fecha</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="FECHA" placeholder="Choose a date">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
 
-            <mat-form-field appearance="fill" class="campoFila2">
-                <mat-label>Hora de entrada</mat-label>
-                <input matInput [ngxTimepicker]="myTimepicker1" formControlName="HORA" 
-                    placeholder="Selecciona una hora">
-                <ngx-material-timepicker-toggle matSuffix [for]="myTimepicker1"></ngx-material-timepicker-toggle>
-                <ngx-material-timepicker #myTimepicker1></ngx-material-timepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="campoFila2">
-                <mat-label>Hora de salida</mat-label>
-                <input matInput [ngxTimepicker]="myTimepicker2" formControlName="HORA_FIN"
-                    placeholder="Selecciona una hora" >
-                <ngx-material-timepicker-toggle matSuffix [for]="myTimepicker2"></ngx-material-timepicker-toggle>
-                <ngx-material-timepicker #myTimepicker2></ngx-material-timepicker>
-            </mat-form-field>
-        </div>
 
         <div class="divFormularioFila3">
             <mat-form-field appearance="fill" class="campoFila3">
                 <mat-label>Tratamiento</mat-label>
                 <textarea #tratamiento matInput matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
-                     formControlName="EVOLUCION" placeholder="Tratamiento"></textarea>
-                
+                    formControlName="EVOLUCION" style="min-height: 130px;" placeholder="Tratamiento"></textarea>
+
             </mat-form-field>
         </div>
 
@@ -105,7 +110,7 @@
 
     <div class="divContenedorDeBotones">
         <button class="BotonGuardar" mat-raised-button (click)="guardarEvolucion()">Guardar Evolucion</button>
-        <button class="BotonFirmar" mat-raised-button (click)="agregarFirmas()">Agregar firmar</button>
+        <button class="BotonFirmar" mat-raised-button (click)="agregarFirmas()">Agregar Firma</button>
         <button class="BotonCancelar" mat-raised-button (click)="cancelarEvolucion()">Cancelar</button>
     </div>
 </form>

@@ -39,7 +39,6 @@ export class SignalRService {
   async obtenerPin(clienteId: string, pin: string) {
     await this.hubConnection.invoke('ObtenerPin', clienteId, pin)
       .catch(err => console.error(err));
-      console.log('ObtenerPin');
   }
 
   async enviarMensaje(mensaje: string) {
