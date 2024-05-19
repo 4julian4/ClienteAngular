@@ -59,19 +59,22 @@
                 <mat-option *ngFor="let sede of sedes" [value]="sede.idSede">{{sede.nombreSede}}</mat-option>
             </mat-select>
         </div>
+        <button (click)="cerrarSession()">
+            Cerrar sesión
+        </button>
 
         <!-- Select de Doctores -->
         <div class="mostrarDoctores" *ngIf="mostrarDoctores" fxLayoutGap="30px"
-     style="display: flex; align-items: center;">
-  <mat-label>Seleccione Doctor</mat-label>
-  <div style="display: flex; flex-direction: column; align-items: center; margin-left: 30px;">
-    <mat-select #selectDoctorSeleccionado [(value)]="doctorSeleccionado" (selectionChange)="onDoctorSeleccionado($event.value)"
-                style="min-width: 150px;">
-      <mat-option *ngFor="let doctor of lstDoctores" [value]="doctor.id">{{doctor.nombre}}</mat-option>
-    </mat-select>
-    <mat-label style="font-size: small;">{{totalPacientesDoctorSeleccionado}} Pacientes</mat-label>
-  </div>
-</div>
+            style="display: flex; align-items: center;">
+            <mat-label>Seleccione Doctor</mat-label>
+            <div style="display: flex; flex-direction: column; align-items: center; margin-left: 30px;">
+                <mat-select #selectDoctorSeleccionado [(value)]="doctorSeleccionado"
+                    (selectionChange)="onDoctorSeleccionado($event.value)" style="min-width: 150px;">
+                    <mat-option *ngFor="let doctor of lstDoctores" [value]="doctor.id">{{doctor.nombre}}</mat-option>
+                </mat-select>
+                <mat-label style="font-size: small;">{{totalPacientesDoctorSeleccionado}} Pacientes</mat-label>
+            </div>
+        </div>
         <!-- <div class="mostrarDoctores" *ngIf="mostrarDoctores" fxLayoutGap="30px"
             style="display: flex; align-items: center;">
             <mat-label>Seleccione Doctor</mat-label>
@@ -156,10 +159,7 @@
         <div style="display: flex; align-items: center;">
             <div style="display: flex; align-items: center;">
 
-                <mat-label>Correo Electrónico</mat-label>
-                <input matInput type="email" [(ngModel)]="correo">
-
-                <button mat-raised-button color="primary" (click)="iniciarSesion()">Iniciar Sesión</button>
+                <app-login></app-login>
             </div>
         </div>
     </mat-toolbar>

@@ -19,6 +19,7 @@ import { BuscarHitoriaClinicaComponent } from '../buscar-hitoria-clinica';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { Subscription } from 'rxjs';
+import { LoginService } from '../login';
 
 
 @Component({
@@ -59,6 +60,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
     private overlay: OverlayContainer,
     private usuariosService: UsuariosService,
     private signalRService: SignalRService,
+    private loginService : LoginService,
     private respuestaObtenerDoctorService: RespuestaObtenerDoctorService,
     private respuestaPinService: RespuestaPinService,
     private mensajesUsuariosService: MensajesUsuariosService,
@@ -102,6 +104,20 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
       }
     });
+    this.logeado = false;
+    if (this.loginService.IsSingned()){
+      let loginToken = this.loginService.decodeToken();
+      if (loginToken && loginToken.id){
+        this.logeado = true;
+        let usuario = await this.usuariosService.Get(loginToken.id);
+        if (usuario.idUsuario != undefined) {
+          this.usuariosService.outUsuario.emit(usuario);
+          // this.router.navigate(['/']);
+        }
+
+      }
+
+    }
 
 
 
@@ -156,6 +172,10 @@ export class SidenavComponent implements OnInit, OnDestroy {
   }
   setMostrarBuscarHistoriaClinica(value: boolean) {
     this.mostrarBuscarHistoriaClinica = value;
+  }
+
+  cerrarSession(){
+    this.loginService.signOut();
   }
 
 

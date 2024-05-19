@@ -68,6 +68,11 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+            "ssl": true,
+            "sslKey": "C:\\TrabajoCliente\\Rydent\\RydentWebAngular\\ClienteAngular\\dev.key",
+            "sslCert": "C:\\TrabajoCliente\\Rydent\\RydentWebAngular\\ClienteAngular\\dev.crt"
+          },
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
