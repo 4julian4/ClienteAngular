@@ -3,12 +3,12 @@ export class RespuestaDatosAdministrativos {
     public fechaFin?: Date;
     public pacientesAsistieron?: number;
     public pacientesNuevos?: number;
-    public tratamientosActivos?: string;
+    public tratamientosActivos?: number;
     public pacientesAbonaron?: number;
-    public PacientesMora?: string;
-    public PacientesNoAsistieron?: string;
-    public citasCanceladas?: string;
-    public pacientesInicianTratamiento?: string;
+    public pacientesMora?: number;
+    public pacientesNoAsistieron?: number;
+    public citasCanceladas?: number;
+    public pacientesInicianTratamiento?: number;
     public carteraTotal?: number;
     public moraTotal?: number;
     public totalIngresos?: number;

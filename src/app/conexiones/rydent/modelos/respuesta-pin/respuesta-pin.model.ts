@@ -8,6 +8,7 @@ import { FrasesXEvolucion } from "../../tablas/frases-xevolucion";
 import { TConfiguracionesRydent } from "../../tablas/tconfiguraciones-rydent";
 import { TFestivos } from "../../tablas/tfestivos";
 import { THorariosAgenda } from "../../tablas/thorarios-agenda";
+import { THorariosAsuntos } from "../../tablas/thorarios-asuntos";
 
 export class RespuestaPin {
     clave:Clave = new Clave();
@@ -19,6 +20,7 @@ export class RespuestaPin {
     lstCiudades : CodigosCiudades [] = [];
     lstFrasesXEvolucion : FrasesXEvolucion[] = [];
     lstHorariosAgenda : THorariosAgenda[] = [];
+    lstHorariosAsuntos : THorariosAsuntos[] = [];
     lstFestivos : TFestivos[] = [];
     lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
     lstAnamnesisParaAgendayBuscadores?: RespuestaDatosPacientesParaLaAgenda[];
