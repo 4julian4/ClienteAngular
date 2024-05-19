@@ -13,9 +13,17 @@ Chart.register(PieController, LineController,PointElement, LineElement, LinearSc
 })
 export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
   idSedeActualSignalR: string = '';
-  resultadoDatosAdministrativos: RespuestaDatosAdministrativos[] = [];
+  resultadoDatosAdministrativos!: RespuestaDatosAdministrativos;
+  
   fechaInicio!: Date;
   fechaFin!: Date;
+  pacientesAsistieron!: number;
+  pacientesNuevos!: number;
+  pacientesNoAsistieron!: number;
+  citasCanceladas!: number;
+  pacientesAbonaron!: number;
+  totalPacientes!: number;
+  pieChart?: Chart<'pie', number[], string>;
 
 
   constructor(
@@ -30,13 +38,24 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
       }
     });
     
-    this.respuestaDatosAdministrativosService.respuestaDatosAdministrativosEmit.subscribe(async (respuestaDatosAdministrativos: RespuestaDatosAdministrativos[]) => {
+    this.respuestaDatosAdministrativosService.respuestaDatosAdministrativosEmit.subscribe(async (respuestaDatosAdministrativos: RespuestaDatosAdministrativos) => {
       this.resultadoDatosAdministrativos = respuestaDatosAdministrativos;
+      console.log(this.resultadoDatosAdministrativos);
+      this.pacientesAsistieron = this.resultadoDatosAdministrativos.pacientesAsistieron ?? 0;
+      this.pacientesNuevos = this.resultadoDatosAdministrativos.pacientesNuevos ?? 0;
+      this.pacientesNoAsistieron = this.resultadoDatosAdministrativos.pacientesNoAsistieron ?? 0;
+      this.citasCanceladas = this.resultadoDatosAdministrativos.citasCanceladas ?? 0;
+      this.pacientesAbonaron = this.resultadoDatosAdministrativos.pacientesAbonaron ?? 0;
+      console.log(this.pacientesAsistieron);
+      console.log(this.citasCanceladas);
+      console.log(this.pacientesNoAsistieron);
+      this.totalPacientes = this.pacientesAsistieron + this.pacientesNoAsistieron + this.citasCanceladas;
+      this.initPieChart();
     });
   }
 
   ngAfterViewInit(): void {
-    this.initPieChart();
+    
     this.initBarChart();
     this.initLineChart();
   }
@@ -84,28 +103,32 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
       console.error('No se pudo obtener el contexto 2D del canvas.');
       return;
     }
-
-    new Chart(pieChartCtx, {
+    if (this.pieChart) {
+      this.pieChart.destroy();
+    }
+    this.pieChart = new Chart(pieChartCtx, {
       type: 'pie',
       data: {
-        labels: ['Atendidos', 'En Mora', 'Pendientes'],
+        labels: ['Asistieron '+this.pacientesAsistieron, 'No Asistieron '+this.pacientesNoAsistieron, 'Cancelaron '+this.citasCanceladas],
         datasets: [{
-          data: [300, 50, 100],
+          data: [this.pacientesAsistieron, this.pacientesNoAsistieron, this.citasCanceladas],
           backgroundColor: [
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(255, 206, 86, 0.2)'
+            '#4BC0C0',
+            '#FF6384',
+            '#FFCE56'
           ],
           borderColor: [
-            'rgba(75, 192, 192, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(255, 206, 86, 1)'
+            '#4BC0C0',
+            '#FF6384',
+            '#FFCE56'
           ],
           borderWidth: 1
         }]
       },
       options: {
-        // Tus opciones aquí...
+        animation: {
+          animateScale: true
+        }
       }
     });
   }
@@ -155,5 +178,6 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
 
   async consultarDatosAdministrativos(fechaInicio: Date, fechaFin: Date) {
     await this.respuestaDatosAdministrativosService.startConnectionRespuestaDatosAdministrativos(this.idSedeActualSignalR, fechaInicio, fechaFin);
+    
   }
 }

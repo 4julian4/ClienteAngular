@@ -65,7 +65,7 @@ export class MensajesUsuariosService {
     });
   }
 
-  async mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace(mensaje: string): Promise<{ resultado: boolean, mensajeParaGuardar: string, opcionSeleccionadaMensaje: string }> {
+  async mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace(mensaje: string, fechaCita: Date, horaCita: Date): Promise<{ resultado: boolean, mensajeParaGuardar: string, opcionSeleccionadaMensaje: string }> {
     return await this.openDialogModal({
       name: 'Usuario',
       mensaje: mensaje,
@@ -76,10 +76,12 @@ export class MensajesUsuariosService {
       mostrarCampoTexto: true,
       mostrarSelect: false,
       mostrarSelectCitaCancelada: true,
+      fechaCita: fechaCita,
+      horaCita: horaCita
     });
   }
 
-  async mensajeConfirmarSiNoIngresarEvolucion(mensaje: string): Promise<{ resultado: boolean, mensajeParaGuardar: string, opcionSeleccionadaMensaje: string }> {
+  async mensajeConfirmarSiNoIngresarEvolucion(mensaje: string, mensajePorDefecto: string = ''): Promise<{ resultado: boolean, mensajeParaGuardar: string, opcionSeleccionadaMensaje: string }> {
     return await this.openDialogModal({
       name: 'Usuario',
       mensaje: mensaje,
@@ -90,6 +92,7 @@ export class MensajesUsuariosService {
       mostrarCampoTexto: true,
       mostrarSelect: false,
       mostrarSelectCancelarCita: false,
+      mensajeParaGuardar: mensajePorDefecto,
     });
   }
 

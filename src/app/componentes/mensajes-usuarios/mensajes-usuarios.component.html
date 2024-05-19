@@ -3,7 +3,7 @@
   <p>{{data.mensaje}}</p>
   <div class="dialog-form-fields">
     <mat-form-field *ngIf="data.mostrarCampoTexto" class="dialog-form-field">
-      <textarea matInput placeholder="Observacion" [(ngModel)]="mensajeParaGuardar"></textarea>
+      <textarea matInput placeholder="Observacion" [(ngModel)]="data.mensajeParaGuardar"></textarea>
     </mat-form-field>
     <mat-form-field *ngIf="data.mostrarSelect" class="dialog-form-field">
       <mat-label>Alarma</mat-label>
@@ -11,12 +11,12 @@
         <mat-option value="si">Sí</mat-option>
         <mat-option value="no">No</mat-option>
       </mat-select>
-    </mat-form-field>
+    </mat-form-field> 
     
 
     <mat-form-field *ngIf="data.mostrarSelectCitaCancelada" class="dialog-form-field">
       <mat-label>Quien Cancela</mat-label>
-      <mat-select [(ngModel)]="opcionSeleccionadaMensaje">
+      <mat-select [(ngModel)]="opcionSeleccionadaMensaje"(selectionChange)="onSelectionChange($event)">
         <mat-option value="PACIENTE">PACIENTE</mat-option>
         <mat-option *ngFor="let doc of lstDoctores" [value]="doc.nombre">{{ doc.nombre }}</mat-option>
       </mat-select>

@@ -111,17 +111,14 @@
                 <mat-calendar #miCalendario [(selected)]="fechaSeleccionada"
                     (selectedChange)="cambiarFecha()"></mat-calendar>
             </div>
-            <!-- <div class="divBotonAgendarCita">
-                    <button class="boton-agendar" (click)="toggleFormVisibility()">Agendar Cita</button>
-
-                </div> -->
+            <!-- Formulario para agendar la cita -->
             <form *ngIf="showForm" class="formulario-cita" [formGroup]="formularioAgregarCita">
                 <input type="hidden" formControlName="fechaEditar" name="fechaEditar">
                 <input type="hidden" formControlName="horaEditar" name="horaEditar">
                 <input type="hidden" formControlName="sillaEditar" name="sillaEditar">
                 <input type="hidden" formControlName="nombreEditar" name="nombreEditar">
                 <div class="fila">
-                 
+
                     <div class="campo-formulario historia">
                         <input type="text" placeholder="Nombre Paciente" formControlName="nombre"
                             [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
@@ -224,16 +221,27 @@
                         </mat-autocomplete>
                     </div>
                 </div>
-                <div class="fila">
+
+                <div class="campo-formulario observaciones">
+                    <input type="text" placeholder="Asunto" formControlName="observaciones"
+                        [matAutocomplete]="autoDatosAsuntoParaAgendar" class="form-control"
+                        style="text-transform: uppercase;" (keydown)="$event.preventDefault()">
+                    <mat-autocomplete #autoDatosAsuntoParaAgendar="matAutocomplete">
+                        <mat-option *ngFor="let item of listaHorariosAsuntosPorSilla" [value]="item.ASUNTO">
+                            {{ item.ASUNTO }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </div>
+                <!-- <div class="fila">
                     <div class="campo-formulario observaciones">
                         <input type="text" class="form-control" placeholder="Asunto" formControlName="observaciones"
                             name="observaciones" style="text-transform: uppercase;">
                     </div>
-                </div>
+                </div> -->
 
                 <div class="fila">
                     <button class="boton-generar-cita" (click)="agendarCita()">Agendar</button>
-                    <button class="boton-generar-cita" (click)="editarCita()">Cancelar</button>
+                    <button class="boton-generar-cita" (click)="limpiarDatos()">Cancelar</button>
                 </div>
             </form>
         </div>
@@ -243,7 +251,7 @@
             <mat-table #myTable class="tabla-horarios" [dataSource]="resultadosBusquedaAgendaPorFecha">
 
                 <!-- Hora Column -->
-                <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
+                <!-- <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
                     <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
                     <mat-cell *matCellDef="let intervalo" class="hora-column">
                         <input [(ngModel)]="intervalo.OUT_CODIGO" type="hidden">
@@ -253,8 +261,19 @@
                         <input [(ngModel)]="intervalo.OUT_ALARMAR" type="hidden">
                         {{fechaHoraHelperService.convertirHora(intervalo.OUT_HORA)}}
                     </mat-cell>
+                </ng-container> -->
+                <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
+                    <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo" class="hora-column"
+                        (click)="onHoraClicked($event, intervalo)">
+                        <input [(ngModel)]="intervalo.OUT_CODIGO" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_HORA_CITA" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_ASISTENCIA" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_CONFIRMAR" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_ALARMAR" type="hidden">
+                        {{fechaHoraHelperService.convertirHora(intervalo.OUT_HORA)}}
+                    </mat-cell>
                 </ng-container>
-
 
                 <ng-container class="otro-Campo" matColumnDef="OUT_NOMBRE">
                     <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
@@ -304,38 +323,7 @@
                     </mat-cell>
                 </ng-container>
 
-                <!-- <ng-container class="otro-Campo-no-mostrar" hideColumn matColumnDef="OUT_HORA_CITA" >
-                    <mat-header-cell *matHeaderCellDef> Hora Cita </mat-header-cell>
-                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_HORA_CITA" placeholder="" >
-                    </mat-cell>
-                </ng-container> 
 
-                <ng-container class="otro-Campo-no-mostrar" hideColumn matColumnDef="OUT_ASISTENCIA" >
-                    <mat-header-cell *matHeaderCellDef> Asistencia </mat-header-cell>
-                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_ASISTENCIA" placeholder="" >
-                    </mat-cell>
-                </ng-container>
-
-                <ng-container class="otro-Campo-no-mostrar" hideColumn matColumnDef="OUT_CONFIRMAR" >
-                    <mat-header-cell *matHeaderCellDef> Confirmar </mat-header-cell>
-                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_CONFIRMAR" placeholder="" >
-                    </mat-cell>
-                </ng-container>
-
-                <ng-container class="otro-Campo-no-mostrar" hideColumn matColumnDef="OUT_ALARMAR" >
-                    <mat-header-cell *matHeaderCellDef> Alarmar </mat-header-cell>
-                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_ALARMAR" placeholder="" >
-                    </mat-cell>
-                </ng-container> -->
-
-
-                <!-- <mat-menu #rowMenu="matMenu">
-                        <button mat-menu-item (click)="agendarCita()">Agregar</button>
-                        <button mat-menu-item (click)="editarCita()">Editar</button>
-                        <button mat-menu-item (click)="borrarCita()">Borrar</button>
-                        <button mat-menu-item (click)="confirmarCita()">Confirmar</button>
-                        <button mat-menu-item (click)="asistencia()">Confirmar</button>
-                    </mat-menu> -->
 
                 <mat-menu #rowMenu="matMenu">
                     <button mat-menu-item [matMenuTriggerFor]="confirmarMenu">Confirmar</button>

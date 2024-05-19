@@ -15,18 +15,25 @@
         box-sizing: border-box;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        // box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         background-color: #fff;
         transition: transform 0.3s ease; // Agrega una transición para el hover effect
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        margin: 10px; // Añade un poco de margen para separar las tarjetas
+
 
         &:hover {
             transform: scale(1.02); // Agrega un hover effect para hacer las tarjetas más interactivas
         }
 
         h2 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #333;
+            //font-size: 20px;
+            //margin-bottom: 15px;
+            //color: #333;
+            font-family: 'Arial', sans-serif; // Cambia la fuente a algo más atractivo
+            font-size: 24px; // Aumenta el tamaño de la fuente
+            color: #555; // Oscurece el color para que sea más legible
         }
 
         .metrics {
@@ -51,17 +58,24 @@
             //flex: 1 0 calc(25% - 20px);
             width: calc(25% - 20px);
         }
+
         .number-display {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3em; // Ajusta esto a lo que necesites
-            height: 100%;
-            width: 100%;
+            font-size: 1.5em; // Ajusta el tamaño de la fuente
+            height: 40px; // Ajusta la altura
+            width: auto; // Ajusta el ancho para que se ajuste al contenido
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 60px; // Ajusta la posición desde la parte superior. Aumenta este valor si el título es más grande.
+            left: 50%; // Centra el total horizontalmente
+            transform: translateX(-50%); // Asegura que el total esté centrado
+            background-color: rgba(0, 183, 255, 0.8); // Añade un color de fondo que coincide con los colores del gráfico de pastel
+            color: #fff; // Cambia el color del texto a blanco
+            padding: 0 10px; // Añade un poco de espacio a los lados del texto
         }
+
+        
     }
 
     .date-range-form {
@@ -88,49 +102,48 @@
     .pacientes-atendidos {
         background-color: #C8FACD;
     }
-    
+
     .pacientes-nuevos {
         background-color: #B2F7EF;
     }
-    
+
     .pacientes-terminaron {
         background-color: #A6E3E9;
     }
-    
+
     .pacientes-abonaron {
         background-color: #AEE1E1;
     }
-    
+
     .pacientes-mora {
         background-color: #AED9E0;
     }
-    
+
     .pacientes-inasistentes {
         background-color: #AEC3B0;
     }
-    
+
     .pacientes-cancelaron {
         background-color: #AEB7BA;
     }
-    
+
     .pacientes-inician-tratamiento {
         background-color: #B4AED9;
     }
-    
+
     .total-mora {
         background-color: #D6BEF4;
     }
-    
+
     .total-egresos {
         background-color: #E4B1F4;
     }
-    
+
     .total-ingresos {
         background-color: #E8B5CE;
     }
-    
+
     .total-caja {
         background-color: #EAB8C3;
     }
 }
-
