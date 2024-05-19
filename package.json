@@ -25,6 +25,7 @@
     "chart.js": "^4.4.2",
     "html2canvas": "^1.4.1",
     "install": "^0.13.0",
+    "jwt-decode": "^4.0.0",
     "ng-pick-datetime": "^7.0.0",
     "ng2-datetime-picker": "^0.15.1",
     "ngx-material-timepicker": "^13.1.1",

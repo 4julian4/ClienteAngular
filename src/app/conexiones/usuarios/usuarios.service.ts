@@ -14,10 +14,10 @@ export class UsuariosService {
   _Usuarios?: Usuarios[];
   constructor(private httpClient: HttpClient) { }
 
-  public Get(idUsuario: string): Observable<Usuarios> {
+  public async Get(idUsuario: string): Promise<Usuarios> {
     let url = urlPage + "/" + idUsuario;
     let obj = this.httpClient.get<Usuarios>(url, environment.httpOptions);
-    return obj;
+    return await lastValueFrom(obj);
   }
 
   public async ConsultarPorCorreo(correoUsuario: string): Promise<Usuarios> {

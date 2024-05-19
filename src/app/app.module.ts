@@ -14,7 +14,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTabsModule } from '@angular/material/tabs';
 
 
+import { LoginComponent } from './componentes/login/login.component';
 import { SpinnerComponent } from './componentes/spinner/spinner.component';
+import { httpLoadingInterceptorInterceptor } from './componentes/spinner/http-loading-interceptor.interceptor';
 import { SidenavComponent } from './componentes/sidenav/sidenav.component';
 import { PedirPinComponent } from './componentes/pedir-pin/pedir-pin.component';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -58,6 +60,7 @@ export const MY_DATE_FORMATS = {
 @NgModule({
   declarations: [
     AppComponent,
+    LoginComponent,
     SpinnerComponent,
     SidenavComponent,
     //PedirPin,
@@ -106,6 +109,7 @@ export const MY_DATE_FORMATS = {
     DatePipe,
     { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
     { provide: DateAdapter, useClass: NativeDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: HTTP_INTERCEPTORS, useClass: httpLoadingInterceptorInterceptor, multi: true },
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
 ],
   bootstrap: [AppComponent],

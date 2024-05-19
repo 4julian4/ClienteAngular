@@ -11,8 +11,12 @@ import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clin
 import { EstadoCuentaComponent } from './componentes/estado-cuenta';
 import { RipsComponent } from './componentes/rips';
 import { DatosAdministrativosComponent } from './componentes/datos-administrativos';
+import { LoginCallbackGoogleComponent } from './componentes/login-callback-google';
+import { LoginCallBackComponent } from './componentes/login-call-back';
 
 const routes: Routes = [
+  {path: 'auth/login-callback', component: LoginCallBackComponent },
+  {path: 'auth/login-callback-google', component: LoginCallbackGoogleComponent },
   {path: 'datos-personales', component: DatosPersonalesComponent},
   {path: 'antecedentes', component: AntecedentesComponent},
   {path: 'evolucion', component: EvolucionComponent},
