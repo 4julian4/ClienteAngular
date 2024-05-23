@@ -29,8 +29,9 @@ jobs:
       
       - name: Compress artifact
         run: |
-          zip -r build-artifact.zip dist
+          7z a -r build-artifact.zip dist
         if: always()
+
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
