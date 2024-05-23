@@ -37,6 +37,7 @@
         }
 
         .metrics {
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -60,20 +61,18 @@
         }
 
         .number-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            color: #fff;
+            background-color: rgba(0, 183, 255, 0.8);
+            padding: 0 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5em; // Ajusta el tamaño de la fuente
-            height: 40px; // Ajusta la altura
-            width: auto; // Ajusta el ancho para que se ajuste al contenido
-            position: absolute;
-            top: 60px; // Ajusta la posición desde la parte superior. Aumenta este valor si el título es más grande.
-            left: 50%; // Centra el total horizontalmente
-            transform: translateX(-50%); // Asegura que el total esté centrado
-            background-color: rgba(0, 183, 255, 0.8); // Añade un color de fondo que coincide con los colores del gráfico de pastel
-            color: #fff; // Cambia el color del texto a blanco
-            padding: 0 10px; // Añade un poco de espacio a los lados del texto
-        }
+          }
 
         
     }
@@ -146,4 +145,7 @@
     .total-caja {
         background-color: #EAB8C3;
     }
+
+    
 }
+

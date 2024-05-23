@@ -1,7 +1,8 @@
 {
-    "/api": {
-        "target": "https://localhost:63363",
-        "target1": "https://localhost:7028",
+    "/api22": {
+        "target1": "https://localhost:63363",
+        "targetJuli": "https://localhost:7028",
+        "target": "https://rydentwebdv.azurewebsites.net",
         "secure": false
     }
 }

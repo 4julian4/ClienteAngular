@@ -1,4 +1,3 @@
-
 <div class="dashboard">
     <form class="date-range-form">
         <mat-form-field appearance="fill">
@@ -6,27 +5,37 @@
             <input matInput [matDatepicker]="picker1" [(ngModel)]="fechaInicio" name="fechaInicio">
             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
-          </mat-form-field>
-          
-          <mat-form-field appearance="fill">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
             <mat-label>Fecha de fin</mat-label>
             <input matInput [matDatepicker]="picker2" [(ngModel)]="fechaFin" name="fechaFin">
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
             <mat-datepicker #picker2></mat-datepicker>
-          </mat-form-field>
+        </mat-form-field>
 
-          <button mat-raised-button color="primary" type="submit" (click)="consultarDatosAdministrativos(fechaInicio, fechaFin)">Consultar</button>
+        <button mat-raised-button color="primary" type="submit"
+            (click)="consultarDatosAdministrativos(fechaInicio, fechaFin)">Consultar</button>
+
+        <select [(ngModel)]="intervaloSeleccionado" name="intervalo">
+            <option value="dia">Día</option>
+            <option value="semana">Semana</option>
+            <option value="mes">Mes</option>
+            <option value="año">Año</option>
+        </select>
+
+        <button (click)="initLineChart(intervaloSeleccionado)">Actualizar gráfico</button>
     </form>
 
     <mat-card class="widget pacientes-atendidos">
         <h2>Pacientes Atendidos</h2>
         <div class="metrics">
-            <canvas id="pieChart"></canvas>
+            <canvas id="doughnutChart"></canvas>
+
         </div>
 
-        <div class="number-display">{{totalPacientes}}</div> <!-- Aquí está el nuevo elemento -->
     </mat-card>
-    
+
     <mat-card class="widget pacientes-nuevos">
         <h2>Pacientes Nuevos</h2>
         <div class="metrics">
@@ -43,7 +52,9 @@
         <h2>Pacientes Abonaron</h2>
         <div class="metrics">
             <!-- Métricas de pacientes que abonaron -->
+            <canvas id="pieChart"></canvas>
         </div>
+        <!-- <div class="number-display">{{totalPacientes}}</div> -->
     </mat-card>
     <mat-card class="widget pacientes-mora">
         <h2>Pacientes en Mora</h2>

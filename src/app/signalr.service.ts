@@ -22,7 +22,9 @@ export class SignalRService {
     //private respuestaObtenerDoctorService: RespuestaObtenerDoctorService
   ) {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(environment.signalRUrl) // URL de tu servidor SignalR
+      .withUrl(environment.signalRUrl, {
+        withCredentials: true
+    }) // URL de tu servidor SignalR
       .build();
   }
 

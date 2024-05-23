@@ -2,7 +2,7 @@ export class RespuestaDatosAdministrativos {
     public fechaInicio?: Date;
     public fechaFin?: Date;
     public pacientesAsistieron?: number;
-    public pacientesNuevos?: number;
+    public totalPacientesNuevos?: number;
     public tratamientosActivos?: number;
     public pacientesAbonaron?: number;
     public pacientesMora?: number;
@@ -14,4 +14,11 @@ export class RespuestaDatosAdministrativos {
     public totalIngresos?: number;
     public totalEgresos?: number;
     public totalCaja?: number;
+    public lstPacientesNuevos?: PacientesNuevos[];
+}
+
+
+export class PacientesNuevos {
+    public FECHA_INGRESO_DATE?: Date;
+    public SEXO?: string;
 }
