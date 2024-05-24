@@ -1,10 +1,8 @@
 import { Component, AfterViewInit, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Chart, LineController, LineElement, LinearScale,PointElement, BarController, BarElement, PieController, ArcElement, CategoryScale, Tooltip, Legend } from 'chart.js';
 import { P_CONSULTAR_ESTACUENTA, P_CONSULTAR_ESTACUENTAPACIENTE, RespuestaConsultarEstadoCuenta, RespuestaConsultarEstadoCuentaService, RespuestaSaldoPorDoctor } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-estado-cuenta';
 import { RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 
-Chart.register(PieController, LineController,PointElement, LineElement, LinearScale, BarController, BarElement, ArcElement, CategoryScale, Tooltip, Legend);
 
 @Component({
   selector: 'app-estado-cuenta',
