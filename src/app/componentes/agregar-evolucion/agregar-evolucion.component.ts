@@ -1,7 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import SignaturePad from 'signature_pad';
-
 import { Router } from '@angular/router';
 import { MatSelectChange } from '@angular/material/select';
 
