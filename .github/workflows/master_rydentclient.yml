@@ -61,11 +61,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FE069E6C4BDC4BD794B85DF9451C7E5D }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5FFC46A164234605BB4BDCB37E7EF2FF }}
 
-      - name: Clean wwwroot directory
-        run: |
-          az webapp remote-connection create --resource-group rydentwebdv6_group --name rydentclient
-          Invoke-Command -ScriptBlock { Remove-Item -Path 'C:\home\site\wwwroot\*' -Recurse -Force }
-        shell: pwsh
+
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
