@@ -23,11 +23,15 @@
     "@microsoft/signalr": "^8.0.0",
     "date-fns": "^3.6.0",
     "html2canvas": "^1.4.1",
+    "http": "^0.0.1-security",
+    "https": "^1.0.0",
     "install": "^0.13.0",
     "jwt-decode": "^4.0.0",
     "ngx-material-timepicker": "^13.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "url": "^0.11.3",
+    "util": "^0.12.5",
     "zone.js": "~0.14.4"
   },
   "devDependencies": {
@@ -36,11 +40,19 @@
     "@angular/compiler-cli": "^18.0.0",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.5.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.1.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.0.0",
+    "karma": "^6.4.3",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage": "^2.2.1",
+    "karma-jasmine": "^5.1.0",
+    "karma-jasmine-html-reporter": "^2.1.0",
     "typescript": "~5.4.5"
-  }
+  },
+  "browser": {
+    "http": false,
+    "https":false,
+    "net": false,
+    "path": false,
+    "stream": false,
+    "tls": false
+}
 }
