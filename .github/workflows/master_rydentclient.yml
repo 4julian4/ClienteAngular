@@ -29,7 +29,7 @@ jobs:
       
       - name: Compress artifact
         run: |
-          7z a -r build-artifact.zip dist
+          7z a -r build-artifact.zip dist/*
         if: always()
 
       
@@ -60,6 +60,12 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BB10ACCB52D048E48F08A20E376A75CD }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FE069E6C4BDC4BD794B85DF9451C7E5D }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5FFC46A164234605BB4BDCB37E7EF2FF }}
+
+      - name: Clean wwwroot directory
+        run: |
+          az webapp remote-connection create --resource-group rydentwebdv6_group --name rydentclient
+          Invoke-Command -ScriptBlock { Remove-Item -Path 'C:\home\site\wwwroot\*' -Recurse -Force }
+        shell: pwsh
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
