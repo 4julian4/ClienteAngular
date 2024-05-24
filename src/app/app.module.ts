@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 
@@ -57,62 +57,48 @@ export const MY_DATE_FORMATS = {
 };
 
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    SpinnerComponent,
-    SidenavComponent,
-    //PedirPin,
-    PedirPinComponent,
-    MensajesUsuariosComponent,
-    AgendaComponent,
-    CitasComponent,
-    DetalleCitasComponent,
-    BuscarHitoriaClinicaComponent,
-    DatosPersonalesComponent,
-    AntecedentesComponent,
-    EvolucionComponent,
-    AgregarEvolucionComponent,
-    AgregarFirmasComponent,
-    EstadoCuentaComponent,
-    RipsComponent,
-    DatosAdministrativosComponent,
-    HideColumnDirective
-    
-   
-    
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    MaterialModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatDialogModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatTabsModule,
-    MatMenuModule,
-    NgxMaterialTimepickerModule,
-    MatAutocompleteModule,
-    MatCardModule
-    
-
-
-  ],
-  
-  providers: [
-    DatePipe,
-    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
-    { provide: DateAdapter, useClass: NativeDateAdapter, deps: [MAT_DATE_LOCALE] },
-    { provide: HTTP_INTERCEPTORS, useClass: httpLoadingInterceptorInterceptor, multi: true },
-    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
-],
-  bootstrap: [AppComponent],
-
-})
+@NgModule({ declarations: [
+        AppComponent,
+        LoginComponent,
+        SpinnerComponent,
+        SidenavComponent,
+        //PedirPin,
+        PedirPinComponent,
+        MensajesUsuariosComponent,
+        AgendaComponent,
+        CitasComponent,
+        DetalleCitasComponent,
+        BuscarHitoriaClinicaComponent,
+        DatosPersonalesComponent,
+        AntecedentesComponent,
+        EvolucionComponent,
+        AgregarEvolucionComponent,
+        AgregarFirmasComponent,
+        EstadoCuentaComponent,
+        RipsComponent,
+        DatosAdministrativosComponent,
+        HideColumnDirective
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        BrowserAnimationsModule,
+        MaterialModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatDialogModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatTabsModule,
+        MatMenuModule,
+        NgxMaterialTimepickerModule,
+        MatAutocompleteModule,
+        MatCardModule], providers: [
+        DatePipe,
+        { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
+        { provide: DateAdapter, useClass: NativeDateAdapter, deps: [MAT_DATE_LOCALE] },
+        { provide: HTTP_INTERCEPTORS, useClass: httpLoadingInterceptorInterceptor, multi: true },
+        { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule { }
