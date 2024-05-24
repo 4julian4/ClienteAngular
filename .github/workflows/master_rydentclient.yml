@@ -67,5 +67,5 @@ jobs:
         with:
           app-name: 'rydentclient'
           slot-name: 'Production'
-          package: dist
+          package: build-artifact.zip
           
