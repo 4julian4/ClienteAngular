@@ -29,7 +29,7 @@ jobs:
       
       - name: Compress artifact
         run: |
-          7z a -r build-artifact.zip dist/*
+          7z a -r build-artifact.zip dist/cliente-angular/browser/*
         if: always()
 
       
