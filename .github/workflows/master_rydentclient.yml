@@ -23,7 +23,7 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install --force
+          npm install
           npm run build --if-present
 
       
@@ -67,5 +67,5 @@ jobs:
         with:
           app-name: 'rydentclient'
           slot-name: 'Production'
-          package: cliente-angular/dist
+          package: dist/cliente-angular
           
