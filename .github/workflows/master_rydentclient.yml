@@ -22,8 +22,6 @@ jobs:
           node-version: '18.x'
 
       - name: npm install, build, and test
-        env:
-          NODE_ENV: production
         run: |
           npm install
           npm run build --if-present
