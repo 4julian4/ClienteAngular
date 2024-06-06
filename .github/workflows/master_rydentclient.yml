@@ -26,6 +26,12 @@ jobs:
           npm install
           npm run build --if-present -- --c production
 
+      - name: Copy web.config to dist directory
+        run: cp src/web.config dist/cliente-angular/browser/
+
+      - name: Copy proxy to dist directory
+        run: cp proxy.conf.json dist/cliente-angular/browser/
+
       
       - name: Compress artifact
         run: |
