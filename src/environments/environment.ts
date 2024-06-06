@@ -3,9 +3,9 @@ import { HttpHeaders } from "@angular/common/http";
 export const environment = {
     production: true,
     httpOptions : { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) },
-    apiUrl : "https://rydentclient.azurewebsites.net/api",
+    apiUrl : "https://rydentwebdv.azurewebsites.net/api",
     signalRUrlJp : "https://localhost:63363/Rydenthub",
-    signalRUrl : "https://rydentclient.azurewebsites.net/Rydenthub",
+    signalRUrl : "https://rydentwebdv.azurewebsites.net/Rydenthub",
     NombreAplicacion :"Rydent Web Nube",
     OAuth: {
         AuthCodeEndPoint : "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
