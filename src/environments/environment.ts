@@ -5,7 +5,7 @@ export const environment = {
     httpOptions : { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) },
     apiUrl : "/api",
     signalRUrlJp : "https://localhost:63363/Rydenthub",
-    signalRUrl : "https://localhost:7028/Rydenthub",
+    signalRUrl : "https://rydentclient.azurewebsites.net/Rydenthub",
     NombreAplicacion :"Rydent Web Nube",
     OAuth: {
         AuthCodeEndPoint : "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
