@@ -3,7 +3,7 @@ import { HttpHeaders } from "@angular/common/http";
 export const environment = {
     production: true,
     httpOptions : { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) },
-    apiUrl : "/api",
+    apiUrl : "https://rydentwebdv.azurewebsites.net/api",
     signalRUrlJp : "https://localhost:63363/Rydenthub",
     signalRUrl : "https://rydentwebdv.azurewebsites.net/Rydenthub",
     NombreAplicacion :"Rydent Web Nube",
