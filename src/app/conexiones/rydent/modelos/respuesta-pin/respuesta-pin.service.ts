@@ -6,6 +6,7 @@ import { CodigosEps } from '../../tablas/codigos-eps';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { DatosPersonales } from '../datos-personales';
 import { RespuestaDatosPersonales } from '../respuesta-datos-personales';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 
 @Injectable({
   providedIn: 'root'
@@ -51,59 +52,99 @@ export class RespuestaPinService {
 
   constructor(
     private signalRService: SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { this.onDoctorSeleccionado = () => { }; }
 
   async startConnectionRespuestaObtenerPin() {
+    // Si ya hay una conexión, detenerla
     if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
       await this.signalRService.hubConnection.stop();
     }
+
     await this.signalRService.hubConnection
       .start()
       .then(async () => {
+        console.log('Conectado a SignalR');
 
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
-
         });
+
         this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
-          this.respuestaPinModel.emit(JSON.parse(objRespuestaObtenerDoctor));
+          try {
+            console.log('RespuestaObtenerPin (compressed): ', objRespuestaObtenerDoctor);
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
+            console.log('RespuestaObtenerPin (decompressed): ', decompressedData);
 
+            this.respuestaPinModel.emit(JSON.parse(decompressedData));
+          } catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
         });
-
       })
       .catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
+
+
+
+
+
+  // async startConnectionRespuestaObtenerPin() {
+  //   if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
+  //     await this.signalRService.hubConnection.stop();
+  //   }
+  //   await this.signalRService.hubConnection
+  //     .start()
+  //     .then(async () => {
+
+  //       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+  //         alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+  //         this.interruptionService.interrupt();
+
+  //       });
+  //       console.log('Conectado a SignalR');
+  //       this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
+  //         console.log('RespuestaObtenerPin: ' + objRespuestaObtenerDoctor);
+  //         const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
+  //         console.log('RespuestaObtenerPin: ' + decompressedData);
+
+  //         this.respuestaPinModel.emit(JSON.parse(decompressedData));
+
+  //       });
+  //     })
+  //     .catch(err => console.log('Error al conectar con SignalR: ' + err));
+  // }
   // Aca actualizamos variables para que sean usadas por los componenetes
   async updateAnamnesisData(data: number) {
-    this.anamnesisData.next(data);
-  }
+  this.anamnesisData.next(data);
+}
 
-  updateSedeData(data: string) {
-    this.sedeData.next(data);
-  }
-  updatedatosRespuestaPin(data: RespuestaPin) {
-    this.datosRespuestaPin.next(data);
-  }
-  updateDoctorSeleccionado(data: string) {
-    this.doctorSeleccionado.next(data);
+updateSedeData(data: string) {
+  this.sedeData.next(data);
+}
+updatedatosRespuestaPin(data: RespuestaPin) {
+  this.datosRespuestaPin.next(data);
+}
+updateDoctorSeleccionado(data: string) {
+  this.doctorSeleccionado.next(data);
 
-  }
-   updateCambiarDoctorSeleccionado(data: string) {
-     this.cambiarDoctorSeleccionado.next(data);
-   }
-  
+}
+updateCambiarDoctorSeleccionado(data: string) {
+  this.cambiarDoctorSeleccionado.next(data);
+}
 
-  updateListadoEps(data: CodigosEps) {
-    this.listadoEps.next(data);
-  }
-  updatedatosPersonalesParaCambioDeDoctor(data: RespuestaDatosPersonales) {
-    this.datosPersonalesParaCambioDeDoctor.next(data);
-  }
-  updateNumPacientesPorDoctor(data: number) {
-    this.numPacientesPorDoctor.next(data);
-  }
+
+updateListadoEps(data: CodigosEps) {
+  this.listadoEps.next(data);
+}
+updatedatosPersonalesParaCambioDeDoctor(data: RespuestaDatosPersonales) {
+  this.datosPersonalesParaCambioDeDoctor.next(data);
+}
+updateNumPacientesPorDoctor(data: number) {
+  this.numPacientesPorDoctor.next(data);
+}
   // updateDoctorSeleccionado(idDoctor: string) {
   //   this.doctorSeleccionado.next(idDoctor);
   //   if (this.onDoctorSeleccionado) {
