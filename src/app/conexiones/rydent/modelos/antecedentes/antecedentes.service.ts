@@ -3,6 +3,7 @@ import { SignalRService } from 'src/app/signalr.service';
 import { Antecedentes } from './antecedentes.model';
 import { BehaviorSubject } from 'rxjs';
 import { InterruptionService } from 'src/app/helpers/interruption';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,8 @@ export class AntecedentesService {
   
   constructor(
     private signalRService: SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { }
   async startConnectionRespuestaBusquedaAntecedentes(clienteId: string, idAnanesis: string) {
     if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
@@ -29,8 +31,15 @@ export class AntecedentesService {
   
         });
         this.signalRService.hubConnection.on('RespuestaObtenerAntecedentesPaciente', async (clienteId: string, objRespuestaAntecedentesEmit: string) => {
-          this.respuestaAntecedentesEmit.emit(JSON.parse(objRespuestaAntecedentesEmit));
-          await this.signalRService.stopConnection();
+          try {
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaAntecedentesEmit);
+            this.respuestaAntecedentesEmit.emit(JSON.parse(decompressedData));
+            await this.signalRService.stopConnection();
+          }
+          catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
+          
         });
         this.signalRService.hubConnection.invoke('ObtenerAntecedentesPaciente', clienteId, idAnanesis).catch(err => console.error(err));
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));

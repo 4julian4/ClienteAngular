@@ -2,6 +2,7 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { SignalRService } from 'src/app/signalr.service';
 import { RespuestaConsultarEstadoCuenta } from './respuesta-consultar-estado-cuenta.model';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,8 @@ export class RespuestaConsultarEstadoCuentaService {
   @Output() respuestaConsultarEstadoCuentaEmit: EventEmitter<RespuestaConsultarEstadoCuenta[]> = new EventEmitter<RespuestaConsultarEstadoCuenta[]>();
   constructor(
     private signalRService: SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { }
 
   async startConnectionRespuestaConsultarEstadoCuenta(clienteId: string, modeloDatosConsultarEstadoCuenta:string) {
@@ -27,8 +29,14 @@ export class RespuestaConsultarEstadoCuentaService {
   
         });
         this.signalRService.hubConnection.on('RespuestaConsultarEstadoCuenta', async (clienteId: string, objRespuestaConsultarEstadoCuentaEmit: string) => {
-          this.respuestaConsultarEstadoCuentaEmit.emit(JSON.parse(objRespuestaConsultarEstadoCuentaEmit));
-          await this.signalRService.stopConnection();
+          try {
+            var decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarEstadoCuentaEmit);
+            this.respuestaConsultarEstadoCuentaEmit.emit(JSON.parse(decompressedData));
+            await this.signalRService.stopConnection();
+          } catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
+          
         });
         this.signalRService.hubConnection.invoke('ConsultarEstadoCuenta', clienteId, modeloDatosConsultarEstadoCuenta).catch(err => console.error(err));
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
