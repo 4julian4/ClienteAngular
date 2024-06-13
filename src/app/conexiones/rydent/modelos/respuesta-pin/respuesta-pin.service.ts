@@ -74,10 +74,7 @@ export class RespuestaPinService {
 
         this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
           try {
-            console.log('RespuestaObtenerPin (compressed): ', objRespuestaObtenerDoctor);
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
-            console.log('RespuestaObtenerPin (decompressed): ', decompressedData);
-
             this.respuestaPinModel.emit(JSON.parse(decompressedData));
           } catch (error) {
             console.error('Error during decompression or parsing: ', error);

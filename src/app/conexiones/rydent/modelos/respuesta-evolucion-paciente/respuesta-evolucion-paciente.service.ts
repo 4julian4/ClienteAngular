@@ -3,17 +3,19 @@ import { RespuestaEvolucionPaciente } from './respuesta-evolucion-paciente.model
 import { SignalRService } from 'src/app/signalr.service';
 import { BehaviorSubject } from 'rxjs';
 import { InterruptionService } from 'src/app/helpers/interruption';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RespuestaEvolucionPacienteService {
- 
+
   @Output() respuestaEvolucionPacienteEmit: EventEmitter<RespuestaEvolucionPaciente[]> = new EventEmitter<RespuestaEvolucionPaciente[]>();
 
   constructor(
     private signalRService: SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { }
   async startConnectionRespuestaEvolucionPaciente(clienteId: string, idAnanesis: string) {
     if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
@@ -26,16 +28,33 @@ export class RespuestaEvolucionPacienteService {
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
-  
+
         });
+
+        // this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
+        //   try {
+        //     const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
+        //     this.respuestaPinModel.emit(JSON.parse(decompressedData));
+        //   } catch (error) {
+        //     console.error('Error during decompression or parsing: ', error);
+        //   }
+        // });
+
+
+
         this.signalRService.hubConnection.on('RespuestaObtenerDatosEvolucion', async (clienteId: string, objRespuestaEvolucionPacienteEmit: string) => {
-          this.respuestaEvolucionPacienteEmit.emit(JSON.parse(objRespuestaEvolucionPacienteEmit));
-          await this.signalRService.stopConnection();
+          try {
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaEvolucionPacienteEmit);
+            this.respuestaEvolucionPacienteEmit.emit(JSON.parse(decompressedData));
+            await this.signalRService.stopConnection();
+          } catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
         });
         this.signalRService.hubConnection.invoke('ObtenerDatosEvolucion', clienteId, idAnanesis).catch(err => console.error(err));
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
   }
 
-  
+
 }

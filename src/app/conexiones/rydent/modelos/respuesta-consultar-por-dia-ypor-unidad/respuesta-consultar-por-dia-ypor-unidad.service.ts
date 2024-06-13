@@ -2,6 +2,7 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { RespuestaConsultarPorDiaYPorUnidad } from './respuesta-consultar-por-dia-ypor-unidad.model';
 import { SignalRService } from 'src/app/signalr.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,8 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
   @Output() respuestaConsultarPorDiaYPorUnidadModel: EventEmitter<RespuestaConsultarPorDiaYPorUnidad> = new EventEmitter<RespuestaConsultarPorDiaYPorUnidad>();
   constructor(
     private signalRService:SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { }
 
   async startConnectionRespuestaConsultarPorDiaYPorUnidad(clienteId: string, silla:string, fecha: Date) {
@@ -26,9 +28,16 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
           this.interruptionService.interrupt();
   
         });
+        
         this.signalRService.hubConnection.on('RespuestaObtenerConsultaPorDiaYPorUnidad', async (clienteId: string, objRespuestaConsultarPorDiaYPorUnidadModel: string) => {
-          this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(objRespuestaConsultarPorDiaYPorUnidadModel));
-          await this.signalRService.stopConnection();
+          try {
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarPorDiaYPorUnidadModel);
+            this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(decompressedData));
+            await this.signalRService.stopConnection();
+          } catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
+          
         });
         
         this.signalRService.hubConnection.invoke('ObtenerConsultaPorDiaYPorUnidad', clienteId, silla, fecha).catch(err => console.error(err));
