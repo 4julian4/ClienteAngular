@@ -2,6 +2,7 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { RespuestaRealizarAccionesEnCitaAgendada } from './respuesta-realizar-acciones-en-cita-agendada.model';
 import { SignalRService } from 'src/app/signalr.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,8 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   @Output() respuestaRealizarAccionesEnCitaAgendadaEmit: EventEmitter<boolean> = new EventEmitter<boolean>();
   constructor(
     private signalRService: SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { }
 
   async startConnectionRespuestaRealizarAccionesEnCitaAgendada(clienteId: string, modelorealizaraccionesencitaagendada: string) {
@@ -27,9 +29,14 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   
         });
         this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
-          let obj = JSON.parse(objRespuestaRealizarAccionesEnCitaAgendadaModel)
-          await this.signalRService.stopConnection();
-          this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(obj);
+          try {
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;
+            this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
+            await this.signalRService.stopConnection();
+          } catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
+          
         });
 
         this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada).catch(err => console.error(err));

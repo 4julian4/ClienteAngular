@@ -2,6 +2,7 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
 import { RespuestaBusquedaPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
 import { RespuestaConsultarPorDiaYPorUnidad } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { SignalRService } from 'src/app/signalr.service';
 
@@ -13,7 +14,8 @@ export class AgendaService {
   @Output() respuestaBuscarCitasPacienteAgendaEmit: EventEmitter<RespuestaBusquedaCitasPaciente[]> = new EventEmitter<RespuestaBusquedaCitasPaciente[]>();
   constructor(
     private signalRService: SignalRService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService
   ) { }
 
   async startConnectionRespuestaAgendarCita(clienteId: string, modelocrearcita:string) {
@@ -30,9 +32,15 @@ export class AgendaService {
   
         });
         this.signalRService.hubConnection.on('RespuestaAgendarCita', async (clienteId: string, objRespuestaRespuestaAgendarCitaModel: string) => {
-          let obj=JSON.parse(objRespuestaRespuestaAgendarCitaModel)
-          await this.signalRService.stopConnection();
-          this.respuestaAgendarCitaEmit.emit(obj);
+          try {
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
+            this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
+            await this.signalRService.stopConnection();
+          }
+          catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
+          
         });
         
         this.signalRService.hubConnection.invoke('AgendarCita', clienteId, modelocrearcita ).catch(err => console.error(err));
