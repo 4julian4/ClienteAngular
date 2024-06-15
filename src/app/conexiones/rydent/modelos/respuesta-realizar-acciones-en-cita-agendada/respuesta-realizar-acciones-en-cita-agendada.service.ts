@@ -28,6 +28,7 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
         this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;

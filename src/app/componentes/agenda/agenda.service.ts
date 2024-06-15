@@ -31,6 +31,7 @@ export class AgendaService {
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaAgendarCita');
         this.signalRService.hubConnection.on('RespuestaAgendarCita', async (clienteId: string, objRespuestaRespuestaAgendarCitaModel: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
@@ -61,6 +62,7 @@ export class AgendaService {
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaBuscarCitasPacienteAgenda');
         this.signalRService.hubConnection.on('RespuestaBuscarCitasPacienteAgenda', async (clienteId: string, objRespuestaBusquedaPacienteModel: string) => {
           this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
           await this.signalRService.stopConnection();

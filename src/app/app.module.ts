@@ -39,6 +39,8 @@ import { NativeDateAdapter } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EstadoCuentaComponent } from './componentes/estado-cuenta/estado-cuenta.component';
 import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar'; //
+ 
 import {RipsComponent} from './componentes/rips/rips.component';
 import { DatosAdministrativos, DatosAdministrativosComponent } from './componentes/datos-administrativos';
 import { HideColumnDirective } from './directives/hide-column.directive';
@@ -61,6 +63,8 @@ export const MY_DATE_FORMATS = {
         AppComponent,
         LoginComponent,
         SpinnerComponent,
+        
+        
         SidenavComponent,
         //PedirPin,
         PedirPinComponent,
@@ -91,6 +95,7 @@ export const MY_DATE_FORMATS = {
         MatNativeDateModule,
         MatTabsModule,
         MatMenuModule,
+        MatProgressBarModule,
         NgxMaterialTimepickerModule,
         MatAutocompleteModule,
         MatCardModule], providers: [
