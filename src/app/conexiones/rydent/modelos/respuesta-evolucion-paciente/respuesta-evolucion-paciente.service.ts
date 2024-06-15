@@ -41,7 +41,7 @@ export class RespuestaEvolucionPacienteService {
         // });
 
 
-
+        this.signalRService.hubConnection.off('RespuestaObtenerDatosEvolucion');
         this.signalRService.hubConnection.on('RespuestaObtenerDatosEvolucion', async (clienteId: string, objRespuestaEvolucionPacienteEmit: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaEvolucionPacienteEmit);

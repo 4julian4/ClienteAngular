@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { RespuestaEvolucionPaciente, RespuestaEvolucionPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-evolucion-paciente';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 
+
+
 @Component({
   selector: 'app-evolucion',
   templateUrl: './evolucion.component.html',
@@ -15,6 +17,7 @@ export class EvolucionComponent implements OnInit {
   idSedeActualSignalR: string = "";
   idAnamnesisPacienteSeleccionado: number = 0;
   resultadosEvolucion: RespuestaEvolucionPaciente[] = [];
+  isloading: boolean = false;
   // columnasMostradas = ['IDEVOLUCION', 'IDEVOLUSECUND', 'PROXIMA_CITAstr','FECHA_PROX_CITA','FECHA_ORDEN','ENTRADAstr', 'SALIDAstr', 'FECHA', 
   //                      'HORA', 'DOCTOR','FIRMA','COMPLICACION','HORA_FIN','COLOR','NOTA',
   //                      'EVOLUCION','URGENCIAS','HORA_LLEGADA','imgFirmaPaciente','imgFirmaDoctor']; 
@@ -45,6 +48,7 @@ export class EvolucionComponent implements OnInit {
     });
 
     //Antecedente
+    this.isloading = true;
     this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(async (respuestaBusquedaEvolucion: RespuestaEvolucionPaciente[]) => {
       this.resultadoBusquedaEvolucion = respuestaBusquedaEvolucion;
       if (this.resultadoBusquedaEvolucion.length > 0) {
@@ -58,6 +62,7 @@ export class EvolucionComponent implements OnInit {
       }
       // this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucion);
       //this.formularioEvolucion.disable();
+      this.isloading = false;
     });
     await this.obtenerEvolucionPaciente(this.idAnamnesisPacienteSeleccionado);
   }
