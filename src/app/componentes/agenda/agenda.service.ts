@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Subject } from 'rxjs';
 import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
 import { RespuestaBusquedaPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
 import { RespuestaConsultarPorDiaYPorUnidad } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
@@ -12,11 +13,25 @@ import { SignalRService } from 'src/app/signalr.service';
 export class AgendaService {
   @Output() respuestaAgendarCitaEmit: EventEmitter<RespuestaConsultarPorDiaYPorUnidad> = new EventEmitter<RespuestaConsultarPorDiaYPorUnidad>();
   @Output() respuestaBuscarCitasPacienteAgendaEmit: EventEmitter<RespuestaBusquedaCitasPaciente[]> = new EventEmitter<RespuestaBusquedaCitasPaciente[]>();
+  @Output() refrescarAgendaEmit: EventEmitter<boolean> = new EventEmitter<boolean>();
+  refrescarAgenda = new Subject<void>();
+  // Observable para que los componentes puedan suscribirse
+  refrescarAgenda$ = this.refrescarAgenda.asObservable();
+  
   constructor(
     private signalRService: SignalRService,
     private interruptionService: InterruptionService,
     private descomprimirDatosService: DescomprimirDatosService
   ) { }
+
+  
+
+  // Método para emitir un evento
+  async emitRefrescarAgenda() {
+    console.log('Emitindo refrescar agenda');
+    this.refrescarAgendaEmit.emit(true);
+    //this.refrescarAgenda.next();
+  }
 
   async startConnectionRespuestaAgendarCita(clienteId: string, modelocrearcita:string) {
     if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
@@ -37,6 +52,8 @@ export class AgendaService {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
             await this.signalRService.stopConnection();
+            //console.log('emitir refrescar agenda');
+            await this.emitRefrescarAgenda();
           }
           catch (error) {
             console.error('Error during decompression or parsing: ', error);
