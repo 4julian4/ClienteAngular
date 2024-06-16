@@ -22,7 +22,7 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
 
   // Método para emitir un evento
   async emitRefrescarAgenda() {
-    console.log('Emitindo refrescar agenda');
+    console.log('Emitiendo refrescar realizar acciones en agenda');
     this.refrescarAgendaEmit.emit(true);
     //this.refrescarAgenda.next();
   }
@@ -43,11 +43,10 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
         this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
         this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
           try {
-           
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;
-            this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
             await this.signalRService.stopConnection();
-            
+            this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
+            console.log('emitir refrescar realziar acciones en cita agendada');
             await this.emitRefrescarAgenda();
           } catch (error) {
             console.error('Error during decompression or parsing: ', error);
