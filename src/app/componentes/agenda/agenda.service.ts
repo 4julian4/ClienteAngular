@@ -28,7 +28,7 @@ export class AgendaService {
 
   // Método para emitir un evento
   async emitRefrescarAgenda() {
-    console.log('Emitindo refrescar agenda');
+    console.log('Emitiendo refrescar agenda');
     this.refrescarAgendaEmit.emit(true);
     //this.refrescarAgenda.next();
   }
@@ -50,9 +50,9 @@ export class AgendaService {
         this.signalRService.hubConnection.on('RespuestaAgendarCita', async (clienteId: string, objRespuestaRespuestaAgendarCitaModel: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
-            this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
             await this.signalRService.stopConnection();
-            //console.log('emitir refrescar agenda');
+            this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
+            console.log('emitir refrescar agenda');
             await this.emitRefrescarAgenda();
           }
           catch (error) {

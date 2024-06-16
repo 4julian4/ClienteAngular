@@ -168,12 +168,14 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.agendaService.refrescarAgendaEmit.subscribe(async (data:boolean) => {
       if (data) {
         await this.cambiarFecha();
+        console.log('Refrescar agenda');
       }
     });
 
     this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data:boolean) => {
       if (data) {
         await this.cambiarFecha();
+        console.log('Refrescar acciones agenda');
       }
     });
 
