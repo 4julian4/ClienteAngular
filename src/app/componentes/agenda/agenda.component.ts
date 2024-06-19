@@ -32,6 +32,7 @@ import { THorariosAsuntos } from 'src/app/conexiones/rydent/tablas/thorarios-asu
 })
 
 export class AgendaComponent implements OnInit, AfterViewInit {
+  isloading: boolean = false;
   //contextMenuPosition = { x: '0px', y: '0px' };
   //@ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
   @ViewChild('myTable') myTable!: MatTable<any>;
@@ -169,6 +170,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (data) {
         await this.cambiarFecha();
         console.log('Refrescar agenda');
+        this.isloading = false;
       }
     });
 
@@ -176,6 +178,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (data) {
         await this.cambiarFecha();
         console.log('Refrescar acciones agenda');
+        this.isloading = false;
       }
     });
 
@@ -637,6 +640,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
         return;
       }
+      this.isloading = true;
+
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -655,7 +660,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async confirmar() {
     if (this.selectedRow.OUT_HORA_CITA) {
-
+      
+      this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -669,6 +675,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
       const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } = await this.mensajesUsuariosService.mensajeConfirmarSiNoAlarmaObservaciones('Desea Ingresar alguna observacion?', true, true);
       if (resultado) {
+        
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
         let alarmar = opcionSeleccionadaMensaje == "SI";
         if (alarmar) {
@@ -692,6 +699,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async sinConfirmar() {
     if (this.selectedRow.OUT_HORA_CITA) {
+      this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -711,6 +719,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async asistenciaNo() {
     if (this.selectedRow.OUT_HORA_CITA) {
+      this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -728,6 +737,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
       const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoIngresarEvolucion('Desea registrar la inasistencia en la evolucion del paciente?', 'El paciente no asistió a la cita del ' + fechaFormateada + ' a las ' + horaFormateada);
       if (resultado) {
+        
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
       }
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
@@ -740,6 +750,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async asistenciaSi() {
     if (this.selectedRow.OUT_HORA_CITA) {
+      this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -760,6 +771,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async quitarAsistencia() {
     if (this.selectedRow.OUT_HORA_CITA) {
+      this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -780,6 +792,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async cancelarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
+      this.isloading = true;
       const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace('Esta seguro de cancelar la cita?', this.fechaSeleccionada, this.selectedRow.OUT_HORA_CITA);
       if (resultado) {
         let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
@@ -859,6 +872,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
 
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
+    this.isloading = true;
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre;
     var telefono = formulario.telefono;
