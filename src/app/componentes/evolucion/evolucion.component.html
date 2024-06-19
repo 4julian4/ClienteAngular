@@ -1,22 +1,26 @@
 <table mat-table [dataSource]="resultadoBusquedaEvolucion" class="mat-elevation-z8">
+    
     <!-- Columna de ejemplo -->
     <ng-container matColumnDef="IDEVOLUCION">
-
+        
         <th mat-header-cell *matHeaderCellDef>
             <div class="divContenedorDeBotones">
+                <div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
+                    <mat-spinner></mat-spinner>
+                </div>
                 <div>
                     <h1 class="tituloEvolucion">Evolución</h1>
                 </div>
-                <div>
-                    <mat-spinner *ngIf="isloading"></mat-spinner>
-                </div>
+                
                 <div>
                     <button class="BotonGuardar" mat-raised-button color="primary"
                         [routerLink]="'/agregar-evolucion'">Agregar Evolucion</button>
                     <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/rips'">Agregar
                         Rips</button>
                 </div>
+                 
             </div>
+            
         </th>
         <td mat-cell *matCellDef="let evolucionPaciente">
             <br>

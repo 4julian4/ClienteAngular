@@ -1,4 +1,10 @@
+<!-- Este div se mostrará solo si la variable 'spinnerActive' es verdadera. 
+     La directiva *ngIf de Angular se utiliza para condicionar la visualización de un elemento HTML. -->
 <div *ngIf="spinnerActive" class="loading-container flex-content-center">
+    <!-- 'mat-progress-spinner' es un componente de Angular Material que muestra un spinner de carga.
+         El atributo 'flex' permite que el spinner se adapte al tamaño de su contenedor.
+         El color del spinner se establece a 'primary', que es uno de los colores predefinidos en el tema de Angular Material.
+         El modo 'indeterminate' significa que el spinner girará indefinidamente hasta que se le indique que se detenga. -->
     <mat-progress-spinner flex color="primary" mode="indeterminate">
     </mat-progress-spinner>
 </div>
