@@ -170,7 +170,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (data) {
         await this.cambiarFecha();
         console.log('Refrescar agenda');
-        this.isloading = false;
+        //this.isloading = false;
       }
     });
 
@@ -178,7 +178,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (data) {
         await this.cambiarFecha();
         console.log('Refrescar acciones agenda');
-        this.isloading = false;
+        //this.isloading = false;
       }
     });
 
@@ -761,7 +761,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'ASISTIO';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-
+     console.log('entro a poner asistencia');
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     }
     else {
@@ -1055,6 +1055,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   async cambiarFecha() {
     if (this.idSedeActualSignalR != '') {
       await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
+      this.isloading = false;
     }
    // this.terminoRefrescarAgenda.next();
   }
