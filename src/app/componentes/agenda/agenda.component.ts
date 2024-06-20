@@ -344,6 +344,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       }
       // Emite el evento terminoRefrescarAgenda para indicar que la operación de refresco ha terminado
       this.terminoRefrescarAgenda.next();
+      this.isloading = false;
     });
     await this.cambiarFecha();
     this.recibirRespuestaAgendarCitaEmitida();
@@ -793,9 +794,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async cancelarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      this.isloading = true;
       const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace('Esta seguro de cancelar la cita?', this.fechaSeleccionada, this.selectedRow.OUT_HORA_CITA);
       if (resultado) {
+        this.isloading = true;
         let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
         let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
         objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
