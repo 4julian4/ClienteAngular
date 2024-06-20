@@ -351,6 +351,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.respuestaRealizarAccionesEnCitaAgendadaService.respuestaRealizarAccionesEnCitaAgendadaEmit.subscribe(async (respuestaRealizarAccionesEnCitaAgendada: boolean) => {
       
       if (respuestaRealizarAccionesEnCitaAgendada) {
+        this.isloading = false;
         //await this.cambiarFecha();
       }
     });
@@ -1055,7 +1056,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   async cambiarFecha() {
     if (this.idSedeActualSignalR != '') {
       await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
-      this.isloading = false;
     }
    // this.terminoRefrescarAgenda.next();
   }
