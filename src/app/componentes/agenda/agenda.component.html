@@ -130,9 +130,9 @@
                             </mat-option>
                         </mat-autocomplete>
                     </div>
-
                 </div>
                 <div class="fila">
+                    <!--
                     <div class="campo-formulario telefono">
                         <input type="text" placeholder="Teléfono" formControlName="telefono"
                             [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
@@ -147,7 +147,19 @@
                             </ng-container>
                         </mat-autocomplete>
                     </div>
+                    -->
+                    <div class="campo-formulario telefono">
+                         <input type="text" placeholder="Teléfono" formControlName="telefono"
+                         [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
+                         style="text-transform: uppercase;">
+                         <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
+                            <mat-option *ngFor="let telefonoPaciente of (filteredTelefonoPacienteParaAgendar | async)" [value]="telefonoPaciente.nombre">
+                                {{ telefonoPaciente.nombre }}
+                            </mat-option>
+                         </mat-autocomplete>
+                    </div>
 
+                    
                     <div class="campo-formulario telefono">
                         <input type="text" placeholder="Celular" formControlName="celular"
                             [matAutocomplete]="autoCelularPacienteParaAgendar" class="form-control"
@@ -192,23 +204,7 @@
                             </mat-option>
                         </mat-autocomplete>
                     </div>
-                    <!-- <div class="campo-formulario duracion">
-                            <select type="tel" class="form-control" formControlName="duracion" name="duracion" style="text-transform: uppercase;">
-                                <option value="" disabled selected>Duracion</option>
-                                <option *ngFor="let intervalo of intervalos" [value]="intervalo">{{ intervalo }}
-                                </option>
-                            </select>
-                        </div> -->
-                    <!-- <div class="campo-formulario historia">
-                        <input type="text" placeholder="Duración" [formControl]="duracion"
-                            [matAutocomplete]="autoDatosDuracionParaAgendar" class="form-control"
-                            style="text-transform: uppercase;">
-                        <mat-autocomplete #autoDatosDuracionParaAgendar="matAutocomplete">
-                            <mat-option *ngFor="let intervalo of intervalos " [value]="intervalo">
-                                {{ intervalo }}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </div> -->
+                    
                     <div class="campo-formulario historia">
                         <input type="text" placeholder="Duración" formControlName="duracion"
                             [matAutocomplete]="autoDatosDuracionParaAgendar" class="form-control"
@@ -232,12 +228,7 @@
                         </mat-option>
                     </mat-autocomplete>
                 </div>
-                <!-- <div class="fila">
-                    <div class="campo-formulario observaciones">
-                        <input type="text" class="form-control" placeholder="Asunto" formControlName="observaciones"
-                            name="observaciones" style="text-transform: uppercase;">
-                    </div>
-                </div> -->
+               
 
                 <div class="fila">
                     <button class="boton-generar-cita" (click)="agendarCita()">Agendar</button>
@@ -250,18 +241,6 @@
         <div class="scrollable-content-derecho">
             <mat-table #myTable class="tabla-horarios" [dataSource]="resultadosBusquedaAgendaPorFecha">
 
-                <!-- Hora Column -->
-                <!-- <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
-                    <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
-                    <mat-cell *matCellDef="let intervalo" class="hora-column">
-                        <input [(ngModel)]="intervalo.OUT_CODIGO" type="hidden">
-                        <input [(ngModel)]="intervalo.OUT_HORA_CITA" type="hidden">
-                        <input [(ngModel)]="intervalo.OUT_ASISTENCIA" type="hidden">
-                        <input [(ngModel)]="intervalo.OUT_CONFIRMAR" type="hidden">
-                        <input [(ngModel)]="intervalo.OUT_ALARMAR" type="hidden">
-                        {{fechaHoraHelperService.convertirHora(intervalo.OUT_HORA)}}
-                    </mat-cell>
-                </ng-container> -->
                 <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
                     <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
                     <mat-cell *matCellDef="let intervalo" class="hora-column"

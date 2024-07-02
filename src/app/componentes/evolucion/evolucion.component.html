@@ -13,14 +13,10 @@
                 </div>
                 
                 <div>
-                    <button class="BotonGuardar" mat-raised-button color="primary"
-                        [routerLink]="'/agregar-evolucion'">Agregar Evolucion</button>
-                    <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/rips'">Agregar
-                        Rips</button>
+                    <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/agregar-evolucion'" [disabled]="!botonAgregarEvolucionHabilitado">Agregar Evolucion</button>
+                    <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/rips'" [disabled]="!botonAgregarRipsHabilitado">Agregar Rips</button>
                 </div>
-                 
             </div>
-            
         </th>
         <td mat-cell *matCellDef="let evolucionPaciente">
             <br>

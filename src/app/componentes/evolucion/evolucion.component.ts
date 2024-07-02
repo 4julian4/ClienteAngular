@@ -18,11 +18,9 @@ export class EvolucionComponent implements OnInit {
   idAnamnesisPacienteSeleccionado: number = 0;
   resultadosEvolucion: RespuestaEvolucionPaciente[] = [];
   isloading: boolean = false;
-  // columnasMostradas = ['IDEVOLUCION', 'IDEVOLUSECUND', 'PROXIMA_CITAstr','FECHA_PROX_CITA','FECHA_ORDEN','ENTRADAstr', 'SALIDAstr', 'FECHA', 
-  //                      'HORA', 'DOCTOR','FIRMA','COMPLICACION','HORA_FIN','COLOR','NOTA',
-  //                      'EVOLUCION','URGENCIAS','HORA_LLEGADA','imgFirmaPaciente','imgFirmaDoctor']; 
   columnasMostradas = ['IDEVOLUCION'];
-  //columnasMostradas = ['IDEVOLUCION', 'FECHA','HORA_LLEGADA','HORA_FIN','DOCTOR', 'NOTA','EVOLUCION','PROXIMA_CITAstr','imgFirmaPaciente','imgFirmaDoctor']; 
+  botonAgregarEvolucionHabilitado: boolean = true;
+  botonAgregarRipsHabilitado: boolean = true;
 
 
   constructor(
@@ -49,6 +47,8 @@ export class EvolucionComponent implements OnInit {
 
     //Antecedente
     this.isloading = true;
+    this.botonAgregarEvolucionHabilitado = false;
+    this.botonAgregarRipsHabilitado = false;
     this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(async (respuestaBusquedaEvolucion: RespuestaEvolucionPaciente[]) => {
       this.resultadoBusquedaEvolucion = respuestaBusquedaEvolucion;
       if (this.resultadoBusquedaEvolucion.length > 0) {
@@ -63,6 +63,8 @@ export class EvolucionComponent implements OnInit {
       // this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucion);
       //this.formularioEvolucion.disable();
       this.isloading = false;
+      this.botonAgregarEvolucionHabilitado = true;
+      this.botonAgregarRipsHabilitado = true;
     });
     await this.obtenerEvolucionPaciente(this.idAnamnesisPacienteSeleccionado);
   }

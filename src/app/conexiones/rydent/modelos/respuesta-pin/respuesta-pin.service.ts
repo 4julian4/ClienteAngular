@@ -39,6 +39,9 @@ export class RespuestaPinService {
   private numPacientesPorDoctor = new BehaviorSubject<number | null>(null);
   sharedNumPacientesPorDoctorData = this.numPacientesPorDoctor.asObservable();
 
+  private notaImportante = new BehaviorSubject<string | null>(null);
+  sharednotaImportante = this.notaImportante.asObservable();
+
   private onDoctorSeleccionado: (IdDoctor: number) => void;
   setOnDoctorSeleccionadoCallback(callback: (IdDoctor: number) => void) {
     this.onDoctorSeleccionado = callback;
@@ -141,6 +144,9 @@ updatedatosPersonalesParaCambioDeDoctor(data: RespuestaDatosPersonales) {
 }
 updateNumPacientesPorDoctor(data: number) {
   this.numPacientesPorDoctor.next(data);
+}
+updateNotaImportante(data: string) {
+  this.notaImportante.next(data);
 }
   // updateDoctorSeleccionado(idDoctor: string) {
   //   this.doctorSeleccionado.next(idDoctor);

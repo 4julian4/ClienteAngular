@@ -169,16 +169,13 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.agendaService.refrescarAgendaEmit.subscribe(async (data:boolean) => {
       if (data) {
         await this.cambiarFecha();
-        console.log('Refrescar agenda');
-        //this.isloading = false;
       }
     });
 
     this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data:boolean) => {
       if (data) {
         await this.cambiarFecha();
-        console.log('Refrescar acciones agenda');
-        //this.isloading = false;
+        
       }
     });
 
@@ -221,6 +218,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
             startWith(''),
             map(value => this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
           );
+
+          // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
+          //   startWith(this.selectedRow.OUT_TELEFONO),
+          //   map(value => this._filter(value, this.lstTelefonoPacienteParaAgendar))
+          // );  
 
         this.listaCelularPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
         this.lstCelularPacienteParaAgendar = this.listaCelularPacienteParaAgendar!.map(item => ({ id: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', nombre: item.CELULAR_P ? item.CELULAR_P : '' }));
@@ -415,7 +417,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   recibirRespuestaAgendarCitaEmitida() {
     
     this.agendaService.respuestaAgendarCitaEmit.subscribe(async (respuestaAgendarCita: RespuestaConsultarPorDiaYPorUnidad) => {
-      alert('Recibiendo respuesta de agendar cita');
+      //alert('Recibiendo respuesta de agendar cita');
       if (respuestaAgendarCita.lstConfirmacionesPedidas) {
         let lstRestrictivas = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => x.esMensajeRestrictivo);
         if (lstRestrictivas.length > 0) {
@@ -438,7 +440,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         let lstMensajesInformativos = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => !x.esMensajeRestrictivo && !x.pedirConfirmar);
         console.log(lstMensajesInformativos);
         for (let confirmacion of lstMensajesInformativos) {
-          await this.mensajesUsuariosService.mensajeInformativo(confirmacion.mensaje);
+          if (confirmacion.mensaje!='Cita guardada correctamente' && confirmacion.mensaje!='Cita editada correctamente'){
+            await this.mensajesUsuariosService.mensajeInformativo(confirmacion.mensaje);
+          }
         }
         if (lstPedirConfirmar.length > 0) {
           respuestaAgendarCita.lstConfirmacionesPedidas = [];
@@ -501,9 +505,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     if (this.selectedRow.OUT_NOMBRE) {
       this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
-      console.log(this.selectedRow.OUT_NOMBRE);
-      console.log(this.selectedRow.OUT_TELEFONO);
-      console.log(this.selectedRow.OUT_CELULAR);
+            
       this.formularioAgregarCita.setValue({
         fechaEditar: this.fechaSeleccionada,
         sillaEditar: this.sillaSeleccionada,
@@ -513,14 +515,15 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         nombre: this.selectedRow.OUT_NOMBRE,
         telefono: this.selectedRow.OUT_TELEFONO,
         celular: this.selectedRow.OUT_CELULAR,
-
         numHistoria: this.selectedRow.OUT_CODIGO,
         asunto: this.selectedRow.OUT_ASUNTO,
         doctor: this.selectedRow.OUT_DOCTOR,
         duracion: this.selectedRow.OUT_DURACION,
         observaciones: this.selectedRow.OUT_ASUNTO
       });
-      //this.showForm = true;
+      this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
+      this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+      
       for (let resultado of this.resultadosBusquedaAgendaPorFecha.filter(x => x.OUT_HORA_CITA?.toString() === this.horaCitaSeleccionada)) {
         resultado.OUT_NOMBRE = '';
         resultado.OUT_TELEFONO = '';
@@ -905,7 +908,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     detalleCita.NOMBRE = nombre;
     detalleCita.TELEFONO = telefono;
     detalleCita.CELULAR = this.formularioAgregarCita.value.celular;
-    detalleCita.ASUNTO = this.formularioAgregarCita.value.asunto;
+    console.log(this.formularioAgregarCita.value.observaciones);
+    detalleCita.ASUNTO = this.formularioAgregarCita.value.observaciones;
     detalleCita.DOCTOR = this.formularioAgregarCita.value.doctor;
     console.log(this.formularioAgregarCita.value.duracion);
     var duracion = this.formularioAgregarCita.value.duracion;
@@ -915,6 +919,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     detalleCita.DURACION = duracion;
     datosParaGurdarEnAgenda.lstDetallaCitas.push(detalleCita);
     datosParaGurdarEnAgenda.lstConfirmacionesPedidas = lstConfirmacionesPedidas;
+    console.log(datosParaGurdarEnAgenda);
+    console.log(detalleCita);
     let respuesta = JSON.stringify(datosParaGurdarEnAgenda);
     await this.agendaService.startConnectionRespuestaAgendarCita(this.idSedeActualSignalR, respuesta);
 

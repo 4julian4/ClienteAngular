@@ -23,6 +23,11 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
   citasCanceladas!: number;
   pacientesAbonaron!: number;
   totalPacientes!: number;
+  totalEgresos!: number;
+  totalIngresos!: number;
+  totalAbonos!: number;
+  totalMora!: number;
+  totalCartera!: number;
   //pieChart?: Chart<'pie', number[], string>;
   //doughnutChart?: Chart<'doughnut', number[], string>;
 //lineChart?:Chart | null = null;
@@ -52,6 +57,11 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
       this.citasCanceladas = this.resultadoDatosAdministrativos.citasCanceladas ?? 0;
       this.pacientesAbonaron = this.resultadoDatosAdministrativos.pacientesAbonaron ?? 0;
       this.lstPacientesNuevos = this.resultadoDatosAdministrativos.lstPacientesNuevos ?? [];
+      this.totalEgresos = this.resultadoDatosAdministrativos.totalEgresos ?? 0;
+      this.totalIngresos = this.resultadoDatosAdministrativos.totalIngresos ?? 0;
+      this.totalAbonos = this.resultadoDatosAdministrativos.totalAbonos ?? 70000000;
+      this.totalMora = this.resultadoDatosAdministrativos.moraTotal ?? 900000000;
+      this.totalCartera = this.resultadoDatosAdministrativos.totalCartera ?? 1100000000;
       console.log(this.pacientesAsistieron);
       console.log(this.citasCanceladas);
       console.log(this.pacientesNoAsistieron);
