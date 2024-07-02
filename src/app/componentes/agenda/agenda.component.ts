@@ -955,7 +955,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       return '#ffcccc'; // Por ejemplo, verde si está confirmado
     }
 
-    if (row.OUT_NOMBRE && row.OUT_CONFIRMAR === 'NO' && row.OUT_ASISTENCIA === 'SI') {
+    if (row.OUT_NOMBRE && row.OUT_CONFIRMAR != 'SI' && row.OUT_ASISTENCIA === 'SI') {
       return '#ccffcc' // Por ejemplo, verde si está confirmado
     }
 
@@ -991,6 +991,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       console.log(row);
       this.onRowClickedAgenda(row);
       console.log('termino refrescar agenda');
+      this.isloading = false;
     });
     await this.cambiarFecha();
   }
