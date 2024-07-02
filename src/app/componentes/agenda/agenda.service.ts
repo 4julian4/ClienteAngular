@@ -28,7 +28,7 @@ export class AgendaService {
 
   // Método para emitir un evento
   async emitRefrescarAgenda() {
-    console.log('Emitiendo refrescar agenda');
+    
     this.refrescarAgendaEmit.emit(true);
     //this.refrescarAgenda.next();
   }

@@ -21,6 +21,7 @@ import { CodigosEps, CodigosEpsService } from 'src/app/conexiones/rydent/tablas/
 export class PedirPinComponent {
   listadoEps: CodigosEps= new CodigosEps();
   public obtenerPinRepuesta: RespuestaPin = new RespuestaPin();
+  isloading: boolean = false;
   //data = { name: 'Usuario', pin: '' };
 
   constructor(private dialogRef: MatDialogRef<PedirPinComponent>,
@@ -36,6 +37,7 @@ export class PedirPinComponent {
 
 
   async confirmar() {
+    this.isloading= true;
     // Aquí puedes hacer algo con this.data.pin, como verificarlo o enviarlo a un servidor
     await this.respuestaPinService.startConnectionRespuestaObtenerPin();
     this.respuestaPinService.respuestaPinModel.subscribe(async (respuestaPin: RespuestaPin) => {

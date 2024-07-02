@@ -89,6 +89,19 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       }
     });
 
+    this.respuestaPinService.sharednotaImportante.subscribe(data => {
+      if (data != null) {
+        this.notaImportante = data;
+        if (this.notaImportante != '' && this.notaImportante != 'no' && this.notaImportante != 'NO' && this.notaImportante != 'No' && this.notaImportante != null) {
+            this.mensajeNotaImportante = "EL PACIENTE TIENE NOTA IMPORTANTE";
+        }
+        else {
+            this.mensajeNotaImportante = '';
+            this.notaImportante = '';
+        }
+      }
+    });
+
     this.inicializarFormulario();
 
 
@@ -366,7 +379,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       await this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
       // Actualiza el doctor
       await this.actualizarDoctor(filaSeleccionada);
-
+      this.nombrePaciente = filaSeleccionada.NOMBRE_PACIENTE;
       // Obtiene los datos completos del paciente
       //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
 

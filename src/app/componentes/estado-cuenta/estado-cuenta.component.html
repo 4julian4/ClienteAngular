@@ -54,29 +54,7 @@
         </mat-form-field>
       </div>
     </div>
-
-    <!-- <div class="divFormularioFila2">
-          <mat-form-field appearance="fill" class="campoFila2">
-            <mat-label>Evolucion</mat-label>
-            <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
-              value={{evolucionPaciente.evolucion.EVOLUCION}} placeholder="Evolucion"></textarea>
-          </mat-form-field>
-        </div>
-
-        <div class="divFormularioFila3">
-          <mat-form-field appearance="fill" class="campoFila3">
-            <mat-label>Proxima Cita</mat-label>
-            <textarea matInput readonly matTextareaAutosize matAutosizeMinRows="3" matAutosizeMaxRows="6"
-              value={{evolucionPaciente.evolucion.PROXIMA_CITAstr}} placeholder="Proxima Cita"></textarea>
-          </mat-form-field>
-        </div> -->
-
-
-
-
-    <div>
-      <button mat-raised-button class="botonConsultarEstadoCuenta" (click)="buscarEstadoCuenta()">Buscar</button>
-    </div>
+    
     <div *ngIf="!mostrarMensajeSinEstadoCuenta" class="contenedorEstadoCuenta">
       <mat-tab-group>
         <mat-tab label="Pagos Detallados">
@@ -114,7 +92,7 @@
               </ng-container>
               <ng-container matColumnDef="NOTACREDITO">
                 <th mat-header-cell *matHeaderCellDef> Nota Credito </th>
-                <td mat-cell *matCellDef="let elemento"> {{elemento.NOTACREDITO}} </td>
+                <td mat-cell *matCellDef="let elemento"> {{elemento.NOTACREDITO | number:'1.0-0'}} </td>
               </ng-container>
               <ng-container matColumnDef="SALDO_PARCIAL">
                 <th mat-header-cell *matHeaderCellDef> Saldo Parcial </th>
@@ -180,7 +158,7 @@
               </ng-container>
               <ng-container matColumnDef="NOTACREDITO">
                 <th mat-header-cell *matHeaderCellDef> Nota Crédito </th>
-                <td mat-cell *matCellDef="let elemento"> {{elemento.NOTACREDITO}} </td>
+                <td mat-cell *matCellDef="let elemento"> {{elemento.NOTACREDITO | number:'1.0-0'}} </td>
               </ng-container>
               <ng-container matColumnDef="CODIGO_DESCRIPCION">
                 <th mat-header-cell *matHeaderCellDef> Codigo Descripcion </th>

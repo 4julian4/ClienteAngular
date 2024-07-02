@@ -2,11 +2,11 @@
     <mat-expansion-panel #panelBuscarPaciente *ngIf="mostrarPanelBuscarPaciente" class="buscarPaciente"
         [expanded]="openorclosePanelBuscarPaciente" (opened)="panelBuscarPacienteOpen()">
         <mat-expansion-panel-header>
-            <mat-panel-title>
+            <mat-panel-title style="color: black; font-size: 1.5em;">
                 {{nombrePaciente}} {{numeroHistoria}}
             </mat-panel-title>
             <mat-panel-description>
-                <span style="color: red; font-size: 1.2em;" matTooltip="{{notaImportante}}"> {{mensajeNotaImportante}}</span>
+                <span style="color: red; font-size: 1.0em;" matTooltip="{{notaImportante}}"> {{mensajeNotaImportante}}</span>
             </mat-panel-description>
             <mat-icon class="custom-mat-icon" mat-expansion-indicator matTooltip="click aca para buscar paciente">search</mat-icon>
             
@@ -28,7 +28,7 @@
                 
                 <div class="divBuscadorInput">
                     <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
-                        [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;">
+                        [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;" (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)">
                     <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
                         <mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
                             {{ datosPaciente.datoBuscar }}

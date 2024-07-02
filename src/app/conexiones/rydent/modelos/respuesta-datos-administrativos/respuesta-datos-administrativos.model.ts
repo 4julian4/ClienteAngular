@@ -9,9 +9,10 @@ export class RespuestaDatosAdministrativos {
     public pacientesNoAsistieron?: number;
     public citasCanceladas?: number;
     public pacientesInicianTratamiento?: number;
-    public carteraTotal?: number;
+    public totalCartera?: number;
     public moraTotal?: number;
     public totalIngresos?: number;
+    public totalAbonos?: number;
     public totalEgresos?: number;
     public totalCaja?: number;
     public lstPacientesNuevos?: PacientesNuevos[];
