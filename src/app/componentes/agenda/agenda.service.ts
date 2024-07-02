@@ -52,8 +52,9 @@ export class AgendaService {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
             await this.signalRService.stopConnection();
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
-            console.log('emitir refrescar agenda');
-            await this.emitRefrescarAgenda();
+            //console.log('emitir refrescar agenda');
+            //this.refrescarAgendaEmit.emit(true);
+            //await this.emitRefrescarAgenda();
           }
           catch (error) {
             console.error('Error during decompression or parsing: ', error);

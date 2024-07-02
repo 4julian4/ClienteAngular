@@ -333,8 +333,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
             element.scrollIntoView({ behavior: 'auto', block: 'center' });
 
             // Luego de desplazar el elemento a la vista, llama a onRowClickedAgenda
-            setTimeout(() => this.onRowClickedAgenda(intervaloCita), 300);
-            //await this.onRowClickedAgenda(intervaloCita);
+            //setTimeout(() => this.onRowClickedAgenda(intervaloCita), 500);
+            this.onRowClickedAgenda(intervaloCita);
           } else {
           }
         } else {
@@ -444,15 +444,18 @@ export class AgendaComponent implements OnInit, AfterViewInit {
             await this.mensajesUsuariosService.mensajeInformativo(confirmacion.mensaje);
           }
         }
+        //aca se valida si hay nuevams confiamciones, se vuelve hacer el proceso sino se termina el proceso y se manda refrescar
         if (lstPedirConfirmar.length > 0) {
           respuestaAgendarCita.lstConfirmacionesPedidas = [];
           await this.agendaService.startConnectionRespuestaAgendarCita(this.idSedeActualSignalR, JSON.stringify(respuestaAgendarCita));
         }
         else {
           this.formularioAgregarCita.reset();
+          this.agendaService.refrescarAgendaEmit.emit(true);
           //await this.cambiarFecha();
         }
       }
+      
     });
   }
 
