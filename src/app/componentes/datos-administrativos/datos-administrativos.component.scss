@@ -1,6 +1,6 @@
 .dashboard {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); // Establece 4 columnas por renglón
+    grid-template-columns: repeat(5, 1fr); // Establece 5 columnas por renglón
     grid-auto-rows: 200px; // Altura fija para todas las filas
     gap: 20px;
     padding: 40px;
@@ -69,7 +69,7 @@
     }
 
     .metrics {
-        font-size: 3rem; // Tamaño aumentado
+        font-size: 30px; // Tamaño aumentado
         font-weight: 700; // Más bold
         color: rgb(28, 197, 244);
         text-align: center;

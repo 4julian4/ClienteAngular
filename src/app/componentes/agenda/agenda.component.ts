@@ -46,7 +46,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   intervalosDeTiempo: any[] = [];
   intervaloDeTiempoSeleccionado: number = 0; // Valor por defecto
 
-
+  estaCambiandoFecha = false;
   fechaSeleccionada: Date = new Date(); // Fecha seleccionada
   nombre: string = '';
   telefono: string = '';
@@ -119,7 +119,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   localizandoCita: boolean = false;
   panelBuscarCitaDeshabilitado: boolean = true;
   //resultadosBusquedaCita: boolean = false;
-
+  refrescoAgenda: boolean = false;
 
   columnasMostradasCitasEncontradas = ['fecha', 'hora', 'numHistoria', 'nombre', 'cedula', 'telefono', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
 
@@ -136,7 +136,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     private agendaService: AgendaService,
     private changeDetectorRef: ChangeDetectorRef,
     private respuestaRealizarAccionesEnCitaAgendadaService: RespuestaRealizarAccionesEnCitaAgendadaService,
-    
+
   ) {
 
   }
@@ -166,16 +166,15 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     let mes = parseInt(lstFecha[1]) - 1;
     let anio = parseInt(lstFecha[2]);
     this.fechaSeleccionada = new Date(anio, mes, dia);
-    this.agendaService.refrescarAgendaEmit.subscribe(async (data:boolean) => {
+    this.agendaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
         await this.cambiarFecha();
       }
     });
 
-    this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data:boolean) => {
+    this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
         await this.cambiarFecha();
-        
       }
     });
 
@@ -184,6 +183,13 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.idSedeActualSignalR = data;
       }
     });
+
+    this.respuestaPinService.sharedisLoading.subscribe(data => {
+      if (data != null) {
+        this.isloading = data;
+      }
+    });
+
     this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
         this.doctorSeleccionado = data;
@@ -219,10 +225,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
             map(value => this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
           );
 
-          // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
-          //   startWith(this.selectedRow.OUT_TELEFONO),
-          //   map(value => this._filter(value, this.lstTelefonoPacienteParaAgendar))
-          // );  
+        // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
+        //   startWith(this.selectedRow.OUT_TELEFONO),
+        //   map(value => this._filter(value, this.lstTelefonoPacienteParaAgendar))
+        // );  
 
         this.listaCelularPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
         this.lstCelularPacienteParaAgendar = this.listaCelularPacienteParaAgendar!.map(item => ({ id: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', nombre: item.CELULAR_P ? item.CELULAR_P : '' }));
@@ -265,7 +271,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           }
         });
 
-        
+
 
 
         this.formularioAgregarCita.get('numHistoria')!.valueChanges.subscribe(value => {
@@ -317,6 +323,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     });
 
     this.respuestaConsultarPorDiaYPorUnidadService.respuestaConsultarPorDiaYPorUnidadModel.subscribe(async (respuestaConsultarPorDiaYPorUnidad: RespuestaConsultarPorDiaYPorUnidad) => {
+      this.refrescoAgenda = respuestaConsultarPorDiaYPorUnidad.terminoRefrescar;
+      //if (this.refrescoAgenda) {
       this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
       this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
       if (this.localizandoCita) {
@@ -343,20 +351,23 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
         this.localizandoCita = false;
         this.showSearch = true;
+        //}
+        // Emite el evento terminoRefrescarAgenda para indicar que la operación de refresco ha terminado
+        //this.terminoRefrescarAgenda.next();
+        this.agendaService.refrescarAgendaEmit.emit(true);
+        //this.isloading = false;
       }
-      // Emite el evento terminoRefrescarAgenda para indicar que la operación de refresco ha terminado
-      this.terminoRefrescarAgenda.next();
-      this.isloading = false;
+
     });
     await this.cambiarFecha();
     this.recibirRespuestaAgendarCitaEmitida();
 
     this.respuestaRealizarAccionesEnCitaAgendadaService.respuestaRealizarAccionesEnCitaAgendadaEmit.subscribe(async (respuestaRealizarAccionesEnCitaAgendada: boolean) => {
-      
-      if (respuestaRealizarAccionesEnCitaAgendada) {
-        this.isloading = false;
+
+      //if (respuestaRealizarAccionesEnCitaAgendada) {
+        //this.isloading = false;
         //await this.cambiarFecha();
-      }
+      //}
     });
 
     this.agendaService.respuestaBuscarCitasPacienteAgendaEmit.subscribe(async (respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[]) => {
@@ -415,7 +426,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   }
 
   recibirRespuestaAgendarCitaEmitida() {
-    
+
     this.agendaService.respuestaAgendarCitaEmit.subscribe(async (respuestaAgendarCita: RespuestaConsultarPorDiaYPorUnidad) => {
       //alert('Recibiendo respuesta de agendar cita');
       if (respuestaAgendarCita.lstConfirmacionesPedidas) {
@@ -440,7 +451,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         let lstMensajesInformativos = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => !x.esMensajeRestrictivo && !x.pedirConfirmar);
         console.log(lstMensajesInformativos);
         for (let confirmacion of lstMensajesInformativos) {
-          if (confirmacion.mensaje!='Cita guardada correctamente' && confirmacion.mensaje!='Cita editada correctamente'){
+          if (confirmacion.mensaje != 'Cita guardada correctamente' && confirmacion.mensaje != 'Cita editada correctamente') {
             await this.mensajesUsuariosService.mensajeInformativo(confirmacion.mensaje);
           }
         }
@@ -455,7 +466,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           //await this.cambiarFecha();
         }
       }
-      
+
     });
   }
 
@@ -508,7 +519,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     if (this.selectedRow.OUT_NOMBRE) {
       this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
-            
+
       this.formularioAgregarCita.setValue({
         fechaEditar: this.fechaSeleccionada,
         sillaEditar: this.sillaSeleccionada,
@@ -526,7 +537,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       });
       this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
       this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
-      
+
       for (let resultado of this.resultadosBusquedaAgendaPorFecha.filter(x => x.OUT_HORA_CITA?.toString() === this.horaCitaSeleccionada)) {
         resultado.OUT_NOMBRE = '';
         resultado.OUT_TELEFONO = '';
@@ -648,7 +659,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
         return;
       }
-      this.isloading = true;
+      //this.isloading = true;
 
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
@@ -668,8 +679,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async confirmar() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      
-      this.isloading = true;
+
+      //this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -683,7 +694,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
       const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } = await this.mensajesUsuariosService.mensajeConfirmarSiNoAlarmaObservaciones('Desea Ingresar alguna observacion?', true, true);
       if (resultado) {
-        
+
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
         let alarmar = opcionSeleccionadaMensaje == "SI";
         if (alarmar) {
@@ -707,7 +718,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async sinConfirmar() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      this.isloading = true;
+      //this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -727,7 +738,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async asistenciaNo() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      this.isloading = true;
+      //this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -745,7 +756,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
       const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoIngresarEvolucion('Desea registrar la inasistencia en la evolucion del paciente?', 'El paciente no asistió a la cita del ' + fechaFormateada + ' a las ' + horaFormateada);
       if (resultado) {
-        
+
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
       }
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
@@ -758,7 +769,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async asistenciaSi() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      this.isloading = true;
+      //this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -769,7 +780,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'ASISTIO';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-     console.log('entro a poner asistencia');
+      console.log('entro a poner asistencia');
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     }
     else {
@@ -779,7 +790,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async quitarAsistencia() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      this.isloading = true;
+      //this.isloading = true;
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -802,7 +813,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     if (this.selectedRow.OUT_HORA_CITA) {
       const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace('Esta seguro de cancelar la cita?', this.fechaSeleccionada, this.selectedRow.OUT_HORA_CITA);
       if (resultado) {
-        this.isloading = true;
+        //this.isloading = true;
         let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
         let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
         objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
@@ -880,7 +891,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
 
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
-    this.isloading = true;
+    //this.isloading = true;
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre;
     var telefono = formulario.telefono;
@@ -994,7 +1005,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       console.log(row);
       this.onRowClickedAgenda(row);
       console.log('termino refrescar agenda');
-      this.isloading = false;
+      //this.isloading = false;
     });
     await this.cambiarFecha();
   }
@@ -1003,7 +1014,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     this.selectedRow = intervalo;
     //prueba para refrescar agenda
-  console.log(intervalo);
+    console.log(intervalo);
 
     this.toggleFormVisibility();
     if (intervalo.OUT_HORA_CITA !== 0 && intervalo.OUT_HORA_CITA !== null) {
@@ -1064,16 +1075,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   }
 
+
+
   async cambiarFecha() {
     if (this.idSedeActualSignalR != '') {
       await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
     }
-   // this.terminoRefrescarAgenda.next();
   }
 
   async refrescarAgenda() {
     await this.cambiarFecha();
-
   }
 
 

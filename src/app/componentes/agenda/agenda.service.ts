@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
 import { RespuestaBusquedaPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
 import { RespuestaConsultarPorDiaYPorUnidad } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
+import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { SignalRService } from 'src/app/signalr.service';
@@ -21,7 +22,8 @@ export class AgendaService {
   constructor(
     private signalRService: SignalRService,
     private interruptionService: InterruptionService,
-    private descomprimirDatosService: DescomprimirDatosService
+    private descomprimirDatosService: DescomprimirDatosService,
+    private respuestaPinService: RespuestaPinService
   ) { }
 
   
@@ -52,6 +54,10 @@ export class AgendaService {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
             await this.signalRService.stopConnection();
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
+            if(decompressedData != null){
+              this.respuestaPinService.updateisLoading(false);
+              console.log('terminodecargar');
+            }
             //console.log('emitir refrescar agenda');
             //this.refrescarAgendaEmit.emit(true);
             //await this.emitRefrescarAgenda();
@@ -63,6 +69,8 @@ export class AgendaService {
         });
         
         this.signalRService.hubConnection.invoke('AgendarCita', clienteId, modelocrearcita ).catch(err => console.error(err));
+        this.respuestaPinService.updateisLoading(true);
+        console.log('iniciocargar');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
   }

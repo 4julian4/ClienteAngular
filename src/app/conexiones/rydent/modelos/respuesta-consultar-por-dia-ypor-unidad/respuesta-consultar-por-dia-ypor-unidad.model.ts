@@ -9,6 +9,7 @@ export class RespuestaConsultarPorDiaYPorUnidad {
     lstP_AGENDA1:P_Agenda1Model[] = [];
     esFestivo: boolean = false;
     lstConfirmacionesPedidas ?: ConfirmacionesPedidas[];
+    terminoRefrescar: boolean = false;
 }
 export class P_Agenda1Model {
     OUT_HORA: Date= new Date();

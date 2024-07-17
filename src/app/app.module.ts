@@ -12,7 +12,7 @@ import {MaterialModule} from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTabsModule } from '@angular/material/tabs';
-
+import { MatIconModule } from '@angular/material/icon';
 
 import { LoginComponent } from './componentes/login/login.component';
 import { SpinnerComponent } from './componentes/spinner/spinner.component';
@@ -95,6 +95,7 @@ export const MY_DATE_FORMATS = {
         MatNativeDateModule,
         MatTabsModule,
         MatMenuModule,
+        MatIconModule,
         MatProgressBarModule,
         NgxMaterialTimepickerModule,
         MatAutocompleteModule,
