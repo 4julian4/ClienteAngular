@@ -42,6 +42,9 @@ export class RespuestaPinService {
   private notaImportante = new BehaviorSubject<string | null>(null);
   sharednotaImportante = this.notaImportante.asObservable();
 
+  private isLoading = new BehaviorSubject<boolean | null>(null);
+  sharedisLoading = this.isLoading.asObservable();
+
   private onDoctorSeleccionado: (IdDoctor: number) => void;
   setOnDoctorSeleccionadoCallback(callback: (IdDoctor: number) => void) {
     this.onDoctorSeleccionado = callback;
@@ -147,6 +150,10 @@ updateNumPacientesPorDoctor(data: number) {
 }
 updateNotaImportante(data: string) {
   this.notaImportante.next(data);
+}
+
+updateisLoading(data: boolean) {
+  this.isLoading.next(data);
 }
   // updateDoctorSeleccionado(idDoctor: string) {
   //   this.doctorSeleccionado.next(idDoctor);

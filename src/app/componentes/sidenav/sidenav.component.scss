@@ -1,64 +1,58 @@
-:host {
-    // the styles below were moved from the .sidenav class in app.component.scss
-    height: 100vh;
-    width: var(--sidenav-width);
-  
-    box-sizing: border-box;
-  
-    // makes the sidenav stay in place, even when content is scrollable
-    position: sticky;
-    top: 0;
-    
-    background-color: rgb(237, 241, 243);
-  
-    border-right: 2px solid rgb(192, 192, 192);
-  }
-  
-  .sidenav {
-    height: 100vh;
-    width: var(--sidenav-width);
-  
-    box-sizing: border-box;
-  }
-  .mat-drawer-inner-container
-          {
-            overflow:visible !important;
-          }
-  
-  .content {
-    flex-grow: 1;
-  
-    padding: 1rem;
-  }
+/* Establece el estilo base para todos los elementos, eliminando márgenes, paddings, y estableciendo la caja de borde y la fuente por defecto */
 
-  .spacer {
-    flex: 1 1 auto;
-  }
-
-  .iniciarsesion-form-field {
-    width: 200px; /* Ajusta este valor según tus necesidades */
-    height: 36px; /* Ajusta este valor según tus necesidades */
-  }
-
-  .mat-option.mat-selected {
-    color: white !important;
-  }
-
-  mat-select {
-    background-color: white;
-    margin-right: 10px;
+/* Estilos para mat-toolbar, definiendo el color de fondo */
+mat-toolbar {
+  background: rgb(28, 197, 244); /* Color de fondo */
 }
 
-mat-label {
-    margin-right: 10px;
+
+
+/* Utilidad para agregar espacio flexible en diseños flex */
+.spacer {
+  flex: 1 1 auto;
 }
 
-.divMenuContainer {
-  position: relative;
+/* Estilos para campos de formulario de inicio de sesión, ajustando dimensiones */
+.iniciarsesion-form-field {
+  width: 200px; /* Ajusta este valor según tus necesidades */
+  height: 36px; /* Ajusta este valor según tus necesidades */
 }
 
-button[mat-button] {
-  position: absolute;
-  top: 0;
-  left: 0;
+/* Estilos para mat-select, incluyendo color de fondo y margen */
+mat-select {
+  background-color: rgb(237, 242, 244);
+  margin-right: 10px;
+  border-radius: 3px;
 }
+
+.app-container {
+  display: flex;
+}
+
+.main-content {
+  margin-top: 70px; /* Ajusta este valor según la altura de tu barra de navegación */
+  margin-left: 250px;
+  /* Asegúrate de aplicar cualquier padding o margen necesario aquí para evitar que el contenido toque directamente los bordes del menú lateral */
+}
+
+.labelSede {
+  margin-right: 7px;
+}
+
+.labelDoctor {
+  margin-left: 7px;
+}
+
+.usuarioActivo {
+  display: flex; 
+  align-items: center; 
+  margin-left: 30px;
+  font-weight: 300;
+  font-size: 14px;
+}
+
+
+
+
+
+

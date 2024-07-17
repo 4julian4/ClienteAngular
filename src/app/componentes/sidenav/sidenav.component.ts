@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output, Renderer2 } from '@angular/core';
 import { SidenavService } from './';
 import { environment } from 'src/environments/environment';
 import { FormControl } from '@angular/forms';
@@ -20,6 +20,8 @@ import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { Subscription } from 'rxjs';
 import { LoginService } from '../login';
+import { MatIconModule } from '@angular/material/icon';
+
 
 
 @Component({
@@ -34,18 +36,25 @@ export class SidenavComponent implements OnInit, OnDestroy {
   idSedeActualSignalR: string = "";
   sedeSeleccionada = "";
   showFiller = false;
-  titulo = environment.NombreAplicacion;
+  //titulo = environment.NombreAplicacion;
+  titulo = "Rydent Web";
   toggleControl = new FormControl(false);
   @HostBinding('class') className = '';
   logeado = false;
   mostrarDoctores = false;
+  emailUsuario="nbalamejor@gmail.com";
   doctorSeleccionado = "";
   doctorEscogido = "";
+  idPacienteSeleccionado = 0;
   totalPacientesDoctorSeleccionado = 0;
   lstDoctores: { id: number, nombre: string }[] = [];
   sedeConectadaActual: SedesConectadas = new SedesConectadas();
   private subscription: Subscription;
   public mostrarBuscarHistoriaClinica: boolean = false;
+  menuExpandido = false;
+  menuOpen = false;
+
+    
 
 
 
@@ -53,6 +62,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   route = "";
 
   constructor(
+    private renderer: Renderer2,
     private dialog: MatDialog,
     private location1: Location,
     private router: Router,
@@ -79,6 +89,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   }
   async ngOnInit() {
+    this.renderer.setAttribute(document.body, 'id', 'body');
+
     this.toggleControl.valueChanges.subscribe((darkMode) => {
       const darkClassName = 'darkMode';
       this.className = darkMode ? darkClassName : '';
@@ -96,6 +108,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
     this.respuestaPinService.setOnDoctorSeleccionadoCallback(this.onDoctorSeleccionado.bind(this));
 
+    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
+      if (data != null) {
+        this.idPacienteSeleccionado = data;
+      }
+    });
 
     this.respuestaPinService.sharedcambiarDoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
@@ -126,6 +143,10 @@ export class SidenavComponent implements OnInit, OnDestroy {
     return [];
   }
 
+  toggleMenu() {
+    this.menuExpandido = !this.menuExpandido;
+  }
+  
   async iniciarSesion() {
     let resultadoConsultaUsuario = await this.usuariosService.ConsultarCorreoyFechaActivo(this.correo);
     if (resultadoConsultaUsuario.status == 1) {
@@ -141,6 +162,16 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
     }
   }
+
+  //Evento mostrar y ocultar menu
+  open_close_menu() {
+    this.menuOpen = !this.menuOpen; // Cambia el estado del menú
+    console.log("click");
+    //this.body?.classList.toggle("body_move");
+    //this.side_menu?.classList.toggle("menu__side_move");
+    console.log("click");
+  }
+
 
   async pedirPinSedeSeleccionada(idSede: number) {
     if (this.sedesConectadas.length > 0 && this.sedesConectadas.filter(x => x.idSede == idSede).length > 0) {

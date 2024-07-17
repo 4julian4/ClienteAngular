@@ -6,6 +6,7 @@ import { TConfiguracionesRydent } from 'src/app/conexiones/rydent/tablas/tconfig
 import { RipsService } from './rips.service';
 import { Observable, debounceTime, map, startWith, take } from 'rxjs';
 import { MatAutocomplete } from '@angular/material/autocomplete';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-rips',
@@ -48,7 +49,8 @@ export class RipsComponent implements OnInit {
   constructor(
     private respuestaPinService: RespuestaPinService,
     private ripsService: RipsService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private router: Router,
   ) { }
 
 
@@ -301,7 +303,10 @@ export class RipsComponent implements OnInit {
     }
   }
 
-  cancelarGuardarRips() { }
+  cancelarGuardarRips() { 
+    this.router.navigate(['/evolucion']);
+  }
+
   async guardarRips() {
     if (this.idSedeActualSignalR != '') {
       let datosParaGurdarRips: DatosGuardarRips = new DatosGuardarRips();

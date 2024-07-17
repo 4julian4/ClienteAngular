@@ -4,6 +4,7 @@ import { SignalRService } from 'src/app/signalr.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 import { Subject } from 'rxjs';
+import { RespuestaPinService } from '../respuesta-pin';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,8 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   constructor(
     private signalRService: SignalRService,
     private interruptionService: InterruptionService,
-    private descomprimirDatosService: DescomprimirDatosService
+    private descomprimirDatosService: DescomprimirDatosService,
+    private respuestaPinService: RespuestaPinService
   ) { }
 
   // Método para emitir un evento
@@ -41,11 +43,17 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   
         });
         this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
+        
         this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;
             await this.signalRService.stopConnection();
             this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
+            if(decompressedData != null){
+              this.respuestaPinService.updateisLoading(false);
+              console.log('terminodecargar');
+            }
+            
             console.log('emitir refrescar realziar acciones en cita agendada');
             await this.emitRefrescarAgenda();
           } catch (error) {
@@ -55,6 +63,8 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
         });
 
         this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada).catch(err => console.error(err));
+        this.respuestaPinService.updateisLoading(true);
+        console.log('iniciocargar');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
 }
