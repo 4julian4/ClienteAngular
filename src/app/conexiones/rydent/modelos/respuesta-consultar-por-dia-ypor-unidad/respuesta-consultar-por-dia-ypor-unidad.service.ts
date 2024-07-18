@@ -21,11 +21,9 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
   async startConnectionRespuestaConsultarPorDiaYPorUnidad(clienteId: string, silla: string, fecha: Date) {
     console.log(this.ocupado);
     if (this.ocupado == false) {
-      console.log('entro');
       if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
         await this.signalRService.hubConnection.stop();
       }
-      console.log('entro');
       await this.signalRService.hubConnection.start().then(
         async () => {
           //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
