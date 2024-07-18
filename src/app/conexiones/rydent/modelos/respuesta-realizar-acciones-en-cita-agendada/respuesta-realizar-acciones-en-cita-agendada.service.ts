@@ -49,13 +49,14 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;
             await this.signalRService.stopConnection();
             this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
+            
+            
+            console.log('emitir refrescar realziar acciones en cita agendada');
+            await this.emitRefrescarAgenda();
             if(decompressedData != null){
               this.respuestaPinService.updateisLoading(false);
               console.log('terminodecargar');
             }
-            
-            //console.log('emitir refrescar realziar acciones en cita agendada');
-            //await this.emitRefrescarAgenda();
           } catch (error) {
             console.error('Error during decompression or parsing: ', error);
           }
