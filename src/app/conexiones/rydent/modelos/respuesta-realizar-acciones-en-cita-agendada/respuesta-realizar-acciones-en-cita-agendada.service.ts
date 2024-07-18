@@ -54,8 +54,10 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
             console.log('emitir refrescar realziar acciones en cita agendada');
             await this.emitRefrescarAgenda();
             if(decompressedData != null){
-              this.respuestaPinService.updateisLoading(false);
-              console.log('terminodecargar');
+              setTimeout(() => {
+                this.respuestaPinService.updateisLoading(false);
+                console.log('terminodecargar');
+              }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
           } catch (error) {
             console.error('Error during decompression or parsing: ', error);

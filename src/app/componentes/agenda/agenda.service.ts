@@ -54,13 +54,15 @@ export class AgendaService {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
             await this.signalRService.stopConnection();
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
+            console.log('emitir refrescar agenda');
+            this.refrescarAgendaEmit.emit(true);
+            await this.emitRefrescarAgenda();
             if(decompressedData != null){
-              this.respuestaPinService.updateisLoading(false);
-              console.log('terminodecargar');
+              setTimeout(() => {
+                this.respuestaPinService.updateisLoading(false);
+                console.log('terminodecargar');
+              }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
-            //console.log('emitir refrescar agenda');
-            //this.refrescarAgendaEmit.emit(true);
-            //await this.emitRefrescarAgenda();
           }
           catch (error) {
             console.error('Error during decompression or parsing: ', error);
@@ -93,8 +95,10 @@ export class AgendaService {
           await this.signalRService.stopConnection();
           this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
           if(objRespuestaBusquedaPacienteModel != null){
-            this.respuestaPinService.updateisLoading(false);
-            console.log('terminodecargar');
+            setTimeout(() => {
+              this.respuestaPinService.updateisLoading(false);
+              console.log('terminodecargar');
+            }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
           }
         });
         this.signalRService.hubConnection.invoke('BuscarCitasPacienteAgenda', clienteId,  valorDeBusqueda).catch(err => console.error(err));
