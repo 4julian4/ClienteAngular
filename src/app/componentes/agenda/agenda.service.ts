@@ -90,10 +90,16 @@ export class AgendaService {
         });
         this.signalRService.hubConnection.off('RespuestaBuscarCitasPacienteAgenda');
         this.signalRService.hubConnection.on('RespuestaBuscarCitasPacienteAgenda', async (clienteId: string, objRespuestaBusquedaPacienteModel: string) => {
-          this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
           await this.signalRService.stopConnection();
+          this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
+          if(objRespuestaBusquedaPacienteModel != null){
+            this.respuestaPinService.updateisLoading(false);
+            console.log('terminodecargar');
+          }
         });
         this.signalRService.hubConnection.invoke('BuscarCitasPacienteAgenda', clienteId,  valorDeBusqueda).catch(err => console.error(err));
+        this.respuestaPinService.updateisLoading(true);
+        console.log('iniciocargar');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
 

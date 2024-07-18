@@ -54,8 +54,8 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
               console.log('terminodecargar');
             }
             
-            console.log('emitir refrescar realziar acciones en cita agendada');
-            await this.emitRefrescarAgenda();
+            //console.log('emitir refrescar realziar acciones en cita agendada');
+            //await this.emitRefrescarAgenda();
           } catch (error) {
             console.error('Error during decompression or parsing: ', error);
           }
