@@ -72,12 +72,13 @@ export class RespuestaPinService {
       .start()
       .then(async () => {
         console.log('Conectado a SignalR');
-
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
         });
 
+        this.signalRService.hubConnection.off('RespuestaObtenerPin');
         this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
@@ -94,72 +95,42 @@ export class RespuestaPinService {
 
 
 
-  // async startConnectionRespuestaObtenerPin() {
-  //   if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
-  //     await this.signalRService.hubConnection.stop();
-  //   }
-  //   await this.signalRService.hubConnection
-  //     .start()
-  //     .then(async () => {
 
-  //       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-  //         alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-  //         this.interruptionService.interrupt();
-
-  //       });
-  //       console.log('Conectado a SignalR');
-  //       this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
-  //         console.log('RespuestaObtenerPin: ' + objRespuestaObtenerDoctor);
-  //         const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
-  //         console.log('RespuestaObtenerPin: ' + decompressedData);
-
-  //         this.respuestaPinModel.emit(JSON.parse(decompressedData));
-
-  //       });
-  //     })
-  //     .catch(err => console.log('Error al conectar con SignalR: ' + err));
-  // }
   // Aca actualizamos variables para que sean usadas por los componenetes
   async updateAnamnesisData(data: number) {
-  this.anamnesisData.next(data);
-}
+    this.anamnesisData.next(data);
+  }
 
-updateSedeData(data: string) {
-  this.sedeData.next(data);
-}
-updatedatosRespuestaPin(data: RespuestaPin) {
-  this.datosRespuestaPin.next(data);
-}
-updateDoctorSeleccionado(data: string) {
-  this.doctorSeleccionado.next(data);
+  updateSedeData(data: string) {
+    this.sedeData.next(data);
+  }
+  updatedatosRespuestaPin(data: RespuestaPin) {
+    this.datosRespuestaPin.next(data);
+  }
+  updateDoctorSeleccionado(data: string) {
+    this.doctorSeleccionado.next(data);
 
-}
-updateCambiarDoctorSeleccionado(data: string) {
-  this.cambiarDoctorSeleccionado.next(data);
-}
+  }
+  updateCambiarDoctorSeleccionado(data: string) {
+    this.cambiarDoctorSeleccionado.next(data);
+  }
 
 
-updateListadoEps(data: CodigosEps) {
-  this.listadoEps.next(data);
-}
-updatedatosPersonalesParaCambioDeDoctor(data: RespuestaDatosPersonales) {
-  this.datosPersonalesParaCambioDeDoctor.next(data);
-}
-updateNumPacientesPorDoctor(data: number) {
-  this.numPacientesPorDoctor.next(data);
-}
-updateNotaImportante(data: string) {
-  this.notaImportante.next(data);
-}
+  updateListadoEps(data: CodigosEps) {
+    this.listadoEps.next(data);
+  }
+  updatedatosPersonalesParaCambioDeDoctor(data: RespuestaDatosPersonales) {
+    this.datosPersonalesParaCambioDeDoctor.next(data);
+  }
+  updateNumPacientesPorDoctor(data: number) {
+    this.numPacientesPorDoctor.next(data);
+  }
+  updateNotaImportante(data: string) {
+    this.notaImportante.next(data);
+  }
 
-updateisLoading(data: boolean) {
-  this.isLoading.next(data);
-}
-  // updateDoctorSeleccionado(idDoctor: string) {
-  //   this.doctorSeleccionado.next(idDoctor);
-  //   if (this.onDoctorSeleccionado) {
-  //     this.onDoctorSeleccionado(idDoctor);
-  //   }
-  // }
-  //-----------------------------------------------------------------------//
+  updateisLoading(data: boolean) {
+    this.isLoading.next(data);
+  }
+
 }

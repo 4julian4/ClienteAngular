@@ -168,12 +168,14 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.fechaSeleccionada = new Date(anio, mes, dia);
     this.agendaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
+        alert('refrescar agendaService');
         await this.cambiarFecha();
       }
     });
 
     this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
+        alert('refrescar respuestaRealizarAccionesEnCitaAgendadaService');
         await this.cambiarFecha();
       }
     });
@@ -186,6 +188,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     this.respuestaPinService.sharedisLoading.subscribe(data => {
       if (data != null) {
+        alert('isloading'+ data);
         this.isloading = data;
       }
     });
@@ -361,14 +364,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     });
     await this.cambiarFecha();
     this.recibirRespuestaAgendarCitaEmitida();
-
-    this.respuestaRealizarAccionesEnCitaAgendadaService.respuestaRealizarAccionesEnCitaAgendadaEmit.subscribe(async (respuestaRealizarAccionesEnCitaAgendada: boolean) => {
-
-      //if (respuestaRealizarAccionesEnCitaAgendada) {
-        //this.isloading = false;
-        //await this.cambiarFecha();
-      //}
-    });
 
     this.agendaService.respuestaBuscarCitasPacienteAgendaEmit.subscribe(async (respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[]) => {
       this.resultadosBusquedaCitaPacienteAgenda = respuestaBuscarCitasPacienteAgenda;
@@ -780,7 +775,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'ASISTIO';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-      console.log('entro a poner asistencia');
+      alert('entro a poner asistencia');
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     }
     else {
@@ -1083,9 +1078,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async refrescarAgenda() {
-    await this.cambiarFecha();
-  }
+  
 
 
   agregarMinutosAHora(hora: string, minutos: string): string {

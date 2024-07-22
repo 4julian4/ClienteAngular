@@ -13,7 +13,6 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   refrescarAgenda = new Subject<void>();
   // Observable para que los componentes puedan suscribirse
   refrescarAgenda$ = this.refrescarAgenda.asObservable();
-  @Output() respuestaRealizarAccionesEnCitaAgendadaEmit: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() refrescarAgendaEmit: EventEmitter<boolean> = new EventEmitter<boolean>();
   constructor(
     private signalRService: SignalRService,
@@ -37,6 +36,7 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
@@ -48,8 +48,7 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;
             await this.signalRService.stopConnection();
-            this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
-            
+                       
             
             console.log('emitir refrescar realziar acciones en cita agendada');
             await this.emitRefrescarAgenda();
@@ -67,7 +66,7 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
 
         this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada).catch(err => console.error(err));
         this.respuestaPinService.updateisLoading(true);
-        console.log('iniciocargar');
+        alert('iniciocargar RealizarAccionesEnCitaAgendada');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
 }

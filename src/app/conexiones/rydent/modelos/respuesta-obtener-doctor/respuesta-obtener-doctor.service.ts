@@ -25,11 +25,13 @@ export class RespuestaObtenerDoctorService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaObtenerDoctor');
         this.signalRService.hubConnection.on('RespuestaObtenerDoctor', async (clienteId: string, objRespuestaObtenerDoctorModel: string) => {
           this.respuestaObtenerDoctorModel.emit(JSON.parse(objRespuestaObtenerDoctorModel));
           await this.signalRService.stopConnection();
@@ -50,11 +52,13 @@ export class RespuestaObtenerDoctorService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaObtenerDoctorSiLoCambian');
         this.signalRService.hubConnection.on('RespuestaObtenerDoctorSiLoCambian', async (clienteId: string, objRespuestaObtenerDoctorModel: string) => {
           this.respuestaObtenerDoctorSiLoCambianModel.emit(JSON.parse(objRespuestaObtenerDoctorModel));
           await this.signalRService.stopConnection();

@@ -28,12 +28,14 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
         async () => {
           //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
           //aca clienteId 
+          this.signalRService.hubConnection.off('ErrorConexion');
           this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
             alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
             this.interruptionService.interrupt();
 
           });
 
+          this.signalRService.hubConnection.off('RespuestaObtenerConsultaPorDiaYPorUnidad');
           this.signalRService.hubConnection.on('RespuestaObtenerConsultaPorDiaYPorUnidad', async (clienteId: string, objRespuestaConsultarPorDiaYPorUnidadModel: string) => {
             try {
               const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarPorDiaYPorUnidadModel);
@@ -57,7 +59,7 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
           console.log('ocupado');
           this.signalRService.hubConnection.invoke('ObtenerConsultaPorDiaYPorUnidad', clienteId, silla, fecha).catch(err => console.error(err));
           this.respuestaPinService.updateisLoading(true);
-          console.log('iniciocargar');
+          alert('iniciocargar ObtenerConsultaPorDiaYPorUnidad');
           //poner aca lo del isloading
         }).catch(err => console.log('Error al conectar con SignalR: ' + err));
     }

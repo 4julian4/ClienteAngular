@@ -31,6 +31,7 @@ export class CodigosEpsService {
   
     //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
     //aca clienteId 
+    this.signalRService.hubConnection.off('RespuestaObtenerCodigosEps');
     this.signalRService.hubConnection.on('RespuestaObtenerCodigosEps', async (clienteId: string, objRespuestaObtenerCodigosEpsEmit: string) => {
       this.respuestaObtenerCodigosEpsEmit.emit(JSON.parse(objRespuestaObtenerCodigosEpsEmit));
       await this.signalRService.stopConnection();

@@ -44,6 +44,7 @@ export class AgendaService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
@@ -76,7 +77,7 @@ export class AgendaService {
         
         this.signalRService.hubConnection.invoke('AgendarCita', clienteId, modelocrearcita ).catch(err => console.error(err));
         this.respuestaPinService.updateisLoading(true);
-        console.log('iniciocargar');
+        alert('iniciocargar AgendarCita');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
   }
@@ -89,6 +90,7 @@ export class AgendaService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
@@ -107,7 +109,7 @@ export class AgendaService {
         });
         this.signalRService.hubConnection.invoke('BuscarCitasPacienteAgenda', clienteId,  valorDeBusqueda).catch(err => console.error(err));
         this.respuestaPinService.updateisLoading(true);
-        console.log('iniciocargar');
+        alert('iniciocargar BuscarCitasPacienteAgenda');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
 
