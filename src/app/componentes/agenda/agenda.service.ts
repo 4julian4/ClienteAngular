@@ -18,6 +18,7 @@ export class AgendaService {
   refrescarAgenda = new Subject<void>();
   // Observable para que los componentes puedan suscribirse
   refrescarAgenda$ = this.refrescarAgenda.asObservable();
+  contador = 0;
   
   constructor(
     private signalRService: SignalRService,
@@ -54,13 +55,16 @@ export class AgendaService {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
             await this.signalRService.stopConnection();
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
-            console.log('emitir refrescar agenda');
-            this.refrescarAgendaEmit.emit(true);
+            //console.log('emitir refrescar agenda');
+            //this.refrescarAgendaEmit.emit(true);
             await this.emitRefrescarAgenda();
+            this.contador=this.contador+1;
+            console.log(this.contador);
             if(decompressedData != null){
               setTimeout(() => {
                 this.respuestaPinService.updateisLoading(false);
                 console.log('terminodecargar');
+                
               }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
           }
