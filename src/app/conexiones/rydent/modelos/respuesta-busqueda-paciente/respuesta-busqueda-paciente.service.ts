@@ -23,11 +23,13 @@ export class RespuestaBusquedaPacienteService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaBuscarPaciente');
         this.signalRService.hubConnection.on('RespuestaBuscarPaciente', async (clienteId: string, objRespuestaBusquedaPacienteModel: string) => {
           try {
             var decompressedData = this.descomprimirDatosService.decompressString(objRespuestaBusquedaPacienteModel);

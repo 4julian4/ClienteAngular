@@ -34,6 +34,7 @@ export class EvolucionService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('RespuestaGuardarDatosEvolucion');
         this.signalRService.hubConnection.on('RespuestaGuardarDatosEvolucion', async (clienteId: string, objRespuestaGuardarDatosEvolucionEmit: string) => {
           let respuesta = JSON.parse(objRespuestaGuardarDatosEvolucionEmit);
           this.respuestaGuardarDatosEvolucionEmit.emit(respuesta);

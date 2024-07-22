@@ -25,22 +25,14 @@ export class RespuestaEvolucionPacienteService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
 
         });
 
-        // this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
-        //   try {
-        //     const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
-        //     this.respuestaPinModel.emit(JSON.parse(decompressedData));
-        //   } catch (error) {
-        //     console.error('Error during decompression or parsing: ', error);
-        //   }
-        // });
-
-
+        
         this.signalRService.hubConnection.off('RespuestaObtenerDatosEvolucion');
         this.signalRService.hubConnection.on('RespuestaObtenerDatosEvolucion', async (clienteId: string, objRespuestaEvolucionPacienteEmit: string) => {
           try {

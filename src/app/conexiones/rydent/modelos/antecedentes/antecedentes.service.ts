@@ -25,11 +25,13 @@ export class AntecedentesService {
       async () => {
         //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
         //aca clienteId 
+        this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
           alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
   
         });
+        this.signalRService.hubConnection.off('RespuestaObtenerAntecedentesPaciente');
         this.signalRService.hubConnection.on('RespuestaObtenerAntecedentesPaciente', async (clienteId: string, objRespuestaAntecedentesEmit: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaAntecedentesEmit);
