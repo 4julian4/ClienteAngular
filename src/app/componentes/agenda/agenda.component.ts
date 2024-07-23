@@ -462,7 +462,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         }
         else {
           this.formularioAgregarCita.reset();
-          this.agendaService.refrescarAgendaEmit.emit(true);
+          //this.agendaService.refrescarAgendaEmit.emit(true);
           //await this.cambiarFecha();
         }
       }

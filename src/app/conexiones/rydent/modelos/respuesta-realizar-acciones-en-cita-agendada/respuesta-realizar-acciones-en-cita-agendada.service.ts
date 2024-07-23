@@ -51,12 +51,13 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
             this.respuestaRealizarAccionesEnCitaAgendadaEmit.emit(JSON.parse(decompressedData));
             
             
-            console.log('emitir refrescar realziar acciones en cita agendada');
-            await this.emitRefrescarAgenda();
+            
             if(decompressedData != null){
               setTimeout(() => {
                 this.respuestaPinService.updateisLoading(false);
                 console.log('terminodecargar');
+                console.log('emitir refrescar realziar acciones en cita agendada');
+                this.emitRefrescarAgenda();
               }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
           } catch (error) {

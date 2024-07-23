@@ -57,13 +57,14 @@ export class AgendaService {
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
             //console.log('emitir refrescar agenda');
             //this.refrescarAgendaEmit.emit(true);
-            await this.emitRefrescarAgenda();
+            
             this.contador=this.contador+1;
             console.log(this.contador);
             if(decompressedData != null){
               setTimeout(() => {
                 this.respuestaPinService.updateisLoading(false);
                 console.log('terminodecargar');
+                this.emitRefrescarAgenda();
                 
               }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
