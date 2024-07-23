@@ -166,16 +166,17 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     let mes = parseInt(lstFecha[1]) - 1;
     let anio = parseInt(lstFecha[2]);
     this.fechaSeleccionada = new Date(anio, mes, dia);
+   
     this.agendaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
-        alert('refrescar agendaService');
+        //alert('refrescar agendaService');
         await this.cambiarFecha();
       }
     });
 
     this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
-        alert('refrescar respuestaRealizarAccionesEnCitaAgendadaService');
+        //alert('refrescar respuestaRealizarAccionesEnCitaAgendadaService');
         await this.cambiarFecha();
       }
     });
@@ -188,7 +189,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     this.respuestaPinService.sharedisLoading.subscribe(data => {
       if (data != null) {
-        alert('isloading'+ data);
+        //alert('isloading'+ data);
         this.isloading = data;
       }
     });
@@ -452,12 +453,13 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         }
         //aca se valida si hay nuevams confiamciones, se vuelve hacer el proceso sino se termina el proceso y se manda refrescar
         if (lstPedirConfirmar.length > 0) {
+          //alert('Pedir confirmar');
           respuestaAgendarCita.lstConfirmacionesPedidas = [];
           await this.agendaService.startConnectionRespuestaAgendarCita(this.idSedeActualSignalR, JSON.stringify(respuestaAgendarCita));
         }
         else {
           this.formularioAgregarCita.reset();
-          this.agendaService.refrescarAgendaEmit.emit(true);
+          //this.agendaService.refrescarAgendaEmit.emit(true);
           //await this.cambiarFecha();
         }
       }
@@ -775,7 +777,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'ASISTIO';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-      alert('entro a poner asistencia');
+      //alert('entro a poner asistencia');
       await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     }
     else {

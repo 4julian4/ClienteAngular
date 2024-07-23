@@ -46,7 +46,7 @@ export class AgendaService {
         //aca clienteId 
         this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+          //alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
   
         });
@@ -58,14 +58,14 @@ export class AgendaService {
             this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
             //console.log('emitir refrescar agenda');
             //this.refrescarAgendaEmit.emit(true);
-            await this.emitRefrescarAgenda();
+            
             this.contador=this.contador+1;
             console.log(this.contador);
             if(decompressedData != null){
               setTimeout(() => {
+                //alert('terminodecargar RespuestaAgendarCita');
                 this.respuestaPinService.updateisLoading(false);
-                console.log('terminodecargar');
-                
+                this.emitRefrescarAgenda();
               }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
           }
@@ -76,8 +76,8 @@ export class AgendaService {
         });
         
         this.signalRService.hubConnection.invoke('AgendarCita', clienteId, modelocrearcita ).catch(err => console.error(err));
+        //alert('iniciocargar AgendarCita');
         this.respuestaPinService.updateisLoading(true);
-        alert('iniciocargar AgendarCita');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
 
   }
@@ -92,7 +92,7 @@ export class AgendaService {
         //aca clienteId 
         this.signalRService.hubConnection.off('ErrorConexion');
         this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+          //alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
           this.interruptionService.interrupt();
   
         });
@@ -102,14 +102,14 @@ export class AgendaService {
           this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
           if(objRespuestaBusquedaPacienteModel != null){
             setTimeout(() => {
+              //alert('terminodecargar RespuestaBuscarCitasPacienteAgenda');
               this.respuestaPinService.updateisLoading(false);
-              console.log('terminodecargar');
             }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
           }
         });
         this.signalRService.hubConnection.invoke('BuscarCitasPacienteAgenda', clienteId,  valorDeBusqueda).catch(err => console.error(err));
+        //alert('iniciocargar BuscarCitasPacienteAgenda');
         this.respuestaPinService.updateisLoading(true);
-        alert('iniciocargar BuscarCitasPacienteAgenda');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
 
