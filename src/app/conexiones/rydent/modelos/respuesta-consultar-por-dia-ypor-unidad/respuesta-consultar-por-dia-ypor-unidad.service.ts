@@ -42,8 +42,8 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
               this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(decompressedData));
               //poner aca lo del isloading
               if(decompressedData != null){
+                //alert('terminodecargar RespuestaObtenerConsultaPorDiaYPorUnidad');
                 this.respuestaPinService.updateisLoading(false);
-                console.log('terminodecargar');
                 this.ocupado = false;
                 console.log('desocupado');
               }
@@ -58,8 +58,8 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
           this.ocupado = true;
           console.log('ocupado');
           this.signalRService.hubConnection.invoke('ObtenerConsultaPorDiaYPorUnidad', clienteId, silla, fecha).catch(err => console.error(err));
+          //alert('iniciocargar ObtenerConsultaPorDiaYPorUnidad');
           this.respuestaPinService.updateisLoading(true);
-          alert('iniciocargar ObtenerConsultaPorDiaYPorUnidad');
           //poner aca lo del isloading
         }).catch(err => console.log('Error al conectar con SignalR: ' + err));
     }

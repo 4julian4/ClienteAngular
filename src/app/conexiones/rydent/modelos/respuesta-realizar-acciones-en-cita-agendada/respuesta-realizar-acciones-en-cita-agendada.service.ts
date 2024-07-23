@@ -50,12 +50,13 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
             await this.signalRService.stopConnection();
                        
             
-            console.log('emitir refrescar realziar acciones en cita agendada');
-            await this.emitRefrescarAgenda();
+            
             if(decompressedData != null){
               setTimeout(() => {
+                //alert('terminodecargar RespuestaRealizarAccionesEnCitaAgendada');
                 this.respuestaPinService.updateisLoading(false);
-                console.log('terminodecargar');
+                console.log('emitir refrescar realziar acciones en cita agendada');
+                this.emitRefrescarAgenda();
               }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
             }
           } catch (error) {
@@ -65,8 +66,8 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
         });
 
         this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada).catch(err => console.error(err));
+        //alert('iniciocargar RealizarAccionesEnCitaAgendada');
         this.respuestaPinService.updateisLoading(true);
-        alert('iniciocargar RealizarAccionesEnCitaAgendada');
       }).catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
 }
