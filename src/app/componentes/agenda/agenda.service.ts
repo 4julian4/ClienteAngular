@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
+import { set } from 'date-fns';
 import { Subject } from 'rxjs';
 import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
 import { RespuestaBusquedaPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
@@ -65,8 +66,13 @@ export class AgendaService {
               setTimeout(() => {
                 //alert('terminodecargar RespuestaAgendarCita');
                 this.respuestaPinService.updateisLoading(false);
-                this.emitRefrescarAgenda();
+                
               }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
+              setTimeout(() => {
+                //alert('emitir refrescar agenda');
+                this.emitRefrescarAgenda();
+              }, 2000); // Espera 2000 milisegundos (2 segundo) antes de ejecutar el console.log
+              //this.emitRefrescarAgenda();
             }
           }
           catch (error) {
