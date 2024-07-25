@@ -115,7 +115,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
       this.respuestaPinService.updateNumPacientesPorDoctor(this.totalPacientes);
       
-
+      
 
       this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
         .filter(item => item.DOCTOR === this.nombreDoctor)
@@ -126,11 +126,12 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
           startWith(''),
           map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
         );
-
+        //alert('esta entrando ca antes o despues del error')
       //this.panelBuscarPacienteOpen();
     });
 
     this.respuestaObtenerDoctorService.respuestaObtenerDoctorSiLoCambianModel.subscribe(async (respuestaObtenerDoctorSiLoCambian: RespuestaObtenerDoctor) => {
+      
       this.respuestaObtenerDoctorSiLoCambianModel = respuestaObtenerDoctorSiLoCambian;
       this.nombreDoctor = this.respuestaObtenerDoctorSiLoCambianModel.doctor.NOMBRE;
       this.totalPacientes = this.respuestaObtenerDoctorSiLoCambianModel.totalPacientes;
@@ -399,6 +400,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       }
       this.nombreDoctor = filaSeleccionada.DOCTOR;
       await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(this.idSedeActualSignalR, parseInt(idDoctor));
+      //alert('esta entrando ca antes o despues del error')
       this.respuestaPinService.updateCambiarDoctorSeleccionado(filaSeleccionada.DOCTOR);
       
     }else{

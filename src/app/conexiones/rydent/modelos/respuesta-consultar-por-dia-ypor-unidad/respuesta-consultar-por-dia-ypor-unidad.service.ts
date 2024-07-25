@@ -20,49 +20,47 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
 
   async startConnectionRespuestaConsultarPorDiaYPorUnidad(clienteId: string, silla: string, fecha: Date) {
     console.log(this.ocupado);
-    if (this.ocupado == false) {
+    if (!this.ocupado) {
       if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
         await this.signalRService.hubConnection.stop();
       }
-      await this.signalRService.hubConnection.start().then(
-        async () => {
-          //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
-          //aca clienteId 
-          this.signalRService.hubConnection.off('ErrorConexion');
-          this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-            alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-            this.interruptionService.interrupt();
 
-          });
+      try {
+        await this.signalRService.hubConnection.start();
 
-          this.signalRService.hubConnection.off('RespuestaObtenerConsultaPorDiaYPorUnidad');
-          this.signalRService.hubConnection.on('RespuestaObtenerConsultaPorDiaYPorUnidad', async (clienteId: string, objRespuestaConsultarPorDiaYPorUnidadModel: string) => {
-            try {
-              const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarPorDiaYPorUnidadModel);
-              this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(decompressedData));
-              //poner aca lo del isloading
-              if(decompressedData != null){
-                //alert('terminodecargar RespuestaObtenerConsultaPorDiaYPorUnidad');
-                this.respuestaPinService.updateisLoading(false);
-                this.ocupado = false;
-                console.log('desocupado');
-              }
-              
-                
-              await this.signalRService.stopConnection();
-            } catch (error) {
-              console.error('Error during decompression or parsing: ', error);
+        this.signalRService.hubConnection.off('ErrorConexion');
+        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+          this.interruptionService.interrupt();
+        });
+
+        this.signalRService.hubConnection.off('RespuestaObtenerConsultaPorDiaYPorUnidad');
+        this.signalRService.hubConnection.on('RespuestaObtenerConsultaPorDiaYPorUnidad', async (clienteId: string, objRespuestaConsultarPorDiaYPorUnidadModel: string) => {
+          try {
+            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarPorDiaYPorUnidadModel);
+            this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(decompressedData));
+
+            if (decompressedData != null) {
+              this.respuestaPinService.updateisLoading(false);
+              this.ocupado = false;
+              console.log('desocupado');
             }
 
-          });
-          this.ocupado = true;
-          console.log('ocupado');
-          this.signalRService.hubConnection.invoke('ObtenerConsultaPorDiaYPorUnidad', clienteId, silla, fecha).catch(err => console.error(err));
-          //alert('iniciocargar ObtenerConsultaPorDiaYPorUnidad');
-          this.respuestaPinService.updateisLoading(true);
-          //poner aca lo del isloading
-        }).catch(err => console.log('Error al conectar con SignalR: ' + err));
+            await this.signalRService.stopConnection();
+          } catch (error) {
+            console.error('Error during decompression or parsing: ', error);
+          }
+        });
+
+        this.ocupado = true;
+        console.log('ocupado');
+        await this.signalRService.hubConnection.invoke('ObtenerConsultaPorDiaYPorUnidad', clienteId, silla, fecha);
+        this.respuestaPinService.updateisLoading(true);
+      } catch (err) {
+        console.log('Error al conectar con SignalR: ' + err);
+      }
     }
   }
+
 
 }
