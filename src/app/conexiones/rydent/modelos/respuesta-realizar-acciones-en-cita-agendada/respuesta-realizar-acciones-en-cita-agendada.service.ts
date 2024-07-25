@@ -32,46 +32,37 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
     if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
       await this.signalRService.hubConnection.stop();
     }
-    await this.signalRService.hubConnection.start().then(
-      async () => {
-        //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
-        //aca clienteId 
-        this.signalRService.hubConnection.off('ErrorConexion');
-        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-          this.interruptionService.interrupt();
-  
-        });
-        this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
-        
-        this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
-          try {
-            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);;
-            await this.signalRService.stopConnection();
-                       
-            
-            
-            if(decompressedData != null){
-              setTimeout(() => {
-                //alert('terminodecargar RespuestaRealizarAccionesEnCitaAgendada');
-                this.respuestaPinService.updateisLoading(false);
-                console.log('emitir refrescar realziar acciones en cita agendada');
-                //this.emitRefrescarAgenda();
-              }, 1000); // Espera 1000 milisegundos (1 segundo) antes de ejecutar el console.log
-              setTimeout(() => {
-                //alert('emitir refrescar agenda');
-                this.emitRefrescarAgenda();
-              }, 2000); // Espera 2000 milisegundos (2 segundo) antes de ejecutar el console.log
-            }
-          } catch (error) {
-            console.error('Error during decompression or parsing: ', error);
-          }
-          
-        });
 
-        this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada).catch(err => console.error(err));
-        //alert('iniciocargar RealizarAccionesEnCitaAgendada');
-        this.respuestaPinService.updateisLoading(true);
-      }).catch(err => console.log('Error al conectar con SignalR: ' + err));
+    try {
+      await this.signalRService.hubConnection.start();
+
+      this.signalRService.hubConnection.off('ErrorConexion');
+      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+        alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+        this.interruptionService.interrupt();
+      });
+
+      this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
+      this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
+        try {
+          const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);
+          await this.signalRService.stopConnection();
+
+          if (decompressedData != null) {
+            this.respuestaPinService.updateisLoading(false);
+            console.log('emitir refrescar realizar acciones en cita agendada');
+            await this.emitRefrescarAgenda();
+          }
+        } catch (error) {
+          console.error('Error during decompression or parsing: ', error);
+        }
+      });
+
+      await this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada);
+      this.respuestaPinService.updateisLoading(true);
+    } catch (err) {
+      console.log('Error al conectar con SignalR: ' + err);
+    }
   }
+
 }
