@@ -49,7 +49,7 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
           await this.signalRService.stopConnection();
 
           if (decompressedData != null) {
-            this.respuestaPinService.updateisLoading(false);
+            //this.respuestaPinService.updateisLoading(false);
             console.log('emitir refrescar realizar acciones en cita agendada');
             await this.emitRefrescarAgenda();
           }
