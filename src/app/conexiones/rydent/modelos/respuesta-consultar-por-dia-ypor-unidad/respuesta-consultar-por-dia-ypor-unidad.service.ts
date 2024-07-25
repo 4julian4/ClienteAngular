@@ -38,6 +38,7 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
         this.signalRService.hubConnection.on('RespuestaObtenerConsultaPorDiaYPorUnidad', async (clienteId: string, objRespuestaConsultarPorDiaYPorUnidadModel: string) => {
           try {
             const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarPorDiaYPorUnidadModel);
+            await this.signalRService.stopConnection();
             this.respuestaConsultarPorDiaYPorUnidadModel.emit(JSON.parse(decompressedData));
 
             if (decompressedData != null) {
@@ -46,7 +47,7 @@ export class RespuestaConsultarPorDiaYPorUnidadService {
               console.log('desocupado');
             }
 
-            await this.signalRService.stopConnection();
+            
           } catch (error) {
             console.error('Error during decompression or parsing: ', error);
           }
