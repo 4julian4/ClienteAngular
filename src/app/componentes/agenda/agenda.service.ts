@@ -83,7 +83,7 @@ async startConnectionRespuestaAgendarCita(clienteId: string, modelocrearcita: st
                 console.log('Contador actualizado: ' + this.contador);
 
                 if (decompressedData != null) {
-                    this.respuestaPinService.updateisLoading(false);
+                    //this.respuestaPinService.updateisLoading(false);
                     console.log('Emitir refrescar agenda...');
                     await this.emitRefrescarAgenda();
                 }
