@@ -5,6 +5,7 @@ import { InterruptionService } from 'src/app/helpers/interruption';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 import { Subject } from 'rxjs';
 import { RespuestaPinService } from '../respuesta-pin';
+import { HubConnectionState } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -29,8 +30,17 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   }
 
   async startConnectionRespuestaRealizarAccionesEnCitaAgendada(clienteId: string, modelorealizaraccionesencitaagendada: string) {
-    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
+    if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
+      this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
+      console.log('Deteniendo conexión existente...');
       await this.signalRService.hubConnection.stop();
+      console.log('Conexión detenida.');
+    }
+
+    // Esperar hasta que la conexión esté en el estado 'Disconnected'
+    while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
+      console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     try {
@@ -41,6 +51,8 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
         alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
+
+
 
       this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
       this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
