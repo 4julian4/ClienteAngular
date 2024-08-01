@@ -77,7 +77,8 @@ export class MensajesUsuariosService {
       mostrarSelect: false,
       mostrarSelectCitaCancelada: true,
       fechaCita: fechaCita,
-      horaCita: horaCita
+      horaCita: horaCita,
+      
     });
   }
 
@@ -110,8 +111,12 @@ export class MensajesUsuariosService {
   private openDialogModal(data: any): Promise<{ resultado: boolean, mensajeParaGuardar: string, opcionSeleccionadaMensaje: string }> {
     const dialogRef = this.dialog.open(MensajesUsuariosComponent, { data, disableClose: true });
     return new Promise<{ resultado: boolean, mensajeParaGuardar: string, opcionSeleccionadaMensaje: string }>((resolve) => {
-      dialogRef.afterClosed().pipe(take(1)).subscribe((result: boolean) => {
-        resolve({ resultado: result, mensajeParaGuardar: dialogRef.componentInstance.mensajeParaGuardar, opcionSeleccionadaMensaje: dialogRef.componentInstance.opcionSeleccionadaMensaje });
+      dialogRef.afterClosed().pipe(take(1)).subscribe((result: any) => {
+        resolve({
+          resultado: result.decision,
+          mensajeParaGuardar: result.mensajeParaGuardar,
+          opcionSeleccionadaMensaje: result.opcionSeleccionadaMensaje
+        });
       });
     });
   }

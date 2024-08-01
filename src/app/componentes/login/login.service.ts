@@ -44,8 +44,6 @@ export class LoginService {
       const token = this.GetTokenString();
       if (token) {
         let r = jwtDecode(token);
-        console.log(r);
-        
         return r;
       }
       return null;
@@ -59,11 +57,13 @@ export class LoginService {
   
     public saveUser(): void {
       window.sessionStorage.removeItem(UsuarioLoguiadoKey);
+      console.log(UsuarioLoguiadoKey);
       window.sessionStorage.setItem(UsuarioLoguiadoKey, JSON.stringify({"idEmpresa": 4}));
     }
     
     public getUser() {
       let user = window.sessionStorage.getItem(UsuarioLoguiadoKey);
+      console.log(UsuarioLoguiadoKey);
       if (user) {
         return JSON.parse(user);
       }

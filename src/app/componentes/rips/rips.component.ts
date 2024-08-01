@@ -317,30 +317,35 @@ export class RipsComponent implements OnInit {
       }
       datosParaGurdarRips.FACTURA = this.formularioAgregarRips.value.NFACTURA;
       datosParaGurdarRips.FECHACONSULTA = this.formularioAgregarRips.value.FECHA;
-      let codigoEntidadSeleccionada = this.lstEps.find(x => x.nombre === this.formularioAgregarRips.value.ENTIDAD)?.id;
+      let codigoEntidadSeleccionada = this.lstEps.find(x => x.nombre === this.entidadControl.value)?.id;
+      if (!codigoEntidadSeleccionada) {
+        console.error('Entidad no encontrada:', this.formularioAgregarRips.value.ENTIDAD);
+        return; // Salir de la función si no se encuentra la entidad
+      }
       datosParaGurdarRips.CODIGOENTIDAD = codigoEntidadSeleccionada;
+      console.log('Codigo entidad seleccionada: ', codigoEntidadSeleccionada);
       datosParaGurdarRips.NUMEROAUTORIZACION = '';
-      datosParaGurdarRips.CODIGOCONSULTA = this.formularioAgregarRips.value.CODIGO_TIPO_CONSULTA;
+      datosParaGurdarRips.CODIGOCONSULTA = this.codigoConsultaControl.value;// this.formularioAgregarRips.value.CODIGO_TIPO_CONSULTA;
       datosParaGurdarRips.FINALIDADCONSULTA = '10';
       datosParaGurdarRips.CAUSAEXTERNA = '13';
-      datosParaGurdarRips.CODIGODIAGNOSTICOPRINCIPAL = this.formularioAgregarRips.value.CODIGO_DIAGNOSTICO_PRINCIPAL;
+      datosParaGurdarRips.CODIGODIAGNOSTICOPRINCIPAL = this.codigoDiagnosticoPrincipalControl.value;// this.formularioAgregarRips.value.CODIGO_DIAGNOSTICO_PRINCIPAL;
       datosParaGurdarRips.TIPODIAGNOSTICO = '2';
       datosParaGurdarRips.VALORCONSULTA = 1;
       datosParaGurdarRips.VALORCUOTAMODERADORA = 0;
-      datosParaGurdarRips.VALORNETO = this.formularioAgregarRips.value.VALOR_TOTAL;
-      datosParaGurdarRips.CODIGOPROCEDIMIENTO = this.formularioAgregarRips.value.CODIGO_PROCEDIMIENTO;
+      datosParaGurdarRips.VALORNETO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));
+      datosParaGurdarRips.CODIGOPROCEDIMIENTO = this.codigoProcedimientoControl.value; //this.formularioAgregarRips.value.CODIGO_PROCEDIMIENTO;
       datosParaGurdarRips.FINALIDADPROCEDIMIENTI = '2';
       datosParaGurdarRips.AMBITOREALIZACION = '1';
       datosParaGurdarRips.PERSONALQUEATIENDE = '';
-      datosParaGurdarRips.DXPRINCIPAL = this.formularioAgregarRips.value.CODIGO_DIAGNOSTICO_PRINCIPAL;
+      datosParaGurdarRips.DXPRINCIPAL = this.codigoDiagnosticoPrincipalControl.value;
       datosParaGurdarRips.DXRELACIONADO = '';
       datosParaGurdarRips.COMPLICACION = '';
       datosParaGurdarRips.FORMAREALIZACIONACTOQUIR = '';
-      datosParaGurdarRips.VALORPROCEDIMIENTO = this.formularioAgregarRips.value.VALOR_TOTAL;
+      datosParaGurdarRips.VALORPROCEDIMIENTO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));// this.formularioAgregarRips.value.VALOR_TOTAL;
       datosParaGurdarRips.EXTRANJERO = '';
       datosParaGurdarRips.PAIS = '';
 
-
+      console.log('Datos para guardar Rips: ', datosParaGurdarRips);
       // //evolucion.IDEVOLUCION
       await this.ripsService.startConnectionGuardarDatosRips(this.idSedeActualSignalR, JSON.stringify(datosParaGurdarRips));
 

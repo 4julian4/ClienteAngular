@@ -24,6 +24,7 @@ export class RespuestaPin {
     lstFestivos : TFestivos[] = [];
     lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
     lstAnamnesisParaAgendayBuscadores?: RespuestaDatosPacientesParaLaAgenda[];
+    acceso : boolean = false;
 }
 
 export class ListadoItem{
