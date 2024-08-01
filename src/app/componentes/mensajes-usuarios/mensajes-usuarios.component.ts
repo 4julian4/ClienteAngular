@@ -37,11 +37,18 @@ export class MensajesUsuariosComponent implements OnInit{
       const horaDate = new Date(`1970-01-01T${this.data.horaCita}`); // Se puede utilizar cualquier fecha aquí, solo necesitamos la hora
       const horaFormateada = format(horaDate, 'hh:mm a');
       this.data.mensajeParaGuardar = `El paciente cancela la cita del ${fechaFormateada} a las ${horaFormateada}`;
+      
     }
   }
 
-  cerrar(respuesta: any) {
-    this.dialogRef.close(respuesta);
+  cerrar(resultado: any) {
+    this.mensajeParaGuardar = this.data.mensajeParaGuardar;
+    console.log('Mensaje para guardar: ', this.mensajeParaGuardar);
+    this.dialogRef.close({
+      decision: resultado,
+      mensajeParaGuardar: this.mensajeParaGuardar,
+      opcionSeleccionadaMensaje: this.opcionSeleccionadaMensaje
+    });
   }
 }
 

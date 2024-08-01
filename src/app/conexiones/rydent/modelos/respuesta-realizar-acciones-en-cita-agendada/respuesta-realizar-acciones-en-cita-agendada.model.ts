@@ -6,4 +6,5 @@ export class RespuestaRealizarAccionesEnCitaAgendada {
     aceptado?: boolean = false;
     respuesta?: string = "";
     quienLoHace?: string = "";
+    mensaje?: string = "";
 }

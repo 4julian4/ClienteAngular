@@ -42,7 +42,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   @HostBinding('class') className = '';
   logeado = false;
   mostrarDoctores = false;
-  emailUsuario="nbalamejor@gmail.com";
+  emailUsuario="";
   doctorSeleccionado = "";
   doctorEscogido = "";
   idPacienteSeleccionado = 0;
@@ -124,6 +124,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
     this.logeado = false;
     if (this.loginService.IsSingned()){
       let loginToken = this.loginService.decodeToken();
+      this.emailUsuario = loginToken.correo;
       if (loginToken && loginToken.id){
         this.logeado = true;
         let usuario = await this.usuariosService.Get(loginToken.id);

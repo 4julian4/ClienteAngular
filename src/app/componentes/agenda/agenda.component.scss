@@ -5,6 +5,8 @@
     padding: 3px;
 }
 
+
+
 .mat-expansion-panel {
     background-color: transparent; // Hace que el panel sea transparente
      // Ajusta este valor según tus necesidades
@@ -315,6 +317,50 @@
         outline: none;
         pointer-events: none;
         background-color: transparent;
+    }
+}
+
+@media (max-width: 768px) {
+    .contenedor {
+        width: 95vw; /* Ajustar el ancho para pantallas más pequeñas */
+    }
+
+    .contenedorArriba, .contenedorAbajo {
+        padding: 2px; /* Ajustar el padding para pantallas más pequeñas */
+    }
+
+    .contenedor-izquierdo {
+        width: 25%; /* Ajustar el ancho para pantallas más pequeñas */
+    }
+
+    .contenedor-derecho {
+        width: 70%; /* Ajustar el ancho para pantallas más pequeñas */
+    }
+
+    .mat-expansion-description-panel {
+        height: 40px; /* Ajustar la altura para pantallas más pequeñas */
+    }
+}
+
+@media (max-width: 480px) {
+    .contenedor {
+        width: 100vw; /* Ajustar el ancho para pantallas muy pequeñas */
+    }
+
+    .contenedorArriba, .contenedorAbajo {
+        padding: 1px; /* Ajustar el padding para pantallas muy pequeñas */
+    }
+
+    .contenedor-izquierdo {
+        width: 30%; /* Ajustar el ancho para pantallas muy pequeñas */
+    }
+
+    .contenedor-derecho {
+        width: 65%; /* Ajustar el ancho para pantallas muy pequeñas */
+    }
+
+    .mat-expansion-description-panel {
+        height: 35px; /* Ajustar la altura para pantallas muy pequeñas */
     }
 }
 

@@ -23,7 +23,7 @@
                                     [formControl]="datosPacienteParaBuscarAgendaControl"
                                     [matAutocomplete]="autoDatosPacienteParaBuscarAgenda" class="example-input"
                                     style="text-transform: uppercase;" (keydown)="stopAccordionToggle($event)"
-                                    (input)="datosPacienteParaBuscarAgendaControl.setValue(datosPacienteParaBuscarAgendaControl.value.toUpperCase())">
+                                    (input)="datosPacienteParaBuscarAgendaControl.setValue(datosPacienteParaBuscarAgendaControl.value.toUpperCase())" (keyup.enter)="buscarCitasPaciente(datosPacienteParaBuscarAgendaControl.value)">
                                 <mat-autocomplete #autoDatosPacienteParaBuscarAgenda="matAutocomplete">
                                     <mat-option
                                         *ngFor="let datosPacienteBuscar of filteredDatosPacienteParaBuscarAgenda | async"

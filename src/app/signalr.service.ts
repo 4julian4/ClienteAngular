@@ -7,7 +7,7 @@ import { RespuestaObtenerDoctorService } from './conexiones/rydent/modelos/respu
 import { HubConnectionState } from '@microsoft/signalr';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root'  
 })
 export class SignalRService {
   public hubConnection: signalR.HubConnection;
@@ -24,25 +24,57 @@ export class SignalRService {
   ) {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.signalRUrl, {
-        withCredentials: true
+        withCredentials: true 
       }) // URL de tu servidor SignalR
+      .withAutomaticReconnect() // Habilitar la reconexión automática
       .build();
+
     this.hubConnection.onclose(() => this.reconnect());
+
+    // Manejar eventos de reconexión
+    this.hubConnection.onreconnecting((error) => {
+      console.warn(`Intentando reconectar: ${error}`);
+    });
+
+    this.hubConnection.onreconnected((connectionId) => {
+      console.log(`Reconectado exitosamente: ${connectionId}`);
+    });
   }
 
   public async startConnection(): Promise<void> {
-    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      console.log('La conexión ya está iniciada.');
+    if (this.hubConnection.state === signalR.HubConnectionState.Connected||
+      this.hubConnection.state === signalR.HubConnectionState.Connecting) {
+      console.log('La conexión ya está en proceso o conectada.');
       return;
     }
 
     try {
       await this.hubConnection.start();
-      console.log('Connection started');
+      console.log('Conexión iniciada');
     } catch (err) {
-      console.error('Error while starting connection: ' + err);
-      setTimeout(() => this.startConnection(), 5000); // Reintentar después de 5 segundos
+      // Información detallada del error
+      console.error('Error al iniciar la conexión: ', err);
+
+      // Verificar si es un error temporal de red y reintentar después de unos segundos
+      if (this.isTemporaryNetworkError(err)) {
+        console.log('Error de red temporal detectado. Reintentando en 5 segundos...');
+        setTimeout(() => this.startConnection(), 5000);
+      } else {
+        // Para otros tipos de errores, puede ser útil notificar al usuario o registrar el error para análisis posterior
+        this.notifyUserOrLogError(err);
+      }
     }
+  }
+
+  private notifyUserOrLogError(error: any): void {
+    // Notificar al usuario o registrar el error para análisis posterior
+    console.error('Error crítico al iniciar la conexión: ', error);
+  }
+
+  private isTemporaryNetworkError(error: any): boolean {
+    // Implementar lógica para detectar errores temporales de red
+    // Por ejemplo, se puede basar en el tipo de error o en el mensaje de error
+    return error && error.message && (error.message.includes('network') || error.message.includes('timeout'));
   }
 
   public async stopConnection(): Promise<void> {
