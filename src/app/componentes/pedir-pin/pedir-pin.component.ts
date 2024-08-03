@@ -58,11 +58,12 @@ export class PedirPinComponent {
       console.log(this.obtenerPinRepuesta);
       console.log(this.obtenerPinRepuesta.acceso);
       if (this.obtenerPinRepuesta.acceso) {
+        this.isloading = false;
         this.dialogRef.close(this);
       } else {
-        await this.mensajesUsuariosService.mensajeInformativo('CLAVE INCORRECTA');
         this.isloading = false;
-        return;
+        await this.mensajesUsuariosService.mensajeInformativo('CLAVE INCORRECTA');
+        //return;
       }
     });
 
