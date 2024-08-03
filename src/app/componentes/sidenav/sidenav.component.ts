@@ -8,7 +8,7 @@ import { Location } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { UsuariosService, Usuarios } from 'src/app/conexiones/usuarios';
 import { SedesService, Sedes } from 'src/app/conexiones/sedes';
-import { SedesConectadas } from 'src/app/conexiones/sedes-conectadas';
+import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
 import { PedirPin, PedirPinComponent } from '../pedir-pin';
 import { MensajesUsuariosComponent, MensajesUsuariosService } from '../mensajes-usuarios';
 import { MatDialog } from '@angular/material/dialog';
@@ -34,7 +34,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   @Input() sedes: Sedes[] = [];
   @Input() sedesConectadas: SedesConectadas[] = [];
   idSedeActualSignalR: string = "";
-  sedeSeleccionada = "";
+  //sedeSeleccionada = "";
   showFiller = false;
   //titulo = environment.NombreAplicacion;
   titulo = "Rydent Web";
@@ -49,16 +49,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
   totalPacientesDoctorSeleccionado = 0;
   lstDoctores: { id: number, nombre: string }[] = [];
   sedeConectadaActual: SedesConectadas = new SedesConectadas();
+  sedeSeleccionada :  SedesConectadas = new SedesConectadas();
   private subscription: Subscription;
   public mostrarBuscarHistoriaClinica: boolean = false;
   menuExpandido = false;
   menuOpen = false;
-
-    
-
-
-
-
   route = "";
 
   constructor(
@@ -74,7 +69,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
     private respuestaObtenerDoctorService: RespuestaObtenerDoctorService,
     private respuestaPinService: RespuestaPinService,
     private mensajesUsuariosService: MensajesUsuariosService,
-    private interruptionService: InterruptionService
+    private interruptionService: InterruptionService,
+    private sedesConectadasService: SedesConectadasService
   ) {
     this.subscription = this.interruptionService.onInterrupt().subscribe(() => {
       this.iniciarSesion();
@@ -175,32 +171,43 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
 
   async pedirPinSedeSeleccionada(idSede: number) {
-    if (this.sedesConectadas.length > 0 && this.sedesConectadas.filter(x => x.idSede == idSede).length > 0) {
-      this.sedeConectadaActual = this.sedesConectadas.filter(x => x.idSede == idSede)[0];
-      if (this.sedeConectadaActual.idSede != undefined) {
-        this.idSedeActualSignalR = this.sedeConectadaActual.idActualSignalR;
-        this.respuestaPinService.idSedeActualSignalREmit.emit(this.sedeConectadaActual.idActualSignalR);
-        this.respuestaPinService.updateSedeData(this.sedeConectadaActual.idActualSignalR);
-        let data = { clienteId: this.sedeConectadaActual.idActualSignalR, pin: '' };
-        const dialogRef = this.dialog.open(PedirPinComponent, {
-          data: data
-        }).afterClosed().subscribe(result => {
-          this.lstDoctores = result.obtenerPinRepuesta.lstDoctores;
-          if (this.lstDoctores.length > 0) {
-            this.mostrarDoctores = true;
-            return result;
-          }
-        });
+    this.sedeSeleccionada = await this.sedesConectadasService.ConsultarSedePorId(idSede);
+    console.log(this.sedeSeleccionada);
+    console.log(this.sedeSeleccionada.activo);
+    if (this.sedeSeleccionada.activo) {
+      this.respuestaPinService.updateSedeSeleccionada(idSede);
+      if (this.sedesConectadas.length > 0 && this.sedesConectadas.filter(x => x.idSede == idSede).length > 0) {
+        this.sedeConectadaActual = this.sedesConectadas.filter(x => x.idSede == idSede)[0];
+        if (this.sedeConectadaActual.idSede != undefined) {
+          this.idSedeActualSignalR = this.sedeConectadaActual.idActualSignalR;
+          this.respuestaPinService.idSedeActualSignalREmit.emit(this.sedeConectadaActual.idActualSignalR);
+          this.respuestaPinService.updateSedeData(this.sedeConectadaActual.idActualSignalR);
+          let data = { clienteId: this.sedeConectadaActual.idActualSignalR, pin: '' };
+          const dialogRef = this.dialog.open(PedirPinComponent, {
+            data: data
+          }).afterClosed().subscribe(result => {
+            this.lstDoctores = result.obtenerPinRepuesta.lstDoctores;
+            if (this.lstDoctores.length > 0) {
+              this.mostrarDoctores = true;
+              return result;
+            }
+          });
+        }
+        else {
+          this.respuestaPinService.idSedeActualSignalREmit.emit("");
+        }
       }
       else {
+        await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
         this.respuestaPinService.idSedeActualSignalREmit.emit("");
+        return;
       }
     }
     else {
       await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
       this.respuestaPinService.idSedeActualSignalREmit.emit("");
       return;
-    }
+    }  
   }
   setMostrarBuscarHistoriaClinica(value: boolean) {
     this.mostrarBuscarHistoriaClinica = value;

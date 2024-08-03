@@ -21,6 +21,9 @@ export class RespuestaPinService {
   private sedeData = new BehaviorSubject<string | null>(null);
   sharedSedeData = this.sedeData.asObservable();
 
+  private sedeSeleccionada = new BehaviorSubject<number | null>(null);
+  sharedSedeSeleccionada = this.sedeSeleccionada.asObservable();
+
   private datosRespuestaPin = new BehaviorSubject<RespuestaPin | null>(null);
   shareddatosRespuestaPinData = this.datosRespuestaPin.asObservable();
 
@@ -104,6 +107,9 @@ export class RespuestaPinService {
   updateSedeData(data: string) {
     this.sedeData.next(data);
   }
+  updateSedeSeleccionada(data: number) {
+    this.sedeSeleccionada.next(data);
+  }
   updatedatosRespuestaPin(data: RespuestaPin) {
     this.datosRespuestaPin.next(data);
   }
@@ -114,8 +120,6 @@ export class RespuestaPinService {
   updateCambiarDoctorSeleccionado(data: string) {
     this.cambiarDoctorSeleccionado.next(data);
   }
-
-
   updateListadoEps(data: CodigosEps) {
     this.listadoEps.next(data);
   }
