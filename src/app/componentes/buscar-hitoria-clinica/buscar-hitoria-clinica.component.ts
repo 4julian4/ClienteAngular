@@ -6,11 +6,12 @@ import { DatosPersonales, DatosPersonalesService } from 'src/app/conexiones/ryde
 import { RespuestaBusquedaPaciente, RespuestaBusquedaPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
 import { RespuestaEvolucionPaciente, RespuestaEvolucionPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-evolucion-paciente';
 import { RespuestaObtenerDoctor, RespuestaObtenerDoctorService } from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
-import { SedesConectadas } from 'src/app/conexiones/sedes-conectadas';
+import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
 import { Router } from '@angular/router';
 import { ListadoItem, RespuestaDatosPacientesParaLaAgenda, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { RespuestaDatosPersonales } from 'src/app/conexiones/rydent/modelos/respuesta-datos-personales';
 import { Observable, map, startWith } from 'rxjs';
+import { MensajesUsuariosService } from '../mensajes-usuarios';
 
 @Component({
   selector: 'app-buscar-hitoria-clinica',
@@ -53,6 +54,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   filteredDatoPacienteParaBuscar?: Observable<{ idAnamnesis: number, datoBuscar: string }[]>;
   datoPacienteParaBuscarControl = new FormControl();
   listaDoctores: ListadoItem[] = [];
+  sedeSeleccionada :  SedesConectadas = new SedesConectadas();
+  idSede:number = 0;
 
 
   opciones = [
@@ -71,7 +74,9 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
     private formBuilder: FormBuilder,
     private respuestaPinService: RespuestaPinService,
-    private router: Router
+    private router: Router,
+    private mensajesUsuariosService: MensajesUsuariosService,
+    private sedesConectadasService: SedesConectadasService
   ) { }
 
   ngOnInit(): void {
@@ -79,6 +84,12 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       if (data != null) {
         this.idSedeActualSignalR = data;
 
+      }
+    });
+
+    this.respuestaPinService.sharedSedeSeleccionada.subscribe(data => {
+      if (data != null) {
+        this.idSede = data;
       }
     });
 
@@ -344,9 +355,18 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async buscarPaciente(nombrePaciente: string) {
-    if (this.idSedeActualSignalR != '') {
-      await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(this.idSedeActualSignalR, this.opcionSeleccionada, nombrePaciente);
+    this.sedeSeleccionada = await this.sedesConectadasService.ConsultarSedePorId(this.idSede);
+    console.log(this.sedeSeleccionada);
+    console.log(this.sedeSeleccionada.activo);
+    if (this.sedeSeleccionada.activo) {
+      if (this.idSedeActualSignalR != '') {
+        await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(this.idSedeActualSignalR, this.opcionSeleccionada, nombrePaciente);
+      }
     }
+    else {
+      await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
+      return;
+    }      
   }
 
   async obtenerDatosCompletosPaciente(idAnamnesis: number) {
@@ -371,25 +391,33 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async onRowClicked(filaSeleccionada: RespuestaBusquedaPaciente) {
-    try {
-      this.openorclosePanelBuscarPaciente = false;
-      this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
-      this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
+    this.sedeSeleccionada = await this.sedesConectadasService.ConsultarSedePorId(this.idSede);
+    console.log(this.sedeSeleccionada);
+    console.log(this.sedeSeleccionada.activo);
+    if (this.sedeSeleccionada.activo) {
+      try {
+        this.openorclosePanelBuscarPaciente = false;
+        this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
+        this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
 
-      // Actualiza la anamnesis
-      await this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
-      // Actualiza el doctor
-      await this.actualizarDoctor(filaSeleccionada);
-      this.nombrePaciente = filaSeleccionada.NOMBRE_PACIENTE;
-      // Obtiene los datos completos del paciente
-      //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
+        // Actualiza la anamnesis
+        await this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
+        // Actualiza el doctor
+        await this.actualizarDoctor(filaSeleccionada);
+        this.nombrePaciente = filaSeleccionada.NOMBRE_PACIENTE;
+        // Obtiene los datos completos del paciente
+        //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
 
-      // Navega a la página de datos personales
-      
-    } catch (error) {
-      console.error('Error en onRowClicked:', error);
-      // Manejar el error adecuadamente
-    }
+        // Navega a la página de datos personales
+        
+      } catch (error) {
+        console.error('Error en onRowClicked:', error);
+        // Manejar el error adecuadamente
+      }
+    }else {
+      await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
+      return;
+    }   
   }
 
   async actualizarDoctor(filaSeleccionada: RespuestaBusquedaPaciente) {

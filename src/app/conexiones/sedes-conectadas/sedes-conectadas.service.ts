@@ -30,6 +30,11 @@ export  class SedesConectadasService {
     return await lastValueFrom(obj); 
   }
 
+  public async ConsultarSedePorId(idSede: number): Promise<SedesConectadas>{
+    let url = urlPage + "/ConsultarSedePorId/" + idSede;
+    const obj = await this.httpClient.get<SedesConectadas>(url, environment.httpOptions);
+    return await lastValueFrom(obj); 
+  }
 
   public Edit(_SedesConectadas : SedesConectadas): Observable<boolean>{
     return this.httpClient.put<boolean>(urlPage + '/' + (_SedesConectadas.idSedeConectada), _SedesConectadas, environment.httpOptions);
