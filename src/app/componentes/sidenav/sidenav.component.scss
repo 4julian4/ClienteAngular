@@ -1,11 +1,43 @@
-/* Establece el estilo base para todos los elementos, eliminando márgenes, paddings, y estableciendo la caja de borde y la fuente por defecto */
+// Definir mixin para puntos de interrupción
+@mixin media-breakpoint-down($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: 576px) {
+      @content;
+    }
+  } @else if $breakpoint == sm {
+    @media (max-width: 768px) {
+      @content;
+    }
+  } @else if $breakpoint == md {
+    @media (max-width: 992px) {
+      @content;
+    }
+  } @else if $breakpoint == lg {
+    @media (max-width: 1200px) {
+      @content;
+    }
+  } @else if $breakpoint == xl {
+    @media (max-width: 1400px) {
+      @content;
+    }
+  }
+}
+
+.full-title {
+  font-size: 16px;
+  display: inline;
+}
+.initials-title {
+  display: none;
+}
 
 /* Estilos para mat-toolbar, definiendo el color de fondo */
 mat-toolbar {
   background: rgb(28, 197, 244); /* Color de fondo */
+  display: flex;
+  justify-content: space-between; /* Asegura que los elementos estén correctamente distribuidos */
+  padding: 0 24px; /* Añade un padding inicial */
 }
-
-
 
 /* Utilidad para agregar espacio flexible en diseños flex */
 .spacer {
@@ -21,10 +53,12 @@ mat-toolbar {
 /* Estilos para mat-select, incluyendo color de fondo y margen */
 mat-select {
   background-color: rgb(237, 242, 244);
-  margin-right: 10px;
+  margin-right: 5px;
   border-radius: 3px;
+  width: 150px; /* Ajusta el ancho */
 }
 
+/* Estilos para el contenedor principal */
 .app-container {
   display: flex;
 }
@@ -32,27 +66,113 @@ mat-select {
 .main-content {
   margin-top: 70px; /* Ajusta este valor según la altura de tu barra de navegación */
   margin-left: 250px;
-  /* Asegúrate de aplicar cualquier padding o margen necesario aquí para evitar que el contenido toque directamente los bordes del menú lateral */
 }
 
-.labelSede {
-  margin-right: 7px;
-}
-
+.labelSede,
 .labelDoctor {
-  margin-left: 7px;
+  margin-right: 7px;
+  margin-left: 20px;
+  font-size: 14px;
+  /* Tamaño de fuente base */
 }
+
 
 .usuarioActivo {
-  display: flex; 
-  align-items: center; 
-  margin-left: 30px;
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
   font-weight: 300;
   font-size: 14px;
 }
 
+.totalPacientes {
+  display: flex;
+  align-items: center;
+  //margin-left: 20px;
+  font-weight: 300;
+  font-size: 14px;
+}
 
+/* Media Queries */
 
+/* Estilos para tabletas */
+@media screen and (max-width: 1024px) and (min-width: 768px) {
+  .full-title {
+    font-size: 16px;
+    display: inline;
+  }
+  .initials-title {
+    display: none;
+  }
+  
+  .mat-toolbar {
+    padding: 0 10px;
+  }
 
+  .iniciarsesion-form-field {
+    width: 120px;
+    height: 32px;
+  }
 
+  .mat-select {
+    width: 100px;
+  }
 
+  .usuarioActivo {
+    font-size: 12px;
+  }
+
+  .labelSede,
+  .labelDoctor {
+    font-size: 12px;
+  }
+}
+
+/* Ajustes para pantallas más pequeñas como celulares */
+@media screen and (max-width: 600px) {
+  
+  .mat-toolbar {
+    padding: 0 10px;
+  }
+
+  .iniciarsesion-form-field {
+    width: 120px;
+    height: 32px;
+  }
+
+  .mat-select {
+    width:60px;
+    height:15px;
+    font-size: 8px;
+  }
+
+  .mat-select-trigger {
+    height: 15px; /* Ajusta la altura del trigger del select */
+    line-height: 15px; /* Alinea verticalmente el texto */
+  }
+
+  .mat-select-value {
+    font-size: 8px; /* Ajusta el tamaño de la letra del valor seleccionado */
+  }
+
+  .mat-option {
+    font-size: 8px; /* Ajusta el tamaño de la letra de las opciones */
+  }
+
+  
+
+  .labelSede,
+  .labelDoctor {
+    font-size: 10px;
+  }
+  .emailUsuario {
+    display: none;
+  }
+  .exitUsuarioActivo {
+    padding: 2px;
+  }
+}
+
+  
+
+  

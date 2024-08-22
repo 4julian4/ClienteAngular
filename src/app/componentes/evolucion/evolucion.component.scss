@@ -1,147 +1,223 @@
-img {
+/* Estilos para la tabla */
+table.mat-table {
     width: 100%;
-    max-width: 400px;
-    min-width: 400px;
 }
 
-.divFormularioFila1 {
-    width: 100%;
+/* Estilos para el contenedor de botones y título */
+.divContenedorDeBotones {
+    padding: 20px;
+    width: 90%;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 
-    .campoFila1 {
-        flex: 1;
-        
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
 
-        &:not(:first-child) {
-            margin-left: 5px;
+    .tituloEvolucion {
+        margin: 0;
+        @media (max-width: 768px) {
+            margin-bottom: 15px;
         }
-       
+    }
+
+    .BotonGuardar {
+        margin: 5px;
+        background-color: rgb(28, 197, 244);
+        color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+
+        @media (max-width: 768px) {
+            width: 100%;
+            margin: 10px 0;
+        }
     }
 }
 
-.divFormularioFila2 {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+/* Estilos para los formularios */
+.formularioEvolucion {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 
-    .campoFila2 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 10px;
     }
 }
 
+/* Estilos para los campos del formulario */
+.divFormularioFila1,
+.divFormularioFila2,
 .divFormularioFila3 {
     width: 100%;
     display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas si es necesario */
     justify-content: space-between;
 
+    .campoFila1,
+    .campoFila2,
     .campoFila3 {
         flex: 1;
+        margin: 5px;
 
-        &:not(:last-child) {
-            margin-right: 5px;
+        @media (max-width: 768px) {
+            flex: 100%;
+            margin: 5px 0;
         }
+    }
+   
+}
 
-        &:not(:first-child) {
-            margin-left: 5px;
+.campoFila4 {
+    flex: 1;
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Centra las firmas y sus etiquetas */
+}
+
+/* Estilos para la tabla */
+table.mat-table {
+    width: 100%;
+}
+
+/* Estilos para el contenedor de botones y título */
+.divContenedorDeBotones {
+    padding: 20px;
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .tituloEvolucion {
+        margin: 0;
+        @media (max-width: 768px) {
+            margin-bottom: 15px;
+        }
+    }
+
+    .BotonGuardar {
+        margin: 5px;
+        background-color: rgb(28, 197, 244);
+        color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+
+        @media (max-width: 768px) {
+            width: 100%;
+            margin: 10px 0;
         }
     }
 }
 
+/* Estilos para los formularios */
+.formularioEvolucion {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 10px;
+    }
+}
 
+/* Estilos para los campos del formulario */
+.divFormularioFila1,
+.divFormularioFila2,
+.divFormularioFila3 {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas si es necesario */
+    justify-content: space-between;
+
+    .campoFila1,
+    .campoFila2,
+    .campoFila3 {
+        flex: 1;
+        margin: 5px;
+
+        @media (max-width: 768px) {
+            flex: 100%;
+            margin: 5px 0;
+        }
+    }
+   
+}
+
+.campoFila4 {
+    flex: 1;
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Centra las firmas y sus etiquetas */
+}
+
+/* Estilos específicos para las firmas */
 .divFormularioFila4 {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    .campoFila4 {
-        flex: 1;
+    > div {
+        display: flex;
+        flex-direction: colum;
+        align-items: center;
+        margin: 0 10px; /* Espacio entre las firmas */
 
-        &:not(:last-child) {
-            margin-right: 5px;
+        img, strong {
+            max-width: 100%;
+            height: auto; /* Mantiene la proporción de la imagen */
+            margin-bottom: 5px; /* Espacio entre la imagen y la etiqueta */
         }
 
-        &:not(:first-child) {
-            margin-left: 5px;
+        .strongPaciente {
+            margin-top: 5px; /* Espacio entre la imagen y la etiqueta */
+            text-align: center; /* Centra la etiqueta debajo de la imagen */
+            margin-left: 150px; /* Centra la etiqueta debajo de la imagen */
+        }
+
+        .strongDoctor {
+            margin-top: 5px; /* Espacio entre la imagen y la etiqueta */
+            text-align: center; /* Centra la etiqueta debajo de la imagen */
+            margin-right: 150px; /* Centra la etiqueta debajo de la imagen */
+        }
+        @media (max-width: 600px) {
+            .strongPaciente, .strongDoctor {
+                margin: 0;
+            }
         }
     }
 }
 
-.divFormularioFila4>div {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
+/* Estilos para el contenido desplazable */
 .scrollable-content {
     max-height: calc(100vh - 200px);
-    /* Ajusta este valor según el tamaño de tus botones */
     overflow-y: auto;
 }
 
-.formularioEvolucion {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    /* Esto redondea las esquinas */
-    padding: 20px;
-    width: 90%;
-    /* Ajusta esto a lo que necesites */
-    margin: 0 auto;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-
-}
-
-
-
-.campoFila2 {
-    flex: 1;
-
-    &:not(:last-child) {
-        margin-right: 5px;
-    }
-
-    &:not(:first-child) {
-        margin-left: 5px;
-    }
-}
-
-
-.divContenedorDeBotones {
-    padding: 20px; // Agrega un espacio de 20px alrededor del contenido del formulario, dentro del borde.
-    width: 90%; // Establece el ancho del formulario al 90% del ancho de su contenedor.
-    margin: 0 auto; // Centra el formulario horizontalmente en su contenedor. '0' es el margen superior e inferior y 'auto' es el margen izquierdo y derecho.
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .BotonGuardar {
-
-        margin: 5px;
-        background-color: rgb(28, 197, 244);
-        color: white;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-        /* Ajusta estos valores para obtener el efecto de sombra que deseas */
-    }
-
- 
-}
-
-.tituloEvolucion {
-    margin: 0;
-    /* Elimina el margen predeterminado del título */
+/* Estilos para el contenido desplazable */
+.scrollable-content {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }

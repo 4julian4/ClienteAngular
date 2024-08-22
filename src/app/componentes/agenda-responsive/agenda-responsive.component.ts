@@ -1,38 +1,48 @@
-import { Time } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostBinding, Input, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MatMenuTrigger } from '@angular/material/menu';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { format } from 'date-fns';
+import { map, Observable, startWith, Subject, Subscription, takeUntil } from 'rxjs';
+import { ConfirmacionesPedidas } from 'src/app/conexiones/rydent/modelos/confirmaciones-pedidas';
+import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
 import { P_Agenda1Model, RespuestaConsultarPorDiaYPorUnidad, RespuestaConsultarPorDiaYPorUnidadService } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
 import { RespuestaDatosPacientesParaLaAgenda, RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { RespuestaRealizarAccionesEnCitaAgendada, RespuestaRealizarAccionesEnCitaAgendadaService } from 'src/app/conexiones/rydent/modelos/respuesta-realizar-acciones-en-cita-agendada';
+import { TDetalleCitas } from 'src/app/conexiones/rydent/tablas/tdetalle-citas';
+import { MensajesUsuariosService } from '../mensajes-usuarios';
+import { FechaHoraHelperService } from 'src/app/helpers/fecha-hora-helper/fecha-hora-helper.service';
+import { AgendaService } from '../agenda/agenda.service';
+import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
 import { TConfiguracionesRydent } from 'src/app/conexiones/rydent/tablas/tconfiguraciones-rydent';
 import { TFestivos } from 'src/app/conexiones/rydent/tablas/tfestivos';
-import { THorariosAgenda } from 'src/app/conexiones/rydent/tablas/thorarios-agenda';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { MensajesUsuariosComponent, MensajesUsuariosService } from '../mensajes-usuarios';
-import { ConfirmacionesPedidas } from 'src/app/conexiones/rydent/modelos/confirmaciones-pedidas';
-import { FechaHoraHelperService } from 'src/app/helpers/fecha-hora-helper/fecha-hora-helper.service';
-import { TDetalleCitas } from 'src/app/conexiones/rydent/tablas/tdetalle-citas';
-import { AgendaService } from './agenda.service';
-import { MatRow, MatTable } from '@angular/material/table';
-import { RespuestaRealizarAccionesEnCitaAgendada, RespuestaRealizarAccionesEnCitaAgendadaService } from 'src/app/conexiones/rydent/modelos/respuesta-realizar-acciones-en-cita-agendada';
-import { Observable, Subject, map, startWith } from 'rxjs';
-import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
-import { MatCalendar } from '@angular/material/datepicker';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
-import { format } from 'date-fns';
 import { THorariosAsuntos } from 'src/app/conexiones/rydent/tablas/thorarios-asuntos';
-import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
+import { THorariosAgenda } from 'src/app/conexiones/rydent/tablas/thorarios-agenda';
+import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
+import { MatCalendar, MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatTable } from '@angular/material/table';
+import { PedirPinComponent } from '../pedir-pin';
+import { Usuarios, UsuariosService } from 'src/app/conexiones/usuarios';
+import { InterruptionService } from 'src/app/helpers/interruption';
+import { RespuestaObtenerDoctorService } from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
+import { LoginService } from '../login';
+import { SignalRService } from 'src/app/signalr.service';
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { SidenavService } from '../sidenav';
+import { Router } from '@angular/router';
+import { Sedes } from 'src/app/conexiones/sedes';
 
 @Component({
-  selector: 'app-agenda',
-  templateUrl: './agenda.component.html',
-  styleUrls: ['./agenda.component.scss']
+  selector: 'app-agenda-responsive',
+  templateUrl: './agenda-responsive.component.html',
+  styleUrls: ['./agenda-responsive.component.scss']
 })
 
-export class AgendaComponent implements OnInit, AfterViewInit {
+
+
+
+export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   isloading: boolean = false;
   //contextMenuPosition = { x: '0px', y: '0px' };
   //@ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
@@ -58,6 +68,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   selectedRowBuscarCita: any;
   showSearch = false;
   searchTerm = '';
+  mostrarSelectSilla = true;
+  mostrarBuscarAgenda = false;
+  mostrarFormulario = false;
+  mostrarColumna = false;
+  mostrarBotonAgendar = true;
   resultadosBusquedaAgendaPorFecha: P_Agenda1Model[] = [];
   //resultadosBusquedaAgendaPorFecha[]: RespuestaConsultarPorDiaYPorUnidad[] = new RespuestaConsultarPorDiaYPorUnidad();
   idSedeActualSignalR: string = '';
@@ -123,10 +138,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   //resultadosBusquedaCita: boolean = false;
   refrescoAgenda: boolean = false;
 
-  columnasMostradasCitasEncontradas = ['fecha', 'hora', 'numHistoria', 'nombre', 'cedula', 'telefono', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
+  columnasMostradasCitasEncontradas = ['fecha', 'hora', 'nombre','telefono','numHistoria', 'cedula', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
 
-  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE', 'OUT_TELEFONO', 'OUT_CELULAR', 'OUT_DOCTOR', 'OUT_ASUNTO', 'ACCIONES'];
+  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE',  'OUT_TELEFONO','ACCIONES'];//,'OUT_TELEFONO', 'OUT_DOCTOR', 'OUT_ASUNTO' ];
 
+  
   constructor(
     private respuestaConsultarPorDiaYPorUnidadService: RespuestaConsultarPorDiaYPorUnidadService,
     private respuestaPinService: RespuestaPinService,
@@ -139,6 +155,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     private changeDetectorRef: ChangeDetectorRef,
     private sedesConectadasService: SedesConectadasService,
     private respuestaRealizarAccionesEnCitaAgendadaService: RespuestaRealizarAccionesEnCitaAgendadaService,
+    private renderer: Renderer2
 
   ) {
 
@@ -161,6 +178,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     //this.inicializarFormulario();
     // Aquí puedes poner el código que quieres que se ejecute después de que las vistas del componente y las vistas de sus hijos se hayan inicializado.
   }
+
+  
 
   async ngOnInit() {
     let lstFecha = this.fechaSeleccionada.toLocaleDateString().split('/');
@@ -524,13 +543,47 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       duracion: '',
       observaciones: ''
     });
+    this.mostrarFormulario = false;
+    this.mostrarBotonAgendar = true;
     await this.cambiarFecha();
   }
 
+  async detallarCita(){
+    this.mostrarBotonAgendar = false;
+    if (this.selectedRow.OUT_HORA_CITA) {
+      this.mostrarFormulario = true;
+      this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
+
+      this.formularioAgregarCita.setValue({
+        fechaEditar: this.fechaSeleccionada,
+        sillaEditar: this.sillaSeleccionada,
+        horaEditar: this.horaCitaSeleccionada,
+        nombreEditar: this.selectedRow.OUT_NOMBRE,
+        asistencia: this.selectedRow.OUT_ASISTENCIA,
+        confirmar: this.selectedRow.OUT_CONFIRMAR,
+
+        nombre: this.selectedRow.OUT_NOMBRE,
+        telefono: this.selectedRow.OUT_TELEFONO,
+        celular: this.selectedRow.OUT_CELULAR,
+        numHistoria: this.selectedRow.OUT_CODIGO,
+        asunto: this.selectedRow.OUT_ASUNTO,
+        doctor: this.selectedRow.OUT_DOCTOR,
+        duracion: this.selectedRow.OUT_DURACION,
+        observaciones: this.selectedRow.OUT_ASUNTO
+      });
+      this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
+      this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+    }
+    else {
+      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
+    }
+  }
+  
   async editarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
 
       if (this.selectedRow.OUT_NOMBRE) {
+        this.mostrarFormulario = true;
         this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
 
         this.formularioAgregarCita.setValue({
@@ -569,12 +622,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
   }
 
+  async agregarCita(){
+    this.mostrarFormulario = true;
+  }
   async agendarCita() {
     let lstConfirmacionesPedidas: ConfirmacionesPedidas[] = [];
     if (!this.selectedRow) {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA HORA PARA PODER DAR LA CITA');
       return;
     }
+
     var horaCita = this.selectedRow.OUT_HORA;
     var duracion = this.formularioAgregarCita.value.duracion;
     if (!duracion) {
@@ -661,6 +718,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         }
 
         await this.guardarCita(lstConfirmacionesPedidas);
+        this.mostrarFormulario = false;
       }
       else if (!nombre) {
         await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN NOMBRE PARA CONTINUAR');
@@ -712,9 +770,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
 
       lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      console.log(lstDatosParaRealizarAccionesEnCitaAgendada);
       const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } = await this.mensajesUsuariosService.mensajeConfirmarSiNoAlarmaObservaciones('Desea Ingresar alguna observacion?', true, true);
       if (resultado) {
-
+        this.removeFocus();
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
         let alarmar = opcionSeleccionadaMensaje == "SI";
         if (alarmar) {
@@ -733,6 +792,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     else {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
     }
+  }
+
+  removeFocus() {
+    // Quitar el foco del elemento activo
+    this.renderer.selectRootElement(':focus').blur();
   }
 
   async sinConfirmar() {
@@ -1082,7 +1146,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     //this.miPanelBucarCitas.close();
     this.datosPacienteParaBuscarAgendaControl.setValue(event.option.value);
   }
-
+  
+  mostrarBuscar(){
+    this.mostrarSelectSilla = false;
+    this.mostrarBuscarAgenda = true;
+  }
 
   onSillaChange(sillaSeleccionada: number) {
     let silla = this.lstHorariosAgenda.find(s => Number(s.SILLA) === Number(sillaSeleccionada));
@@ -1093,6 +1161,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       this.cambiarFecha();
       this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(x => x.SILLAS == sillaSeleccionada.toString());
       console.log(this.listaHorariosAsuntosPorSilla);
+      
+      
     }
   }
 
@@ -1110,7 +1180,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
 
   }
-
 
 
   async cambiarFecha() {

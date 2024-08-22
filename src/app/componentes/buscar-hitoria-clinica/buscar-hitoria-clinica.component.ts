@@ -355,18 +355,14 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async buscarPaciente(nombrePaciente: string) {
-    this.sedeSeleccionada = await this.sedesConectadasService.ConsultarSedePorId(this.idSede);
-    console.log(this.sedeSeleccionada);
-    console.log(this.sedeSeleccionada.activo);
-    if (this.sedeSeleccionada.activo) {
+    
+      console.log(nombrePaciente);
+      console.log(this.opcionSeleccionada);
       if (this.idSedeActualSignalR != '') {
         await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(this.idSedeActualSignalR, this.opcionSeleccionada, nombrePaciente);
       }
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
-      return;
-    }      
+    
+      
   }
 
   async obtenerDatosCompletosPaciente(idAnamnesis: number) {
@@ -391,11 +387,10 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async onRowClicked(filaSeleccionada: RespuestaBusquedaPaciente) {
-    this.sedeSeleccionada = await this.sedesConectadasService.ConsultarSedePorId(this.idSede);
-    console.log(this.sedeSeleccionada);
-    console.log(this.sedeSeleccionada.activo);
-    if (this.sedeSeleccionada.activo) {
+    
+    
       try {
+        //console.log('Fila seleccionada:', filaSeleccionada);
         this.openorclosePanelBuscarPaciente = false;
         this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
         this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
@@ -414,13 +409,11 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         console.error('Error en onRowClicked:', error);
         // Manejar el error adecuadamente
       }
-    }else {
-      await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
-      return;
-    }   
+    
   }
 
   async actualizarDoctor(filaSeleccionada: RespuestaBusquedaPaciente) {
+    //oo aca toca validar si no hay doctor asignado que debe hacer
     if (filaSeleccionada.DOCTOR != this.nombreDoctor) {
       let idDoctor = this.listaDoctores.find(x => x.nombre == filaSeleccionada.DOCTOR)?.id;
       if (!idDoctor) {

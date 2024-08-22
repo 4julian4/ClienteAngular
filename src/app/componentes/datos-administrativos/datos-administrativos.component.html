@@ -1,13 +1,13 @@
 <div class="dashboard">
     <form class="date-range-form">
-        <mat-form-field appearance="fill">
+        <mat-form-field class="calendario" appearance="fill">
             <mat-label>Fecha inicial</mat-label>
             <input matInput [matDatepicker]="picker1" [(ngModel)]="fechaInicio" name="fechaInicio">
             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field appearance="fill">
+        <mat-form-field class="calendario" appearance="fill">
             <mat-label>Fecha final</mat-label>
             <input matInput [matDatepicker]="picker2" [(ngModel)]="fechaFin" name="fechaFin">
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>

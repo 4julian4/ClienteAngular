@@ -24,12 +24,12 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 22px;
+    height: 26px;
     background-color: rgb(28, 197, 244);
     border-radius: 20px;
     //border-top-left-radius: 10px;
     //border-top-right-radius: 10px;
-    padding: 8px 2px; // Espaciado opcional
+    padding: 5px 2px; // Espaciado opcional
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
     transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
@@ -53,22 +53,27 @@
 .barra-superior {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 5px;
     background-color: rgb(28, 197, 244);
     border-radius: 20px;
-    height: 18px;
+    height: 22px;
     width: 100%;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
     transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
 
-.selector-silla {
-    flex: 1;
+
+.botonMostrarBuscar{
+    margin-left: auto;
 }
 
-.custom-select {
+.filaClickeable {
+    cursor: pointer;
+  }
+
+  .custom-select {
     position: relative;
-    width: 16%;
+    width: 100%;
     height: 28px;
     background-color: #ffffff;
     border: 1px solid #ced4da;
@@ -77,10 +82,6 @@
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
     transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
-
-.filaClickeable {
-    cursor: pointer;
-  }
 
 .custom-select select {
     width: 100%;
@@ -96,46 +97,46 @@
     // appearance: none; /* Oculta la flecha del select nativo */
 }
 
-.custom-select label {
-    position: absolute;
-    top: 50%;
-    left: 5px;
-    /* Espacio a la izquierda del label */
-    transform: translateY(-50%);
-    font-size: 12px;
-    /* Tamaño de fuente */
-    color: #6c757d;
-}
-
-
-
 .buscarAgenda {
-    margin-left: auto; // Esto empujará la búsqueda a la derecha
-    margin-right: 5px; // Esto despegará la búsqueda 10px del margen derecho
+    //margin-left: auto; // Esto empujará la búsqueda a la derecha
+    position: relative;
+    //margin-right: 5px; // Esto despegará la búsqueda 5px del margen derecho
+    //margin-left: 5px; // Esto despegará la búsqueda 5px del margen izquierdo
     display: flex;
     align-items: center;
     background-color: #fff;
     border-radius: 20px;
-    padding: 5px 5px;
-    max-width: 50%;
-    flex: 1;
-    height: 100%;
+    //padding: 5px 5px;
+    width: 100%;
+    //flex: 1;
+    height: 28px;
+    overflow: hidden;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); // Añade sombra para dar profundidad
     transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
 }
 
 
+    
+    
+
 
 .buscarAgenda input {
     border: none;
+    padding: 8px;
     flex: 1;
     margin-left: 5px; // Reducir el margen izquierdo
-    font-size: 14px; // Reducir el tamaño de la fuente
+    font-size: 12px; // Reducir el tamaño de la fuente
     height: 100%; // Asegurar que no se desborde del contenedor
+    width: 100%;
     outline: none; // Eliminar el recuadro de borde negro al hacer clic
     transition: 0.3s; // Añade transiciones para suavizar los cambios de estado
+    background-color: transparent;
+    //height: 26px;
 }
 
+
+   
+    
 
 .buscarAgenda button {
     //align-items: center;
@@ -147,29 +148,31 @@
     transition: 0.3s;
 }
 
+.columnaBusqueda{
+    font-size: 12px;
+}
+
 
 
 
 .contenedorAbajo {
-    position: relative; // Necesario para que z-index funcione
-    z-index: 1; // Ajusta este valor según tus necesidades
-    display: flex;
-    //flex: 1; // Para que los contenedores se expandan para llenar el espacio disponible
+    flex-direction: column;
+    height: 100%;
 }
 
 .contenedor-izquierdo {
-    width: 18%; // Establece el ancho del elemento al 20% del ancho de su contenedor.
+    width: 100%; // Establece el ancho del elemento al 20% del ancho de su contenedor.
     height: 100%;
-    justify-content: center;
-    align-items: center;
+    //justify-content: center;
+    //align-items: center;
     //flex: 1; // Permite que el elemento crezca y se encoja para utilizar el espacio disponible en su contenedor flex.
-    display: flex; // Establece el tipo de visualización del elemento a flex, permitiendo la disposición flexible de sus hijos.
+    //display: flex; // Establece el tipo de visualización del elemento a flex, permitiendo la disposición flexible de sus hijos.
     flex-direction: column; // Los hijos del elemento se apilarán verticalmente.
-    justify-content: center;
-    align-items: center;
+    //justify-content: center;
+    //align-items: center;
     margin-right: 5px; // Añade un margen a la derecha del elemento de 5px. Este es un espaciado opcional.
     border-radius: 8px; // Redondea las esquinas del elemento con un radio de 8px.
-    overflow-x: hidden;
+    //overflow-x: hidden;
 }
 
 .scrollable-content-izquierdo {
@@ -178,18 +181,18 @@
 }
 
 .divCalendario {
-    width: 100%;
-    height: 25%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5px; // Añade un margen superior de 10px
+    display: block; /* Asegura que el contenedor se comporte como un bloque */
+    width: 100%; /* Ocupa todo el ancho del contenedor padre */
+    box-sizing: border-box; /* Incluye el padding y el borde en el ancho total */
+    padding: 0 5px; /* Opcional: agrega padding si es necesario */
+    margin: 0; /* Elimina cualquier margen que pueda estar afectando el ancho */
 }
 
-.mi-calendario {
-    width: 77%;
-    height: 20%; // Cambiado para ocupar todo el espacio disponible
+mat-form-field {
+    width: 100%; /* Asegura que el campo de formulario ocupe todo el ancho del contenedor */
 }
+
+
 
 .divBotonAgendarCita {
     display: flex;
@@ -227,9 +230,14 @@
     flex-direction: column;
     justify-content: space-between;
     background-color: #f9f9f9; // Fondo del formulario
-    padding: 0.5px; // Espacio interno del formulario
+    padding: 10px; // Espacio interno del formulario
+    border: 1px solid #ccc;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     border-radius: 10px; // Bordes redondeados
     overflow: auto; // Muestra una barra de desplazamiento si es necesario
+    width: 90%;
+    margin: 10px auto 10px auto; // Centra el formulario en la página
+    
 
     * {
         box-sizing: border-box; // Incluye el padding y los bordes en el tamaño total de los elementos
@@ -304,13 +312,18 @@
     /* Color del texto al pasar el ratón */
 }
 
-
+.scrollable-content-derecho {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}
 
 .contenedor-derecho {
     overflow-x: auto;
-    width: 75%;
-    flex: 4;
-    //padding: 10px; // Espaciado opcional
+    width: 100%;
+    //position: relative;
+
+    //flex: 4;
+    padding: 5px; // Espaciado opcional
 
     mat-cell input {
         border: none;
@@ -327,6 +340,7 @@ x
 .scrollable-content-derecho {
     max-height: calc(100vh - 150px);
     overflow-y: auto;
+    overflow-x: auto;
     background-color: transparent;
 }
 
@@ -339,21 +353,82 @@ x
     border: none;
     outline: none;
     border-radius: 8px;
+    /* Estilo para la fila del encabezado de la tabla */
+    .fila-superior {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
 
-    //background-color: white;
+    .hora-column {
+        font-size: 10px; // Reduce el tamaño de la fuente
+        color: white;
+        background-color: rgb(28, 197, 244);
+        //position: sticky;
+        left: 0;
+       // z-index: 1;
+        width: 90px;
+        min-width: 90px;
+    }
+
+    .hora-column-header{
+        position: sticky;
+        color: white;
+        background-color: rgb(28, 197, 244);
+        left: 0;
+        z-index: 1;
+        width: 90px;
+        min-width: 90px;
+    }
+
+    
+
+    .acciones-column-header{
+        position: sticky;
+        align-items: center;
+        right: 2px;
+        z-index: 1;
+        width: 65px;
+        min-width: 65px;
+    }
+    
+    .nombre-column {
+        //flex-basis: auto;
+        //flex: 2 1 auto; /* Ajustar el espacio según sea necesario */
+        width: 140px;
+        min-width: 140px; /* Asegura que la columna tenga más espacio */
+        font-size: 10px;
+    }
+
+    .inputNombre {
+        font-size: 10px;
+    }
+
+    .nombre-column-header{
+        width: 140px;
+        min-width: 140px;
+    }
+
+    .celular-column {
+        width: 90px;
+        min-width: 90px; /* Asegura que la columna tenga más espacio */
+        font-size: 10px;
+    }
+
+    .inputCelular {
+        font-size: 10px;
+    }
+
+    .celular-column-header{
+        width: 90px;
+        min-width: 90px;
+    }
 }
 
 
 
 
-/* Estilo para la fila del encabezado de la tabla */
-.fila-superior {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    //background-color: white;
-   // background-color: transparent; // Hace que el fondo sea transparente
-}
+
 
 .seleccionado {
     //background-color: rgb(32, 244, 28);
@@ -383,13 +458,9 @@ x
     transition: background-color 0.3s;
 }
 
-.hora-column {
-    font-size: 14px; // Reduce el tamaño de la fuente
-    //padding: 1px 1; // Reduce el padding vertical
-    //line-height: 0.5;
-    color: white;
-    background-color: rgb(28, 197, 244);
-}
+
+
+
 
 
 .highlighted {
@@ -398,15 +469,8 @@ x
 }
 
 
-// .hora-column-contenedor {
-//     width: 100px;
-//     min-width: 100px;
-// }
 
-.hora-column-header {
-    color: black;
-    background-color: rgb(28, 197, 244);
-}
+
 
 
 .hora-column:hover {
@@ -414,84 +478,6 @@ x
 }
 
 
-/* Media Queries para adaptar a tablets y móviles */
-@media (max-width: 768px) {
-    .custom-select {
-        width: 30%; /* Aumenta el ancho en pantallas más pequeñas */
-    }
-    
-    .contenedor-izquierdo {
-        width: 25%;
-    }
-    
-    .mi-calendario {
-        width: 100%;
-        height: 30%; /* Ajusta la altura para pantallas más pequeñas */
-    }
 
-    .formulario-cita {
-        height: auto; /* Ajusta la altura del formulario para pantallas más pequeñas */
-    }
 
-    .buscarAgenda {
-        max-width: 100%;
-        flex: 1;
-    }
-}
-
-@media (max-width: 480px) {
-    .custom-select {
-        width: 50%;
-    }
-    
-    .contenedor-izquierdo {
-        width: 40%;
-    }
-
-    .barra-superior, .contenedorArriba {
-        height: auto;
-        padding: 5px;
-    }
-
-    .formulario-cita {
-        height: auto;
-    }
-
-    .buscarAgenda {
-        flex-direction: column;
-        max-width: 100%;
-    }
-
-    .mi-calendario {
-        width: 100%;
-        height: 40%;
-    }
-
-    .contenedor-derecho {
-        overflow-x: auto;
-        width: 75%;
-        flex: 4;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-    }
-
-    .contenedor-derecho > .columna {
-        box-sizing: border-box;
-        padding: 10px;
-        border-right: 1px solid #ccc;
-    }
-
-    .contenedor-derecho > .columna:not(.hora) {
-        flex: 0 0 auto;
-        min-width: 200px;
-    }
-
-    .contenedor-derecho > .columna.hora {
-        flex: 0 0 50px; /* Ajuste a 50px para un ancho menor */
-        min-width: 50px; /* Mantiene un ancho mínimo de 50px */
-        padding: 5px; /* Reduce el padding interno */
-        text-align: center; /* Centra el texto */
-    }
-}
-
+  

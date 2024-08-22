@@ -50,6 +50,7 @@ export class SignalRService {
 
     try {
       await this.hubConnection.start();
+      this.reconnectAttempts = 0; // Reinicia el contador al conectar
       console.log('Conexión iniciada');
     } catch (err) {
       // Información detallada del error
@@ -91,8 +92,21 @@ export class SignalRService {
     }
   }
 
-  private reconnect(): void {
-    setTimeout(() => this.startConnection(), 5000); // Reintentar conexión después de 5 segundos
+  //private reconnect(): void {
+    //setTimeout(() => this.startConnection(), 5000); // Reintentar conexión después de 5 segundos
+  //}
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+
+  private async reconnect(): Promise<void> {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Intento de reconexión #${this.reconnectAttempts}`);
+      setTimeout(() => this.startConnection(), 5000); // Reintentar conexión después de 5 segundos
+    } else {
+      console.error('Máximo número de intentos de reconexión alcanzado.');
+      this.notifyUserOrLogError('Conexión perdida. No se pudo reconectar.');
+    }
   }
 
   public on(event: string, callback: (...args: any[]) => void): void {

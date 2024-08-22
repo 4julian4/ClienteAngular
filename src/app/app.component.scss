@@ -1,0 +1,15 @@
+.imagen-debajo-sidenav {
+    max-width: 100%; /* La imagen no excede el ancho del contenedor */
+    height: auto; /* Mantiene la proporción de la imagen */
+    display: block; /* Evita espacios extra debajo de la imagen */
+    margin: 0 auto; /* Centra la imagen horizontalmente */
+    width: 100%; /* Hace que la imagen ocupe el 100% del contenedor, ajustándose a su tamaño */
+    //border-radius: 15px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para darle un poco de profundidad */
+}
+@media (max-width: 768px) {
+    .imagen-debajo-sidenav {
+        max-width: 100%; /* Reduce el ancho en pantallas pequeñas */
+        margin: 10px auto; /* Añade márgenes alrededor de la imagen */
+    }
+}

@@ -2,11 +2,11 @@
     <mat-expansion-panel #panelBuscarPaciente *ngIf="mostrarPanelBuscarPaciente" class="buscarPaciente"
         [expanded]="openorclosePanelBuscarPaciente" (opened)="panelBuscarPacienteOpen()">
         <mat-expansion-panel-header>
-            <mat-panel-title style="color: black; font-size: 1.5em;">
+            <mat-panel-title class="nombrePacienteSeleccionado" >
                 {{nombrePaciente}} {{numeroHistoria}}
             </mat-panel-title>
             <mat-panel-description>
-                <span style="color: red; font-size: 1.0em;" matTooltip="{{notaImportante}}"> {{mensajeNotaImportante}}</span>
+                <span class="notaImportantePaciente"  matTooltip="{{notaImportante}}"> {{mensajeNotaImportante}}</span>
             </mat-panel-description>
             <mat-icon class="custom-mat-icon" mat-expansion-indicator matTooltip="click aca para buscar paciente">search</mat-icon>
             
@@ -30,11 +30,12 @@
                     <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
                         [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;" (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)">
                     <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
-                        <mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
+                        <!--<mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
                             {{ datosPaciente.datoBuscar }}
-                        </mat-option>
+                        </mat-option>-->
                     </mat-autocomplete>
-                    
+                </div>
+                <div class="divBotonesBuscarCancelar">    
                     <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Buscar</button>
                     <button mat-raised-button class="botonCancelarBuscarPaciente"
                         (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Cancelar</button>
