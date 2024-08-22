@@ -136,44 +136,91 @@
 .formularioAgregarEvolucion {
     border: 1px solid #ccc;
     border-radius: 10px;
-    /* Esto redondea las esquinas */
     padding: 20px;
     width: 90%;
-    /* Ajusta esto a lo que necesites */
     margin: 0 auto;
-    /* Centra la caja en la página */
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-
-    
+    /* Evita que se desborde el contenido */
+    box-sizing: border-box;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 
     .divContenedorDeBotones {
         text-align: right;
 
-        .BotonGuardar {
-            margin: 5px;
-            background-color: rgb(28, 197, 244);
-            color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
-        }
-
-        .BotonCancelar {
-            margin: 5px;
-            background-color: rgb(28, 197, 244);
-            color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
-        }
+        .BotonGuardar,
+        .BotonCancelar,
         .BotonFirmar {
+            margin: 5px;
             background-color: rgb(28, 197, 244);
             color: white;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
         }
     }
 
+    @media screen and (max-width: 768px) {
+        .divFormularioFila1,
+        .divFormularioFila2,
+        .divFormularioFila3,
+        .divFormularioFila4
+         {
+            flex-direction: column;
+        }
 
+        .divContenedorDeBotones {
+            text-align: center;
+            margin-top: 20px;
+
+            .BotonGuardar,
+            .BotonCancelar,
+            .BotonFirmar {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        .campoFila6 {
+            flex: 1;
+            margin: 5px;
+            display: flex;
+            flex-direction: row;
+            align-items: center; /* Centra las firmas y sus etiquetas */
+        }
+        
+        /* Estilos específicos para las firmas */
+        .divFormularioFila6 {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        
+            > div {
+                display: flex;
+                flex-direction: colum;
+                align-items: center;
+                margin: 0 10px; /* Espacio entre las firmas */
+        
+                img, strong {
+                    max-width: 100%;
+                    height: auto; /* Mantiene la proporción de la imagen */
+                    margin-bottom: 5px; /* Espacio entre la imagen y la etiqueta */
+                }
+        
+                .strongPaciente {
+                    margin-top: 5px; /* Espacio entre la imagen y la etiqueta */
+                    text-align: center; /* Centra la etiqueta debajo de la imagen */
+                    margin-left: 150px; /* Centra la etiqueta debajo de la imagen */
+                }
+        
+                .strongDoctor {
+                    margin-top: 5px; /* Espacio entre la imagen y la etiqueta */
+                    text-align: center; /* Centra la etiqueta debajo de la imagen */
+                    margin-right: 150px; /* Centra la etiqueta debajo de la imagen */
+                }
+                @media (max-width: 600px) {
+                    .strongPaciente, .strongDoctor {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+    }
 }

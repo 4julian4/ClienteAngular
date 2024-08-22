@@ -13,6 +13,7 @@ import { RipsComponent } from './componentes/rips';
 import { DatosAdministrativosComponent } from './componentes/datos-administrativos';
 import { LoginCallbackGoogleComponent } from './componentes/login-callback-google';
 import { LoginCallBackComponent } from './componentes/login-call-back';
+import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 
 const routes: Routes = [
   {path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -21,6 +22,7 @@ const routes: Routes = [
   {path: 'antecedentes', component: AntecedentesComponent},
   {path: 'evolucion', component: EvolucionComponent},
   {path: 'agenda', component: AgendaComponent},
+  {path: 'agenda-responsive', component: AgendaResponsiveComponent},
   {path: 'agregar-evolucion', component: AgregarEvolucionComponent},
   {path: 'agregar-firmas', component: AgregarFirmasComponent},
   {path: 'buscar-historia-clinica', component: BuscarHitoriaClinicaComponent},

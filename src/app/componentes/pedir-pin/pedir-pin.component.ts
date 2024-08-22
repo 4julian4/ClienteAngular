@@ -36,12 +36,13 @@ export class PedirPinComponent {
               @Inject(MAT_DIALOG_DATA) public data: any) { }
 
   onNoClick() {
-    this.dialogRef.close();
+    this.dialogRef.close('no-action');
   }
 
 
   async confirmar() {
     this.isloading= true;
+    console.log("entro a confirmar");
     // Aquí puedes hacer algo con this.data.pin, como verificarlo o enviarlo a un servidor
     await this.respuestaPinService.startConnectionRespuestaObtenerPin();
     
@@ -63,7 +64,7 @@ export class PedirPinComponent {
       } else {
         this.isloading = false;
         await this.mensajesUsuariosService.mensajeInformativo('CLAVE INCORRECTA');
-        //return;
+        return;
       }
     });
 

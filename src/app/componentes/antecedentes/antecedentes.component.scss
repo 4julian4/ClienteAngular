@@ -1,215 +1,37 @@
-
-
-.divFila1DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila1 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-
-.divFila2DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila2 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-.divFila3DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila3 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila4DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila4 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila5DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila5 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila6DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila6 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila7DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila7 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila8DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila8 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila9DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila9 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila10DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila10 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila11DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila11 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
-.divFila12DatosPersonales {
-    display: flex;
-    justify-content: space-between;
-
-    .campoFila12 {
-        flex: 1;
-
-        &:not(:last-child) {
-            margin-right: 5px;
-        }
-
-        &:not(:first-child) {
-            margin-left: 5px;
-        }
-    }
-}
-
+.divFila1DatosPersonales,
+.divFila2DatosPersonales,
+.divFila3DatosPersonales,
+.divFila4DatosPersonales,
+.divFila5DatosPersonales,
+.divFila6DatosPersonales,
+.divFila7DatosPersonales,
+.divFila8DatosPersonales,
+.divFila9DatosPersonales,
+.divFila10DatosPersonales,
+.divFila11DatosPersonales,
+.divFila12DatosPersonales,
 .divFila13DatosPersonales {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+    /* Asegúrate de que no sobrepase el ancho de su contenedor */
 
+    .campoFila1,
+    .campoFila2,
+    .campoFila3,
+    .campoFila4,
+    .campoFila5,
+    .campoFila6,
+    .campoFila7,
+    .campoFila8,
+    .campoFila9,
+    .campoFila10,
+    .campoFila11,
+    .campoFila12,
     .campoFila13 {
         flex: 1;
+        margin: 5px;
 
         &:not(:last-child) {
             margin-right: 5px;
@@ -218,14 +40,21 @@
         &:not(:first-child) {
             margin-left: 5px;
         }
+
+        @media (max-width: 768px) {
+            flex: 100%;
+            margin: 5px 0;
+        }
     }
 }
 
-.scrollable-content{
+.scrollable-content {
     max-height: calc(100vh - 200px);
-    /* Ajusta este valor según el tamaño de tus botones */
     overflow-y: auto;
-    mat-seelect :disabled{
+    width: 100%;
+    /* Asegúrate de que no sobrepase el ancho de su contenedor */
+
+    mat-select:disabled {
         background-color: #f5f5f5;
     }
 }
@@ -233,35 +62,43 @@
 .formularioAntecedentes {
     border: 1px solid #ccc;
     border-radius: 10px;
-    /* Esto redondea las esquinas */
     padding: 20px;
     width: 90%;
-    /* Ajusta esto a lo que necesites */
+    max-width: 100%;
+    /* Evita que se desborde el contenido */
+    box-sizing: border-box;
+    /* Incluye padding y border en el ancho total */
     margin: 0 auto;
-    /* Centra la caja en la página */
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-    
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 10px;
+    }
 
     .divContenedorDeBotones {
         text-align: right;
 
-        .BotonGuardar {
+        .BotonGuardar,
+        .BotonCancelar {
             margin: 5px;
             background-color: rgb(28, 197, 244);
             color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0px 0px 10px rgba(0, 0, 0, 0.5);
         }
 
-        .BotonCancelar {
-            background-color: rgb(28, 197, 244);
-            color: white;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        /* Media queries para diferentes tamaños de pantalla */
+        @media (max-width: 768px) {
+            .divDatosPersonales {
+                flex-direction: column;
+
+                .campo,
+                .campo-full {
+                    flex: 0 0 100%; // Ocupa todo el ancho en pantallas pequeñas
+                    margin-left: 0;
+                    margin-right: 0;
+                }
+            }
         }
     }
-
-
 }

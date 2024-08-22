@@ -17,7 +17,7 @@ export class RespuestaPinService {
   //Diferentes componentes
   private anamnesisData = new BehaviorSubject<number | null>(null);
   sharedAnamnesisData = this.anamnesisData.asObservable();
-
+ 
   private sedeData = new BehaviorSubject<string | null>(null);
   sharedSedeData = this.sedeData.asObservable();
 
@@ -93,23 +93,17 @@ export class RespuestaPinService {
       })
       .catch(err => console.log('Error al conectar con SignalR: ' + err));
   }
-
-
-
-
-
-
-  // Aca actualizamos variables para que sean usadas por los componenetes
+ // Aca actualizamos variables para que sean usadas por los componenetes
   async updateAnamnesisData(data: number) {
     this.anamnesisData.next(data);
   }
-
   updateSedeData(data: string) {
     this.sedeData.next(data);
   }
   updateSedeSeleccionada(data: number) {
     this.sedeSeleccionada.next(data);
   }
+  
   updatedatosRespuestaPin(data: RespuestaPin) {
     this.datosRespuestaPin.next(data);
   }

@@ -194,6 +194,9 @@
     /* Esto redondea las esquinas */
     padding: 20px;
     width: 90%;
+    /* Evita que se desborde el contenido */
+    box-sizing: border-box;
+    
     /* Ajusta esto a lo que necesites */
     margin: 0 auto;
     /* Centra la caja en la página */
@@ -221,5 +224,85 @@
     }
 
 
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+    .formulariodatosPersonales {
+        width: 95%;
+    }
+}
+
+@media (max-width: 992px) {
+    .formulariodatosPersonales {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .divFormularioFila1,
+    .divFormularioFila2,
+    .divFormularioFila3,
+    .divFormularioFila4,
+    .divFormularioFila5,
+    .divFormularioFila6,
+    .divFormularioFila7,
+    .divFormularioFila8,
+    .divFormularioFila9,
+    .divFormularioFila10,
+    .divFormularioFila11 {
+        flex-direction: column;
+        align-items: stretch;
+
+        mat-form-field {
+            width: 100%;
+            margin: 10px 0;
+        }
+    }
+
+    .scrollable-content {
+        max-height: calc(100vh - 150px); // Reduce for smaller screens
+    }
+}
+
+@media (max-width: 768px) {
+    .formulariodatosPersonales {
+        padding: 10px;
+    }
+
+    .divContenedorDeBotones {
+        text-align: center;
+
+        .BotonGuardar,
+        .BotonCancelar {
+            width: 100%;
+            margin: 10px 0;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .formulariodatosPersonales {
+        padding: 5px;
+    }
+
+    .divFormularioFila1,
+    .divFormularioFila2,
+    .divFormularioFila3,
+    .divFormularioFila4,
+    .divFormularioFila5,
+    .divFormularioFila6,
+    .divFormularioFila7,
+    .divFormularioFila8,
+    .divFormularioFila9,
+    .divFormularioFila10,
+    .divFormularioFila11 {
+        mat-form-field {
+            margin: 5px 0;
+        }
+    }
+
+    .scrollable-content {
+        max-height: calc(100vh - 100px); // Further reduce for small screens
+    }
 }
 
