@@ -1,5 +1,5 @@
 import { Time } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { P_Agenda1Model, RespuestaConsultarPorDiaYPorUnidad, RespuestaConsultarPorDiaYPorUnidadService } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
@@ -139,7 +139,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     private changeDetectorRef: ChangeDetectorRef,
     private sedesConectadasService: SedesConectadasService,
     private respuestaRealizarAccionesEnCitaAgendadaService: RespuestaRealizarAccionesEnCitaAgendadaService,
-
+    private renderer: Renderer2
   ) {
 
   }
@@ -674,13 +674,27 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async borrarCita() {
-    if (this.selectedRow.OUT_HORA_CITA) {
-      if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
-        return;
-      }
-      //this.isloading = true;
+  removeFocus() {
+    // Quitar el foco del elemento activo
+    this.renderer.selectRootElement(':focus').blur();
+  }
 
+  async borrarCita() {
+    console.log(this.selectedRow.OUT_HORA_CITA);
+    if (this.selectedRow.OUT_HORA_CITA) {
+      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de borrar esta cita?');
+    
+      if (!confirmacion.resultado) {
+        console.log('No se borró la cita');
+        return;
+      }  
+      
+      //if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
+        //console.log('No se borro la cita');
+       // return;
+        
+      //}
+      //this.removeFocus();
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;

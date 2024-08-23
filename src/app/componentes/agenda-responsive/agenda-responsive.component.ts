@@ -573,6 +573,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       });
       this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
       this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+      this.formularioAgregarCita.disable();
     }
     else {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
@@ -616,6 +617,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
           resultado.OUT_OBSERVACIONES = '';
         }
       }
+      this.formularioAgregarCita.enable();
     }
     else {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
@@ -734,9 +736,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
   async borrarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
+      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de borrar esta cita?');
+    
+      if (!confirmacion.resultado) {
+        console.log('No se borró la cita');
         return;
-      }
+      }  
       //this.isloading = true;
 
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];

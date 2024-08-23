@@ -1,0 +1,25 @@
+.button-container {
+    display: flex; /* Mantiene los botones en una fila horizontal */
+    justify-content: center; /* Centra los botones horizontalmente */
+    align-items: center; /* Alinea los botones verticalmente */
+    gap: 7px; /* Espacio entre los botones */
+    flex-wrap: nowrap; /* Evita que los botones se muevan a la siguiente línea */
+    overflow-x: auto; /* Permite el desplazamiento horizontal si es necesario */
+    padding: 10px; /* Espacio interior del contenedor */
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    white-space: nowrap; /* Evita que el texto del botón se ajuste a la siguiente línea */
+  }
+  
+  @media (max-width: 768px) {
+    /* Opcional: puedes ajustar el tamaño del botón en pantallas más pequeñas si es necesario */
+    button {
+        font-size: 0.65rem; /* Tamaño de fuente más pequeño para pantallas pequeñas */
+        padding: 6px 10px; /* Ajuste de padding para pantallas pequeñas */
+        height: 27px; /* Altura del botón */
+    }
+  }
+  
