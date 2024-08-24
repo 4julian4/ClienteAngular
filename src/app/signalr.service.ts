@@ -17,13 +17,19 @@ export class SignalRService {
   constructor() {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.signalRUrl, {
-        withCredentials: true 
+        withCredentials: false // Desactiva el uso de cookies
       })
       .withAutomaticReconnect()
       .build();
 
     this.hubConnection.onclose(() => this.reconnect());
-    this.hubConnection.onreconnecting((error) => console.warn(`Intentando reconectar: ${error}`));
+    this.hubConnection.onreconnecting((error) => {
+      if (error && error.message.includes('404')) {
+        console.warn('Error 404 durante la reconexión. Verifica las rutas de negociación.');
+      } else {
+        console.warn(`Intentando reconectar: ${error}`);
+      }
+    });
     this.hubConnection.onreconnected((connectionId) => {
       console.log(`Reconectado exitosamente: ${connectionId}`);
       this.reconnectAttempts = 0;
@@ -43,24 +49,31 @@ export class SignalRService {
       console.log('Conexión iniciada');
       this.reconnectAttempts = 0;
     } catch (err) {
-      console.error('Error al iniciar la conexión: ', err);
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        setTimeout(() => this.startConnection(), 5000);
-        this.reconnectAttempts++;
+      if (err instanceof Error) {
+        if (err.message.includes('404')) {
+          console.warn('Error 404 ignorado. La ruta puede no ser crítica.');
+        } else {
+          console.error('Error al iniciar la conexión: ', err.message);
+          if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            setTimeout(() => this.startConnection(), 5000);
+            this.reconnectAttempts++;
+          } else {
+            console.error('Máximo número de intentos de reconexión alcanzado.');
+          }
+        }
       } else {
-        console.error('Máximo número de intentos de reconexión alcanzado.');
+        console.error('Error desconocido al iniciar la conexión:', err);
       }
     }
   }
 
   async ensureConnection(): Promise<void> {
     if (this.hubConnection.state === signalR.HubConnectionState.Connected ||
-        this.hubConnection.state === signalR.HubConnectionState.Connecting) {
+      this.hubConnection.state === signalR.HubConnectionState.Connecting) {
       console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
       return;
     }
 
-    // Detener la conexión si está en estado de reconexión
     if (this.hubConnection.state === signalR.HubConnectionState.Reconnecting) {
       console.log('Esperando a que finalice la reconexión actual...');
       await this.hubConnection.stop();
@@ -72,16 +85,21 @@ export class SignalRService {
       await this.hubConnection.start();
       console.log('Conexión a SignalR establecida.');
     } catch (err) {
-      console.error('Error al conectar con SignalR: ', err);
-      throw err; // Lanza el error para que pueda ser manejado por el llamador
+      if (err instanceof Error) {
+        console.error('Error al conectar con SignalR: ', err.message);
+      } else {
+        console.error('Error desconocido al conectar con SignalR:', err);
+      }
+      throw err;
     }
   }
 
   private async reconnect(): Promise<void> {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      console.log(`Intento de reconexión #${this.reconnectAttempts}`);
-      await this.startConnection();
+      const delay = Math.pow(2, this.reconnectAttempts) * 1000; // Backoff exponencial
+      console.log(`Intento de reconexión #${this.reconnectAttempts} en ${delay} ms`);
+      setTimeout(() => this.startConnection(), delay);
     } else {
       console.error('Máximo número de intentos de reconexión alcanzado.');
     }
@@ -90,10 +108,17 @@ export class SignalRService {
   public async stopConnection(): Promise<void> {
     if (this.hubConnection.state !== signalR.HubConnectionState.Disconnected) {
       try {
+        // Desuscribirse de eventos antes de detener la conexión
+        this.hubConnection.off('ErrorConexion');
+        this.hubConnection.off('RespuestaAgendarCita');
         await this.hubConnection.stop();
         console.log('Conexión detenida');
       } catch (err) {
-        console.error('Error al detener la conexión: ', err);
+        if (err instanceof Error) {
+          console.error('Error al detener la conexión: ', err.message);
+        } else {
+          console.error('Error desconocido al detener la conexión:', err);
+        }
       }
     }
   }
@@ -110,15 +135,26 @@ export class SignalRService {
     try {
       await this.hubConnection.invoke(method, ...args);
     } catch (err) {
-      console.error(`Error invocando ${method}: `, err);
+      if (err instanceof Error) {
+        console.error(`Error invocando ${method}: `, err.message);
+      } else {
+        console.error(`Error desconocido invocando ${method}: `, err);
+      }
     }
   }
-  async obtenerPin(clienteId: string, pin: string) {
-    await this.hubConnection.invoke('ObtenerPin', clienteId, pin)
-      .catch(err => console.error(err));
-  } 
 
-  
+  async obtenerPin(clienteId: string, pin: string) {
+    try {
+      await this.hubConnection.invoke('ObtenerPin', clienteId, pin);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error('Error al obtener el pin: ', err.message);
+      } else {
+        console.error('Error desconocido al obtener el pin: ', err);
+      }
+    }
+  }
+
   public recibirMensaje(callback: (mensaje: string) => void) {
     this.hubConnection.on('ReceiveMessage', (mensaje: string) => {
       this.mensajeSubject.next(mensaje);
