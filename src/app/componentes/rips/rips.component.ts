@@ -5,7 +5,7 @@ import { RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/mod
 import { TConfiguracionesRydent } from 'src/app/conexiones/rydent/tablas/tconfiguraciones-rydent';
 import { RipsService } from './rips.service';
 import { Observable, debounceTime, map, startWith, take } from 'rxjs';
-import { MatAutocomplete } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 
 @Component({
@@ -113,7 +113,7 @@ export class RipsComponent implements OnInit {
             startWith(''),
             map(value => this._filterNombre(value, this.lstTiposDeConsultas))
           );
-
+          
         this.filteredCodigosTiposDeConsultas = this.codigoConsultaControl.valueChanges
           .pipe(
             startWith(''),
@@ -135,6 +135,7 @@ export class RipsComponent implements OnInit {
           }
         });
 
+        
         //obtenemos diagnpsticos principales para aplicar Rips
         this.listaConsultas = data;
         this.lstConsultas = this.listaConsultas.lstConsultas
@@ -217,11 +218,14 @@ export class RipsComponent implements OnInit {
     return list.filter(option => option.nombre.toLowerCase().includes(filterValue));
   }
 
+    
   private _filterCodigo(value: string, list: { id: string, nombre: string }[]): { id: string, nombre: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
 
     return list.filter(option => option.id.toLowerCase().includes(filterValue));
   }
+
+  
 
   inicializarFormulario() {
     const fechaActual = new Date();
@@ -295,13 +299,31 @@ export class RipsComponent implements OnInit {
     }
   }
 
-  validateAndClearIfInvalid(control: FormControl, validOptions: any[]): void {
+  /*validateAndClearIfInvalid(control: FormControl, validOptions: any[]): void {
     const inputValue = control.value;
     const isValid = validOptions.some(option => option.nombre === inputValue || option.id === inputValue);
     if (!isValid) {
       control.setValue('');
     }
+  }*/
+
+  validateAndClearIfInvalid(control: FormControl, list: { id: string, nombre: string }[]) {
+    console.log('control', control);
+    console.log('list', list);
+    const value = control.value;
+    const isValid = list.some(option => option.nombre === value || option.id === value);
+    console.log('isValid', isValid);
+    console.log('value', value);
+    if (!isValid) {
+      control.setValue('');
+    }
   }
+  // con esta puedo cambiar el valor del select
+  /*onOptionSelected(event: MatAutocompleteSelectedEvent) {
+    const selectedValue = event.option.value;
+    this.tipoConsultaControl.setValue(selectedValue);
+    console.log('Valor seleccionado:', selectedValue);
+  }*/
 
   cancelarGuardarRips() { 
     this.router.navigate(['/evolucion']);

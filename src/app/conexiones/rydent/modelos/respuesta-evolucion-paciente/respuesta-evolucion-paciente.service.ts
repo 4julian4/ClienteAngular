@@ -4,7 +4,7 @@ import { SignalRService } from 'src/app/signalr.service';
 import { BehaviorSubject } from 'rxjs';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
-import { HubConnectionState } from '@microsoft/signalr';
+import signalR, { HubConnectionState } from '@microsoft/signalr';
 import { RespuestaPinService } from '../respuesta-pin';
 
 @Injectable({
@@ -20,23 +20,26 @@ export class RespuestaEvolucionPacienteService {
     private descomprimirDatosService: DescomprimirDatosService,
     private respuestaPinService: RespuestaPinService
   ) { }
-  
-  
+
+
   async startConnectionRespuestaEvolucionPaciente(clienteId: string, idAnanesis: string) {
     if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
       this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-      console.log('Deteniendo conexión existente...');
-      await this.signalRService.hubConnection.stop();
-      console.log('Conexión detenida.');
-    }
 
-    // Esperar hasta que la conexión esté en el estado 'Disconnected'
-    while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
-      console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+    } else {
+      console.log('Iniciando conexión a SignalR...');
+
+      try {
+        await this.signalRService.hubConnection.start();
+        console.log('Conexión a SignalR establecida.');
+      } catch (err) {
+        console.log('Error al conectar con SignalR: ' + err);
+        return; // Salir si hay un error al iniciar la conexión
+      }
     }
     try {
-      await this.signalRService.hubConnection.start();
+      //await this.signalRService.hubConnection.start();
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
@@ -47,7 +50,7 @@ export class RespuestaEvolucionPacienteService {
       this.signalRService.hubConnection.on('RespuestaObtenerDatosEvolucion', async (clienteId: string, objRespuestaEvolucionPacienteEmit: string) => {
         try {
           const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaEvolucionPacienteEmit);
-          await this.signalRService.stopConnection();
+          //await this.signalRService.stopConnection();
           this.respuestaEvolucionPacienteEmit.emit(JSON.parse(decompressedData));
           if (decompressedData != null) {
             this.respuestaPinService.updateisLoading(false);
@@ -58,8 +61,8 @@ export class RespuestaEvolucionPacienteService {
       });
       await this.signalRService.hubConnection.invoke('ObtenerDatosEvolucion', clienteId, idAnanesis).catch(err => console.error(err));
       this.respuestaPinService.updateisLoading(true);
-    }  catch (err) {
-        console.log('Error al conectar con SignalR: ' + err);
+    } catch (err) {
+      console.log('Error al conectar con SignalR: ' + err);
     }
 
   }

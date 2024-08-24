@@ -3,6 +3,7 @@ import { InterruptionService } from 'src/app/helpers/interruption';
 import { SignalRService } from 'src/app/signalr.service';
 import { RespuestaConsultarEstadoCuenta } from './respuesta-consultar-estado-cuenta.model';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
+import { HubConnectionState } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -15,32 +16,49 @@ export class RespuestaConsultarEstadoCuentaService {
     private descomprimirDatosService: DescomprimirDatosService
   ) { }
 
-  async startConnectionRespuestaConsultarEstadoCuenta(clienteId: string, modeloDatosConsultarEstadoCuenta:string) {
-    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
-      await this.signalRService.hubConnection.stop();
-    }
-    await this.signalRService.hubConnection.start().then(
-      async () => {
-        //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
-        //aca clienteId 
-        this.signalRService.hubConnection.off('ErrorConexion');
-        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-          this.interruptionService.interrupt();
-  
-        });
-        this.signalRService.hubConnection.off('RespuestaConsultarEstadoCuenta');
-        this.signalRService.hubConnection.on('RespuestaConsultarEstadoCuenta', async (clienteId: string, objRespuestaConsultarEstadoCuentaEmit: string) => {
-          try {
-            var decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarEstadoCuentaEmit);
-            this.respuestaConsultarEstadoCuentaEmit.emit(JSON.parse(decompressedData));
-            await this.signalRService.stopConnection();
-          } catch (error) {
-            console.error('Error during decompression or parsing: ', error);
-          }
-          
-        });
-        this.signalRService.hubConnection.invoke('ConsultarEstadoCuenta', clienteId, modeloDatosConsultarEstadoCuenta).catch(err => console.error(err));
-      }).catch(err => console.log('Error al conectar con SignalR: ' + err));
+  async startConnectionRespuestaConsultarEstadoCuenta(clienteId: string, modeloDatosConsultarEstadoCuenta: string): Promise<void> {
+    try {
+      // Verificar si la conexión ya está establecida
+      if (this.signalRService.hubConnection.state === HubConnectionState.Connected) {
+        console.log('La conexión ya está activa. No es necesario reiniciar.');
+      } else {
+        // Detener la conexión si está en estado de conexión o reconexión
+        if (this.signalRService.hubConnection.state === HubConnectionState.Connecting ||
+          this.signalRService.hubConnection.state === HubConnectionState.Reconnecting) {
+          console.log('Esperando a que finalice la conexión actual...');
+          await this.signalRService.hubConnection.stop();
+          console.log('Conexión detenida.');
+        }
+
+        // Iniciar nueva conexión
+        console.log('Iniciando nueva conexión...');
+        await this.signalRService.hubConnection.start();
+        console.log('Conexión iniciada.');
+      }
+
+      // Configurar eventos de SignalR
+      this.signalRService.hubConnection.off('ErrorConexion');
+      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+        alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
+        this.interruptionService.interrupt();
+      });
+
+      this.signalRService.hubConnection.off('RespuestaConsultarEstadoCuenta');
+      this.signalRService.hubConnection.on('RespuestaConsultarEstadoCuenta', async (clienteId: string, objRespuestaConsultarEstadoCuentaEmit: string) => {
+        try {
+          // Descomprimir y procesar la respuesta
+          const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaConsultarEstadoCuentaEmit);
+          this.respuestaConsultarEstadoCuentaEmit.emit(JSON.parse(decompressedData));
+        } catch (error) {
+          console.error('Error durante la descompresión o el procesamiento: ', error);
+        } 
+      });
+
+      // Invocar el método en el servidor
+      console.log('Invocando método ConsultarEstadoCuenta...');
+      await this.signalRService.hubConnection.invoke('ConsultarEstadoCuenta', clienteId, modeloDatosConsultarEstadoCuenta);
+    } catch (err) {
+      console.error('Error al conectar con SignalR: ', err);
     }
   }
+}

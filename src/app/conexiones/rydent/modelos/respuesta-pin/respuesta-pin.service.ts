@@ -7,6 +7,7 @@ import { InterruptionService } from 'src/app/helpers/interruption';
 import { DatosPersonales } from '../datos-personales';
 import { RespuestaDatosPersonales } from '../respuesta-datos-personales';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
+import signalR, { HubConnectionState } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class RespuestaPinService {
   //Diferentes componentes
   private anamnesisData = new BehaviorSubject<number | null>(null);
   sharedAnamnesisData = this.anamnesisData.asObservable();
- 
+
   private sedeData = new BehaviorSubject<string | null>(null);
   sharedSedeData = this.sedeData.asObservable();
 
@@ -66,34 +67,43 @@ export class RespuestaPinService {
   ) { this.onDoctorSeleccionado = () => { }; }
 
   async startConnectionRespuestaObtenerPin() {
-    // Si ya hay una conexión, detenerla
-    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
-      await this.signalRService.hubConnection.stop();
+    // Verificar si ya hay una conexión activa o en proceso de conexión
+    if (this.signalRService.hubConnection.state ===HubConnectionState.Connected ||
+      this.signalRService.hubConnection.state ===HubConnectionState.Connecting) {
+
+      console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+    } else {
+      console.log('Iniciando conexión a SignalR...');
+
+      try {
+        await this.signalRService.hubConnection.start();
+        console.log('Conexión a SignalR establecida.');
+      } catch (err) {
+        console.log('Error al conectar con SignalR: ' + err);
+        return; // Salir si hay un error al iniciar la conexión
+      }
     }
 
-    await this.signalRService.hubConnection
-      .start()
-      .then(async () => {
-        console.log('Conectado a SignalR');
-        this.signalRService.hubConnection.off('ErrorConexion');
-        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-          alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-          this.interruptionService.interrupt();
-        });
+    // Configurar eventos de SignalR después de iniciar la conexión
+    this.signalRService.hubConnection.off('ErrorConexion');
+    this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+      alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+      this.interruptionService.interrupt();
+    });
 
-        this.signalRService.hubConnection.off('RespuestaObtenerPin');
-        this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
-          try {
-            const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
-            this.respuestaPinModel.emit(JSON.parse(decompressedData));
-          } catch (error) {
-            console.error('Error during decompression or parsing: ', error);
-          }
-        });
-      })
-      .catch(err => console.log('Error al conectar con SignalR: ' + err));
+    this.signalRService.hubConnection.off('RespuestaObtenerPin');
+    this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
+      try {
+        const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
+        this.respuestaPinModel.emit(JSON.parse(decompressedData));
+      } catch (error) {
+        console.error('Error durante la descompresión o análisis: ', error);
+      }
+    });
+    
   }
- // Aca actualizamos variables para que sean usadas por los componenetes
+
+  // Aca actualizamos variables para que sean usadas por los componenetes
   async updateAnamnesisData(data: number) {
     this.anamnesisData.next(data);
   }
@@ -103,7 +113,7 @@ export class RespuestaPinService {
   updateSedeSeleccionada(data: number) {
     this.sedeSeleccionada.next(data);
   }
-  
+
   updatedatosRespuestaPin(data: RespuestaPin) {
     this.datosRespuestaPin.next(data);
   }

@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { fromEvent, Observable, merge } from 'rxjs';
 import { map, tap, switchMap, takeUntil, finalize } from 'rxjs/operators';
 import { EvolucionService } from 'src/app/conexiones/rydent/tablas/evolucion';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-agregar-firmas',
@@ -79,10 +79,15 @@ export class AgregarFirmasComponent implements AfterViewInit {
     // Ajustar las coordenadas del evento al canvas
     const getCanvasAdjustedCoordinates = (event: MouseEvent): { offsetX: number, offsetY: number } => {
       const rect = canvasElement.getBoundingClientRect();
-      return {
-        offsetX: event.clientX - rect.left,
-        offsetY: event.clientY - rect.top
-      };
+      const scaleX = canvasElement.width / rect.width;
+      const scaleY = canvasElement.height / rect.height;
+
+      const offsetX = (event.clientX - rect.left) * scaleX;
+      const offsetY = (event.clientY - rect.top) * scaleY;
+
+      console.log(`Adjusted Coordinates: X=${offsetX}, Y=${offsetY}`);
+
+      return { offsetX, offsetY };
     };
   
     // Combinar streams de ratón y táctiles
@@ -140,21 +145,158 @@ export class AgregarFirmasComponent implements AfterViewInit {
     }
   }
 
-  enviarFirmaPaciente() {
+  /*enviarFirmaPaciente() {
     if (this.ctx && this.canvas && this.canvas.nativeElement) {
       const firma = this.canvas.nativeElement.toDataURL();
       this.evolucionService.cambiarFirmaPaciente(firma);
       this.router.navigate(['/agregar-evolucion']);
     }
-  }
+  }*/
+    enviarFirmaPaciente() {
+      if (this.ctx && this.canvas && this.canvas.nativeElement) {
+        const canvasElement = this.canvas.nativeElement;
+        const ctx = this.ctx;
+    
+        // Obtener los datos de la imagen del canvas
+        const imageData = ctx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const data = imageData.data;
+    
+        // Variables para los límites de la firma
+        let minX = canvasElement.width;
+        let minY = canvasElement.height;
+        let maxX = 0;
+        let maxY = 0;
+    
+        // Encontrar los límites de la firma
+        for (let y = 0; y < canvasElement.height; y++) {
+          for (let x = 0; x < canvasElement.width; x++) {
+            const index = (y * canvasElement.width + x) * 4;
+            const alpha = data[index + 3];
+            if (alpha > 0) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+    
+        // Ajustar los límites para evitar recortes incorrectos
+        const padding = 10; // Puedes ajustar este valor según sea necesario
+        minX = Math.max(minX - padding, 0);
+        minY = Math.max(minY - padding, 0);
+        maxX = Math.min(maxX + padding, canvasElement.width);
+        maxY = Math.min(maxY + padding, canvasElement.height);
+    
+        // Crear un nuevo canvas temporal
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = maxX - minX;
+        tempCanvas.height = maxY - minY;
+        const tempCtx = tempCanvas.getContext('2d');
+    
+        if (tempCtx) {
+          // Copiar la parte de la firma al nuevo canvas
+          tempCtx.putImageData(ctx.getImageData(minX, minY, tempCanvas.width, tempCanvas.height), 0, 0);
+    
+          // Crear un canvas para la firma escalada con tamaño fijo
+          const fixedWidth = 300; // Ancho fijo
+          const fixedHeight = 150; // Alto fijo
+          const scaledCanvas = document.createElement('canvas');
+          scaledCanvas.width = fixedWidth;
+          scaledCanvas.height = fixedHeight;
+          const scaledCtx = scaledCanvas.getContext('2d');
+    
+          if (scaledCtx) {
+            // Dibujar la imagen escalada en el nuevo canvas con tamaño fijo
+            scaledCtx.drawImage(tempCanvas, 0, 0, fixedWidth, fixedHeight);
+    
+            // Convertir el nuevo canvas a una imagen en base64
+            const firma = scaledCanvas.toDataURL();
+    
+            // Enviar la firma recortada y escalada
+            this.evolucionService.cambiarFirmaPaciente(firma);
+            this.router.navigate(['/agregar-evolucion']);
+          }
+        }
+      }
+    }
 
-  enviarFirmaDoctor() {
+    enviarFirmaDoctor() {
+      if (this.ctx && this.canvas && this.canvas.nativeElement) {
+        const canvasElement = this.canvas.nativeElement;
+        const ctx = this.ctx;
+    
+        // Obtener los datos de la imagen del canvas
+        const imageData = ctx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const data = imageData.data;
+    
+        // Variables para los límites de la firma
+        let minX = canvasElement.width;
+        let minY = canvasElement.height;
+        let maxX = 0;
+        let maxY = 0;
+    
+        // Encontrar los límites de la firma
+        for (let y = 0; y < canvasElement.height; y++) {
+          for (let x = 0; x < canvasElement.width; x++) {
+            const index = (y * canvasElement.width + x) * 4;
+            const alpha = data[index + 3];
+            if (alpha > 0) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+    
+        // Ajustar los límites para evitar recortes incorrectos
+        const padding = 10; // Puedes ajustar este valor según sea necesario
+        minX = Math.max(minX - padding, 0);
+        minY = Math.max(minY - padding, 0);
+        maxX = Math.min(maxX + padding, canvasElement.width);
+        maxY = Math.min(maxY + padding, canvasElement.height);
+    
+        // Crear un nuevo canvas temporal
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = maxX - minX;
+        tempCanvas.height = maxY - minY;
+        const tempCtx = tempCanvas.getContext('2d');
+    
+        if (tempCtx) {
+          // Copiar la parte de la firma al nuevo canvas
+          tempCtx.putImageData(ctx.getImageData(minX, minY, tempCanvas.width, tempCanvas.height), 0, 0);
+    
+          // Crear un canvas para la firma escalada con tamaño fijo
+          const fixedWidth = 300; // Ancho fijo
+          const fixedHeight = 150; // Alto fijo
+          const scaledCanvas = document.createElement('canvas');
+          scaledCanvas.width = fixedWidth;
+          scaledCanvas.height = fixedHeight;
+          const scaledCtx = scaledCanvas.getContext('2d');
+    
+          if (scaledCtx) {
+            // Dibujar la imagen escalada en el nuevo canvas con tamaño fijo
+            scaledCtx.drawImage(tempCanvas, 0, 0, fixedWidth, fixedHeight);
+    
+            // Convertir el nuevo canvas a una imagen en base64
+            const firma = scaledCanvas.toDataURL();
+    
+            // Enviar la firma recortada y escalada
+            this.evolucionService.cambiarFirmaDoctor(firma);
+            this.router.navigate(['/agregar-evolucion']);
+          }
+        }
+      }
+    }
+
+  /*enviarFirmaDoctor() {
     if (this.ctx && this.canvas && this.canvas.nativeElement) {
       const firma = this.canvas.nativeElement.toDataURL();
       this.evolucionService.cambiarFirmaDoctor(firma);
       this.router.navigate(['/agregar-evolucion']);
     }
-  }
+  }*/
 
   cancelarFirmar() {
     this.router.navigate(['/agregar-evolucion']);

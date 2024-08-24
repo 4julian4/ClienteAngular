@@ -86,11 +86,11 @@
         flex: 1;
 
         &:not(:last-child) {
-            margin-right: 6px;
+            margin-right: 2px;
         }
 
         &:not(:first-child) {
-            margin-left: 5px;
+            margin-left: 2px;
         }
     }
 }
@@ -105,11 +105,11 @@
         flex: 1;
 
         &:not(:last-child) {
-            margin-right: 5px;
+            margin-right: 2px;
         }
 
         &:not(:first-child) {
-            margin-left: 5px;
+            margin-left: 2px;
         }
     }
 }
@@ -179,7 +179,7 @@
         }
         .campoFila6 {
             flex: 1;
-            margin: 5px;
+            margin: 2px;
             display: flex;
             flex-direction: row;
             align-items: center; /* Centra las firmas y sus etiquetas */
@@ -201,17 +201,17 @@
                 img, strong {
                     max-width: 100%;
                     height: auto; /* Mantiene la proporción de la imagen */
-                    margin-bottom: 5px; /* Espacio entre la imagen y la etiqueta */
+                    margin-bottom: 2px; /* Espacio entre la imagen y la etiqueta */
                 }
         
                 .strongPaciente {
-                    margin-top: 5px; /* Espacio entre la imagen y la etiqueta */
+                    margin-top: 2px; /* Espacio entre la imagen y la etiqueta */
                     text-align: center; /* Centra la etiqueta debajo de la imagen */
                     margin-left: 150px; /* Centra la etiqueta debajo de la imagen */
                 }
         
                 .strongDoctor {
-                    margin-top: 5px; /* Espacio entre la imagen y la etiqueta */
+                    margin-top: 2px; /* Espacio entre la imagen y la etiqueta */
                     text-align: center; /* Centra la etiqueta debajo de la imagen */
                     margin-right: 150px; /* Centra la etiqueta debajo de la imagen */
                 }
