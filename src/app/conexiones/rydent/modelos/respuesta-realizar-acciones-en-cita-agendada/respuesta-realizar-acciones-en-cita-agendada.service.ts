@@ -29,32 +29,18 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
     //this.refrescarAgenda.next();
   }
 
-  async startConnectionRespuestaRealizarAccionesEnCitaAgendada(clienteId: string, modelorealizaraccionesencitaagendada: string) {
+  async startConnectionRespuestaRealizarAccionesEnCitaAgendada(clienteId: string, modelorealizaraccionesencitaagendada: string): Promise<void> {
     try {
-      // Verificar si ya hay una conexión activa o en proceso de conexión
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-
-        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-      } else {
-        console.log('Iniciando conexión a SignalR...');
-
-        try {
-          await this.signalRService.hubConnection.start();
-          console.log('Conexión a SignalR establecida.');
-        } catch (err) {
-          console.log('Error al conectar con SignalR: ' + err);
-          return; // Salir si hay un error al iniciar la conexión
-        }
-      }
-
-      // Configurar los eventos de SignalR
+      // Asegurar que la conexión esté activa
+      await this.signalRService.ensureConnection();
+  
+      // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
-
+  
       this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
       this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
         try {
@@ -67,15 +53,16 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
           console.error('Error durante la descompresión o el procesamiento: ', error);
         }
       });
-
-      // Invocar la acción en el servidor
+  
+      // Invocar el método en el servidor
+      console.log('Invocando método RealizarAccionesEnCitaAgendada...');
       await this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada);
       this.respuestaPinService.updateisLoading(true);
-
     } catch (err) {
-      console.log('Error al conectar con SignalR: ' + err);
+      console.error('Error al conectar con SignalR: ', err);
     }
   }
+  
 
 
 

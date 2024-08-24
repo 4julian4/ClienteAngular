@@ -14,42 +14,34 @@ export class RespuestaDatosAdministrativosService {
     private interruptionService: InterruptionService
   ) { }
 
-  async startConnectionRespuestaDatosAdministrativos(clienteId: string, fechaInicio: Date, fechaFin: Date) {
+  async startConnectionRespuestaDatosAdministrativos(clienteId: string, fechaInicio: Date, fechaFin: Date): Promise<void> {
     try {
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-        
-        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-    } else {
-        console.log('Iniciando conexión a SignalR...');
-
-        try {
-            await this.signalRService.hubConnection.start();
-            console.log('Conexión a SignalR establecida.');
-        } catch (err) {
-            console.log('Error al conectar con SignalR: ' + err);
-            return; // Salir si hay un error al iniciar la conexión
-        }
-    }
-
+      // Asegurar que la conexión está activa
+      await this.signalRService.ensureConnection();
+  
       // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
-
+  
       this.signalRService.hubConnection.off('RespuestaObtenerDatosAdministrativos');
       this.signalRService.hubConnection.on('RespuestaObtenerDatosAdministrativos', async (clienteId: string, objRespuestaDatosAdministrativosEmit: string) => {
-        this.respuestaDatosAdministrativosEmit.emit(JSON.parse(objRespuestaDatosAdministrativosEmit));
+        try {
+          // Descomprimir y procesar la respuesta
+          //const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaDatosAdministrativosEmit);
+          this.respuestaDatosAdministrativosEmit.emit(JSON.parse(objRespuestaDatosAdministrativosEmit));
+        } catch (error) {
+          console.error('Error durante la descompresión o el procesamiento: ', error);
+        }
       });
-
+  
       // Invocar el método en el servidor
       console.log('Invocando método ObtenerDatosAdministrativos...');
       await this.signalRService.hubConnection.invoke('ObtenerDatosAdministrativos', clienteId, fechaInicio, fechaFin);
     } catch (err) {
       console.error('Error al conectar con SignalR: ', err);
     }
-
   }
 }
