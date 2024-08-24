@@ -43,53 +43,35 @@ export class AgendaService {
 
   async startConnectionRespuestaAgendarCita(clienteId: string, modelocrearcita: string) {
     try {
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
+      await this.signalRService.ensureConnection();
 
-        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-      } else {
-        console.log('Iniciando conexión a SignalR...');
-
-        try {
-          await this.signalRService.hubConnection.start();
-          console.log('Conexión a SignalR establecida.');
-        } catch (err) {
-          console.log('Error al conectar con SignalR: ' + err);
-          return; // Salir si hay un error al iniciar la conexión
-        }
-      }
-
-      // Configurar eventos de SignalR
-      this.signalRService.hubConnection.off('ErrorConexion');
-      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+      this.signalRService.off('ErrorConexion');
+      this.signalRService.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         console.log('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
 
-      this.signalRService.hubConnection.off('RespuestaAgendarCita');
-      this.signalRService.hubConnection.on('RespuestaAgendarCita', async (clienteId: string, objRespuestaRespuestaAgendarCitaModel: string) => {
+      this.signalRService.off('RespuestaAgendarCita');
+      this.signalRService.on('RespuestaAgendarCita', async (clienteId: string, objRespuestaRespuestaAgendarCitaModel: string) => {
         try {
           const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
           console.log('Datos descomprimidos: ' + decompressedData);
-          //await this.signalRService.hubConnection.stop();
-          console.log('Conexión detenida después de recibir respuesta.');
           this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
 
-          this.contador = this.contador + 1;
+          this.contador++;
           console.log('Contador actualizado: ' + this.contador);
 
           if (decompressedData != null) {
-            //this.respuestaPinService.updateisLoading(false);
             console.log('Emitir refrescar agenda...');
             await this.emitRefrescarAgenda();
           }
         } catch (error) {
-          console.error('Error during decompression or parsing: ', error);
+          console.error('Error durante la descompresión o el análisis: ', error);
         }
       });
 
       console.log('Invocando "AgendarCita"...');
-      await this.signalRService.hubConnection.invoke('AgendarCita', clienteId, modelocrearcita);
+      await this.signalRService.invoke('AgendarCita', clienteId, modelocrearcita);
       this.respuestaPinService.updateisLoading(true);
 
     } catch (err) {
@@ -97,48 +79,29 @@ export class AgendaService {
     }
   }
 
-
-
   async startConnectionRespuestaBuscarCitasPacienteAgenda(clienteId: string, valorDeBusqueda: string) {
     try {
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
+      await this.signalRService.ensureConnection();
 
-        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-      } else {
-        console.log('Iniciando conexión a SignalR...');
-
-        try {
-          await this.signalRService.hubConnection.start();
-          console.log('Conexión a SignalR establecida.');
-        } catch (err) {
-          console.log('Error al conectar con SignalR: ' + err);
-          return; // Salir si hay un error al iniciar la conexión
-        }
-      }
-
-      // Configurar eventos de SignalR
-      this.signalRService.hubConnection.off('ErrorConexion');
-      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+      this.signalRService.off('ErrorConexion');
+      this.signalRService.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         console.log('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
 
-
-      this.signalRService.hubConnection.off('RespuestaBuscarCitasPacienteAgenda');
-      this.signalRService.hubConnection.on('RespuestaBuscarCitasPacienteAgenda', async (clienteId: string, objRespuestaBusquedaPacienteModel: string) => {
+      this.signalRService.off('RespuestaBuscarCitasPacienteAgenda');
+      this.signalRService.on('RespuestaBuscarCitasPacienteAgenda', async (clienteId: string, objRespuestaBusquedaPacienteModel: string) => {
         try {
-          //await this.signalRService.stopConnection();
           this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
           if (objRespuestaBusquedaPacienteModel != null) {
             this.respuestaPinService.updateisLoading(false);
           }
-        }
-        catch (error) {
-          console.error('Error during decompression or parsing: ', error);
+        } catch (error) {
+          console.error('Error durante la descompresión o el análisis: ', error);
         }
       });
-      await this.signalRService.hubConnection.invoke('BuscarCitasPacienteAgenda', clienteId, valorDeBusqueda).catch(err => console.error(err));
+
+      await this.signalRService.invoke('BuscarCitasPacienteAgenda', clienteId, valorDeBusqueda);
       this.respuestaPinService.updateisLoading(true);
     } catch (err) {
       console.log('Error al conectar con SignalR: ' + err);

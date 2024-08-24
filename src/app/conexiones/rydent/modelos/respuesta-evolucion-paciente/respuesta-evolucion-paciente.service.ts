@@ -22,50 +22,41 @@ export class RespuestaEvolucionPacienteService {
   ) { }
 
 
-  async startConnectionRespuestaEvolucionPaciente(clienteId: string, idAnanesis: string) {
-    if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-      this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-
-      console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-    } else {
-      console.log('Iniciando conexión a SignalR...');
-
-      try {
-        await this.signalRService.hubConnection.start();
-        console.log('Conexión a SignalR establecida.');
-      } catch (err) {
-        console.log('Error al conectar con SignalR: ' + err);
-        return; // Salir si hay un error al iniciar la conexión
-      }
-    }
+  async startConnectionRespuestaEvolucionPaciente(clienteId: string, idAnanesis: string): Promise<void> {
     try {
-      //await this.signalRService.hubConnection.start();
+      // Asegurar que la conexión está activa
+      await this.signalRService.ensureConnection();
+  
+      // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-        alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+        alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
-
+  
       this.signalRService.hubConnection.off('RespuestaObtenerDatosEvolucion');
       this.signalRService.hubConnection.on('RespuestaObtenerDatosEvolucion', async (clienteId: string, objRespuestaEvolucionPacienteEmit: string) => {
         try {
+          // Descomprimir y procesar la respuesta
           const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaEvolucionPacienteEmit);
-          //await this.signalRService.stopConnection();
           this.respuestaEvolucionPacienteEmit.emit(JSON.parse(decompressedData));
           if (decompressedData != null) {
             this.respuestaPinService.updateisLoading(false);
           }
         } catch (error) {
-          console.error('Error during decompression or parsing: ', error);
+          console.error('Error durante la descompresión o el procesamiento: ', error);
         }
       });
-      await this.signalRService.hubConnection.invoke('ObtenerDatosEvolucion', clienteId, idAnanesis).catch(err => console.error(err));
+  
+      // Invocar el método en el servidor
+      console.log('Invocando método ObtenerDatosEvolucion...');
+      await this.signalRService.hubConnection.invoke('ObtenerDatosEvolucion', clienteId, idAnanesis);
       this.respuestaPinService.updateisLoading(true);
     } catch (err) {
-      console.log('Error al conectar con SignalR: ' + err);
+      console.error('Error al conectar con SignalR: ', err);
     }
-
   }
+  
 
 
 }

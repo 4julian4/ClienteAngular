@@ -20,101 +20,88 @@ export class RespuestaObtenerDoctorService {
     private router: Router
   ) { }
 
-  async startConnectionRespuestaObtenerPacientesDoctorSeleccionado(clienteId: string, idDoctor: number) {
+  async startConnectionRespuestaObtenerPacientesDoctorSeleccionado(clienteId: string, idDoctor: number): Promise<void> {
     try {
-      // Detener la conexión si está en estado 'Connected' o 'Connecting'
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-
-        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-      } else {
-        console.log('Iniciando conexión a SignalR...');
-
-        try {
-          await this.signalRService.hubConnection.start();
-          console.log('Conexión a SignalR establecida.');
-        } catch (err) {
-          console.log('Error al conectar con SignalR: ' + err);
-          return; // Salir si hay un error al iniciar la conexión
-        }
-      }
-
-      // Configurar los eventos de SignalR
+      // Asegurar que la conexión esté activa
+      await this.signalRService.ensureConnection();
+  
+      // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
-
+  
       this.signalRService.hubConnection.off('RespuestaObtenerDoctorSiLoCambian');
       this.signalRService.hubConnection.on('RespuestaObtenerDoctorSiLoCambian', async (clienteId: string, objRespuestaObtenerDoctorModel: string) => {
-        this.respuestaObtenerDoctorSiLoCambianModel.emit(JSON.parse(objRespuestaObtenerDoctorModel));
-        await this.signalRService.stopConnection();
-        console.log(JSON.parse(objRespuestaObtenerDoctorModel));
-        console.log("Total Pacientes: " + JSON.parse(objRespuestaObtenerDoctorModel).totalPacientes);
-
-        // Navegar a la ruta deseada
-        this.router.routeReuseStrategy.shouldReuseRoute = function () {
-          return false;
-        };
-        this.router.onSameUrlNavigation = 'reload';
-        this.router.navigate(['/']);
+        try {
+          // Procesar la respuesta recibida
+          const response = JSON.parse(objRespuestaObtenerDoctorModel);
+          this.respuestaObtenerDoctorSiLoCambianModel.emit(response);
+          console.log(response);
+          console.log("Total Pacientes: " + response.totalPacientes);
+  
+          // Detener la conexión si es necesario
+          await this.signalRService.stopConnection();
+  
+          // Navegar a la ruta deseada
+          //this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+          //this.router.onSameUrlNavigation = 'reload';
+          //this.router.navigate(['/']);
+        } catch (error) {
+          console.error('Error durante el procesamiento de la respuesta: ', error);
+        }
       });
-
-      // Invocar el método SignalR
+  
+      // Invocar el método en el servidor
       console.log('Invocando método ObtenerDoctorSiLoCambian...');
-      this.signalRService.hubConnection.invoke('ObtenerDoctorSiLoCambian', clienteId, idDoctor.toString()).catch(err => console.error(err));
+      await this.signalRService.hubConnection.invoke('ObtenerDoctorSiLoCambian', clienteId, idDoctor.toString());
     } catch (err) {
-      console.log('Error al conectar con SignalR: ' + err);
+      console.error('Error al conectar con SignalR: ', err);
     }
   }
+  
 
-  async startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(clienteId: string, idDoctor: number) {
+  async startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(clienteId: string, idDoctor: number): Promise<void> {
     try {
-      // Detener la conexión si está en estado 'Connected' o 'Connecting'
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-
-        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-      } else {
-        console.log('Iniciando conexión a SignalR...');
-
-        try {
-          await this.signalRService.hubConnection.start();
-          console.log('Conexión a SignalR establecida.');
-        } catch (err) {
-          console.log('Error al conectar con SignalR: ' + err);
-          return; // Salir si hay un error al iniciar la conexión
-        }
-      }
-
-      // Configurar los eventos de SignalR
+      // Asegurar que la conexión esté activa
+      await this.signalRService.ensureConnection();
+  
+      // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
         alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
-
+  
       this.signalRService.hubConnection.off('RespuestaObtenerDoctorSiLoCambian');
       this.signalRService.hubConnection.on('RespuestaObtenerDoctorSiLoCambian', async (clienteId: string, objRespuestaObtenerDoctorModel: string) => {
-        this.respuestaObtenerDoctorSiLoCambianModel.emit(JSON.parse(objRespuestaObtenerDoctorModel));
-        await this.signalRService.stopConnection();
-        console.log(JSON.parse(objRespuestaObtenerDoctorModel));
-        console.log("Total Pacientes: " + JSON.parse(objRespuestaObtenerDoctorModel).totalPacientes);
-
-        // Navegar a la ruta deseada
-        this.router.routeReuseStrategy.shouldReuseRoute = function () {
-          return false;
-        };
-        this.router.onSameUrlNavigation = 'reload';
-        this.router.navigate(['/']);
+        try {
+          // Procesar la respuesta recibida
+          const response = JSON.parse(objRespuestaObtenerDoctorModel);
+          this.respuestaObtenerDoctorSiLoCambianModel.emit(response);
+          console.log(response);
+          console.log("Total Pacientes: " + response.totalPacientes);
+  
+          // Detener la conexión si es necesario
+          await this.signalRService.stopConnection();
+  
+          // Navegar a la ruta deseada
+          this.router.routeReuseStrategy.shouldReuseRoute = function () {
+            return false;
+          };
+          this.router.onSameUrlNavigation = 'reload';
+          this.router.navigate(['/datos-personales']);
+        } catch (error) {
+          console.error('Error durante el procesamiento de la respuesta: ', error);
+        }
       });
-
-      // Invocar el método SignalR
+  
+      // Invocar el método en el servidor
       console.log('Invocando método ObtenerDoctorSiLoCambian...');
-      this.signalRService.hubConnection.invoke('ObtenerDoctorSiLoCambian', clienteId, idDoctor.toString()).catch(err => console.error(err));
+      await this.signalRService.hubConnection.invoke('ObtenerDoctorSiLoCambian', clienteId, idDoctor.toString());
     } catch (err) {
-      console.log('Error al conectar con SignalR: ' + err);
+      console.error('Error al conectar con SignalR: ', err);
     }
   }
 

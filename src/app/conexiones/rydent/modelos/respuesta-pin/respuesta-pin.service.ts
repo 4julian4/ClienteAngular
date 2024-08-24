@@ -67,41 +67,33 @@ export class RespuestaPinService {
   ) { this.onDoctorSeleccionado = () => { }; }
 
   async startConnectionRespuestaObtenerPin() {
-    // Verificar si ya hay una conexión activa o en proceso de conexión
-    if (this.signalRService.hubConnection.state ===HubConnectionState.Connected ||
-      this.signalRService.hubConnection.state ===HubConnectionState.Connecting) {
+    try {
+      // Asegurar que la conexión esté activa
+      await this.signalRService.ensureConnection();
+  
+      // Configurar eventos de SignalR
+      this.signalRService.hubConnection.off('ErrorConexion');
+      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+        alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
+        this.interruptionService.interrupt();
+      });
 
-      console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-    } else {
-      console.log('Iniciando conexión a SignalR...');
-
-      try {
-        await this.signalRService.hubConnection.start();
-        console.log('Conexión a SignalR establecida.');
-      } catch (err) {
-        console.log('Error al conectar con SignalR: ' + err);
-        return; // Salir si hay un error al iniciar la conexión
-      }
+      this.signalRService.hubConnection.off('RespuestaObtenerPin');
+      this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
+        try {
+          const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
+          this.respuestaPinModel.emit(JSON.parse(decompressedData));
+        } catch (error) {
+          console.error('Error durante la descompresión o análisis: ', error);
+        }
+      });
+    } catch (err) {
+      console.error('Error al conectar con SignalR: ', err);
     }
-
-    // Configurar eventos de SignalR después de iniciar la conexión
-    this.signalRService.hubConnection.off('ErrorConexion');
-    this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-      alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-      this.interruptionService.interrupt();
-    });
-
-    this.signalRService.hubConnection.off('RespuestaObtenerPin');
-    this.signalRService.hubConnection.on('RespuestaObtenerPin', (clienteId: string, objRespuestaObtenerDoctor: string) => {
-      try {
-        const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaObtenerDoctor);
-        this.respuestaPinModel.emit(JSON.parse(decompressedData));
-      } catch (error) {
-        console.error('Error durante la descompresión o análisis: ', error);
-      }
-    });
-    
   }
+
+
+
 
   // Aca actualizamos variables para que sean usadas por los componenetes
   async updateAnamnesisData(data: number) {
