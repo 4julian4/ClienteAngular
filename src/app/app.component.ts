@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { SignalRService } from './signalr.service';
 import { Sedes, SedesService } from './conexiones/sedes';
 import { SedesConectadas, SedesConectadasService } from './conexiones/sedes-conectadas';
@@ -7,6 +7,7 @@ import { RespuestaPinService } from './conexiones/rydent/modelos/respuesta-pin';
 import { InterruptionService } from './helpers/interruption';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { HubConnectionState } from '@microsoft/signalr';
 
 
 @Component({
@@ -33,6 +34,23 @@ export class AppComponent implements OnInit {
     private interruptionService: InterruptionService,
     private router: Router
   ) { }
+
+  // Preguntar antes de cerrar o recargar la página
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification(event: BeforeUnloadEvent): void {
+    if (this.signalRService.hubConnection.state === HubConnectionState.Connected) {
+      event.preventDefault();
+      event.returnValue = false; // Necesario para algunos navegadores
+    }
+  }
+
+  // Detener la conexión solo cuando el usuario cierra o recarga la página
+  @HostListener('window:unload', ['$event'])
+  async unloadHandler(event: Event): Promise<void> {
+    if (this.signalRService.hubConnection.state === HubConnectionState.Connected) {
+      await this.signalRService.hubConnection.stop();
+    }
+  }
 
   async ngOnInit() {
 
@@ -67,12 +85,21 @@ export class AppComponent implements OnInit {
     this.interruptionService.interrupt(); 
   }
 
-  enviarMensaje() {
+  /*enviarMensaje() {
     if (this.mensaje.trim() !== '') {
       this.signalRService.enviarMensaje(this.mensaje);
       this.mensaje = '';
     }
-  }
+  }*/
+
+    
+    /*async enviarMensaje(mensaje: string) {
+    this.hubConnection.invoke('ObtenerPin', mensaje, '123')
+      .catch(err => console.error(err));
+    return this.hubConnection
+      .invoke('SendMessage', this.hubConnection.connectionId, mensaje)
+      .catch(err => console.error(err));
+  }*/
 }
 
 

@@ -5,7 +5,7 @@ import { InterruptionService } from 'src/app/helpers/interruption';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 import { Subject } from 'rxjs';
 import { RespuestaPinService } from '../respuesta-pin';
-import { HubConnectionState } from '@microsoft/signalr';
+import signalR, { HubConnectionState } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -30,51 +30,53 @@ export class RespuestaRealizarAccionesEnCitaAgendadaService {
   }
 
   async startConnectionRespuestaRealizarAccionesEnCitaAgendada(clienteId: string, modelorealizaraccionesencitaagendada: string) {
-    if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-      this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-      console.log('Deteniendo conexión existente...');
-      await this.signalRService.hubConnection.stop();
-      console.log('Conexión detenida.');
-    }
-
-    // Esperar hasta que la conexión esté en el estado 'Disconnected'
-    while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
-      console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
     try {
-      await this.signalRService.hubConnection.start();
+      // Verificar si ya hay una conexión activa o en proceso de conexión
+      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
+        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
 
+        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+      } else {
+        console.log('Iniciando conexión a SignalR...');
+
+        try {
+          await this.signalRService.hubConnection.start();
+          console.log('Conexión a SignalR establecida.');
+        } catch (err) {
+          console.log('Error al conectar con SignalR: ' + err);
+          return; // Salir si hay un error al iniciar la conexión
+        }
+      }
+
+      // Configurar los eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
       this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-        alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+        alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
         this.interruptionService.interrupt();
       });
-
-
 
       this.signalRService.hubConnection.off('RespuestaRealizarAccionesEnCitaAgendada');
       this.signalRService.hubConnection.on('RespuestaRealizarAccionesEnCitaAgendada', async (clienteId: string, objRespuestaRealizarAccionesEnCitaAgendadaModel: string) => {
         try {
           const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRealizarAccionesEnCitaAgendadaModel);
-          await this.signalRService.stopConnection();
-
           if (decompressedData != null) {
-            //this.respuestaPinService.updateisLoading(false);
-            console.log('emitir refrescar realizar acciones en cita agendada');
+            console.log('Emitir refrescar realizar acciones en cita agendada');
             await this.emitRefrescarAgenda();
           }
         } catch (error) {
-          console.error('Error during decompression or parsing: ', error);
+          console.error('Error durante la descompresión o el procesamiento: ', error);
         }
       });
 
+      // Invocar la acción en el servidor
       await this.signalRService.hubConnection.invoke('RealizarAccionesEnCitaAgendada', clienteId, modelorealizaraccionesencitaagendada);
       this.respuestaPinService.updateisLoading(true);
+
     } catch (err) {
       console.log('Error al conectar con SignalR: ' + err);
     }
   }
+
+
 
 }

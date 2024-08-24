@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { SedesConectadas } from './sedes-conectadas.model';
 import { SignalRService } from 'src/app/signalr.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
+import signalR, { HubConnectionState } from '@microsoft/signalr';
 const urlPage = environment.apiUrl + '/sedesconectadas';
 
 
@@ -20,45 +21,51 @@ export class SedesConectadasService {
   ) { }
 
   async startConnectionRespuestaObtenerActualizarSedesActivasPorCliente(idCliente: number): Promise<SedesConectadas[]> {
-    // Si ya hay una conexión, detenerla
-    if (this.signalRService.hubConnection.state === this.signalRService.HubConnectionStateConnected) {
-      await this.signalRService.hubConnection.stop();
+    // Verificar si ya hay una conexión activa o en proceso de conexión
+    if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
+      this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
+  
+    console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+  } else {
+    console.log('Iniciando conexión a SignalR...');
+  
+    // Intentar iniciar la conexión
+    try {
+      await this.signalRService.hubConnection.start();
+      console.log('Conexión a SignalR establecida.');
+    } catch (err) {
+      console.log('Error al conectar con SignalR: ' + err);
+      throw err; // Lanza el error para manejarlo en la llamada a la función
     }
-  
+  }
+
     return new Promise<SedesConectadas[]>((resolve, reject) => {
-      this.signalRService.hubConnection
-        .start()
-        .then(async () => {
-          console.log('Conectado a SignalR');
-          this.signalRService.hubConnection.off('ErrorConexion');
-          this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-            alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
-            this.interruptionService.interrupt();
-          });
-  
-          this.signalRService.hubConnection.off('ObtenerActualizarSedesActivasPorCliente');
-          this.signalRService.hubConnection.invoke('ObtenerActualizarSedesActivasPorCliente', idCliente)
-            .then((sedesConectadas: SedesConectadas[]) => {
-              try {
-                console.log('Sedes conectadas: ', sedesConectadas);
-                resolve(sedesConectadas); // Resolver la promesa con los datos recibidos
-              } catch (error) {
-                console.error('Error during handling sedesConectadas: ', error);
-                reject(error); // Rechazar la promesa en caso de error
-              }
-            })
-            .catch(err => {
-              console.log('Error al invocar ObtenerActualizarSedesActivasPorCliente: ' + err);
-              reject(err); // Rechazar la promesa si falla la invocación
-            });
+      // Configurar eventos de SignalR después de iniciar la conexión
+      this.signalRService.hubConnection.off('ErrorConexion');
+      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+        alert('Error de conexion: ' + mensajeError + ' ClienteId: ' + clienteId);
+        this.interruptionService.interrupt();
+      });
+
+      this.signalRService.hubConnection.off('ObtenerActualizarSedesActivasPorCliente');
+      this.signalRService.hubConnection.invoke('ObtenerActualizarSedesActivasPorCliente', idCliente)
+        .then((sedesConectadas: SedesConectadas[]) => {
+          try {
+            console.log('Sedes conectadas: ', sedesConectadas);
+            resolve(sedesConectadas); // Resolver la promesa con los datos recibidos
+          } catch (error) {
+            console.error('Error during handling sedesConectadas: ', error);
+            reject(error); // Rechazar la promesa en caso de error
+          }
         })
         .catch(err => {
-          console.log('Error al conectar con SignalR: ' + err);
-          reject(err); // Rechazar la promesa si falla la conexión
+          console.log('Error al invocar ObtenerActualizarSedesActivasPorCliente: ' + err);
+          reject(err); // Rechazar la promesa si falla la invocación
         });
     });
   }
-  
+
+
 
   public Get(idSedeConectada: string): Observable<SedesConectadas> {
     let url = urlPage + "/" + idSedeConectada;

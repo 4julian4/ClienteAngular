@@ -8,7 +8,8 @@ import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { SignalRService } from 'src/app/signalr.service';
-import { HubConnectionState } from '@microsoft/signalr';
+import signalR, { HubConnectionState } from '@microsoft/signalr';
+
 
 @Injectable({
   providedIn: 'root'
@@ -42,26 +43,21 @@ export class AgendaService {
 
   async startConnectionRespuestaAgendarCita(clienteId: string, modelocrearcita: string) {
     try {
-      console.log('Iniciando proceso de conexión...');
-
-      // Verificar si la conexión está conectada o conectándose, en ese caso detenerla
       if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
         this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-        console.log('Deteniendo conexión existente...');
-        await this.signalRService.hubConnection.stop();
-        console.log('Conexión detenida.');
-      }
 
-      // Esperar hasta que la conexión esté en el estado 'Disconnected'
-      while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
-        console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+      } else {
+        console.log('Iniciando conexión a SignalR...');
 
-      // Iniciar la conexión
-      console.log('Iniciando nueva conexión...');
-      await this.signalRService.hubConnection.start();
-      console.log('Conexión iniciada.');
+        try {
+          await this.signalRService.hubConnection.start();
+          console.log('Conexión a SignalR establecida.');
+        } catch (err) {
+          console.log('Error al conectar con SignalR: ' + err);
+          return; // Salir si hay un error al iniciar la conexión
+        }
+      }
 
       // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
@@ -75,7 +71,7 @@ export class AgendaService {
         try {
           const decompressedData = this.descomprimirDatosService.decompressString(objRespuestaRespuestaAgendarCitaModel);
           console.log('Datos descomprimidos: ' + decompressedData);
-          await this.signalRService.hubConnection.stop();
+          //await this.signalRService.hubConnection.stop();
           console.log('Conexión detenida después de recibir respuesta.');
           this.respuestaAgendarCitaEmit.emit(JSON.parse(decompressedData));
 
@@ -107,18 +103,19 @@ export class AgendaService {
     try {
       if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
         this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-        console.log('Deteniendo conexión existente...');
-        await this.signalRService.hubConnection.stop();
-        console.log('Conexión detenida.');
-      }
-      while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
-        console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
 
-      console.log('Iniciando nueva conexión...');
-      await this.signalRService.hubConnection.start();
-      console.log('Conexión iniciada.');
+        console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+      } else {
+        console.log('Iniciando conexión a SignalR...');
+
+        try {
+          await this.signalRService.hubConnection.start();
+          console.log('Conexión a SignalR establecida.');
+        } catch (err) {
+          console.log('Error al conectar con SignalR: ' + err);
+          return; // Salir si hay un error al iniciar la conexión
+        }
+      }
 
       // Configurar eventos de SignalR
       this.signalRService.hubConnection.off('ErrorConexion');
@@ -131,7 +128,7 @@ export class AgendaService {
       this.signalRService.hubConnection.off('RespuestaBuscarCitasPacienteAgenda');
       this.signalRService.hubConnection.on('RespuestaBuscarCitasPacienteAgenda', async (clienteId: string, objRespuestaBusquedaPacienteModel: string) => {
         try {
-          await this.signalRService.stopConnection();
+          //await this.signalRService.stopConnection();
           this.respuestaBuscarCitasPacienteAgendaEmit.emit(JSON.parse(objRespuestaBusquedaPacienteModel));
           if (objRespuestaBusquedaPacienteModel != null) {
             this.respuestaPinService.updateisLoading(false);

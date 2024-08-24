@@ -36,19 +36,21 @@
         <mat-form-field appearance="fill" class="campoFila2">   
             <mat-label>Tipo Consulta</mat-label>
             <input type="text" matInput [formControl]="tipoConsultaControl" [matAutocomplete]="autoTipoConsulta"
-                (blur)="validateAndClearIfInvalid(tipoConsultaControl, lstTiposDeConsultas)"
+                
                 style="text-transform: uppercase;">
-            <mat-autocomplete #autoTipoConsulta="matAutocomplete">
-                <mat-option *ngFor="let tipoConsulta of filteredTiposDeConsultas | async" [value]="tipoConsulta.nombre">
+            <mat-autocomplete #autoTipoConsulta="matAutocomplete" >
+                <mat-option *ngFor="let tipoConsulta of filteredTiposDeConsultas | async" 
+                    [value]="tipoConsulta.nombre">
                     {{ tipoConsulta.nombre }}
                 </mat-option>
             </mat-autocomplete>
         </mat-form-field>
 
+        
+
         <mat-form-field appearance="fill" class="campoFila2">
             <mat-label>Codigo</mat-label>
             <input type="text" matInput [formControl]="codigoConsultaControl" [matAutocomplete]="autoCodigoTipoConsulta"
-                (blur)="validateAndClearIfInvalid(codigoConsultaControl, lstTiposDeConsultas)"
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoCodigoTipoConsulta="matAutocomplete">
                 <mat-option *ngFor="let codigoConsulta of filteredCodigosTiposDeConsultas | async"

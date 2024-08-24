@@ -246,7 +246,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
     this.mostrarBuscarHistoriaClinica = value;
   }
 
-  cerrarSession() {
+  async cerrarSession() {
+    await this.signalRService.stopConnection();
     this.loginService.signOut();
   }
 
