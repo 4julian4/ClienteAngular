@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class SignalRService {
-  public hubConnection!: signalR.HubConnection;
+  public hubConnection: signalR.HubConnection = {} as signalR.HubConnection;
   private mensajeSubject = new Subject<string>();
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
