@@ -64,6 +64,7 @@ export class RespuestaObtenerDoctorService {
 
   async startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(clienteId: string, idDoctor: number): Promise<void> {
     try {
+      console.log('aca sale el error');
       // Asegurar que la conexión esté activa
       await this.signalRService.ensureConnection();
   

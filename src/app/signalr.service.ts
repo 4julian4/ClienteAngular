@@ -1,3 +1,4 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
@@ -7,19 +8,33 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class SignalRService {
-  public hubConnection: signalR.HubConnection;
+  public hubConnection!: signalR.HubConnection;
   private mensajeSubject = new Subject<string>();
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
 
   mensajes$: Observable<string> = this.mensajeSubject.asObservable();
 
-  constructor() {
+  constructor(private http: HttpClient) {
+    this.startConnection();
+  }
+
+
+
+
+  private async startConnection(): Promise<void> {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.signalRUrl, {
-        withCredentials: false // Desactiva el uso de cookies
+        transport: signalR.HttpTransportType.WebSockets, // Usar WebSockets para menor latencia
+        withCredentials: false // No usar cookies
       })
-      .withAutomaticReconnect()
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds: retryContext => {
+          const delays = [1000, 2000, 5000, 10000, 30000]; // Retrasos en milisegundos
+          return delays[retryContext.previousRetryCount] || 30000;
+        }
+      })
+      .configureLogging(signalR.LogLevel.Information) // Configurar el nivel de logging
       .build();
 
     this.hubConnection.onclose(() => this.reconnect());
@@ -35,10 +50,6 @@ export class SignalRService {
       this.reconnectAttempts = 0;
     });
 
-    this.startConnection();
-  }
-
-  private async startConnection(): Promise<void> {
     if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
       console.log('La conexión ya está activa.');
       return;
