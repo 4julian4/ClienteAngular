@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
@@ -12,6 +12,7 @@ export class SignalRService {
   private mensajeSubject = new Subject<string>();
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
+  private reconnecting = false;
 
   mensajes$: Observable<string> = this.mensajeSubject.asObservable();
 
@@ -19,22 +20,25 @@ export class SignalRService {
     this.startConnection();
   }
 
-
-
-
   private async startConnection(): Promise<void> {
+    if (this.hubConnection.state === signalR.HubConnectionState.Connected ||
+        this.hubConnection.state === signalR.HubConnectionState.Connecting) {
+      console.log('Conexión ya activa o en proceso de conexión. No se necesita reiniciar.');
+      return;
+    }
+
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.signalRUrl, {
-        transport: signalR.HttpTransportType.WebSockets, // Usar WebSockets para menor latencia
-        withCredentials: false // No usar cookies
+        transport: signalR.HttpTransportType.WebSockets,
+        withCredentials: false
       })
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: retryContext => {
-          const delays = [1000, 2000, 5000, 10000, 30000]; // Retrasos en milisegundos
+          const delays = [1000, 2000, 5000, 10000, 30000];
           return delays[retryContext.previousRetryCount] || 30000;
         }
       })
-      .configureLogging(signalR.LogLevel.Information) // Configurar el nivel de logging
+      .configureLogging(signalR.LogLevel.Information)
       .build();
 
     this.hubConnection.onclose(() => this.reconnect());
@@ -48,51 +52,39 @@ export class SignalRService {
     this.hubConnection.onreconnected((connectionId) => {
       console.log(`Reconectado exitosamente: ${connectionId}`);
       this.reconnectAttempts = 0;
+      this.reconnecting = false;
     });
-
-    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      console.log('La conexión ya está activa.');
-      return;
-    }
 
     try {
       await this.hubConnection.start();
       console.log('Conexión iniciada');
       this.reconnectAttempts = 0;
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.message.includes('404')) {
-          console.warn('Error 404 ignorado. La ruta puede no ser crítica.');
-        } else {
-          console.error('Error al iniciar la conexión: ', err.message);
-          if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            setTimeout(() => this.startConnection(), 5000);
-            this.reconnectAttempts++;
-          } else {
-            console.error('Máximo número de intentos de reconexión alcanzado.');
-          }
-        }
-      } else {
-        console.error('Error desconocido al iniciar la conexión:', err);
-      }
+      this.handleConnectionError(err);
+    }
+  }
+
+  private async handleConnectionError(err: any): Promise<void> {
+    console.error('Error al iniciar la conexión: ', err.message);
+
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      console.log(`Reintentando conexión en 5 segundos... (Intento #${this.reconnectAttempts + 1})`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      this.reconnectAttempts++;
+      await this.startConnection();
+    } else {
+      console.error('Máximo número de intentos de reconexión alcanzado.');
     }
   }
 
   async ensureConnection(): Promise<void> {
-    if (this.hubConnection.state === signalR.HubConnectionState.Connected ||
-      this.hubConnection.state === signalR.HubConnectionState.Connecting) {
-      console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
+    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      console.log('Conexión ya activa.');
       return;
     }
 
-    /*if (this.hubConnection.state === signalR.HubConnectionState.Reconnecting) {
-      console.log('Esperando a que finalice la reconexión actual...');
-      await this.hubConnection.stop();
-      console.log('Conexión detenida.');
-    }*/
-
-    if (this.hubConnection.state === signalR.HubConnectionState.Reconnecting) {
-      console.log('Esperando a que finalice la reconexión actual...');
+    if (this.hubConnection.state === signalR.HubConnectionState.Connecting) {
+      console.log('Conexión en proceso, esperando...');
       await new Promise<void>(resolve => {
         const checkConnectionState = setInterval(() => {
           if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
@@ -101,31 +93,36 @@ export class SignalRService {
           }
         }, 1000);
       });
-      console.log('Conexión establecida.');
+      return;
     }
 
-    console.log('Iniciando nueva conexión...');
     try {
-      await this.hubConnection.start();
-      console.log('Conexión a SignalR establecida.');
+      await this.startConnection();
     } catch (err) {
-      if (err instanceof Error) {
-        console.error('Error al conectar con SignalR: ', err.message);
-      } else {
-        console.error('Error desconocido al conectar con SignalR:', err);
-      }
-      throw err;
+      this.handleConnectionError(err);
     }
   }
 
   private async reconnect(): Promise<void> {
+    if (this.reconnecting) {
+      console.log('Reconexión ya en curso.');
+      return;
+    }
+
+    this.reconnecting = true;
+    console.log('Iniciando proceso de reconexión...');
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      const delay = Math.pow(2, this.reconnectAttempts) * 1000; // Backoff exponencial
+      const delay = Math.pow(2, this.reconnectAttempts) * 1000;
       console.log(`Intento de reconexión #${this.reconnectAttempts} en ${delay} ms`);
-      setTimeout(() => this.startConnection(), delay);
+      setTimeout(async () => {
+        await this.startConnection();
+        this.reconnecting = false;
+      }, delay);
     } else {
       console.error('Máximo número de intentos de reconexión alcanzado.');
+      this.reconnecting = false;
     }
   }
 
