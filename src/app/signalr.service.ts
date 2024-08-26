@@ -85,10 +85,23 @@ export class SignalRService {
       return;
     }
 
-    if (this.hubConnection.state === signalR.HubConnectionState.Reconnecting) {
+    /*if (this.hubConnection.state === signalR.HubConnectionState.Reconnecting) {
       console.log('Esperando a que finalice la reconexión actual...');
       await this.hubConnection.stop();
       console.log('Conexión detenida.');
+    }*/
+
+    if (this.hubConnection.state === signalR.HubConnectionState.Reconnecting) {
+      console.log('Esperando a que finalice la reconexión actual...');
+      await new Promise<void>(resolve => {
+        const checkConnectionState = setInterval(() => {
+          if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+            clearInterval(checkConnectionState);
+            resolve();
+          }
+        }, 1000);
+      });
+      console.log('Conexión establecida.');
     }
 
     console.log('Iniciando nueva conexión...');
@@ -143,14 +156,19 @@ export class SignalRService {
   }
 
   public async invoke(method: string, ...args: any[]): Promise<void> {
-    try {
-      await this.hubConnection.invoke(method, ...args);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(`Error invocando ${method}: `, err.message);
-      } else {
-        console.error(`Error desconocido invocando ${method}: `, err);
+    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      try {
+        await this.hubConnection.invoke(method, ...args);
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error(`Error invocando ${method}: `, err.message);
+        } else {
+          console.error(`Error desconocido invocando ${method}: `, err);
+        }
       }
+    } else {
+      console.warn('No se puede invocar el método. La conexión no está en el estado de conexión.');
+      // Puedes optar por intentar reconectar aquí si es necesario.
     }
   }
 
