@@ -72,7 +72,9 @@ export class EvolucionService {
         // Comprobar si se guardó correctamente
         if (respuesta) { // Reemplaza 'respuesta.guardado' con la propiedad correcta de tu respuesta
           // Navegar al componente de evolución
-          this.router.navigate(['/evolucion']);
+          //this.router.navigate(['/evolucion']);
+          this.cambiarFirmaDoctor('');
+          this.cambiarFirmaPaciente('');
         }
 
         await this.signalRService.stopConnection();

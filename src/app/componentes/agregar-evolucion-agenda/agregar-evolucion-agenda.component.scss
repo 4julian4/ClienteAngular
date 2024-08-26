@@ -1,0 +1,226 @@
+.divFormularioFila1 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila1 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila2 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila2 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila3 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila3 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila4 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila4 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila5 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila5 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+
+    .campoFila6 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 2px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 2px;
+        }
+    }
+}
+
+.divFormularioFila6 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .campoFila6 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 2px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 2px;
+        }
+    }
+}
+
+.divFormularioFila6>div {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    img {
+        max-width: 100%; // Asegura que la imagen no sea más grande que su contenedor
+        height: auto; // Mantiene la relación de aspecto de la imagen
+    }
+}
+
+
+.scrollable-content {
+    max-height: calc(100vh - 200px);
+    /* Ajusta este valor según el tamaño de tus botones */
+    overflow-y: auto;
+}
+
+.formularioAgregarEvolucion {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    margin: 0 auto;
+    /* Evita que se desborde el contenido */
+    box-sizing: border-box;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+
+    .divContenedorDeBotones {
+        text-align: right;
+
+        .BotonGuardar,
+        .BotonCancelar,
+        .BotonFirmar {
+            margin: 5px;
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .divFormularioFila1,
+        .divFormularioFila2,
+        .divFormularioFila3,
+        .divFormularioFila4
+         {
+            flex-direction: column;
+        }
+
+        .divContenedorDeBotones {
+            text-align: center;
+            margin-top: 20px;
+
+            .BotonGuardar,
+            .BotonCancelar,
+            .BotonFirmar {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        .campoFila6 {
+            flex: 1;
+            margin: 2px;
+            display: flex;
+            flex-direction: row;
+            align-items: center; /* Centra las firmas y sus etiquetas */
+        }
+        
+        /* Estilos específicos para las firmas */
+        .divFormularioFila6 {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        
+            > div {
+                display: flex;
+                flex-direction: colum;
+                align-items: center;
+                margin: 0 10px; /* Espacio entre las firmas */
+        
+                img, strong {
+                    max-width: 100%;
+                    height: auto; /* Mantiene la proporción de la imagen */
+                    margin-bottom: 2px; /* Espacio entre la imagen y la etiqueta */
+                }
+        
+                .strongPaciente {
+                    margin-top: 2px; /* Espacio entre la imagen y la etiqueta */
+                    text-align: center; /* Centra la etiqueta debajo de la imagen */
+                    margin-left: 150px; /* Centra la etiqueta debajo de la imagen */
+                }
+        
+                .strongDoctor {
+                    margin-top: 2px; /* Espacio entre la imagen y la etiqueta */
+                    text-align: center; /* Centra la etiqueta debajo de la imagen */
+                    margin-right: 150px; /* Centra la etiqueta debajo de la imagen */
+                }
+                @media (max-width: 600px) {
+                    .strongPaciente, .strongDoctor {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+    }
+}

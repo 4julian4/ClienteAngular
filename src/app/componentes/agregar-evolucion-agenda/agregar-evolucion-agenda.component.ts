@@ -15,11 +15,11 @@ import { FrasesXEvolucion } from 'src/app/conexiones/rydent/tablas/frases-xevolu
 declare var webkitSpeechRecognition: any;
 
 @Component({
-  selector: 'app-agregar-evolucion',
-  templateUrl: './agregar-evolucion.component.html',
-  styleUrl: './agregar-evolucion.component.scss'
+  selector: 'app-agregar-evolucion-agenda',
+  templateUrl: './agregar-evolucion-agenda.component.html',
+  styleUrl: './agregar-evolucion-agenda.component.scss'
 })
-export class AgregarEvolucionComponent implements OnInit {
+export class AgregarEvolucionAgendaComponent implements OnInit {
   @ViewChild('tratamiento') tratamiento!: ElementRef;
   recognizing: boolean = false; // Agrega esta línea
 
@@ -57,7 +57,7 @@ export class AgregarEvolucionComponent implements OnInit {
 
 
 
-    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
+    this.respuestaPinService.sharedAnamnesisEvolucionarAgendaData.subscribe(data => {
       if (data != null) {
         this.idAnamnesisPacienteSeleccionado = data;
       }
@@ -98,7 +98,7 @@ export class AgregarEvolucionComponent implements OnInit {
       this.resultadoGuardarEvolucion = evolucion;
       if (this.resultadoGuardarEvolucion! || 0) {
         this.respuestaPinService.datosDelFormulario = null;
-        this.router.navigate(['/evolucion']);
+        this.handleClick();
       }
       // this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucion);
     });
@@ -134,7 +134,15 @@ export class AgregarEvolucionComponent implements OnInit {
     });
   }
 
+  handleClick() {
+    //this.setMostrarBuscarHistoriaClinica(false);
 
+    if (window.innerWidth <= 768) { // Ajusta el tamaño según tus necesidades
+      this.router.navigate(['/agenda-responsive']);
+    } else {
+      this.router.navigate(['/agenda']);
+    }
+  }
 
   inicializarFormulario() {
     const fechaActual = new Date();
@@ -192,7 +200,6 @@ export class AgregarEvolucionComponent implements OnInit {
       //}
     }
     if (this.idSedeActualSignalR != '') {
-      console.log(this.idAnamnesisPacienteSeleccionado);
       let datosParaGuradarEnEvolucion: RespuestaEvolucionPaciente = new RespuestaEvolucionPaciente();
       datosParaGuradarEnEvolucion.evolucion.IDEVOLUSECUND = this.idAnamnesisPacienteSeleccionado;
       datosParaGuradarEnEvolucion.evolucion.PROXIMA_CITAstr = this.formularioAgregarEvolucion.value.PROXIMA_CITAstr;
@@ -245,17 +252,17 @@ export class AgregarEvolucionComponent implements OnInit {
 
   ponerFraceProximaCita() {
     if (this.formularioAgregarEvolucion && this.fraseSeleccionada) {
-        const proximaCitaActual = this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.value || '';
-        const nuevaProximaCita = proximaCitaActual 
-            ? proximaCitaActual + '\n' + this.fraseSeleccionada.CONTENIDO
-            : this.fraseSeleccionada.CONTENIDO;
-        this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(nuevaProximaCita);
+      const proximaCitaActual = this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.value || '';
+      const nuevaProximaCita = proximaCitaActual
+        ? proximaCitaActual + '\n' + this.fraseSeleccionada.CONTENIDO
+        : this.fraseSeleccionada.CONTENIDO;
+      this.formularioAgregarEvolucion.get('PROXIMA_CITAstr')?.setValue(nuevaProximaCita);
     }
-}
+  }
 
 
   async cancelarEvolucion() {
-    this.router.navigate(['/evolucion']);
+    this.handleClick();
     // this.obtenerEvolucionPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);
   }
 

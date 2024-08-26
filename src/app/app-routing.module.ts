@@ -14,6 +14,7 @@ import { DatosAdministrativosComponent } from './componentes/datos-administrativ
 import { LoginCallbackGoogleComponent } from './componentes/login-callback-google';
 import { LoginCallBackComponent } from './componentes/login-call-back';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
+import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
 
 const routes: Routes = [
   {path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -24,6 +25,7 @@ const routes: Routes = [
   {path: 'agenda', component: AgendaComponent},
   {path: 'agenda-responsive', component: AgendaResponsiveComponent},
   {path: 'agregar-evolucion', component: AgregarEvolucionComponent},
+  {path: 'agregar-evolucion-agenda', component: AgregarEvolucionAgendaComponent},
   {path: 'agregar-firmas', component: AgregarFirmasComponent},
   {path: 'buscar-historia-clinica', component: BuscarHitoriaClinicaComponent},
   {path: 'estado-cuenta', component: EstadoCuentaComponent},

@@ -155,7 +155,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     private changeDetectorRef: ChangeDetectorRef,
     private sedesConectadasService: SedesConectadasService,
     private respuestaRealizarAccionesEnCitaAgendadaService: RespuestaRealizarAccionesEnCitaAgendadaService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private router: Router
 
   ) {
 
@@ -495,11 +496,18 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     });
   }
 
+  //llena el select del campo duracion en la agenda
   llenarIntervalos() {
+    if (this.intervalos){
+      this.intervalos = [];
+    }
+
     let intervaloSel = this.intervaloDeTiempoSeleccionado; // Reemplaza esto con tu valor real
+    console.log('intervaloSel', intervaloSel);
     for (let i = intervaloSel; i <= 120; i += intervaloSel) {
       this.intervalos.push(i);
     }
+    console.log('intervalos', this.intervalos);
   }
 
   inicializarFormulario() {
@@ -732,6 +740,18 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       }
 
     }
+  }
+  async agregarEvolucion() {
+    console.log(this.selectedRow.OUT_ID);
+    console.log(this.selectedRow.OUT_NOMBRE);
+    console.log(this.listaHistoriaPacienteParaAgendar);
+    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.IDANAMNESIS?.toString() === this.selectedRow.OUT_ID);
+    if (!pacienteEncontrado) {
+      await this.mensajesUsuariosService.mensajeInformativo('EL PACIENTE NO TIENE HISTORIA CLINICA PARA EVOLUCIONAR DEBE CREARLO');
+      return;
+    }
+    await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
+    this.router.navigate(['/agregar-evolucion-agenda']);
   }
 
   async borrarCita() {

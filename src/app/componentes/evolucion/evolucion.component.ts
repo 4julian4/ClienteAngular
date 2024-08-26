@@ -26,19 +26,19 @@ export class EvolucionComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
-    private respustaPinService: RespuestaPinService
+    private respuestaPinService: RespuestaPinService
 
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
-    this.respustaPinService.sharedAnamnesisData.subscribe(data => {
+    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
       if (data != null) {
         this.idAnamnesisPacienteSeleccionado = data;
       }
     });
 
-    this.respustaPinService.sharedSedeData.subscribe(data => {
+    this.respuestaPinService.sharedSedeData.subscribe(data => {
       if (data != null) {
         this.idSedeActualSignalR = data;
 
@@ -105,7 +105,9 @@ export class EvolucionComponent implements OnInit {
     // Llena el formulario con los datos de resultadoBusquedaEvolucionCompletos
     //this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucionCompletos);
   }
-
+  async actualizarDeDondeSeAgregaEvolucion(){
+    await this.respuestaPinService.updateDeDondeAgregaEvolucionData('EVOLUCION');
+  }
   guardarEvolucion() {
     // Lógica para guardar los datos del formulario
   }

@@ -38,7 +38,7 @@
             <input type="text" matInput [formControl]="tipoConsultaControl" [matAutocomplete]="autoTipoConsulta"
                 
                 style="text-transform: uppercase;">
-            <mat-autocomplete #autoTipoConsulta="matAutocomplete" >
+            <mat-autocomplete #autoTipoConsulta="matAutocomplete" (optionSelected)="onTipoConsultaSelected($event)">
                 <mat-option *ngFor="let tipoConsulta of filteredTiposDeConsultas | async" 
                     [value]="tipoConsulta.nombre">
                     {{ tipoConsulta.nombre }}
@@ -68,7 +68,7 @@
             <mat-label>D. Principal</mat-label>
             <input type="text" matInput [formControl]="diagnosticoPrincipalControl"
                 [matAutocomplete]="autoDiagnosticoPrincipal"
-                (blur)="validateAndClearIfInvalid(diagnosticoPrincipalControl, lstConsultas)"
+                
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoDiagnosticoPrincipal="matAutocomplete">
                 <mat-option *ngFor="let diagnosticoPrincipal of filteredDiagnosticoPrincipal | async"
@@ -82,7 +82,7 @@
             <mat-label>Codigo</mat-label>
             <input type="text" matInput [formControl]="codigoDiagnosticoPrincipalControl"
                 [matAutocomplete]="autoCodigoDiagnosticoPrincipal"
-                (blur)="validateAndClearIfInvalid(codigoDiagnosticoPrincipalControl, lstConsultas)"
+                
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoCodigoDiagnosticoPrincipal="matAutocomplete">
                 <mat-option *ngFor="let codigoDiagnosticoP of filteredCodigosDiagnosticoPrincipal | async"
@@ -98,7 +98,7 @@
         <mat-form-field appearance="fill" class="campoFila4">
             <mat-label>Procedimiento</mat-label>
             <input type="text" matInput [formControl]="procedimientoControl" [matAutocomplete]="autoProcedimiento"
-                (blur)="validateAndClearIfInvalid(procedimientoControl, lstProcedimientos)"
+                
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoProcedimiento="matAutocomplete">
                 <mat-option *ngFor="let procedimiento of filteredProcedimientos | async" [value]="procedimiento.nombre">
@@ -111,7 +111,7 @@
             <mat-label>Codigo</mat-label>
             <input type="text" matInput [formControl]="codigoProcedimientoControl"
                 [matAutocomplete]="autoCodigoProcedimiento"
-                (blur)="validateAndClearIfInvalid(codigoProcedimientoControl, lstProcedimientos)"
+                
                 style="text-transform: uppercase;">
             <mat-autocomplete #autoCodigoProcedimiento="matAutocomplete">
                 <mat-option *ngFor="let codigoProcedimiento of filteredCodigosProcedimientos | async"

@@ -19,6 +19,12 @@ export class RespuestaPinService {
   private anamnesisData = new BehaviorSubject<number | null>(null);
   sharedAnamnesisData = this.anamnesisData.asObservable();
 
+  private anamnesisEvolucionarAgendaData = new BehaviorSubject<number | null>(null);
+  sharedAnamnesisEvolucionarAgendaData = this.anamnesisEvolucionarAgendaData.asObservable();
+
+  private deDondeAgregaEvolucionData = new BehaviorSubject<string | null>(null);
+  sharedDeDondeAgregaEvolucionData = this.deDondeAgregaEvolucionData.asObservable();
+
   private sedeData = new BehaviorSubject<string | null>(null);
   sharedSedeData = this.sedeData.asObservable();
 
@@ -98,6 +104,12 @@ export class RespuestaPinService {
   // Aca actualizamos variables para que sean usadas por los componenetes
   async updateAnamnesisData(data: number) {
     this.anamnesisData.next(data);
+  }
+  async updateDeDondeAgregaEvolucionData(data: string) {
+    this.deDondeAgregaEvolucionData.next(data);
+  }
+  async updateAnamnesisEvolucionarAgendaData(data: number) {
+    this.anamnesisEvolucionarAgendaData.next(data);
   }
   updateSedeData(data: string) {
     this.sedeData.next(data);

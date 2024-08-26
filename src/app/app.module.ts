@@ -45,6 +45,7 @@ import {RipsComponent} from './componentes/rips/rips.component';
 import { DatosAdministrativos, DatosAdministrativosComponent } from './componentes/datos-administrativos';
 import { HideColumnDirective } from './directives/hide-column.directive';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
+import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -79,6 +80,7 @@ export const MY_DATE_FORMATS = {
         AntecedentesComponent,
         EvolucionComponent,
         AgregarEvolucionComponent,
+        AgregarEvolucionAgendaComponent,
         AgregarFirmasComponent,
         EstadoCuentaComponent,
         RipsComponent,
