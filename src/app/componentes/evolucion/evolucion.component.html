@@ -10,7 +10,7 @@
                     <h1 class="tituloEvolucion">Evolución</h1>
                 </div>
                 <div>
-                    <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/agregar-evolucion'" [disabled]="!botonAgregarEvolucionHabilitado">Agregar Evolucion</button>
+                    <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/agregar-evolucion'" [disabled]="!botonAgregarEvolucionHabilitado" (click)="actualizarDeDondeSeAgregaEvolucion()">Agregar Evolucion</button>
                     <button class="BotonGuardar" mat-raised-button color="primary" [routerLink]="'/rips'" [disabled]="!botonAgregarRipsHabilitado">Agregar Rips</button>
                 </div>
             </div>

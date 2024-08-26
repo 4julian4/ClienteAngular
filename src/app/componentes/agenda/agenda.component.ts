@@ -25,6 +25,10 @@ import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
 import { format } from 'date-fns';
 import { THorariosAsuntos } from 'src/app/conexiones/rydent/tablas/thorarios-asuntos';
 import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
+import { Router, RouterLink, Routes } from '@angular/router';
+import { AgregarEvolucionAgendaComponent } from '../agregar-evolucion-agenda';
+
+
 
 @Component({
   selector: 'app-agenda',
@@ -139,7 +143,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     private changeDetectorRef: ChangeDetectorRef,
     private sedesConectadasService: SedesConectadasService,
     private respuestaRealizarAccionesEnCitaAgendadaService: RespuestaRealizarAccionesEnCitaAgendadaService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private router: Router
   ) {
 
   }
@@ -310,8 +315,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         });
         //----------------------------------------------------------------------------//
         this.lstHorariosAsuntos = data.lstHorariosAsuntos;
-
+        console.log('lstHorariosAsuntos', this.lstHorariosAsuntos);
         this.lstHorariosAgenda = data.lstHorariosAgenda.sort((a, b) => a.SILLA - b.SILLA);
+        console.log('lstHorariosAgenda', this.lstHorariosAgenda);
         if (this.lstHorariosAgenda.length > 0) {
           this.sillaSeleccionada = this.lstHorariosAgenda[0].SILLA;
           this.horaInicial = this.lstHorariosAgenda[0].HORAINICIAL;
@@ -475,12 +481,18 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     });
   }
-
+//llena el select del campo duracion en la agenda
   llenarIntervalos() {
+    if (this.intervalos){
+      this.intervalos = [];
+    }
+
     let intervaloSel = this.intervaloDeTiempoSeleccionado; // Reemplaza esto con tu valor real
+    console.log('intervaloSel', intervaloSel);
     for (let i = intervaloSel; i <= 120; i += intervaloSel) {
       this.intervalos.push(i);
     }
+    console.log('intervalos', this.intervalos);
   }
 
   inicializarFormulario() {
@@ -583,8 +595,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     console.log(duracion);
     var horaFinal = this.buscarHoraFinal(horaCita, duracion);
     var nombre = this.formularioAgregarCita.value.nombre;
+    console.log(nombre);
     var telefono = this.formularioAgregarCita.value.telefono;
     var doctor = this.formularioAgregarCita.value.doctor;
+    console.log(doctor);
     var asunto = this.formularioAgregarCita.value.asunto;
     //var asistencia = this.formularioAgregarCita.value.asistencia;
     //var confirmar = this.formularioAgregarCita.value.confirmar;
@@ -677,6 +691,20 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   removeFocus() {
     // Quitar el foco del elemento activo
     this.renderer.selectRootElement(':focus').blur();
+  }
+
+  async agregarEvolucion() {
+    console.log(this.selectedRow.OUT_ID);
+    console.log(this.selectedRow.OUT_NOMBRE);
+    console.log(this.listaHistoriaPacienteParaAgendar);
+    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.IDANAMNESIS?.toString() === this.selectedRow.OUT_ID);
+    if (!pacienteEncontrado) {
+      await this.mensajesUsuariosService.mensajeInformativo('EL PACIENTE NO TIENE HISTORIA CLINICA PARA EVOLUCIONAR DEBE CREARLO');
+      return;
+    }
+    await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
+    await this.respuestaPinService.updateDeDondeAgregaEvolucionData('AGENDA');
+    this.router.navigate(['/agregar-evolucion-agenda']);
   }
 
   async borrarCita() {
@@ -1104,9 +1132,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       this.horaInicial = silla.HORAINICIAL;
       this.horaFinal = silla.HORAFINAL;
       this.intervaloDeTiempoSeleccionado = silla.INTERVALO;
+      console.log(this.intervaloDeTiempoSeleccionado);
       this.cambiarFecha();
       this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(x => x.SILLAS == sillaSeleccionada.toString());
       console.log(this.listaHorariosAsuntosPorSilla);
+      this.llenarIntervalos();
     }
   }
 
@@ -1176,7 +1206,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     horaInicio.setHours(horaInicioActual, minutosInicioActual, 0);
 
     horaFin.setHours(horaFinActual, minutosFinActual, 0);
-
+    console.log(this.intervaloDeTiempoSeleccionado);
     for (let hora = horaInicio; hora <= horaFin; hora = new Date(hora.getTime() + this.intervaloDeTiempoSeleccionado * 60000)) {
       this.intervalosDeTiempo.push({
         hora: new Date(hora),
@@ -1187,6 +1217,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         observaciones: ''
       });
     }
+    console.log(this.intervalosDeTiempo);
   }
 
   async buscarCitasPaciente(valorBuscarAgenda: string) {

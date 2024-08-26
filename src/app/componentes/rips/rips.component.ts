@@ -325,6 +325,13 @@ export class RipsComponent implements OnInit {
     console.log('Valor seleccionado:', selectedValue);
   }*/
 
+    onTipoConsultaSelected(event: any): void {
+      const selectedValue = event.option.value;
+      console.log('Tipo de consulta seleccionada:', selectedValue);
+      // Aquí puedes realizar la acción que desees con el valor seleccionado
+      // Por ejemplo, actualizar otro control, realizar una búsqueda, etc.
+    }
+
   cancelarGuardarRips() { 
     this.router.navigate(['/evolucion']);
   }

@@ -390,7 +390,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     
     
       try {
-        //console.log('Fila seleccionada:', filaSeleccionada);
+        console.log('Fila seleccionada:', filaSeleccionada);
         this.openorclosePanelBuscarPaciente = false;
         this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
         this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
