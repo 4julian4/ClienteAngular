@@ -38,7 +38,7 @@
             <input type="text" matInput [formControl]="tipoConsultaControl" [matAutocomplete]="autoTipoConsulta"
                 
                 style="text-transform: uppercase;">
-            <mat-autocomplete #autoTipoConsulta="matAutocomplete" (optionSelected)="onTipoConsultaSelected($event)">
+            <mat-autocomplete #autoTipoConsulta="matAutocomplete" (optionSelected)="onCodigoTipoConsultaSelected($event)">
                 <mat-option *ngFor="let tipoConsulta of filteredTiposDeConsultas | async" 
                     [value]="tipoConsulta.nombre">
                     {{ tipoConsulta.nombre }}
@@ -52,7 +52,7 @@
             <mat-label>Codigo</mat-label>
             <input type="text" matInput [formControl]="codigoConsultaControl" [matAutocomplete]="autoCodigoTipoConsulta"
                 style="text-transform: uppercase;">
-            <mat-autocomplete #autoCodigoTipoConsulta="matAutocomplete">
+            <mat-autocomplete #autoCodigoTipoConsulta="matAutocomplete" (optionSelected)="onTipoConsultaSelected($event)">
                 <mat-option *ngFor="let codigoConsulta of filteredCodigosTiposDeConsultas | async"
                     [value]="codigoConsulta.id">
                     {{ codigoConsulta.id }}

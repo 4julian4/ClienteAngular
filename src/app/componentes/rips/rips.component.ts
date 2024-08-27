@@ -7,6 +7,7 @@ import { RipsService } from './rips.service';
 import { Observable, debounceTime, map, startWith, take } from 'rxjs';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
+import { MensajesUsuariosService } from '../mensajes-usuarios';
 
 @Component({
   selector: 'app-rips',
@@ -51,6 +52,7 @@ export class RipsComponent implements OnInit {
     private ripsService: RipsService,
     private formBuilder: FormBuilder,
     private router: Router,
+    private mensajesUsuariosService: MensajesUsuariosService
   ) { }
 
 
@@ -113,7 +115,7 @@ export class RipsComponent implements OnInit {
             startWith(''),
             map(value => this._filterNombre(value, this.lstTiposDeConsultas))
           );
-          
+
         this.filteredCodigosTiposDeConsultas = this.codigoConsultaControl.valueChanges
           .pipe(
             startWith(''),
@@ -135,7 +137,7 @@ export class RipsComponent implements OnInit {
           }
         });
 
-        
+
         //obtenemos diagnpsticos principales para aplicar Rips
         this.listaConsultas = data;
         this.lstConsultas = this.listaConsultas.lstConsultas
@@ -218,14 +220,14 @@ export class RipsComponent implements OnInit {
     return list.filter(option => option.nombre.toLowerCase().includes(filterValue));
   }
 
-    
+
   private _filterCodigo(value: string, list: { id: string, nombre: string }[]): { id: string, nombre: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
 
     return list.filter(option => option.id.toLowerCase().includes(filterValue));
   }
 
-  
+
 
   inicializarFormulario() {
     const fechaActual = new Date();
@@ -325,60 +327,77 @@ export class RipsComponent implements OnInit {
     console.log('Valor seleccionado:', selectedValue);
   }*/
 
-    onTipoConsultaSelected(event: any): void {
-      const selectedValue = event.option.value;
-      console.log('Tipo de consulta seleccionada:', selectedValue);
-      // Aquí puedes realizar la acción que desees con el valor seleccionado
-      // Por ejemplo, actualizar otro control, realizar una búsqueda, etc.
-    }
+  onTipoConsultaSelected(event: any): void {
+    //const selectedValue = event.option.value;
+    this.formularioAgregarRips.controls['CODIGO_TIPO_CONSULTA'].setValue(event.option.value);
+    //this.codigoConsultaControl.setValue(event.option.value);
+    //event.option.value = this.tipoConsultaControl.value;
+    //console.log('Valor seleccionado:', event.option.value);
+  }
 
-  cancelarGuardarRips() { 
+  onCodigoTipoConsultaSelected(event: any) {
+    //event.option.value = this.codigoConsultaControl.value;event.option.value
+    this.formularioAgregarRips.controls['TIPO_CONSULTA'].setValue(event.option.value);
+    //this.tipoConsultaControl.setValue(event.option.value);
+  }
+
+  cancelarGuardarRips() {
     this.router.navigate(['/evolucion']);
   }
 
   async guardarRips() {
-    if (this.idSedeActualSignalR != '') {
-      let datosParaGurdarRips: DatosGuardarRips = new DatosGuardarRips();
-      datosParaGurdarRips.IDANAMNESIS = this.idAnamnesisPacienteSeleccionado;
-      let doctor = this.lstDoctores.find(x => x.nombre === this.doctorSeleccionado);
-      if (doctor) {
-        datosParaGurdarRips.IDDOCTOR = doctor.id;
-      }
-      datosParaGurdarRips.FACTURA = this.formularioAgregarRips.value.NFACTURA;
-      datosParaGurdarRips.FECHACONSULTA = this.formularioAgregarRips.value.FECHA;
-      let codigoEntidadSeleccionada = this.lstEps.find(x => x.nombre === this.entidadControl.value)?.id;
-      if (!codigoEntidadSeleccionada) {
-        console.error('Entidad no encontrada:', this.formularioAgregarRips.value.ENTIDAD);
-        return; // Salir de la función si no se encuentra la entidad
-      }
-      datosParaGurdarRips.CODIGOENTIDAD = codigoEntidadSeleccionada;
-      console.log('Codigo entidad seleccionada: ', codigoEntidadSeleccionada);
-      datosParaGurdarRips.NUMEROAUTORIZACION = '';
-      datosParaGurdarRips.CODIGOCONSULTA = this.codigoConsultaControl.value;// this.formularioAgregarRips.value.CODIGO_TIPO_CONSULTA;
-      datosParaGurdarRips.FINALIDADCONSULTA = '10';
-      datosParaGurdarRips.CAUSAEXTERNA = '13';
-      datosParaGurdarRips.CODIGODIAGNOSTICOPRINCIPAL = this.codigoDiagnosticoPrincipalControl.value;// this.formularioAgregarRips.value.CODIGO_DIAGNOSTICO_PRINCIPAL;
-      datosParaGurdarRips.TIPODIAGNOSTICO = '2';
-      datosParaGurdarRips.VALORCONSULTA = 1;
-      datosParaGurdarRips.VALORCUOTAMODERADORA = 0;
-      datosParaGurdarRips.VALORNETO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));
-      datosParaGurdarRips.CODIGOPROCEDIMIENTO = this.codigoProcedimientoControl.value; //this.formularioAgregarRips.value.CODIGO_PROCEDIMIENTO;
-      datosParaGurdarRips.FINALIDADPROCEDIMIENTI = '2';
-      datosParaGurdarRips.AMBITOREALIZACION = '1';
-      datosParaGurdarRips.PERSONALQUEATIENDE = '';
-      datosParaGurdarRips.DXPRINCIPAL = this.codigoDiagnosticoPrincipalControl.value;
-      datosParaGurdarRips.DXRELACIONADO = '';
-      datosParaGurdarRips.COMPLICACION = '';
-      datosParaGurdarRips.FORMAREALIZACIONACTOQUIR = '';
-      datosParaGurdarRips.VALORPROCEDIMIENTO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));// this.formularioAgregarRips.value.VALOR_TOTAL;
-      datosParaGurdarRips.EXTRANJERO = '';
-      datosParaGurdarRips.PAIS = '';
+    let diagnostico = this.codigoDiagnosticoPrincipalControl.value;
+    let procedimiento = this.codigoProcedimientoControl.value;
+    let consulta = this.codigoConsultaControl.value;
+    console.log('diagnostico', diagnostico);
+    console.log('procedimiento', procedimiento);
+    console.log('consulta', consulta);
+    if ((diagnostico != '' &&  (procedimiento != '' || consulta != '')) && (diagnostico != null && (procedimiento != null || consulta != null)) ){
+      if (this.idSedeActualSignalR != '') {
+        let datosParaGurdarRips: DatosGuardarRips = new DatosGuardarRips();
+        datosParaGurdarRips.IDANAMNESIS = this.idAnamnesisPacienteSeleccionado;
+        let doctor = this.lstDoctores.find(x => x.nombre === this.doctorSeleccionado);
+        if (doctor) {
+          datosParaGurdarRips.IDDOCTOR = doctor.id;
+        }
+        datosParaGurdarRips.FACTURA = this.formularioAgregarRips.value.NFACTURA;
+        datosParaGurdarRips.FECHACONSULTA = this.formularioAgregarRips.value.FECHA;
+        let codigoEntidadSeleccionada = this.lstEps.find(x => x.nombre === this.entidadControl.value)?.id;
+        if (!codigoEntidadSeleccionada) {
+          console.error('Entidad no encontrada:', this.formularioAgregarRips.value.ENTIDAD);
+          return; // Salir de la función si no se encuentra la entidad
+        }
+        datosParaGurdarRips.CODIGOENTIDAD = codigoEntidadSeleccionada;
+        console.log('Codigo entidad seleccionada: ', codigoEntidadSeleccionada);
+        datosParaGurdarRips.NUMEROAUTORIZACION = '';
+        datosParaGurdarRips.CODIGOCONSULTA = this.codigoConsultaControl.value;// this.formularioAgregarRips.value.CODIGO_TIPO_CONSULTA;
+        datosParaGurdarRips.FINALIDADCONSULTA = '10';
+        datosParaGurdarRips.CAUSAEXTERNA = '13';
+        datosParaGurdarRips.CODIGODIAGNOSTICOPRINCIPAL = this.codigoDiagnosticoPrincipalControl.value;// this.formularioAgregarRips.value.CODIGO_DIAGNOSTICO_PRINCIPAL;
+        datosParaGurdarRips.TIPODIAGNOSTICO = '2';
+        datosParaGurdarRips.VALORCONSULTA = 1;
+        datosParaGurdarRips.VALORCUOTAMODERADORA = 0;
+        datosParaGurdarRips.VALORNETO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));
+        datosParaGurdarRips.CODIGOPROCEDIMIENTO = this.codigoProcedimientoControl.value; //this.formularioAgregarRips.value.CODIGO_PROCEDIMIENTO;
+        datosParaGurdarRips.FINALIDADPROCEDIMIENTI = '2';
+        datosParaGurdarRips.AMBITOREALIZACION = '1';
+        datosParaGurdarRips.PERSONALQUEATIENDE = '';
+        datosParaGurdarRips.DXPRINCIPAL = this.codigoDiagnosticoPrincipalControl.value;
+        datosParaGurdarRips.DXRELACIONADO = '';
+        datosParaGurdarRips.COMPLICACION = '';
+        datosParaGurdarRips.FORMAREALIZACIONACTOQUIR = '';
+        datosParaGurdarRips.VALORPROCEDIMIENTO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));// this.formularioAgregarRips.value.VALOR_TOTAL;
+        datosParaGurdarRips.EXTRANJERO = '';
+        datosParaGurdarRips.PAIS = '';
 
-      console.log('Datos para guardar Rips: ', datosParaGurdarRips);
-      // //evolucion.IDEVOLUCION
-      await this.ripsService.startConnectionGuardarDatosRips(this.idSedeActualSignalR, JSON.stringify(datosParaGurdarRips));
+        console.log('Datos para guardar Rips: ', datosParaGurdarRips);
+        // //evolucion.IDEVOLUCION
+        await this.ripsService.startConnectionGuardarDatosRips(this.idSedeActualSignalR, JSON.stringify(datosParaGurdarRips));
 
+      }
+    }else{
+      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DIAGNOSTICO PRINCIPAL Y UN PROCEDIMIENTO O CONSULTA PARA GUARDAR EL RIPS');
     }
   }
 
-}
+  }

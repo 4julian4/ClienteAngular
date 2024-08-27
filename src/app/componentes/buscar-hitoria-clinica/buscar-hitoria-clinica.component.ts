@@ -416,14 +416,16 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     //oo aca toca validar si no hay doctor asignado que debe hacer
     if (filaSeleccionada.DOCTOR != this.nombreDoctor) {
       let idDoctor = this.listaDoctores.find(x => x.nombre == filaSeleccionada.DOCTOR)?.id;
+      console.log('ID Doctor:', idDoctor);
       if (!idDoctor) {
         throw new Error('No se encontró el ID del doctor.');
       }
       this.nombreDoctor = filaSeleccionada.DOCTOR;
       await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(this.idSedeActualSignalR, parseInt(idDoctor));
       //alert('esta entrando ca antes o despues del error')
+      console.log('Doctor cambiado:', filaSeleccionada.DOCTOR);
       this.respuestaPinService.updateCambiarDoctorSeleccionado(filaSeleccionada.DOCTOR);
-      
+      this.respuestaPinService.updateDoctorSeleccionado(filaSeleccionada.DOCTOR);
     }else{
       this.router.routeReuseStrategy.shouldReuseRoute = function () {
         return false;

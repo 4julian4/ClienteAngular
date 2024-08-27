@@ -47,7 +47,7 @@
                 <span>Agenda</span>
             </button>
 
-            <button mat-menu-item routerLink="/" (click)="setMostrarBuscarHistoriaClinica(true)">
+            <button mat-menu-item  (click)="mostrarHistoria()">
                 <mat-icon>assignment</mat-icon>
                 <span>Buscar Historia</span>
             </button>
@@ -119,21 +119,7 @@
           <span> Inicio </span>
         </app-sidenav-link>
         <mat-accordion>
-          <ng-container *ngFor="let objMenu of filtrarMenu(0)">
-            <mat-expansion-panel *ngIf="objMenu.esNodo">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
-                  <span> {{objMenu.nombre}} </span>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <ng-container *ngTemplateOutlet="menuItem; context: { objMenu: objMenu }"></ng-container>
-            </mat-expansion-panel>
-            <app-sidenav-link *ngIf="!objMenu.esNodo" routerLink="/{{objMenu.nombreController}}/">
-              <mat-icon class="icon">{{objMenu.nombreAction}}</mat-icon>
-              <span> {{objMenu.nombre}} </span>
-            </app-sidenav-link>
-          </ng-container>
+          
         </mat-accordion>
       </mat-nav-list>
     </mat-sidenav>
@@ -161,42 +147,9 @@
 </ng-container>
 
 <ng-template #menuItem let-idPadre="objMenu">
-  <ng-container *ngFor="let objMenu of filtrarMenu(idPadre.idMenu)">
-    <mat-expansion-panel *ngIf="objMenu.esNodo">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
-          <span> {{objMenu.nombre}} </span>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <ng-container *ngTemplateOutlet="menuItem; context: { objMenu: objMenu }"></ng-container>
-    </mat-expansion-panel>
-    <app-sidenav-link *ngIf="!objMenu.esNodo" routerLink="/{{objMenu.nombreController}}/">
-      <mat-icon class="icon">{{objMenu.nombreAction}}</mat-icon>
-      <span> {{objMenu.nombre}} </span>
-    </app-sidenav-link>
-  </ng-container>
+  
 </ng-template>
 
 <ng-template #menuItemTool let-idPadre="objMenu">
-  <ng-container *ngFor="let objMenu of filtrarMenu(idPadre.idMenu)">
-    <a class="mat-button-class" *ngIf="objMenu.esNodo" mat-menu-item [matMenuTriggerFor]="menuAlterno">
-      <mat-icon *ngIf="objMenu.nombreAction != ''" class="icon">{{objMenu.nombreAction}}</mat-icon>
-      {{ objMenu.nombre }}
-    </a>
-    <mat-menu #menuAlterno="matMenu">
-      <ng-container *ngFor="let subMenu of filtrarMenu(objMenu.idMenu); let i = index">
-        <a mat-menu-item *ngIf="subMenu.esNodo">
-          <span>
-            <mat-icon *ngIf="subMenu.nombreAction != ''" class="icon">{{subMenu.nombreAction}}</mat-icon>
-            {{subMenu.nombre}}
-          </span>
-        </a>
-        <a *ngIf="!subMenu.esNodo" mat-menu-item routerLink="/{{subMenu.nombreController}}/">
-          <mat-icon *ngIf="subMenu.nombreAction != ''" class="icon">{{subMenu.nombreAction}}</mat-icon>
-          <span> {{subMenu.nombre }} </span>
-        </a>
-      </ng-container>
-    </mat-menu>
-  </ng-container>
+  
 </ng-template>
