@@ -89,7 +89,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
   handleClick() {
     this.setMostrarBuscarHistoriaClinica(false);
 
@@ -157,8 +157,14 @@ export class SidenavComponent implements OnInit, OnDestroy {
     }
   }
 
-  filtrarMenu(idPadre?: number): any[] {
-    return [];
+  async mostrarHistoria() {
+    if (this.idPacienteSeleccionado) {
+      this.router.navigate(['/datos-personales']);
+      this.setMostrarBuscarHistoriaClinica(true);
+    } else {
+      this.router.navigate(['/']);
+      this.setMostrarBuscarHistoriaClinica(true);
+    }
   }
 
   toggleMenu() {
@@ -264,21 +270,25 @@ export class SidenavComponent implements OnInit, OnDestroy {
       this.doctorEscogido = this.lstDoctores.filter(x => x.id == idDoctor)[0].nombre;
       if (this.doctorEscogido) {
         this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
-        
+
       }
       this.respuestaPinService.updateCambiarDoctorSeleccionado(this.doctorEscogido);
 
       this.mostrarBuscarHistoriaClinica = true;
       this.mostrarCerrarSesion = false;
-
       
-
+      if (this.idPacienteSeleccionado) {
+        // Espera un momento para asegurarte de que los datos estén listos
+        setTimeout(() => {
+          this.router.navigate(['/datos-personales']);
+        }, 100); // Ajusta el tiempo según sea necesario
+      }
       // Navega a la página de buscar historia clínica (comentado)
       //this.router.navigate(['/buscar-historia-clinica']);
       //this.router.navigate(['/buscar-hitoria-clinica']);
 
     }
-}
+  }
 
   async buscarPacientesDoctorSeleccionado() { }
 

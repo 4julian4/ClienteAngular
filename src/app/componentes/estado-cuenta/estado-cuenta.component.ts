@@ -87,6 +87,7 @@ export class EstadoCuentaComponent implements OnInit {
     this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
         this.doctorSeleccionado = data;
+        console.log(this.doctorSeleccionado);
         this.lstDoctores.filter(item => item.nombre === this.doctorSeleccionado).map(item => this.idDoctor = item.id);
       }
     });
@@ -138,6 +139,7 @@ export class EstadoCuentaComponent implements OnInit {
     objDatosParaDatosParaConsultarEstadoCuenta.ID = this.idAnamnesisPacienteSeleccionado;
     objDatosParaDatosParaConsultarEstadoCuenta.IDDOCTOR = this.idDoctor;
     objDatosParaDatosParaConsultarEstadoCuenta.FASE = this.fase;
+    console.log(objDatosParaDatosParaConsultarEstadoCuenta);
     //lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
     //await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
     await this.respuestaConsultarEstadoCuentaService.startConnectionRespuestaConsultarEstadoCuenta(this.idSedeActualSignalR, JSON.stringify(objDatosParaDatosParaConsultarEstadoCuenta));

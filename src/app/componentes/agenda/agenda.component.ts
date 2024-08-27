@@ -594,12 +594,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
     console.log(duracion);
     var horaFinal = this.buscarHoraFinal(horaCita, duracion);
-    var nombre = this.formularioAgregarCita.value.nombre;
+    var nombre = this.formularioAgregarCita.value.nombre.toUpperCase();
     console.log(nombre);
     var telefono = this.formularioAgregarCita.value.telefono;
-    var doctor = this.formularioAgregarCita.value.doctor;
+    var doctor = this.formularioAgregarCita.value.doctor.toUpperCase();
     console.log(doctor);
-    var asunto = this.formularioAgregarCita.value.asunto;
+    var asunto = this.formularioAgregarCita.value.asunto.toUpperCase();
     //var asistencia = this.formularioAgregarCita.value.asistencia;
     //var confirmar = this.formularioAgregarCita.value.confirmar;
     var numHistoria = this.formularioAgregarCita.value.numHistoria;
@@ -955,7 +955,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
     //this.isloading = true;
     let formulario = this.formularioAgregarCita.value;
-    var nombre = formulario.nombre;
+    var nombre = formulario.nombre.toUpperCase();
     var telefono = formulario.telefono;
     let datosParaGurdarEnAgenda: RespuestaConsultarPorDiaYPorUnidad = new RespuestaConsultarPorDiaYPorUnidad();
     let detalleCita: TDetalleCitas = new TDetalleCitas();
@@ -964,11 +964,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       datosParaGurdarEnAgenda.detalleCitaEditar.FECHA = formulario.fechaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.SILLA = formulario.sillaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.HORA = formulario.horaEditar;
-      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar;
+      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar.toUpperCase();
       datosParaGurdarEnAgenda.detalleCitaEditar.ID = formulario.numHistoria;
       datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = formulario.duracion;
-      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto;
-      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor;
+      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor.toUpperCase();
       //ojo aca deja editar el doctor
       datosParaGurdarEnAgenda.detalleCitaEditar.ASISTENCIA = formulario.asistencia;
       datosParaGurdarEnAgenda.detalleCitaEditar.CONFIRMAR = formulario.confirmar;
@@ -993,8 +993,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     detalleCita.TELEFONO = telefono;
     detalleCita.CELULAR = this.formularioAgregarCita.value.celular;
     console.log(this.formularioAgregarCita.value.observaciones);
-    detalleCita.ASUNTO = this.formularioAgregarCita.value.observaciones;
-    detalleCita.DOCTOR = this.formularioAgregarCita.value.doctor;
+    detalleCita.ASUNTO = this.formularioAgregarCita.value.observaciones.toUpperCase();;
+    detalleCita.DOCTOR = this.formularioAgregarCita.value.doctor.toUpperCase();;
     console.log(this.formularioAgregarCita.value.duracion);
     var duracion = this.formularioAgregarCita.value.duracion;
     if (!duracion) {
