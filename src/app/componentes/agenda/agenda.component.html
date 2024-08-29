@@ -127,7 +127,7 @@
                     <div class="fila">
 
                         <div class="campo-formulario historia">
-                            <input type="text" pattern="^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]*$" placeholder="Nombre Paciente" formControlName="nombre"
+                            <input #nombreInput type="text"  placeholder="Nombre Paciente" formControlName="nombre"
                                 [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
                                 style="text-transform: uppercase;">
                             <mat-autocomplete #autoDatosPacienteParaAgendar="matAutocomplete">
@@ -156,7 +156,7 @@
                         </div>
                         -->
                         <div class="campo-formulario telefono">
-                            <input type="text" placeholder="Teléfono 1" formControlName="telefono"
+                            <input #telefonoInput  type="text" placeholder="Teléfono 1" formControlName="telefono"
                             [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
                             style="text-transform: uppercase;">
                             <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
@@ -189,10 +189,9 @@
 
                     <div class="fila">
                         <div class="campo-formulario historia">
-                            <input type="text" pattern="^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]*$" placeholder="Doctor" formControlName="doctor"
+                            <input type="text"  placeholder="Doctor" formControlName="doctor"
                                 [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
-                                style="text-transform: uppercase;" (keydown)="$event.preventDefault()"
-                                (click)="doctorPacienteParaAgendarControl.setValue('')">
+                                style="text-transform: uppercase;">
                             <mat-autocomplete #autoDatosDoctorParaAgendar="matAutocomplete">
                                 <mat-option *ngFor="let datosDoctor of filteredDoctorParaAgendar | async"
                                     [value]="datosDoctor.nombre">
@@ -205,7 +204,7 @@
                     </div>
                     <div class="fila">
                         <div class="campo-formulario observaciones">
-                            <input type="text" placeholder="Historia" formControlName="numHistoria"
+                            <input  type="text" placeholder="Historia" formControlName="numHistoria"
                                 [matAutocomplete]="autoHistoriaPacienteParaAgendar" class="form-control"
                                 style="text-transform: uppercase;">
                             <mat-autocomplete #autoHistoriaPacienteParaAgendar="matAutocomplete">
@@ -230,7 +229,7 @@
                     </div>
 
                     <div class="campo-formulario observaciones">
-                        <input type="text" pattern="^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]*$" placeholder="Asunto" formControlName="observaciones"
+                        <input type="text"  placeholder="Asunto" formControlName="observaciones"
                             [matAutocomplete]="autoDatosAsuntoParaAgendar" class="form-control"
                             style="text-transform: uppercase;" (keydown)="$event.preventDefault()">
                         <mat-autocomplete #autoDatosAsuntoParaAgendar="matAutocomplete">
@@ -243,7 +242,7 @@
 
                     <div class="fila">
                         <button class="boton-generar-cita" (click)="agendarCita()">Agendar</button>
-                        <button class="boton-generar-cita" (click)="limpiarDatos()">Cancelar</button>
+                        <button #botonCancelarEditar class="boton-generar-cita" (click)="limpiarDatos()">Cancelar</button>
                     </div>
                 </form>
             </div>

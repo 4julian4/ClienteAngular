@@ -148,7 +148,7 @@
                     <div class="fila">
 
                         <div class="campo-formulario historia">
-                            <input type="text" placeholder="Nombre Paciente" formControlName="nombre"
+                            <input #nombreInput type="text" placeholder="Nombre Paciente" formControlName="nombre"
                                 [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
                                 style="text-transform: uppercase;">
                             <mat-autocomplete #autoDatosPacienteParaAgendar="matAutocomplete">
@@ -179,7 +179,7 @@
                         
 
                         <div class="campo-formulario telefono">
-                            <input type="text" placeholder="Teléfono 1" formControlName="telefono"
+                            <input #telefonoInput type="text" placeholder="Teléfono 1" formControlName="telefono"
                             [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
                             style="text-transform: uppercase;">
                             <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
@@ -208,8 +208,7 @@
                         <div class="campo-formulario historia">
                             <input type="text" placeholder="Doctor" formControlName="doctor"
                                 [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
-                                style="text-transform: uppercase;" (keydown)="$event.preventDefault()"
-                                (click)="doctorPacienteParaAgendarControl.setValue('')">
+                                style="text-transform: uppercase;" >
                             <mat-autocomplete #autoDatosDoctorParaAgendar="matAutocomplete">
                                 <mat-option *ngFor="let datosDoctor of filteredDoctorParaAgendar | async"
                                     [value]="datosDoctor.nombre">
@@ -217,7 +216,7 @@
                                 </mat-option>
                             </mat-autocomplete>
                         </div>
-
+                        
 
                     </div>
                     <div class="fila">

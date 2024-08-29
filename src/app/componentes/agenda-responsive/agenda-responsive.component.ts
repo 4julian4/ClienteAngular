@@ -54,9 +54,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   @ViewChild('miPanelBucarCitas') miPanelBucarCitas!: MatExpansionPanel;
   @ViewChild('tablaBusquedaPaciente') tablaBusquedaPaciente!: ElementRef;
   @ViewChild('panelBuscarPersona') panelBuscarPersona!: MatAccordion;
+  //variables para poner foco en los inputs
+  @ViewChild('nombreInput') nombreInput!: ElementRef;
+  @ViewChild('telefonoInput') telefonoInput!: ElementRef;
   intervalosDeTiempo: any[] = [];
   intervaloDeTiempoSeleccionado: number = 0; // Valor por defecto
-
+  modoEdicion: boolean = false;
   estaCambiandoFecha = false;
   fechaSeleccionada: Date = new Date(); // Fecha seleccionada
   nombre: string = '';
@@ -348,7 +351,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
               map(value => this._filterNombre(value, this.lstDatosDoctorParaAgendar))
             );
 
-          //this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
+          this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
           this.llenarIntervalos();
 
         }
@@ -553,6 +556,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     });
     this.mostrarFormulario = false;
     this.mostrarBotonAgendar = true;
+    this.modoEdicion = false;
     await this.cambiarFecha();
   }
 
@@ -594,7 +598,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       if (this.selectedRow.OUT_NOMBRE) {
         this.mostrarFormulario = true;
         this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
-
+        this.modoEdicion = true;
         this.formularioAgregarCita.setValue({
           fechaEditar: this.fechaSeleccionada,
           sillaEditar: this.sillaSeleccionada,
@@ -649,10 +653,10 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     }
     console.log(duracion);
     var horaFinal = this.buscarHoraFinal(horaCita, duracion);
-    var nombre = this.formularioAgregarCita.value.nombre;
+    var nombre = this.formularioAgregarCita.value.nombre.toUpperCase();
     var telefono = this.formularioAgregarCita.value.telefono;
-    var doctor = this.formularioAgregarCita.value.doctor;
-    var asunto = this.formularioAgregarCita.value.asunto;
+    var doctor = this.formularioAgregarCita.value.doctor.toUpperCase();
+    var asunto = this.formularioAgregarCita.value.asunto.toUpperCase();
     //var asistencia = this.formularioAgregarCita.value.asistencia;
     //var confirmar = this.formularioAgregarCita.value.confirmar;
     var numHistoria = this.formularioAgregarCita.value.numHistoria;
@@ -663,6 +667,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     var pacienteCitaRepetida = this.aplicarConfiguracion("CITA_REPETIDA");
     var proximaCitaAsunto = this.aplicarConfiguracion("PROXIMA_CITA_ASUNTO");
     var notaImportanteCitas = this.aplicarConfiguracion("NOTA_IMPORTANTE_CITAS");
+    var doctorCorrecto = this.listaDatosDoctorParaAgendar?.lstDoctores.find(x => x.nombre === doctor);
     //var hayCronograma = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "HAY_CRONOGRAMA");
     //var confirmarDoctorenCita = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "CONFIRMAR_DOCTOR_EN_CITA");
 
@@ -672,6 +677,10 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
         if (doctorPorCita && !doctor) {
           await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR');
+          return;
+        }
+        if (!doctorCorrecto) {
+          await this.mensajesUsuariosService.mensajeInformativo('EL DOCTOR NO EXISTE EN LA LISTA');
           return;
         }
         if (this.esFestivo && confirmarFestivos) {
@@ -732,10 +741,13 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       }
       else if (!nombre) {
         await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN NOMBRE PARA CONTINUAR');
+        this.nombreInput.nativeElement.focus(); // Enfoca el campo de teléfono
         return;
       }
       else if (!telefono) {
         await this.mensajesUsuariosService.mensajeInformativo('DEBE INGRESAR UN NUMERO TELEFONICO PARA CONTINUAR');
+        // Enfocar el campo de teléfono después de mostrar el mensaje
+        this.telefonoInput.nativeElement.focus(); // Enfoca el campo de teléfono
         return;
       }
 
@@ -1001,8 +1013,9 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
     //this.isloading = true;
+    this.modoEdicion = false;
     let formulario = this.formularioAgregarCita.value;
-    var nombre = formulario.nombre;
+    var nombre = formulario.nombre.toUpperCase();
     var telefono = formulario.telefono;
     let datosParaGurdarEnAgenda: RespuestaConsultarPorDiaYPorUnidad = new RespuestaConsultarPorDiaYPorUnidad();
     let detalleCita: TDetalleCitas = new TDetalleCitas();
@@ -1011,11 +1024,11 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       datosParaGurdarEnAgenda.detalleCitaEditar.FECHA = formulario.fechaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.SILLA = formulario.sillaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.HORA = formulario.horaEditar;
-      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar;
+      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar.toUpperCase();
       datosParaGurdarEnAgenda.detalleCitaEditar.ID = formulario.numHistoria;
       datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = formulario.duracion;
-      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto;
-      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor;
+      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor.toUpperCase();
       //ojo aca deja editar el doctor
       datosParaGurdarEnAgenda.detalleCitaEditar.ASISTENCIA = formulario.asistencia;
       datosParaGurdarEnAgenda.detalleCitaEditar.CONFIRMAR = formulario.confirmar;
@@ -1123,16 +1136,21 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   private terminoRefrescarAgenda = new Subject<void>();
 
   async onHoraClicked(event: MouseEvent, row: any) {
-    event.stopPropagation(); // Evita que el evento de clic en la fila se active
+    if (!this.modoEdicion){
+      event.stopPropagation(); // Evita que el evento de clic en la fila se active
 
-    // Aquí va el código que quieres ejecutar cuando se hace clic en la columna "HORA"
-    this.terminoRefrescarAgenda.subscribe(() => {
-      console.log(row);
-      this.onRowClickedAgenda(row);
-      console.log('termino refrescar agenda');
-      //this.isloading = false;
-    });
-    await this.cambiarFecha();
+      // Aquí va el código que quieres ejecutar cuando se hace clic en la columna "HORA"
+      this.terminoRefrescarAgenda.subscribe(() => {
+        console.log(row);
+        this.onRowClickedAgenda(row);
+        console.log('termino refrescar agenda');
+        //this.isloading = false;
+      });
+      await this.cambiarFecha();
+    }else{
+      await this.mensajesUsuariosService.mensajeInformativo('DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO');
+      this.nombreInput.nativeElement.focus();
+    }
   }
 
   async onRowClickedAgenda(intervalo: any) {
