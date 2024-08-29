@@ -48,9 +48,13 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   @ViewChild('miPanelBucarCitas') miPanelBucarCitas!: MatExpansionPanel;
   @ViewChild('tablaBusquedaPaciente') tablaBusquedaPaciente!: ElementRef;
   @ViewChild('panelBuscarPersona') panelBuscarPersona!: MatAccordion;
+  //variables para poner foco en los inputs
+  @ViewChild('nombreInput') nombreInput!: ElementRef;
+  @ViewChild('telefonoInput') telefonoInput!: ElementRef;
+  @ViewChild('botonCancelarEditar') botonCancelarEditar!: ElementRef;
   intervalosDeTiempo: any[] = [];
   intervaloDeTiempoSeleccionado: number = 0; // Valor por defecto
-
+  modoEdicion: boolean = false;
   estaCambiandoFecha = false;
   fechaSeleccionada: Date = new Date(); // Fecha seleccionada
   nombre: string = '';
@@ -481,9 +485,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     });
   }
-//llena el select del campo duracion en la agenda
+  //llena el select del campo duracion en la agenda
   llenarIntervalos() {
-    if (this.intervalos){
+    if (this.intervalos) {
       this.intervalos = [];
     }
 
@@ -536,6 +540,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       duracion: '',
       observaciones: ''
     });
+    this.modoEdicion = false;
     await this.cambiarFecha();
   }
 
@@ -544,7 +549,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
       if (this.selectedRow.OUT_NOMBRE) {
         this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
-
+        this.modoEdicion = true;
         this.formularioAgregarCita.setValue({
           fechaEditar: this.fechaSeleccionada,
           sillaEditar: this.sillaSeleccionada,
@@ -580,7 +585,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
     }
   }
-
+  
   async agendarCita() {
     let lstConfirmacionesPedidas: ConfirmacionesPedidas[] = [];
     if (!this.selectedRow) {
@@ -610,6 +615,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     var pacienteCitaRepetida = this.aplicarConfiguracion("CITA_REPETIDA");
     var proximaCitaAsunto = this.aplicarConfiguracion("PROXIMA_CITA_ASUNTO");
     var notaImportanteCitas = this.aplicarConfiguracion("NOTA_IMPORTANTE_CITAS");
+    var doctorCorrecto = this.listaDatosDoctorParaAgendar?.lstDoctores.find(x => x.nombre === doctor);
     //var hayCronograma = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "HAY_CRONOGRAMA");
     //var confirmarDoctorenCita = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "CONFIRMAR_DOCTOR_EN_CITA");
 
@@ -621,6 +627,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR');
           return;
         }
+
+        if (!doctorCorrecto) {
+          await this.mensajesUsuariosService.mensajeInformativo('EL DOCTOR NO EXISTE EN LA LISTA');
+          return;
+        }
+        
         if (this.esFestivo && confirmarFestivos) {
           if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('El día es festivo, ¿aún así quieres dar la cita?')) {
             return;
@@ -678,10 +690,15 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       }
       else if (!nombre) {
         await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN NOMBRE PARA CONTINUAR');
+        this.nombreInput.nativeElement.focus(); // Enfoca el campo de teléfono
+        //(document.getElementById('nombreInput') as HTMLInputElement)?.focus();
         return;
       }
       else if (!telefono) {
         await this.mensajesUsuariosService.mensajeInformativo('DEBE INGRESAR UN NUMERO TELEFONICO PARA CONTINUAR');
+        // Enfocar el campo de teléfono después de mostrar el mensaje
+        this.telefonoInput.nativeElement.focus(); // Enfoca el campo de teléfono
+        //(document.getElementById('telefonoInput') as HTMLInputElement)?.focus();
         return;
       }
 
@@ -711,16 +728,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     console.log(this.selectedRow.OUT_HORA_CITA);
     if (this.selectedRow.OUT_HORA_CITA) {
       const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de borrar esta cita?');
-    
+
       if (!confirmacion.resultado) {
         console.log('No se borró la cita');
         return;
-      }  
-      
+      }
+
       //if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
-        //console.log('No se borro la cita');
-       // return;
-        
+      //console.log('No se borro la cita');
+      // return;
+
       //}
       //this.removeFocus();
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
@@ -954,6 +971,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
     //this.isloading = true;
+    this.modoEdicion = false;
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre.toUpperCase();
     var telefono = formulario.telefono;
@@ -1076,16 +1094,21 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   private terminoRefrescarAgenda = new Subject<void>();
 
   async onHoraClicked(event: MouseEvent, row: any) {
-    event.stopPropagation(); // Evita que el evento de clic en la fila se active
+    if (!this.modoEdicion){
+      event.stopPropagation(); // Evita que el evento de clic en la fila se active
 
-    // Aquí va el código que quieres ejecutar cuando se hace clic en la columna "HORA"
-    this.terminoRefrescarAgenda.subscribe(() => {
-      console.log(row);
-      this.onRowClickedAgenda(row);
-      console.log('termino refrescar agenda');
-      //this.isloading = false;
-    });
-    await this.cambiarFecha();
+      // Aquí va el código que quieres ejecutar cuando se hace clic en la columna "HORA"
+      this.terminoRefrescarAgenda.subscribe(() => {
+        console.log(row);
+        this.onRowClickedAgenda(row);
+        console.log('termino refrescar agenda');
+        //this.isloading = false;
+      });
+      await this.cambiarFecha();
+    }else{
+      await this.mensajesUsuariosService.mensajeInformativo('DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO');
+      this.nombreInput.nativeElement.focus();
+    }
   }
 
   async onRowClickedAgenda(intervalo: any) {
