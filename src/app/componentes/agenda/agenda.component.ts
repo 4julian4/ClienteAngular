@@ -51,6 +51,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   //variables para poner foco en los inputs
   @ViewChild('nombreInput') nombreInput!: ElementRef;
   @ViewChild('telefonoInput') telefonoInput!: ElementRef;
+  @ViewChild('doctorInput') doctorInput!: ElementRef;
   @ViewChild('botonCancelarEditar') botonCancelarEditar!: ElementRef;
   intervalosDeTiempo: any[] = [];
   intervaloDeTiempoSeleccionado: number = 0; // Valor por defecto
@@ -93,6 +94,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   doctorSeleccionado = "";
   doctorProgramadoCronograma = "";
   horaCitaSeleccionada = "";
+  desactivarFiltro: boolean = false;
   resultadosBusquedaCitaPacienteAgenda: RespuestaBusquedaCitasPaciente[] = [];
 
   listaNombrePacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
@@ -226,8 +228,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredNombrePacienteParaAgendar = this.formularioAgregarCita.get('nombre')!.valueChanges
           .pipe(
             startWith(''),
-            map(value => this._filterNombre(value, this.lstNombrePacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstNombrePacienteParaAgendar : this._filterNombre(value, this.lstNombrePacienteParaAgendar))
           );
+
+          
 
         this.listaDatosPacienteParaBuscarAgenda = data.lstAnamnesisParaAgendayBuscadores;
         this.lstDatosPacienteParaBuscarAgenda = this.listaDatosPacienteParaBuscarAgenda!.map(item => ({ idAnamnesis: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', idAnamenesisTexto: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '', nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '', telefono: item.TELF_P ? item.TELF_P : '' }));
@@ -332,12 +336,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           this.lstConfiguracionesRydent = data.lstConfiguracionesRydent;
           this.listaDatosDoctorParaAgendar = data;
           this.lstDatosDoctorParaAgendar = this.listaDatosDoctorParaAgendar.lstDoctores.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
-          this.filteredDoctorParaAgendar = this.formularioAgregarCita.get('doctor')!.valueChanges
+          /*this.filteredDoctorParaAgendar = this.formularioAgregarCita.get('doctor')!.valueChanges
             .pipe(
               startWith(''),
               map(value => this._filterNombre(value, this.lstDatosDoctorParaAgendar))
+            );*/
+          this.filteredDoctorParaAgendar = this.formularioAgregarCita.get('doctor')!.valueChanges
+            .pipe(
+              startWith(''),
+              map(value => this.desactivarFiltro ? this.lstDatosDoctorParaAgendar : this._filterNombre(value, this.lstDatosDoctorParaAgendar))
             );
-
           //this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
           this.llenarIntervalos();
 
@@ -522,6 +530,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   }
 
   async limpiarDatos() {
+    this.desactivarFiltro = true;
     this.formularioAgregarCita.setValue({
       fechaEditar: '',
       sillaEditar: '',
@@ -540,17 +549,19 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       duracion: '',
       observaciones: ''
     });
+    setTimeout(() => this.desactivarFiltro = false, 100);
     this.modoEdicion = false;
     await this.cambiarFecha();
   }
 
   async editarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
-
+      console.log('nombre', this.selectedRow.OUT_NOMBRE);
       if (this.selectedRow.OUT_NOMBRE) {
         this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
         this.modoEdicion = true;
-        this.formularioAgregarCita.setValue({
+        this.desactivarFiltro = true;
+        this.formularioAgregarCita.patchValue({
           fechaEditar: this.fechaSeleccionada,
           sillaEditar: this.sillaSeleccionada,
           horaEditar: this.horaCitaSeleccionada,
@@ -567,6 +578,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           duracion: this.selectedRow.OUT_DURACION,
           observaciones: this.selectedRow.OUT_ASUNTO
         });
+         // Reactivar el filtro después de un breve retraso
+         setTimeout(() => this.desactivarFiltro = false, 1000);
         this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
         this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
 
@@ -585,7 +598,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
     }
   }
-  
+
   async agendarCita() {
     let lstConfirmacionesPedidas: ConfirmacionesPedidas[] = [];
     if (!this.selectedRow) {
@@ -599,12 +612,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
     console.log(duracion);
     var horaFinal = this.buscarHoraFinal(horaCita, duracion);
-    var nombre = this.formularioAgregarCita.value.nombre.toUpperCase();
+    var nombre = this.formularioAgregarCita.value.nombre;
     console.log(nombre);
     var telefono = this.formularioAgregarCita.value.telefono;
-    var doctor = this.formularioAgregarCita.value.doctor.toUpperCase();
+    var doctor = this.formularioAgregarCita.value.doctor;
     console.log(doctor);
-    var asunto = this.formularioAgregarCita.value.asunto.toUpperCase();
+    var asunto = this.formularioAgregarCita.value.asunto;
     //var asistencia = this.formularioAgregarCita.value.asistencia;
     //var confirmar = this.formularioAgregarCita.value.confirmar;
     var numHistoria = this.formularioAgregarCita.value.numHistoria;
@@ -630,9 +643,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
         if (!doctorCorrecto) {
           await this.mensajesUsuariosService.mensajeInformativo('EL DOCTOR NO EXISTE EN LA LISTA');
+          this.doctorInput.nativeElement.focus();
           return;
         }
-        
+
         if (this.esFestivo && confirmarFestivos) {
           if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('El día es festivo, ¿aún así quieres dar la cita?')) {
             return;
@@ -650,6 +664,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         if (variosDoctoresPorUnidad) {
           if (!doctor) {
             await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR');
+            this.doctorInput.nativeElement.focus();
             return;
           }
         }
@@ -968,12 +983,20 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     return false; // Añade esta línea
   }
 
+  toISO88591(str: string): string {
+    return unescape(encodeURIComponent(str));
+  }
 
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
     //this.isloading = true;
     this.modoEdicion = false;
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre.toUpperCase();
+    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.NOMBRE_PACIENTE?.toString() === nombre);
+    let numHistoria = formulario.numHistoria;
+    if (!pacienteEncontrado) {
+      numHistoria = "0";
+    }
     var telefono = formulario.telefono;
     let datosParaGurdarEnAgenda: RespuestaConsultarPorDiaYPorUnidad = new RespuestaConsultarPorDiaYPorUnidad();
     let detalleCita: TDetalleCitas = new TDetalleCitas();
@@ -982,11 +1005,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       datosParaGurdarEnAgenda.detalleCitaEditar.FECHA = formulario.fechaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.SILLA = formulario.sillaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.HORA = formulario.horaEditar;
+      //datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = this.toISO88591(formulario.nombreEditar.toUpperCase());
       datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar.toUpperCase();
-      datosParaGurdarEnAgenda.detalleCitaEditar.ID = formulario.numHistoria;
+      datosParaGurdarEnAgenda.detalleCitaEditar.ID = numHistoria;
       datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = formulario.duracion;
-      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto.toUpperCase();
-      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto;
+      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor;
       //ojo aca deja editar el doctor
       datosParaGurdarEnAgenda.detalleCitaEditar.ASISTENCIA = formulario.asistencia;
       datosParaGurdarEnAgenda.detalleCitaEditar.CONFIRMAR = formulario.confirmar;
@@ -1002,17 +1026,18 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     detalleCita.FECHA = this.fechaSeleccionada;
     detalleCita.SILLA = this.sillaSeleccionada;
     detalleCita.HORA = horaCita;
-    let numHistoria = this.formularioAgregarCita.value.numHistoria;
-    if (!numHistoria) {
-      numHistoria = "0";
-    }
-    detalleCita.ID = this.formularioAgregarCita.value.numHistoria;
+    //let numHistoria = this.formularioAgregarCita.value.numHistoria;
+    //if (!numHistoria) {
+    //  numHistoria = "0";
+    //}
+    
+    detalleCita.ID = numHistoria;
     detalleCita.NOMBRE = nombre;
     detalleCita.TELEFONO = telefono;
     detalleCita.CELULAR = this.formularioAgregarCita.value.celular;
     console.log(this.formularioAgregarCita.value.observaciones);
-    detalleCita.ASUNTO = this.formularioAgregarCita.value.observaciones.toUpperCase();;
-    detalleCita.DOCTOR = this.formularioAgregarCita.value.doctor.toUpperCase();;
+    detalleCita.ASUNTO = this.formularioAgregarCita.value.observaciones;
+    detalleCita.DOCTOR = this.formularioAgregarCita.value.doctor;
     console.log(this.formularioAgregarCita.value.duracion);
     var duracion = this.formularioAgregarCita.value.duracion;
     if (!duracion) {
@@ -1094,7 +1119,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   private terminoRefrescarAgenda = new Subject<void>();
 
   async onHoraClicked(event: MouseEvent, row: any) {
-    if (!this.modoEdicion){
+    if (!this.modoEdicion) {
       event.stopPropagation(); // Evita que el evento de clic en la fila se active
 
       // Aquí va el código que quieres ejecutar cuando se hace clic en la columna "HORA"
@@ -1105,7 +1130,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         //this.isloading = false;
       });
       await this.cambiarFecha();
-    }else{
+    } else {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO');
       this.nombreInput.nativeElement.focus();
     }

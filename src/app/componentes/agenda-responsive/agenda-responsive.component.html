@@ -147,7 +147,7 @@
                     <input type="hidden" formControlName="confirmar" name="confirmar">
                     <div class="fila">
 
-                        <div class="campo-formulario historia">
+                        <div  class="campo-formulario historia">
                             <input #nombreInput type="text" placeholder="Nombre Paciente" formControlName="nombre"
                                 [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
                                 style="text-transform: uppercase;">
@@ -158,6 +158,8 @@
                                 </mat-option>
                             </mat-autocomplete>
                         </div>
+
+                        
                     </div>
                     <div class="fila">
                         <!--
@@ -206,15 +208,15 @@
 
                     <div class="fila">
                         <div class="campo-formulario historia">
-                            <input type="text" placeholder="Doctor" formControlName="doctor"
-                                [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
+                            <input #doctorInput type="text" placeholder="Doctor" formControlName="doctor"
+                                 class="form-control"
                                 style="text-transform: uppercase;" >
-                            <mat-autocomplete #autoDatosDoctorParaAgendar="matAutocomplete">
+                            
                                 <mat-option *ngFor="let datosDoctor of filteredDoctorParaAgendar | async"
                                     [value]="datosDoctor.nombre">
                                     {{ datosDoctor.nombre }}
                                 </mat-option>
-                            </mat-autocomplete>
+                            
                         </div>
                         
 
