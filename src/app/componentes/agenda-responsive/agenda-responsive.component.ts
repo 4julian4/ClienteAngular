@@ -57,6 +57,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   //variables para poner foco en los inputs
   @ViewChild('nombreInput') nombreInput!: ElementRef;
   @ViewChild('telefonoInput') telefonoInput!: ElementRef;
+  @ViewChild('doctorInput') doctorInput!: ElementRef;
   intervalosDeTiempo: any[] = [];
   intervaloDeTiempoSeleccionado: number = 0; // Valor por defecto
   modoEdicion: boolean = false;
@@ -677,10 +678,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
         if (doctorPorCita && !doctor) {
           await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR');
+          this.doctorInput.nativeElement.focus(); // Enfoca el campo de teléfono
           return;
         }
         if (!doctorCorrecto) {
           await this.mensajesUsuariosService.mensajeInformativo('EL DOCTOR NO EXISTE EN LA LISTA');
+          this.doctorInput.nativeElement.focus(); // Enfoca el campo de teléfono
           return;
         }
         if (this.esFestivo && confirmarFestivos) {

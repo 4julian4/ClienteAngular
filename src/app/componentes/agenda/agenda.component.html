@@ -1,386 +1,383 @@
-<html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <div class="contenedor" #panelBuscarPersona>
 
-        <mat-accordion>
-            <mat-expansion-panel #miPanelBucarCitas class="mat-expansion-panel" [disabled]="panelBuscarCitaDeshabilitado"
-                (closed)="deshabilitarPanelBuscarCita()">
-                <mat-expansion-panel-header>
+<div class="contenedor" #panelBuscarPersona>
 
-                    <mat-panel-description class="mat-expansion-description-panel">
-                        <div class="contenedorArriba">
-                            <div class="barra-superior">
-                                <div class="custom-select">
-                                    <!--  <label for="sillaSeleccionada">{{ sillaSeleccionada }}</label> -->
-                                    <select id="sillaSeleccionada" [(ngModel)]="sillaSeleccionada"
-                                        (ngModelChange)="onSillaChange($event)">
-                                        <option *ngFor="let silla of lstHorariosAgenda" [value]="silla.SILLA">
-                                            {{ silla.DESCRIPCION ? silla.DESCRIPCION : 'UNIDAD' +" "+ silla.SILLA }}
-                                        </option>
-                                    </select>
-                                </div>
+    <mat-accordion>
+        <mat-expansion-panel #miPanelBucarCitas class="mat-expansion-panel" [disabled]="panelBuscarCitaDeshabilitado"
+            (closed)="deshabilitarPanelBuscarCita()">
+            <mat-expansion-panel-header>
 
-                                <div class="buscarAgenda">
-                                    <input type="text" placeholder="Dijita nombre, telefono o numero de historia a buscar"
-                                        [formControl]="datosPacienteParaBuscarAgendaControl"
-                                        [matAutocomplete]="autoDatosPacienteParaBuscarAgenda" class="example-input"
-                                        style="text-transform: uppercase;" (keydown)="stopAccordionToggle($event)"
-                                        (input)="datosPacienteParaBuscarAgendaControl.setValue(datosPacienteParaBuscarAgendaControl.value.toUpperCase())" (keyup.enter)="buscarCitasPaciente(datosPacienteParaBuscarAgendaControl.value)">
-                                    <mat-autocomplete #autoDatosPacienteParaBuscarAgenda="matAutocomplete">
-                                        <!--<mat-option
-                                            *ngFor="let datosPacienteBuscar of filteredDatosPacienteParaBuscarAgenda | async"
-                                            [value]="datosPacienteBuscar.nombre">
-                                            {{ datosPacienteBuscar.nombre }} - {{ datosPacienteBuscar.idAnamenesisTexto }} -
-                                            {{ datosPacienteBuscar.telefono }}
-                                        </mat-option>-->
-                                    </mat-autocomplete>
+                <mat-panel-description class="mat-expansion-description-panel">
+                    <div class="contenedorArriba">
+                        <div class="barra-superior">
+                            <div class="custom-select">
+                                <!--  <label for="sillaSeleccionada">{{ sillaSeleccionada }}</label> -->
+                                <select id="sillaSeleccionada" [(ngModel)]="sillaSeleccionada"
+                                    (ngModelChange)="onSillaChange($event)">
+                                    <option *ngFor="let silla of lstHorariosAgenda" [value]="silla.SILLA">
+                                        {{ silla.DESCRIPCION ? silla.DESCRIPCION : 'UNIDAD' +" "+ silla.SILLA }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="buscarAgenda">
+                                <input type="text" placeholder="Dijita nombre, telefono o numero de historia a buscar"
+                                    [formControl]="datosPacienteParaBuscarAgendaControl"
+                                    [matAutocomplete]="autoDatosPacienteParaBuscarAgenda" class="example-input"
+                                    style="text-transform: uppercase;" (keydown)="stopAccordionToggle($event)"
+                                    (input)="datosPacienteParaBuscarAgendaControl.setValue(datosPacienteParaBuscarAgendaControl.value.toUpperCase())" (keyup.enter)="buscarCitasPaciente(datosPacienteParaBuscarAgendaControl.value)">
+                                <mat-autocomplete #autoDatosPacienteParaBuscarAgenda="matAutocomplete">
+                                    <!--<mat-option
+                                        *ngFor="let datosPacienteBuscar of filteredDatosPacienteParaBuscarAgenda | async"
+                                        [value]="datosPacienteBuscar.nombre">
+                                        {{ datosPacienteBuscar.nombre }} - {{ datosPacienteBuscar.idAnamenesisTexto }} -
+                                        {{ datosPacienteBuscar.telefono }}
+                                    </mat-option>-->
+                                </mat-autocomplete>
 
 
 
-                                    <button mat-icon-button
-                                        (click)="buscarCitasPaciente(datosPacienteParaBuscarAgendaControl.value)">
-                                        <mat-icon>search</mat-icon>
-                                    </button>
-                                </div>
+                                <button mat-icon-button
+                                    (click)="buscarCitasPaciente(datosPacienteParaBuscarAgendaControl.value)">
+                                    <mat-icon>search</mat-icon>
+                                </button>
                             </div>
                         </div>
-                    </mat-panel-description>
-                </mat-expansion-panel-header>
-
-                <!-- Aquí iría tu tabla con los resultados de la búsqueda -->
-                <div class="divContenedorDatosEncontrados">
-                    <div class="scrollable-content">
-                        <table mat-table [dataSource]="resultadosBusquedaCitaPacienteAgenda" class="tablaBusquedaPaciente">
-                            <!-- Definición de las columnas de la tabla -->
-
-                            <ng-container matColumnDef="fecha">
-                                <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> Fecha</th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" class="columnaIdAnamnesis"
-                                    matTooltip="Haz clic para ir a la cita">
-                                    {{datosCitaPaciente.FECHA_CITA | date:'dd-MM-yyyy'}}
-                                </td>
-                            </ng-container>
-                            <ng-container matColumnDef="hora">
-                                <th mat-header-cell *matHeaderCellDef> Hora </th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
-                                    {{fechaHoraHelperService.convertirHora(datosCitaPaciente.HORA_CITA)}} </td>
-                            </ng-container>
-                            <ng-container matColumnDef="numHistoria">
-                                <th mat-header-cell *matHeaderCellDef> N° Historia </th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
-                                    {{datosCitaPaciente.ID}} </td>
-                            </ng-container>
-                            <ng-container matColumnDef="nombre">
-                                <th mat-header-cell *matHeaderCellDef> Nombre </th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
-                                    {{datosCitaPaciente.NOMBRE_PACIENTE}} </td>
-                            </ng-container>
-                            <ng-container matColumnDef="telefono">
-                                <th mat-header-cell *matHeaderCellDef> Telefono 1 </th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
-                                    {{datosCitaPaciente.TELEFONO_PACIENTE}} </td>
-                            </ng-container>
-                            <ng-container matColumnDef="cedula">
-                                <th mat-header-cell *matHeaderCellDef> Cedula </th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
-                                    {{datosCitaPaciente.NUMDOCUMENTO}} </td>
-                            </ng-container>
-                            <ng-container matColumnDef="doctor">
-                                <th mat-header-cell *matHeaderCellDef> Doctor </th>
-                                <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
-                                    {{datosCitaPaciente.DOCTOR}} </td>
-                            </ng-container>
-
-                            <!-- Aquí puedes agregar más columnas según sea necesario -->
-
-                            <!-- Fila de encabezado y filas de datos -->
-                            <tr mat-header-row *matHeaderRowDef="columnasMostradasCitasEncontradas"></tr>
-                            <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradasCitasEncontradas;"
-                                (click)="onRowClickedBuscarAgenda(filaSeleccionada)" class="filaClickeable"></tr>
-                        </table>
                     </div>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Aquí iría tu tabla con los resultados de la búsqueda -->
+            <div class="divContenedorDatosEncontrados">
+                <div class="scrollable-content">
+                    <table mat-table [dataSource]="resultadosBusquedaCitaPacienteAgenda" class="tablaBusquedaPaciente">
+                        <!-- Definición de las columnas de la tabla -->
+
+                        <ng-container matColumnDef="fecha">
+                            <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> Fecha</th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" class="columnaIdAnamnesis"
+                                matTooltip="Haz clic para ir a la cita">
+                                {{datosCitaPaciente.FECHA_CITA | date:'dd-MM-yyyy'}}
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="hora">
+                            <th mat-header-cell *matHeaderCellDef> Hora </th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
+                                {{fechaHoraHelperService.convertirHora(datosCitaPaciente.HORA_CITA)}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="numHistoria">
+                            <th mat-header-cell *matHeaderCellDef> N° Historia </th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
+                                {{datosCitaPaciente.ID}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
+                                {{datosCitaPaciente.NOMBRE_PACIENTE}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="telefono">
+                            <th mat-header-cell *matHeaderCellDef> Telefono 1 </th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
+                                {{datosCitaPaciente.TELEFONO_PACIENTE}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="cedula">
+                            <th mat-header-cell *matHeaderCellDef> Cedula </th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
+                                {{datosCitaPaciente.NUMDOCUMENTO}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="doctor">
+                            <th mat-header-cell *matHeaderCellDef> Doctor </th>
+                            <td mat-cell *matCellDef="let datosCitaPaciente" matTooltip="Haz clic para ir a la cita">
+                                {{datosCitaPaciente.DOCTOR}} </td>
+                        </ng-container>
+
+                        <!-- Aquí puedes agregar más columnas según sea necesario -->
+
+                        <!-- Fila de encabezado y filas de datos -->
+                        <tr mat-header-row *matHeaderRowDef="columnasMostradasCitasEncontradas"></tr>
+                        <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradasCitasEncontradas;"
+                            (click)="onRowClickedBuscarAgenda(filaSeleccionada)" class="filaClickeable"></tr>
+                    </table>
                 </div>
+            </div>
 
-                <!---------------------------------------------------------->
-            </mat-expansion-panel>
-        </mat-accordion>
-    </div>
-    <div class="contenedorAbajo">
+            <!---------------------------------------------------------->
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>
+<div class="contenedorAbajo">
 
-        <div class="contenedor-izquierdo">
-            <div class="scrollable-content-izquierdo">
-                <div class="divCalendario">
-                    <mat-calendar #miCalendario [(selected)]="fechaSeleccionada"
-                        (selectedChange)="cambiarFecha()"></mat-calendar>
-                </div>
-                <!-- Formulario para agendar la cita -->
-                <form *ngIf="showForm" class="formulario-cita" [formGroup]="formularioAgregarCita">
-                    <input type="hidden" formControlName="fechaEditar" name="fechaEditar">
-                    <input type="hidden" formControlName="horaEditar" name="horaEditar">
-                    <input type="hidden" formControlName="sillaEditar" name="sillaEditar">
-                    <input type="hidden" formControlName="nombreEditar" name="nombreEditar">
-                    <input type="hidden" formControlName="asistencia" name="asistencia">
-                    <input type="hidden" formControlName="confirmar" name="confirmar">
-                    <div class="fila">
+    <div class="contenedor-izquierdo">
+        <div class="scrollable-content-izquierdo">
+            <div class="divCalendario">
+                <mat-calendar #miCalendario [(selected)]="fechaSeleccionada"
+                    (selectedChange)="cambiarFecha()"></mat-calendar>
+            </div>
+            <!-- Formulario para agendar la cita -->
+            <form *ngIf="showForm" class="formulario-cita" [formGroup]="formularioAgregarCita">
+                <input type="hidden" formControlName="fechaEditar" name="fechaEditar">
+                <input type="hidden" formControlName="horaEditar" name="horaEditar">
+                <input type="hidden" formControlName="sillaEditar" name="sillaEditar">
+                <input type="hidden" formControlName="nombreEditar" name="nombreEditar">
+                <input type="hidden" formControlName="asistencia" name="asistencia">
+                <input type="hidden" formControlName="confirmar" name="confirmar">
+                <div class="fila">
 
-                        <div class="campo-formulario historia">
-                            <input #nombreInput type="text"  placeholder="Nombre Paciente" formControlName="nombre"
-                                [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
-                                style="text-transform: uppercase;">
-                            <mat-autocomplete #autoDatosPacienteParaAgendar="matAutocomplete">
-                                <mat-option *ngFor="let datosCitaPaciente of filteredNombrePacienteParaAgendar | async"
-                                    [value]="datosCitaPaciente.nombre">
-                                    {{ datosCitaPaciente.nombre }}
-                                </mat-option>
-                            </mat-autocomplete>
-                        </div>
-                    </div>
-                    <div class="fila">
-                        <!--
-                        <div class="campo-formulario telefono">
-                            <input type="text" placeholder="Teléfono" formControlName="telefono"
-                                [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
-                                style="text-transform: uppercase;">
-                            <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
-                                <ng-container
-                                    *ngFor="let telefonoPaciente of (filteredTelefonoPacienteParaAgendar | async)">
-                                    <mat-option *ngIf="telefonoPaciente.nombre && telefonoPaciente.nombre.trim() != ''"
-                                        [value]="telefonoPaciente.nombre">
-                                        {{ telefonoPaciente.nombre }}
-                                    </mat-option>
-                                </ng-container>
-                            </mat-autocomplete>
-                        </div>
-                        -->
-                        <div class="campo-formulario telefono">
-                            <input #telefonoInput  type="text" placeholder="Teléfono 1" formControlName="telefono"
-                            [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
+                    <div class="campo-formulario historia">
+                        <input #nombreInput type="text"  placeholder="Nombre Paciente" formControlName="nombre"
+                            [matAutocomplete]="autoDatosPacienteParaAgendar" class="example-input"
                             style="text-transform: uppercase;">
-                            <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
-                            <!-- <mat-option *ngFor="let telefonoPaciente of (filteredTelefonoPacienteParaAgendar | async)" [value]="telefonoPaciente.nombre">
-                                    {{ telefonoPaciente.nombre }}
-                                </mat-option> -->
-                            </mat-autocomplete>
-                        </div>
-
-                        <div class="campo-formulario telefono">
-                            <input type="text" placeholder="Teléfono 2" formControlName="celular"
-                                [matAutocomplete]="autoCelularPacienteParaAgendar" class="form-control"
-                                style="text-transform: uppercase;">
-                            <mat-autocomplete #autoCelularPacienteParaAgendar="matAutocomplete">
-                                <ng-container *ngFor="let celularPaciente of (filteredCelularPacienteParaAgendar | async)">
-                                    <!--<mat-option *ngIf="celularPaciente.nombre && celularPaciente.nombre.trim() != ''"
-                                        [value]="celularPaciente.nombre">
-                                        {{ celularPaciente.nombre }}
-                                    </mat-option>-->
-                                </ng-container>
-                            </mat-autocomplete>
-                        </div>
-
-                        
-
-                        
-                        
-
-                    </div>
-
-                    <div class="fila">
-                        <div class="campo-formulario historia">
-                            <input type="text"  placeholder="Doctor" formControlName="doctor"
-                                [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
-                                style="text-transform: uppercase;">
-                            <mat-autocomplete #autoDatosDoctorParaAgendar="matAutocomplete">
-                                <mat-option *ngFor="let datosDoctor of filteredDoctorParaAgendar | async"
-                                    [value]="datosDoctor.nombre">
-                                    {{ datosDoctor.nombre }}
-                                </mat-option>
-                            </mat-autocomplete>
-                        </div>
-
-
-                    </div>
-                    <div class="fila">
-                        <div class="campo-formulario observaciones">
-                            <input  type="text" placeholder="Historia" formControlName="numHistoria"
-                                [matAutocomplete]="autoHistoriaPacienteParaAgendar" class="form-control"
-                                style="text-transform: uppercase;">
-                            <mat-autocomplete #autoHistoriaPacienteParaAgendar="matAutocomplete">
-                                <mat-option *ngFor="let historiaPaciente of filteredHistoriaPacienteParaAgendar | async"
-                                    [value]="historiaPaciente.nombre">
-                                    {{ historiaPaciente.nombre }}
-                                </mat-option>
-                            </mat-autocomplete>
-                        </div>
-                        
-                        <div class="campo-formulario historia">
-                            <input type="text" placeholder="Duración" formControlName="duracion"
-                                [matAutocomplete]="autoDatosDuracionParaAgendar" class="form-control"
-                                style="text-transform: uppercase;" (keydown)="$event.preventDefault()"
-                                (click)="duracion.setValue('')">
-                            <mat-autocomplete #autoDatosDuracionParaAgendar="matAutocomplete">
-                                <mat-option *ngFor="let intervalo of intervalos " [value]="intervalo">
-                                    {{ intervalo }}
-                                </mat-option>
-                            </mat-autocomplete>
-                        </div>
-                    </div>
-
-                    <div class="campo-formulario observaciones">
-                        <input type="text"  placeholder="Asunto" formControlName="observaciones"
-                            [matAutocomplete]="autoDatosAsuntoParaAgendar" class="form-control"
-                            style="text-transform: uppercase;" (keydown)="$event.preventDefault()">
-                        <mat-autocomplete #autoDatosAsuntoParaAgendar="matAutocomplete">
-                            <mat-option *ngFor="let item of listaHorariosAsuntosPorSilla" [value]="item.ASUNTO">
-                                {{ item.ASUNTO }}
+                        <mat-autocomplete #autoDatosPacienteParaAgendar="matAutocomplete">
+                            <mat-option *ngFor="let datosCitaPaciente of filteredNombrePacienteParaAgendar | async"
+                                [value]="datosCitaPaciente.nombre">
+                                {{ datosCitaPaciente.nombre }}
                             </mat-option>
                         </mat-autocomplete>
                     </div>
-                
 
-                    <div class="fila">
-                        <button class="boton-generar-cita" (click)="agendarCita()">Agendar</button>
-                        <button #botonCancelarEditar class="boton-generar-cita" (click)="limpiarDatos()">Cancelar</button>
+                    
+                </div>
+                <div class="fila">
+                    <!--
+                    <div class="campo-formulario telefono">
+                        <input type="text" placeholder="Teléfono" formControlName="telefono"
+                            [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
+                            style="text-transform: uppercase;">
+                        <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
+                            <ng-container
+                                *ngFor="let telefonoPaciente of (filteredTelefonoPacienteParaAgendar | async)">
+                                <mat-option *ngIf="telefonoPaciente.nombre && telefonoPaciente.nombre.trim() != ''"
+                                    [value]="telefonoPaciente.nombre">
+                                    {{ telefonoPaciente.nombre }}
+                                </mat-option>
+                            </ng-container>
+                        </mat-autocomplete>
                     </div>
-                </form>
-            </div>
+                    -->
+                    <div class="campo-formulario telefono">
+                        <input #telefonoInput  type="text" placeholder="Teléfono 1" formControlName="telefono"
+                        [matAutocomplete]="autoTelefonoPacienteParaAgendar" class="form-control"
+                        style="text-transform: uppercase;">
+                        <mat-autocomplete #autoTelefonoPacienteParaAgendar="matAutocomplete">
+                        <!-- <mat-option *ngFor="let telefonoPaciente of (filteredTelefonoPacienteParaAgendar | async)" [value]="telefonoPaciente.nombre">
+                                {{ telefonoPaciente.nombre }}
+                            </mat-option> -->
+                        </mat-autocomplete>
+                    </div>
+
+                    <div class="campo-formulario telefono">
+                        <input type="text" placeholder="Teléfono 2" formControlName="celular"
+                            [matAutocomplete]="autoCelularPacienteParaAgendar" class="form-control"
+                            style="text-transform: uppercase;">
+                        <mat-autocomplete #autoCelularPacienteParaAgendar="matAutocomplete">
+                            <ng-container *ngFor="let celularPaciente of (filteredCelularPacienteParaAgendar | async)">
+                                <!--<mat-option *ngIf="celularPaciente.nombre && celularPaciente.nombre.trim() != ''"
+                                    [value]="celularPaciente.nombre">
+                                    {{ celularPaciente.nombre }}
+                                </mat-option>-->
+                            </ng-container>
+                        </mat-autocomplete>
+                    </div>
+
+                    
+
+                    
+                    
+
+                </div>
+
+                <div class="fila">
+                    <div class="campo-formulario historia">
+                        <input #doctorInput type="text"   placeholder="Doctor" formControlName="doctor"
+                            [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
+                            style="text-transform: uppercase;">
+                        <mat-autocomplete #autoDatosDoctorParaAgendar="matAutocomplete">
+                            <mat-option *ngFor="let datosDoctor of filteredDoctorParaAgendar | async"
+                                [value]="datosDoctor.nombre">
+                                {{ datosDoctor.nombre }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </div>
+
+
+                </div>
+                <div class="fila">
+                    <div class="campo-formulario observaciones">
+                        <input  type="text" placeholder="Historia" formControlName="numHistoria"
+                            [matAutocomplete]="autoHistoriaPacienteParaAgendar" class="form-control"
+                            style="text-transform: uppercase;">
+                        <mat-autocomplete #autoHistoriaPacienteParaAgendar="matAutocomplete">
+                            <mat-option *ngFor="let historiaPaciente of filteredHistoriaPacienteParaAgendar | async"
+                                [value]="historiaPaciente.nombre">
+                                {{ historiaPaciente.nombre }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </div>
+                    
+                    <div class="campo-formulario historia">
+                        <input type="text" placeholder="Duración" formControlName="duracion"
+                            [matAutocomplete]="autoDatosDuracionParaAgendar" class="form-control"
+                            style="text-transform: uppercase;" (keydown)="$event.preventDefault()"
+                            (click)="duracion.setValue('')">
+                        <mat-autocomplete #autoDatosDuracionParaAgendar="matAutocomplete">
+                            <mat-option *ngFor="let intervalo of intervalos " [value]="intervalo">
+                                {{ intervalo }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </div>
+                </div>
+
+                <div class="campo-formulario observaciones">
+                    <input type="text"   placeholder="Asunto" formControlName="observaciones"
+                        [matAutocomplete]="autoDatosAsuntoParaAgendar" class="form-control"
+                        style="text-transform: uppercase;" >
+                    <mat-autocomplete #autoDatosAsuntoParaAgendar="matAutocomplete">
+                        <mat-option *ngFor="let item of listaHorariosAsuntosPorSilla" [value]="item.ASUNTO">
+                            {{ item.ASUNTO }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </div>
+            
+
+                <div class="fila">
+                    <button class="boton-generar-cita" (click)="agendarCita()">Agendar</button>
+                    <button #botonCancelarEditar class="boton-generar-cita" (click)="limpiarDatos()">Cancelar</button>
+                </div>
+            </form>
         </div>
-        <div class="contenedor-derecho">
-            <div class="scrollable-content-derecho">
-                <mat-table #myTable class="tabla-horarios" [dataSource]="resultadosBusquedaAgendaPorFecha">
-
-                    <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
-                        <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
-                        <mat-cell *matCellDef="let intervalo" class="hora-column"
-                            (click)="onHoraClicked($event, intervalo)">
-                            <input [(ngModel)]="intervalo.OUT_CODIGO" type="hidden">
-                            <input [(ngModel)]="intervalo.OUT_HORA_CITA" type="hidden">
-                            <input [(ngModel)]="intervalo.OUT_ASISTENCIA" type="hidden">
-                            <input [(ngModel)]="intervalo.OUT_CONFIRMAR" type="hidden">
-                            <input [(ngModel)]="intervalo.OUT_ALARMAR" type="hidden">
-                            {{fechaHoraHelperService.convertirHora(intervalo.OUT_HORA)}}
-                        </mat-cell>
-                    </ng-container>
-
-                    <ng-container class="otro-Campo" matColumnDef="OUT_NOMBRE">
-                        <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
-                        <mat-cell *matCellDef="let intervalo; let i = index">
-                            <ng-container
-                                *ngIf="i === 0 || intervalo.OUT_NOMBRE !== resultadosBusquedaAgendaPorFecha[i-1].OUT_NOMBRE">
-                                <input [(ngModel)]="intervalo.OUT_NOMBRE" placeholder="">
-                            </ng-container>
-                            <ng-container
-                                *ngIf="i !== 0 && intervalo.OUT_NOMBRE === resultadosBusquedaAgendaPorFecha[i-1].OUT_NOMBRE">
-                                <!-- Aquí puedes poner lo que quieras mostrar cuando la condición es verdadera -->
-                            </ng-container>
-                        </mat-cell>
-                    </ng-container>
-
-
-
-                    <!-- Telefono Column -->
-                    <ng-container class="otro-Campo" matColumnDef="OUT_TELEFONO">
-                        <mat-header-cell *matHeaderCellDef> Telefono 1 </mat-header-cell>
-                        <mat-cell *matCellDef="let intervalo; let i = index">
-                            <input [(ngModel)]="intervalo.OUT_TELEFONO" placeholder="">
-                            <!--<ng-container *ngIf="intervalo.OUT_HORA_CITA !== horaCitaSeleccionada">
-                                    
-                                </ng-container>-->
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- Celular Column -->
-                    <ng-container class="otro-Campo" matColumnDef="OUT_CELULAR">
-                        <mat-header-cell *matHeaderCellDef> Telefono 2 </mat-header-cell>
-                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_CELULAR" placeholder="">
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- Historia Column -->
-                    <ng-container class="otro-Campo" matColumnDef="OUT_DOCTOR">
-                        <mat-header-cell *matHeaderCellDef>Doctor </mat-header-cell>
-                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_DOCTOR" placeholder="">
-                        </mat-cell>
-                    </ng-container>
-
-                    <!-- Observaciones Column -->
-                    <ng-container class="otro-Campo" matColumnDef="OUT_ASUNTO">
-                        <mat-header-cell *matHeaderCellDef> Asunto </mat-header-cell>
-                        <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_ASUNTO" placeholder="">
-                        </mat-cell>
-                    </ng-container>
-
-
-
-                    <mat-menu #rowMenu="matMenu">
-                        <button mat-menu-item [matMenuTriggerFor]="confirmarMenu">Confirmar</button>
-                        <button mat-menu-item [matMenuTriggerFor]="asistenciaMenu">Asistencia</button>
-                        <button mat-menu-item (click)="cancelarCita()">Cancelar</button>
-                        <button mat-menu-item (click)="agendarCita()">Agregar</button>
-                        <button mat-menu-item (click)="editarCita()">Editar</button>
-                        <button mat-menu-item (click)="borrarCita()">Borrar</button>
-                        <button mat-menu-item (click)="agregarEvolucion()">Agregar Evolucion</button> 
-                    </mat-menu>
-
-                    <mat-menu #confirmarMenu="matMenu">
-                        <button mat-menu-item (click)="confirmar()">Confirmar</button>
-                        <button mat-menu-item (click)="sinConfirmar()">Sin Confirmar</button>
-                    </mat-menu>
-
-                    <mat-menu #asistenciaMenu="matMenu">
-                        <button mat-menu-item (click)="asistenciaSi()">Sí</button>
-                        <button mat-menu-item (click)="asistenciaNo()">No</button>
-                        <button mat-menu-item (click)="quitarAsistencia()">Quitar</button>
-                    </mat-menu>
-
-                    <!-- Luego, agrega un botón en cada fila de la tabla que abra el menú -->
-                    <ng-container matColumnDef="ACCIONES">
-                        <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
-                        <mat-cell *matCellDef="let row">
-                            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="onMenuClicked(row)"
-                                style="height: 24px; margin: 0; padding: 0;">
-                                <mat-icon>more_vert</mat-icon>
-                            </button>
-                        </mat-cell>
-                    </ng-container>
-
-
-                    <mat-header-row class="fila-superior" *matHeaderRowDef="displayedColumns"></mat-header-row>
-
-                    <!-- contenido de la fila -->
-                    <mat-row #row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClickedAgenda(row)"
-                        [ngStyle]="{'background-color': getColor(row)}" [class.selected]="row === selectedRow"
-                        [ngClass]="{'selected-row': highlightedRows.includes(row)}">
-
-                        <!-- <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClicked(row)"
-                            [ngStyle]="{'background-color': getColor(row)}" [class.selected]="row === selectedRow" [ngClass]="{'selected-row': row === selectedRow}"> -->
-
-                        <mat-cell *matCellDef="let element">{{element.OUT_HORA}}</mat-cell>
-                        <mat-cell *matCellDef="let element">
-                            <ng-container *ngIf="element.OUT_HORA_CITA.toString() !== horaCitaSeleccionada; else empty">
-                                {{log(element.OUT_HORA_CITA)}}
-                                {{element.OUT_NOMBRE}}
-                            </ng-container>
-                            <ng-template #empty></ng-template>
-                        </mat-cell>
-                        <mat-cell *matCellDef="let element; let i = index">
-                            <ng-container *ngIf="element.OUT_HORA_CITA.toString() !== horaCitaSeleccionada; else empty">
-                                {{element.OUT_TELEFONO}}
-                            </ng-container>
-                            <ng-template #empty></ng-template>
-                        </mat-cell>
-                        <!-- Repite este patrón para el resto de las celdas -->
-                    </mat-row>
-
-
-                </mat-table>
-            </div>
-        </div>
-        <div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
-            <mat-spinner></mat-spinner>
-        </div>
-
     </div>
-</html>
+    <div class="contenedor-derecho">
+        <div class="scrollable-content-derecho">
+            <mat-table #myTable class="tabla-horarios" [dataSource]="resultadosBusquedaAgendaPorFecha">
+
+                <ng-container class="hora-column-contenedor" matColumnDef="OUT_HORA">
+                    <mat-header-cell *matHeaderCellDef class="hora-column-header"> Hora </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo" class="hora-column"
+                        (click)="onHoraClicked($event, intervalo)">
+                        <input [(ngModel)]="intervalo.OUT_CODIGO" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_HORA_CITA" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_ASISTENCIA" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_CONFIRMAR" type="hidden">
+                        <input [(ngModel)]="intervalo.OUT_ALARMAR" type="hidden">
+                        {{fechaHoraHelperService.convertirHora(intervalo.OUT_HORA)}}
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container class="otro-Campo" matColumnDef="OUT_NOMBRE">
+                    <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo; let i = index">
+                        <ng-container
+                            *ngIf="i === 0 || intervalo.OUT_NOMBRE !== resultadosBusquedaAgendaPorFecha[i-1].OUT_NOMBRE">
+                            <input [(ngModel)]="intervalo.OUT_NOMBRE" placeholder="">
+                        </ng-container>
+                        <ng-container
+                            *ngIf="i !== 0 && intervalo.OUT_NOMBRE === resultadosBusquedaAgendaPorFecha[i-1].OUT_NOMBRE">
+                            <!-- Aquí puedes poner lo que quieras mostrar cuando la condición es verdadera -->
+                        </ng-container>
+                    </mat-cell>
+                </ng-container>
+
+
+
+                <!-- Telefono Column -->
+                <ng-container class="otro-Campo" matColumnDef="OUT_TELEFONO">
+                    <mat-header-cell *matHeaderCellDef> Telefono 1 </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo; let i = index">
+                        <input [(ngModel)]="intervalo.OUT_TELEFONO" placeholder="">
+                        <!--<ng-container *ngIf="intervalo.OUT_HORA_CITA !== horaCitaSeleccionada">
+                                
+                            </ng-container>-->
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Celular Column -->
+                <ng-container class="otro-Campo" matColumnDef="OUT_CELULAR">
+                    <mat-header-cell *matHeaderCellDef> Telefono 2 </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_CELULAR" placeholder="">
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Historia Column -->
+                <ng-container class="otro-Campo" matColumnDef="OUT_DOCTOR">
+                    <mat-header-cell *matHeaderCellDef>Doctor </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_DOCTOR" placeholder="">
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Observaciones Column -->
+                <ng-container class="otro-Campo" matColumnDef="OUT_ASUNTO">
+                    <mat-header-cell *matHeaderCellDef> Asunto </mat-header-cell>
+                    <mat-cell *matCellDef="let intervalo"> <input [(ngModel)]="intervalo.OUT_ASUNTO" placeholder="">
+                    </mat-cell>
+                </ng-container>
+
+
+
+                <mat-menu #rowMenu="matMenu">
+                    <button mat-menu-item [matMenuTriggerFor]="confirmarMenu">Confirmar</button>
+                    <button mat-menu-item [matMenuTriggerFor]="asistenciaMenu">Asistencia</button>
+                    <button mat-menu-item (click)="cancelarCita()">Cancelar</button>
+                    <button mat-menu-item (click)="agendarCita()">Agregar</button>
+                    <button mat-menu-item (click)="editarCita()">Editar</button>
+                    <button mat-menu-item (click)="borrarCita()">Borrar</button>
+                    <button mat-menu-item (click)="agregarEvolucion()">Agregar Evolucion</button> 
+                </mat-menu>
+
+                <mat-menu #confirmarMenu="matMenu">
+                    <button mat-menu-item (click)="confirmar()">Confirmar</button>
+                    <button mat-menu-item (click)="sinConfirmar()">Sin Confirmar</button>
+                </mat-menu>
+
+                <mat-menu #asistenciaMenu="matMenu">
+                    <button mat-menu-item (click)="asistenciaSi()">Sí</button>
+                    <button mat-menu-item (click)="asistenciaNo()">No</button>
+                    <button mat-menu-item (click)="quitarAsistencia()">Quitar</button>
+                </mat-menu>
+
+                <!-- Luego, agrega un botón en cada fila de la tabla que abra el menú -->
+                <ng-container matColumnDef="ACCIONES">
+                    <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
+                    <mat-cell *matCellDef="let row">
+                        <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="onMenuClicked(row)"
+                            style="height: 24px; margin: 0; padding: 0;">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                    </mat-cell>
+                </ng-container>
+
+
+                <mat-header-row class="fila-superior" *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+                <!-- contenido de la fila -->
+                <mat-row #row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClickedAgenda(row)"
+                    [ngStyle]="{'background-color': getColor(row)}" [class.selected]="row === selectedRow"
+                    [ngClass]="{'selected-row': highlightedRows.includes(row)}">
+
+                    <!-- <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClicked(row)"
+                        [ngStyle]="{'background-color': getColor(row)}" [class.selected]="row === selectedRow" [ngClass]="{'selected-row': row === selectedRow}"> -->
+
+                    <mat-cell *matCellDef="let element">{{element.OUT_HORA}}</mat-cell>
+                    <mat-cell *matCellDef="let element">
+                        <ng-container *ngIf="element.OUT_HORA_CITA.toString() !== horaCitaSeleccionada; else empty">
+                            {{log(element.OUT_HORA_CITA)}}
+                            {{element.OUT_NOMBRE}}
+                        </ng-container>
+                        <ng-template #empty></ng-template>
+                    </mat-cell>
+                    <mat-cell *matCellDef="let element; let i = index">
+                        <ng-container *ngIf="element.OUT_HORA_CITA.toString() !== horaCitaSeleccionada; else empty">
+                            {{element.OUT_TELEFONO}}
+                        </ng-container>
+                        <ng-template #empty></ng-template>
+                    </mat-cell>
+                    <!-- Repite este patrón para el resto de las celdas -->
+                </mat-row>
+
+
+            </mat-table>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
+        <mat-spinner></mat-spinner>
+    </div>
+
+</div>
