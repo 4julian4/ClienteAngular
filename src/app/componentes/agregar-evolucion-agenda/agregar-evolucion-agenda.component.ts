@@ -103,11 +103,13 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
       // this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucion);
     });
     //await this.guardarEvolucion();
-
+    setTimeout(() => {
+      this.tratamiento.nativeElement.focus(); // Pone el foco en el elemento
+    }, 300);
   }
 
   ngAfterViewInit(): void {
-    const recognition = new webkitSpeechRecognition();
+    /*const recognition = new webkitSpeechRecognition();
     recognition.lang = 'es-ES';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
@@ -131,7 +133,7 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
 
     recognition.addEventListener('result', (event: any) => {
       this.tratamiento.nativeElement.value += event.results[0][0].transcript; // Agrega el resultado al valor existente
-    });
+    });*/
   }
 
   handleClick() {

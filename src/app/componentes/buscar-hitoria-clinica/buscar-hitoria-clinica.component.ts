@@ -43,6 +43,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   opcionSeleccionada: string = '1';
   nombreValorSeleccionado: string = '';
   @ViewChild('valorABuscar') valorABuscar: ElementRef | undefined;
+  @ViewChild('buscarPacienteInput') buscarPacienteInput!: ElementRef;
   idAnamnesisParaMenu: number = 0;
   idSedeActualSignalR: string = '';
   idSedeActualSignalRMenu: string = '';
@@ -273,6 +274,10 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
 
   panelBuscarPacienteOpen() {
     this.openorclosePanelBuscarPaciente = true
+    setTimeout(() => {
+      this.buscarPacienteInput.nativeElement.focus();
+    }, 300);
+    //this.buscarPacienteInput.nativeElement.focus();
   }
 
   panelMostrarDatosPersonalesOpen() {

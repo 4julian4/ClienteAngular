@@ -27,7 +27,7 @@
 
                 
                 <div class="divBuscadorInput">
-                    <input type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
+                    <input #buscarPacienteInput type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
                         [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;" (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)">
                     <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
                         <!--<mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
