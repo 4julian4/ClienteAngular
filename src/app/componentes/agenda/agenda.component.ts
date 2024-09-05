@@ -22,7 +22,7 @@ import { MatCalendar } from '@angular/material/datepicker';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { THorariosAsuntos } from 'src/app/conexiones/rydent/tablas/thorarios-asuntos';
 import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
 import { Router, RouterLink, Routes } from '@angular/router';
@@ -76,7 +76,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   listaHorariosAsuntosPorSilla: THorariosAsuntos[] = [];
   horaInicial: string = "";
   horaFinal: string = "";
-  intervalos: number[] = [];
+  intervalos: { id: number, nombre: string }[] = [];
   highlightedRows: any[] = [];
   intervalo: number = 0;
   busqueda: string = '';
@@ -86,7 +86,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   lstFestivos: TFestivos[] = [];
   lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
   lstDoctores: { id: number, nombre: string }[] = [];
-  lstDuracion: { id: number, intervalo: string }[] = [];
+  lstDuracion: { id: string, nombre: string }[] = [];
   duracion = new FormControl();
   invalidSelection = false;
   sedeSeleccionada: SedesConectadas = new SedesConectadas();
@@ -127,6 +127,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   lstHistoriaPacienteParaAgendar: { id: string, nombre: string }[] = [];
   filteredHistoriaPacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
   historiaPacienteParaAgendarControl = new FormControl();
+
+  lstDuracionParaAgendar: { id: string, nombre: string }[] = [];
+  filteredDuracionParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  duracionParaAgendarControl = new FormControl();
+
+
 
   localizandoCita: boolean = false;
   panelBuscarCitaDeshabilitado: boolean = true;
@@ -231,7 +237,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
             map(value => this.desactivarFiltro ? this.lstNombrePacienteParaAgendar : this._filterNombre(value, this.lstNombrePacienteParaAgendar))
           );
 
-          
+
 
         this.listaDatosPacienteParaBuscarAgenda = data.lstAnamnesisParaAgendayBuscadores;
         this.lstDatosPacienteParaBuscarAgenda = this.listaDatosPacienteParaBuscarAgenda!.map(item => ({ idAnamnesis: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', idAnamenesisTexto: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '', nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '', telefono: item.TELF_P ? item.TELF_P : '' }));
@@ -349,6 +355,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           //this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
           this.llenarIntervalos();
 
+
+
+
         }
       }
     });
@@ -448,6 +457,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     return list.filter(option => option.nombre.toLowerCase().includes(filterValue));
   }
 
+
   recibirRespuestaAgendarCitaEmitida() {
 
     this.agendaService.respuestaAgendarCitaEmit.subscribe(async (respuestaAgendarCita: RespuestaConsultarPorDiaYPorUnidad) => {
@@ -494,16 +504,27 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     });
   }
   //llena el select del campo duracion en la agenda
-  llenarIntervalos() {
+  async llenarIntervalos() {
     if (this.intervalos) {
       this.intervalos = [];
+      this.lstDuracion = [];
     }
 
     let intervaloSel = this.intervaloDeTiempoSeleccionado; // Reemplaza esto con tu valor real
     console.log('intervaloSel', intervaloSel);
     for (let i = intervaloSel; i <= 120; i += intervaloSel) {
-      this.intervalos.push(i);
+      this.intervalos.push({ id: i + 1, nombre: i.toString() });
     }
+
+    this.lstDuracion = this.intervalos.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
+    this.filteredDuracionParaAgendar = this.formularioAgregarCita.get('duracion')!.valueChanges
+      .pipe(
+        startWith(''),
+        map(value => this.desactivarFiltro ? this.lstDuracion : this._filterNombre(value, this.lstDuracion))
+      );
+
+
+
     console.log('intervalos', this.intervalos);
   }
 
@@ -578,10 +599,20 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           duracion: this.selectedRow.OUT_DURACION,
           observaciones: this.selectedRow.OUT_ASUNTO
         });
-         // Reactivar el filtro después de un breve retraso
-         setTimeout(() => this.desactivarFiltro = false, 1000);
+
+        // Reactivar el filtro después de un breve retraso
+        
         this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
         this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+        // Combina focus y setSelectionRange en un solo setTimeout
+        setTimeout(() => {
+          const inputElement = this.nombreInput.nativeElement as HTMLInputElement;
+          inputElement.focus();
+          inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+        }, 100);
+        setTimeout(() => this.desactivarFiltro = false, 1000);
+        //setTimeout(() => this.nombreInput.nativeElement.focus(), 100);
+        //setTimeout(() => this.nombreInput.nativeElement.inputElement.setSelectionRange(this.nombreInput.nativeElement.inputElement.value.length, this.nombreInput.nativeElement.inputElement.value.length), 100);
 
         for (let resultado of this.resultadosBusquedaAgendaPorFecha.filter(x => x.OUT_HORA_CITA?.toString() === this.horaCitaSeleccionada)) {
           resultado.OUT_NOMBRE = '';
@@ -592,6 +623,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           resultado.OUT_DURACION = '';
           resultado.OUT_OBSERVACIONES = '';
         }
+
       }
     }
     else {
@@ -992,6 +1024,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.modoEdicion = false;
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre.toUpperCase();
+    var duracion = formulario.duracion;
+    let duracionValida = this.lstDuracion.find(x => x.nombre === formulario.duracion);
+    if (!duracionValida) {
+      await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
+      return;
+    }
     let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.NOMBRE_PACIENTE?.toString() === nombre);
     let numHistoria = formulario.numHistoria;
     if (!pacienteEncontrado) {
@@ -1008,7 +1046,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       //datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = this.toISO88591(formulario.nombreEditar.toUpperCase());
       datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar.toUpperCase();
       datosParaGurdarEnAgenda.detalleCitaEditar.ID = numHistoria;
-      datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = formulario.duracion;
+      datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = duracion;
       datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto;
       datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor;
       //ojo aca deja editar el doctor
@@ -1030,7 +1068,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     //if (!numHistoria) {
     //  numHistoria = "0";
     //}
-    
+
     detalleCita.ID = numHistoria;
     detalleCita.NOMBRE = nombre;
     detalleCita.TELEFONO = telefono;
@@ -1137,7 +1175,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   }
 
   async onRowClickedAgenda(intervalo: any) {
-
+    this.desactivarFiltro = true;
+    this.nombreInput.nativeElement.focus();
     this.selectedRow = intervalo;
     //prueba para refrescar agenda
     console.log(intervalo);
@@ -1148,6 +1187,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     } else {
       this.highlightedRows = [intervalo];
     }
+    setTimeout(() => this.desactivarFiltro = false, 100);
   }
 
 

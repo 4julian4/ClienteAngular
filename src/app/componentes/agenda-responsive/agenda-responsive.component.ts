@@ -86,7 +86,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   listaHorariosAsuntosPorSilla: THorariosAsuntos[] = [];
   horaInicial: string = "";
   horaFinal: string = "";
-  intervalos: number[] = [];
+  intervalos: { id: number, nombre: string }[] = [];
   highlightedRows: any[] = [];
   intervalo: number = 0;
   busqueda: string = '';
@@ -96,7 +96,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   lstFestivos: TFestivos[] = [];
   lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
   lstDoctores: { id: number, nombre: string }[] = [];
-  lstDuracion: { id: number, intervalo: string }[] = [];
+  lstDuracion: { id: string, nombre: string }[] = [];
+  //lstDuracion: { id: number, intervalo: string }[] = [];
   duracion = new FormControl();
   invalidSelection = false;
   sedeSeleccionada: SedesConectadas = new SedesConectadas();
@@ -138,16 +139,20 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   filteredHistoriaPacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
   historiaPacienteParaAgendarControl = new FormControl();
 
+  lstDuracionParaAgendar: { id: string, nombre: string }[] = [];
+  filteredDuracionParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  duracionParaAgendarControl = new FormControl();
+
   localizandoCita: boolean = false;
   panelBuscarCitaDeshabilitado: boolean = true;
   //resultadosBusquedaCita: boolean = false;
   refrescoAgenda: boolean = false;
 
-  columnasMostradasCitasEncontradas = ['fecha', 'hora', 'nombre','telefono','numHistoria', 'cedula', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
+  columnasMostradasCitasEncontradas = ['fecha', 'hora', 'nombre', 'telefono', 'numHistoria', 'cedula', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
 
-  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE',  'OUT_TELEFONO','ACCIONES'];//,'OUT_TELEFONO', 'OUT_DOCTOR', 'OUT_ASUNTO' ];
+  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE', 'OUT_TELEFONO', 'ACCIONES'];//,'OUT_TELEFONO', 'OUT_DOCTOR', 'OUT_ASUNTO' ];
 
-  
+
   constructor(
     private respuestaConsultarPorDiaYPorUnidadService: RespuestaConsultarPorDiaYPorUnidadService,
     private respuestaPinService: RespuestaPinService,
@@ -185,7 +190,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     // Aquí puedes poner el código que quieres que se ejecute después de que las vistas del componente y las vistas de sus hijos se hayan inicializado.
   }
 
-  
+
 
   async ngOnInit() {
     let lstFecha = this.fechaSeleccionada.toLocaleDateString().split('/');
@@ -349,10 +354,10 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
           this.listaDatosDoctorParaAgendar = data;
           this.lstDatosDoctorParaAgendar = this.listaDatosDoctorParaAgendar.lstDoctores.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
           this.filteredDoctorParaAgendar = this.formularioAgregarCita.get('doctor')!.valueChanges
-          .pipe(
-            startWith(''),
-            map(value => this.desactivarFiltro ? this.lstDatosDoctorParaAgendar : this._filterNombre(value, this.lstDatosDoctorParaAgendar))
-          );
+            .pipe(
+              startWith(''),
+              map(value => this.desactivarFiltro ? this.lstDatosDoctorParaAgendar : this._filterNombre(value, this.lstDatosDoctorParaAgendar))
+            );
 
           //this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
           this.llenarIntervalos();
@@ -504,16 +509,26 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
   //llena el select del campo duracion en la agenda
   llenarIntervalos() {
-    if (this.intervalos){
+    if (this.intervalos) {
       this.intervalos = [];
+      this.lstDuracion = [];
     }
 
     let intervaloSel = this.intervaloDeTiempoSeleccionado; // Reemplaza esto con tu valor real
     console.log('intervaloSel', intervaloSel);
     for (let i = intervaloSel; i <= 120; i += intervaloSel) {
-      this.intervalos.push(i);
+      this.intervalos.push({ id: i + 1, nombre: i.toString() });
     }
-    console.log('intervalos', this.intervalos);
+
+    this.lstDuracion = this.intervalos.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
+    this.filteredDuracionParaAgendar = this.formularioAgregarCita.get('duracion')!.valueChanges
+      .pipe(
+        startWith(''),
+        map(value => this.desactivarFiltro ? this.lstDuracion : this._filterNombre(value, this.lstDuracion))
+      );
+
+
+    
   }
 
   inicializarFormulario() {
@@ -534,9 +549,10 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       duracion: [''],
       observaciones: ['']
     });
-    // Llena el formulario con los datos de resultadoBusquedaDatosPersonalesCompletos
-    //this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
   }
+  // Llena el formulario con los datos de resultadoBusquedaDatosPersonalesCompletos
+  //this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
+
 
   async limpiarDatos() {
     this.desactivarFiltro = true;
@@ -565,7 +581,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     await this.cambiarFecha();
   }
 
-  async detallarCita(){
+  async detallarCita() {
     this.mostrarBotonAgendar = false;
     if (this.selectedRow.OUT_HORA_CITA) {
       this.mostrarFormulario = true;
@@ -596,7 +612,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
     }
   }
-  
+
   async editarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
 
@@ -634,6 +650,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
           resultado.OUT_DURACION = '';
           resultado.OUT_OBSERVACIONES = '';
         }
+        
       }
       this.formularioAgregarCita.enable();
     }
@@ -642,7 +659,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async agregarCita(){
+  async agregarCita() {
     this.mostrarFormulario = true;
   }
   async agendarCita() {
@@ -777,11 +794,11 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   async borrarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
       const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de borrar esta cita?');
-    
+
       if (!confirmacion.resultado) {
         console.log('No se borró la cita');
         return;
-      }  
+      }
       //this.isloading = true;
 
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
@@ -1024,6 +1041,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     this.modoEdicion = false;
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre.toUpperCase();
+    var duracion = formulario.duracion;
+    let duracionValida = this.lstDuracion.find(x => x.nombre === formulario.duracion);
+    if (!duracionValida) {
+      await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
+      return;
+    }
     let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.NOMBRE_PACIENTE?.toString() === nombre);
     let numHistoria = formulario.numHistoria;
     if (!pacienteEncontrado) {
@@ -1059,9 +1082,9 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     detalleCita.HORA = horaCita;
     //let numHistoria = this.formularioAgregarCita.value.numHistoria;
     //if (!numHistoria) {
-      //numHistoria = "0";
+    //numHistoria = "0";
     //}
-    detalleCita.ID =  numHistoria;
+    detalleCita.ID = numHistoria;
     detalleCita.NOMBRE = nombre;
     detalleCita.TELEFONO = telefono;
     detalleCita.CELULAR = this.formularioAgregarCita.value.celular;
@@ -1149,7 +1172,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   private terminoRefrescarAgenda = new Subject<void>();
 
   async onHoraClicked(event: MouseEvent, row: any) {
-    if (!this.modoEdicion){
+    if (!this.modoEdicion) {
       event.stopPropagation(); // Evita que el evento de clic en la fila se active
 
       // Aquí va el código que quieres ejecutar cuando se hace clic en la columna "HORA"
@@ -1160,7 +1183,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         //this.isloading = false;
       });
       await this.cambiarFecha();
-    }else{
+    } else {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO');
       this.nombreInput.nativeElement.focus();
     }
@@ -1202,8 +1225,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     //this.miPanelBucarCitas.close();
     this.datosPacienteParaBuscarAgendaControl.setValue(event.option.value);
   }
-  
-  mostrarBuscar(){
+
+  mostrarBuscar() {
     this.mostrarSelectSilla = false;
     this.mostrarBuscarAgenda = true;
   }
@@ -1217,8 +1240,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       this.cambiarFecha();
       this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(x => x.SILLAS == sillaSeleccionada.toString());
       console.log(this.listaHorariosAsuntosPorSilla);
-      
-      
+
+
     }
   }
 
