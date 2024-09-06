@@ -55,8 +55,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   filteredDatoPacienteParaBuscar?: Observable<{ idAnamnesis: number, datoBuscar: string }[]>;
   datoPacienteParaBuscarControl = new FormControl();
   listaDoctores: ListadoItem[] = [];
-  sedeSeleccionada :  SedesConectadas = new SedesConectadas();
-  idSede:number = 0;
+  sedeSeleccionada: SedesConectadas = new SedesConectadas();
+  idSede: number = 0;
 
 
   opciones = [
@@ -105,14 +105,21 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       if (data != null) {
         this.notaImportante = data;
         if (this.notaImportante != '' && this.notaImportante != 'no' && this.notaImportante != 'NO' && this.notaImportante != 'No' && this.notaImportante != null) {
-            this.mensajeNotaImportante = "EL PACIENTE TIENE NOTA IMPORTANTE";
+          this.mensajeNotaImportante = "EL PACIENTE TIENE NOTA IMPORTANTE";
         }
         else {
-            this.mensajeNotaImportante = '';
-            this.notaImportante = '';
+          this.mensajeNotaImportante = '';
+          this.notaImportante = '';
         }
       }
     });
+
+    this.respuestaPinService.sharedNombrePacienteEscogidoData.subscribe(data => {
+      if (data != null) {
+        this.nombrePaciente = data;
+      }
+    });
+   
 
     this.inicializarFormulario();
 
@@ -126,8 +133,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       this.nombreDoctor = respuestaObtenerDoctor.doctor.NOMBRE;
       this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
       this.respuestaPinService.updateNumPacientesPorDoctor(this.totalPacientes);
-      
-      
+
+
 
       this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
         .filter(item => item.DOCTOR === this.nombreDoctor)
@@ -138,12 +145,12 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
           startWith(''),
           map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
         );
-        //alert('esta entrando ca antes o despues del error')
+      //alert('esta entrando ca antes o despues del error')
       //this.panelBuscarPacienteOpen();
     });
 
     this.respuestaObtenerDoctorService.respuestaObtenerDoctorSiLoCambianModel.subscribe(async (respuestaObtenerDoctorSiLoCambian: RespuestaObtenerDoctor) => {
-      
+
       this.respuestaObtenerDoctorSiLoCambianModel = respuestaObtenerDoctorSiLoCambian;
       this.nombreDoctor = this.respuestaObtenerDoctorSiLoCambianModel.doctor.NOMBRE;
       this.totalPacientes = this.respuestaObtenerDoctorSiLoCambianModel.totalPacientes;
@@ -360,14 +367,14 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async buscarPaciente(nombrePaciente: string) {
-    
-      console.log(nombrePaciente);
-      console.log(this.opcionSeleccionada);
-      if (this.idSedeActualSignalR != '') {
-        await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(this.idSedeActualSignalR, this.opcionSeleccionada, nombrePaciente);
-      }
-    
-      
+
+    console.log(nombrePaciente);
+    console.log(this.opcionSeleccionada);
+    if (this.idSedeActualSignalR != '') {
+      await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(this.idSedeActualSignalR, this.opcionSeleccionada, nombrePaciente);
+    }
+
+
   }
 
   async obtenerDatosCompletosPaciente(idAnamnesis: number) {
@@ -392,29 +399,30 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async onRowClicked(filaSeleccionada: RespuestaBusquedaPaciente) {
-    
-    
-      try {
-        console.log('Fila seleccionada:', filaSeleccionada);
-        this.openorclosePanelBuscarPaciente = false;
-        this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
-        this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
 
-        // Actualiza la anamnesis
-        await this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
-        // Actualiza el doctor
-        await this.actualizarDoctor(filaSeleccionada);
-        this.nombrePaciente = filaSeleccionada.NOMBRE_PACIENTE;
-        // Obtiene los datos completos del paciente
-        //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
 
-        // Navega a la página de datos personales
-        
-      } catch (error) {
-        console.error('Error en onRowClicked:', error);
-        // Manejar el error adecuadamente
-      }
-    
+    try {
+      console.log('Fila seleccionada:', filaSeleccionada);
+      this.openorclosePanelBuscarPaciente = false;
+      this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
+      this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
+
+      // Actualiza la anamnesis
+      await this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
+      // Actualiza el doctor
+      await this.actualizarDoctor(filaSeleccionada);
+      this.nombrePaciente = filaSeleccionada.NOMBRE_PACIENTE;
+      this.respuestaPinService.updateNombrePacienteEscogidoData(this.nombrePaciente);
+      // Obtiene los datos completos del paciente
+      //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
+
+      // Navega a la página de datos personales
+
+    } catch (error) {
+      console.error('Error en onRowClicked:', error);
+      // Manejar el error adecuadamente
+    }
+
   }
 
   async actualizarDoctor(filaSeleccionada: RespuestaBusquedaPaciente) {
@@ -431,11 +439,11 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       console.log('Doctor cambiado:', filaSeleccionada.DOCTOR);
       this.respuestaPinService.updateCambiarDoctorSeleccionado(filaSeleccionada.DOCTOR);
       this.respuestaPinService.updateDoctorSeleccionado(filaSeleccionada.DOCTOR);
-    }else{
+    } else {
       this.router.routeReuseStrategy.shouldReuseRoute = function () {
         return false;
       };
-      
+
       this.router.onSameUrlNavigation = 'reload';
       this.router.navigate(['/datos-personales']);
       //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
