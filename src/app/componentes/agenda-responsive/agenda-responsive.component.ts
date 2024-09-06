@@ -588,6 +588,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     this.mostrarBotonAgendar = false;
     if (this.selectedRow.OUT_HORA_CITA) {
       this.mostrarFormulario = true;
+      this.desactivarFiltro = true;
+      this.suscrpcionActivaFiltros = false;
       this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
 
       this.formularioAgregarCita.setValue({
@@ -609,6 +611,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       });
       this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
       this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+      setTimeout(() => this.desactivarFiltro = false, 300);
+      setTimeout(() => this.suscrpcionActivaFiltros = true, 330);
       this.formularioAgregarCita.disable();
     }
     else {
@@ -679,8 +683,9 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     if (!duracion) {
       duracion = this.intervaloDeTiempoSeleccionado.toString();
     }
-    
-    let duracionValida = this.lstDuracion.find(x => x.nombre === duracion);
+    console.log(duracion);
+    console.log(this.intervalos);
+    let duracionValida = this.intervalos.find(x => x === duracion);
     if (!duracionValida) {
       await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
       return;
