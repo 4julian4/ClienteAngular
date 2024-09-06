@@ -86,7 +86,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   listaHorariosAsuntosPorSilla: THorariosAsuntos[] = [];
   horaInicial: string = "";
   horaFinal: string = "";
-  intervalos: { id: number, nombre: string }[] = [];
+  intervalos: number[] = [];
   highlightedRows: any[] = [];
   intervalo: number = 0;
   busqueda: string = '';
@@ -511,24 +511,22 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   llenarIntervalos() {
     if (this.intervalos) {
       this.intervalos = [];
-      this.lstDuracion = [];
+      //this.lstDuracion = [];
     }
 
     let intervaloSel = this.intervaloDeTiempoSeleccionado; // Reemplaza esto con tu valor real
     console.log('intervaloSel', intervaloSel);
     for (let i = intervaloSel; i <= 120; i += intervaloSel) {
-      this.intervalos.push({ id: i + 1, nombre: i.toString() });
+      this.intervalos.push(i);
+      //this.intervalos.push({ id: i + 1, nombre: i.toString() });
     }
 
-    this.lstDuracion = this.intervalos.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
+    /*this.lstDuracion = this.intervalos.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
     this.filteredDuracionParaAgendar = this.formularioAgregarCita.get('duracion')!.valueChanges
       .pipe(
         startWith(''),
         map(value => this.desactivarFiltro ? this.lstDuracion : this._filterNombre(value, this.lstDuracion))
-      );
-
-
-    
+      );*/
   }
 
   inicializarFormulario() {
