@@ -680,12 +680,15 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
     var horaCita = this.selectedRow.OUT_HORA;
     var duracion = this.formularioAgregarCita.value.duracion;
+    var duracionNumero = parseInt(duracion);
+
     if (!duracion) {
       duracion = this.intervaloDeTiempoSeleccionado.toString();
     }
     console.log(duracion);
     console.log(this.intervalos);
-    let duracionValida = this.intervalos.find(x => x === duracion);
+    let duracionValida = this.intervalos.find(x => x === duracionNumero);
+    console.log(duracionValida);
     if (!duracionValida) {
       await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
       return;
