@@ -254,7 +254,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges
           .pipe(
             startWith(''),
-            map(value => this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
+            map(value =>this.desactivarFiltro ? this.lstTelefonoPacienteParaAgendar: this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
           );
 
         // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
@@ -267,7 +267,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita.get('celular')!.valueChanges
           .pipe(
             startWith(''),
-            map(value => this._filterNombre(value, this.lstCelularPacienteParaAgendar))
+            map(value =>this.desactivarFiltro ? this.lstCelularPacienteParaAgendar: this._filterNombre(value, this.lstCelularPacienteParaAgendar))
           );
 
         this.listaHistoriaPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
@@ -275,7 +275,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita.get('numHistoria')!.valueChanges
           .pipe(
             startWith(''),
-            map(value => this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
+            map(value =>this.desactivarFiltro ? this.lstHistoriaPacienteParaAgendar: this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
           );
 
 
@@ -570,7 +570,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       duracion: '',
       observaciones: ''
     });
-    setTimeout(() => this.desactivarFiltro = false, 100);
+    setTimeout(() => this.desactivarFiltro = false, 300);
     this.modoEdicion = false;
     await this.cambiarFecha();
   }
@@ -609,8 +609,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           const inputElement = this.nombreInput.nativeElement as HTMLInputElement;
           inputElement.focus();
           inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
-        }, 100);
-        setTimeout(() => this.desactivarFiltro = false, 1000);
+          setTimeout(() => this.desactivarFiltro = false, 300);
+        }, 400);
+        
         //setTimeout(() => this.nombreInput.nativeElement.focus(), 100);
         //setTimeout(() => this.nombreInput.nativeElement.inputElement.setSelectionRange(this.nombreInput.nativeElement.inputElement.value.length, this.nombreInput.nativeElement.inputElement.value.length), 100);
 
@@ -641,6 +642,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     var duracion = this.formularioAgregarCita.value.duracion;
     if (!duracion) {
       duracion = this.intervaloDeTiempoSeleccionado.toString();
+    }
+    let duracionValida = this.lstDuracion.find(x => x.nombre === duracion);
+    if (!duracionValida) {
+      await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
+      return;
     }
     console.log(duracion);
     var horaFinal = this.buscarHoraFinal(horaCita, duracion);
@@ -1025,11 +1031,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     let formulario = this.formularioAgregarCita.value;
     var nombre = formulario.nombre.toUpperCase();
     var duracion = formulario.duracion;
-    let duracionValida = this.lstDuracion.find(x => x.nombre === formulario.duracion);
+    /*let duracionValida = this.lstDuracion.find(x => x.nombre === formulario.duracion);
     if (!duracionValida) {
       await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
       return;
-    }
+    }*/
     let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.NOMBRE_PACIENTE?.toString() === nombre);
     let numHistoria = formulario.numHistoria;
     if (!pacienteEncontrado) {
