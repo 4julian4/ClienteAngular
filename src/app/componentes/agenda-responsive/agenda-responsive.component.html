@@ -209,14 +209,14 @@
                     <div class="fila">
                         <div class="campo-formulario historia">
                             <input #doctorInput type="text" placeholder="Doctor" formControlName="doctor"
-                                 class="form-control"
-                                style="text-transform: uppercase;" >
-                            
+                                [matAutocomplete]="autoDatosDoctorParaAgendar" class="form-control"
+                                style="text-transform: uppercase;">
+                            <mat-autocomplete #autoDatosDoctorParaAgendar="matAutocomplete">
                                 <mat-option *ngFor="let datosDoctor of filteredDoctorParaAgendar | async"
                                     [value]="datosDoctor.nombre">
                                     {{ datosDoctor.nombre }}
                                 </mat-option>
-                            
+                            </mat-autocomplete>
                         </div>
                         
 
