@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { map, Observable, startWith, Subject, Subscription, takeUntil } from 'rxjs';
 import { ConfirmacionesPedidas } from 'src/app/conexiones/rydent/modelos/confirmaciones-pedidas';
 import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
@@ -70,6 +70,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   observaciones: string = '';
   selectedRow: any;
   selectedRowBuscarCita: any;
+  suscrpcionActivaFiltros: boolean = true;
   showSearch = false;
   searchTerm = '';
   mostrarSelectSilla = true;
@@ -294,23 +295,25 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         //----------------suscribo para cambiar datos segun lo seleccionado-----------//
 
         this.formularioAgregarCita.get('nombre')!.valueChanges.subscribe(value => {
-          const selectedPaciente = this.lstNombrePacienteParaAgendar.find(paciente => paciente.nombre === value);
-          if (selectedPaciente) {
-            const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
-            const correspondingCelular = this.lstCelularPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
-            const correspondingHistoria = this.lstHistoriaPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
-            if (correspondingTelefono) {
-              this.formularioAgregarCita.get('telefono')!.setValue(correspondingTelefono.nombre, { emitEvent: false });
-            }
-            if (correspondingCelular) {
-              this.formularioAgregarCita.get('celular')!.setValue(correspondingCelular.nombre, { emitEvent: false });
-            }
-            if (correspondingHistoria) {
-              this.formularioAgregarCita.get('numHistoria')!.setValue(correspondingHistoria.nombre, { emitEvent: false });
-            }
-            let encontrarDoctor = data.lstAnamnesisParaAgendayBuscadores?.find(item => item.IDANAMNESIS?.toString() === selectedPaciente.id)?.DOCTOR;
-            if (encontrarDoctor) {
-              this.formularioAgregarCita.get('doctor')!.setValue(encontrarDoctor, { emitEvent: false });
+          if(this.suscrpcionActivaFiltros){
+            const selectedPaciente = this.lstNombrePacienteParaAgendar.find(paciente => paciente.nombre === value);
+            if (selectedPaciente) {
+              const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
+              const correspondingCelular = this.lstCelularPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
+              const correspondingHistoria = this.lstHistoriaPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
+              if (correspondingTelefono) {
+                this.formularioAgregarCita.get('telefono')!.setValue(correspondingTelefono.nombre, { emitEvent: false });
+              }
+              if (correspondingCelular) {
+                this.formularioAgregarCita.get('celular')!.setValue(correspondingCelular.nombre, { emitEvent: false });
+              }
+              if (correspondingHistoria) {
+                this.formularioAgregarCita.get('numHistoria')!.setValue(correspondingHistoria.nombre, { emitEvent: false });
+              }
+              let encontrarDoctor = data.lstAnamnesisParaAgendayBuscadores?.find(item => item.IDANAMNESIS?.toString() === selectedPaciente.id)?.DOCTOR;
+              if (encontrarDoctor) {
+                this.formularioAgregarCita.get('doctor')!.setValue(encontrarDoctor, { emitEvent: false });
+              }
             }
           }
         });
@@ -319,23 +322,25 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
 
         this.formularioAgregarCita.get('numHistoria')!.valueChanges.subscribe(value => {
-          const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(historia => historia.nombre === value);
-          if (selectedHistoria) {
-            const correspondingNombre = this.lstNombrePacienteParaAgendar.find(item => item.id === selectedHistoria.id);
-            const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedHistoria.id);
-            const correspondingCelular = this.lstCelularPacienteParaAgendar.find(item => item.id === selectedHistoria.id);
-            if (correspondingNombre) {
-              this.formularioAgregarCita.get('nombre')!.setValue(correspondingNombre.nombre, { emitEvent: false });
-            }
-            if (correspondingTelefono) {
-              this.formularioAgregarCita.get('telefono')!.setValue(correspondingTelefono.nombre, { emitEvent: false });
-            }
-            if (correspondingCelular) {
-              this.formularioAgregarCita.get('celular')!.setValue(correspondingCelular.nombre, { emitEvent: false });
-            }
-            let encontrarDoctor = data.lstAnamnesisParaAgendayBuscadores?.find(item => item.IDANAMNESIS?.toString() === selectedHistoria.id)?.DOCTOR;
-            if (encontrarDoctor) {
-              this.formularioAgregarCita.get('doctor')!.setValue(encontrarDoctor, { emitEvent: false });
+          if(this.suscrpcionActivaFiltros){
+            const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(historia => historia.nombre === value);
+            if (selectedHistoria) {
+              const correspondingNombre = this.lstNombrePacienteParaAgendar.find(item => item.id === selectedHistoria.id);
+              const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedHistoria.id);
+              const correspondingCelular = this.lstCelularPacienteParaAgendar.find(item => item.id === selectedHistoria.id);
+              if (correspondingNombre) {
+                this.formularioAgregarCita.get('nombre')!.setValue(correspondingNombre.nombre, { emitEvent: false });
+              }
+              if (correspondingTelefono) {
+                this.formularioAgregarCita.get('telefono')!.setValue(correspondingTelefono.nombre, { emitEvent: false });
+              }
+              if (correspondingCelular) {
+                this.formularioAgregarCita.get('celular')!.setValue(correspondingCelular.nombre, { emitEvent: false });
+              }
+              let encontrarDoctor = data.lstAnamnesisParaAgendayBuscadores?.find(item => item.IDANAMNESIS?.toString() === selectedHistoria.id)?.DOCTOR;
+              if (encontrarDoctor) {
+                this.formularioAgregarCita.get('doctor')!.setValue(encontrarDoctor, { emitEvent: false });
+              }
             }
           }
         });
@@ -619,6 +624,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
         this.modoEdicion = true;
         this.desactivarFiltro = true;
+        this.suscrpcionActivaFiltros = false;
         this.formularioAgregarCita.setValue({
           fechaEditar: this.fechaSeleccionada,
           sillaEditar: this.sillaSeleccionada,
@@ -649,6 +655,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
           resultado.OUT_OBSERVACIONES = '';
         }
         setTimeout(() => this.desactivarFiltro = false, 300);
+        setTimeout(() => this.suscrpcionActivaFiltros = true, 330);
       }
       this.formularioAgregarCita.enable();
     }
