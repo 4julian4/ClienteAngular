@@ -1191,7 +1191,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async onRowClickedAgenda(intervalo: any) {
     this.desactivarFiltro = true;
-    this.nombreInput.nativeElement.focus();
+    
     this.selectedRow = intervalo;
     //prueba para refrescar agenda
     console.log(intervalo);
@@ -1201,8 +1201,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       this.highlightedRows = this.resultadosBusquedaAgendaPorFecha.filter(r => r.OUT_HORA_CITA === intervalo.OUT_HORA_CITA);
     } else {
       this.highlightedRows = [intervalo];
+      this.nombreInput.nativeElement.focus();
     }
-    setTimeout(() => this.desactivarFiltro = false, 100);
+    setTimeout(() => this.desactivarFiltro = false, 300);
   }
 
 
