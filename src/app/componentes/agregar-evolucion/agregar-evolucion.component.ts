@@ -226,7 +226,7 @@ export class AgregarEvolucionComponent implements OnInit {
 
       }
     }else{
-      await this.mensajesUsuariosService.mensajeInformativo("No hay evolución para guardar");
+      await this.mensajesUsuariosService.mensajeInformativo("NO HAY EVOCUCION PARA GUARDAR");
     }
     
     //this.obtenerAntecedentesPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);  
