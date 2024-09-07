@@ -377,7 +377,7 @@ export class RipsComponent implements OnInit {
         datosParaGurdarRips.TIPODIAGNOSTICO = '2';
         datosParaGurdarRips.VALORCONSULTA = 1;
         datosParaGurdarRips.VALORCUOTAMODERADORA = 0;
-        datosParaGurdarRips.VALORNETO = parseFloat((this.valorTotalRips.value ?? '0').replace(/\./g, ''));
+        datosParaGurdarRips.VALORNETO = parseFloat((this.valorTotalRips.value ?? '1').replace(/\./g, ''));
         datosParaGurdarRips.CODIGOPROCEDIMIENTO = this.codigoProcedimientoControl.value; //this.formularioAgregarRips.value.CODIGO_PROCEDIMIENTO;
         datosParaGurdarRips.FINALIDADPROCEDIMIENTI = '2';
         datosParaGurdarRips.AMBITOREALIZACION = '1';
