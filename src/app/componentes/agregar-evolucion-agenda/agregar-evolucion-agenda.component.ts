@@ -11,6 +11,7 @@ import { RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/mod
 import { ImagenHelperService } from 'src/app/helpers/imagen-helper/imagen-helper.service';
 import { FechaHoraHelperService } from 'src/app/helpers/fecha-hora-helper/fecha-hora-helper.service';
 import { FrasesXEvolucion } from 'src/app/conexiones/rydent/tablas/frases-xevolucion';
+import { MensajesUsuariosService } from '../mensajes-usuarios';
 
 declare var webkitSpeechRecognition: any;
 
@@ -47,7 +48,8 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
     private router: Router,
     private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
     private imagenHelperService: ImagenHelperService,
-    private fechaHoraHelperService: FechaHoraHelperService
+    private fechaHoraHelperService: FechaHoraHelperService,
+    private mensajesUsuariosService: MensajesUsuariosService
   ) {
 
   }
@@ -183,48 +185,52 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
   async guardarEvolucion() {
     let strPaciente = "";
     let strDoctor = "";
+    let contenidoEvolucion = this.formularioAgregarEvolucion.value.EVOLUCION;
     const imgFirmaPaciente = document.getElementById('firmaPaciente') as HTMLImageElement;
     const imgFirmaDoctor = document.getElementById('firmaDoctor') as HTMLImageElement;
 
+    if(contenidoEvolucion){
+      if (imgFirmaPaciente) {
+        strPaciente = imgFirmaPaciente.src.replace("data:image/png;base64,", "");
+        //if (this.imagenHelperService.imagenTieneColorDistintoABlanco(imgFirmaPaciente)) {
+        //  const imagenRecortadaPaciente = await this.imagenHelperService.recortarImagen(imgFirmaPaciente);
+        //  strPaciente = imagenRecortadaPaciente.src.replace("data:image/png;base64,", "");
+        //}
+      }
+      if (imgFirmaDoctor) {
+        strDoctor = imgFirmaDoctor.src.replace("data:image/png;base64,", "");
+        //if (await this.imagenHelperService.imagenTieneColorDistintoABlanco(imgFirmaDoctor)) {
+        //  const imagenRecortadaDoctor = await this.imagenHelperService.recortarImagen(imgFirmaDoctor);
+        //  strDoctor = imagenRecortadaDoctor.src.replace("data:image/png;base64,", "");
+        //}
+      }
+      if (this.idSedeActualSignalR != '') {
+        let datosParaGuradarEnEvolucion: RespuestaEvolucionPaciente = new RespuestaEvolucionPaciente();
+        datosParaGuradarEnEvolucion.evolucion.IDEVOLUSECUND = this.idAnamnesisPacienteSeleccionado;
+        datosParaGuradarEnEvolucion.evolucion.PROXIMA_CITAstr = this.formularioAgregarEvolucion.value.PROXIMA_CITAstr;
+        //datosParaGuradarEnEvolucion.evolucion.FECHA_PROX_CITA = this.formularioAgregarEvolucion.value.FECHA_PROX_CITA;
+        //datosParaGuradarEnEvolucion.evolucion.FECHA_ORDEN = this.formularioAgregarEvolucion.value.FECHA_ORDEN;
+        //datosParaGuradarEnEvolucion.evolucion.ENTRADAstr = this.formularioAgregarEvolucion.value.ENTRADAstr;
+        //datosParaGuradarEnEvolucion.evolucion.SALIDAstr = this.formularioAgregarEvolucion.value.SALIDAstr;
+        datosParaGuradarEnEvolucion.evolucion.FECHA = this.formularioAgregarEvolucion.value.FECHA;
+        datosParaGuradarEnEvolucion.evolucion.HORA = this.fechaHoraHelperService.formatTimeForCSharp(this.formularioAgregarEvolucion.value.HORA);
+        datosParaGuradarEnEvolucion.evolucion.DOCTOR = this.formularioAgregarEvolucion.value.DOCTOR;
+        //datosParaGuradarEnEvolucion.evolucion.FIRMA = this.formularioAgregarEvolucion.value.FIRMA;
+        //datosParaGuradarEnEvolucion.evolucion.COMPLICACION = this.formularioAgregarEvolucion.value.COMPLICACION;
+        datosParaGuradarEnEvolucion.evolucion.HORA_FIN = this.fechaHoraHelperService.formatTimeForCSharp(this.formularioAgregarEvolucion.value.HORA_FIN);
+        //datosParaGuradarEnEvolucion.evolucion.COLOR = this.formularioAgregarEvolucion.value.COLOR;
+        datosParaGuradarEnEvolucion.evolucion.NOTA = this.formularioAgregarEvolucion.value.NOTA;
+        datosParaGuradarEnEvolucion.evolucion.EVOLUCION = this.formularioAgregarEvolucion.value.EVOLUCION;
+        //datosParaGuradarEnEvolucion.evolucion.URGENCIAS = this.formularioAgregarEvolucion.value.URGENCIAS;
+        //datosParaGuradarEnEvolucion.evolucion.HORA_LLEGADA = this.formularioAgregarEvolucion.value.HORA_LLEGADA;
+        datosParaGuradarEnEvolucion.imgFirmaPaciente = strPaciente;
+        datosParaGuradarEnEvolucion.imgFirmaDoctor = strDoctor;
+        //evolucion.IDEVOLUCION
+        await this.evolucionService.startConnectionGuardarDatosEvolucion(this.idSedeActualSignalR, JSON.stringify(datosParaGuradarEnEvolucion));
 
-    if (imgFirmaPaciente) {
-      strPaciente = imgFirmaPaciente.src.replace("data:image/png;base64,", "");
-      //if (this.imagenHelperService.imagenTieneColorDistintoABlanco(imgFirmaPaciente)) {
-      //  const imagenRecortadaPaciente = await this.imagenHelperService.recortarImagen(imgFirmaPaciente);
-      //  strPaciente = imagenRecortadaPaciente.src.replace("data:image/png;base64,", "");
-      //}
-    }
-    if (imgFirmaDoctor) {
-      strDoctor = imgFirmaDoctor.src.replace("data:image/png;base64,", "");
-      //if (await this.imagenHelperService.imagenTieneColorDistintoABlanco(imgFirmaDoctor)) {
-      //  const imagenRecortadaDoctor = await this.imagenHelperService.recortarImagen(imgFirmaDoctor);
-      //  strDoctor = imagenRecortadaDoctor.src.replace("data:image/png;base64,", "");
-      //}
-    }
-    if (this.idSedeActualSignalR != '') {
-      let datosParaGuradarEnEvolucion: RespuestaEvolucionPaciente = new RespuestaEvolucionPaciente();
-      datosParaGuradarEnEvolucion.evolucion.IDEVOLUSECUND = this.idAnamnesisPacienteSeleccionado;
-      datosParaGuradarEnEvolucion.evolucion.PROXIMA_CITAstr = this.formularioAgregarEvolucion.value.PROXIMA_CITAstr;
-      //datosParaGuradarEnEvolucion.evolucion.FECHA_PROX_CITA = this.formularioAgregarEvolucion.value.FECHA_PROX_CITA;
-      //datosParaGuradarEnEvolucion.evolucion.FECHA_ORDEN = this.formularioAgregarEvolucion.value.FECHA_ORDEN;
-      //datosParaGuradarEnEvolucion.evolucion.ENTRADAstr = this.formularioAgregarEvolucion.value.ENTRADAstr;
-      //datosParaGuradarEnEvolucion.evolucion.SALIDAstr = this.formularioAgregarEvolucion.value.SALIDAstr;
-      datosParaGuradarEnEvolucion.evolucion.FECHA = this.formularioAgregarEvolucion.value.FECHA;
-      datosParaGuradarEnEvolucion.evolucion.HORA = this.fechaHoraHelperService.formatTimeForCSharp(this.formularioAgregarEvolucion.value.HORA);
-      datosParaGuradarEnEvolucion.evolucion.DOCTOR = this.formularioAgregarEvolucion.value.DOCTOR;
-      //datosParaGuradarEnEvolucion.evolucion.FIRMA = this.formularioAgregarEvolucion.value.FIRMA;
-      //datosParaGuradarEnEvolucion.evolucion.COMPLICACION = this.formularioAgregarEvolucion.value.COMPLICACION;
-      datosParaGuradarEnEvolucion.evolucion.HORA_FIN = this.fechaHoraHelperService.formatTimeForCSharp(this.formularioAgregarEvolucion.value.HORA_FIN);
-      //datosParaGuradarEnEvolucion.evolucion.COLOR = this.formularioAgregarEvolucion.value.COLOR;
-      datosParaGuradarEnEvolucion.evolucion.NOTA = this.formularioAgregarEvolucion.value.NOTA;
-      datosParaGuradarEnEvolucion.evolucion.EVOLUCION = this.formularioAgregarEvolucion.value.EVOLUCION;
-      //datosParaGuradarEnEvolucion.evolucion.URGENCIAS = this.formularioAgregarEvolucion.value.URGENCIAS;
-      //datosParaGuradarEnEvolucion.evolucion.HORA_LLEGADA = this.formularioAgregarEvolucion.value.HORA_LLEGADA;
-      datosParaGuradarEnEvolucion.imgFirmaPaciente = strPaciente;
-      datosParaGuradarEnEvolucion.imgFirmaDoctor = strDoctor;
-      //evolucion.IDEVOLUCION
-      await this.evolucionService.startConnectionGuardarDatosEvolucion(this.idSedeActualSignalR, JSON.stringify(datosParaGuradarEnEvolucion));
-
+      }
+    }else{
+      await this.mensajesUsuariosService.mensajeInformativo("NO HAY EVOCUCION PARA GUARDAR");
     }
     //this.obtenerAntecedentesPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);  
   }
