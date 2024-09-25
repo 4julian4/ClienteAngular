@@ -15,6 +15,7 @@ import { LoginCallbackGoogleComponent } from './componentes/login-callback-googl
 import { LoginCallBackComponent } from './componentes/login-call-back';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
+import { AdmonClientesComponent } from './componentes/admon-clientes';
 
 const routes: Routes = [
   {path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -30,7 +31,8 @@ const routes: Routes = [
   {path: 'buscar-historia-clinica', component: BuscarHitoriaClinicaComponent},
   {path: 'estado-cuenta', component: EstadoCuentaComponent},
   {path: 'rips', component: RipsComponent},
-  {path: 'datos-administrativos', component: DatosAdministrativosComponent}
+  {path: 'datos-administrativos', component: DatosAdministrativosComponent},
+  {path: 'admon-clientes', component: AdmonClientesComponent}
   
 ];
 

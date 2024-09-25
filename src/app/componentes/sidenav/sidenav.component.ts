@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output, Renderer2 } from '@angular/core';
+import { Component, EventEmitter, HostBinding, HostListener, Input, OnDestroy, OnInit, Output, Renderer2 } from '@angular/core';
 import { SidenavService } from './';
 import { environment } from 'src/environments/environment';
 import { FormControl } from '@angular/forms';
@@ -32,6 +32,8 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
   styleUrls: ['./sidenav.component.scss']
 })
 export class SidenavComponent implements OnInit, OnDestroy {
+
+  
   correo: string = "";
   @Input() sedes: Sedes[] = [];
   @Input() sedesConectadas: SedesConectadas[] = [];
@@ -167,6 +169,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
     }
   }
 
+  
   toggleMenu() {
     this.menuExpandido = !this.menuExpandido;
   }
