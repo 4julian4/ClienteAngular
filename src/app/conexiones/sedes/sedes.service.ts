@@ -35,7 +35,10 @@ export  class SedesService {
     const obj = await this.httpClient.get<Sedes[]>(url, environment.httpOptions);
     return await lastValueFrom(obj); 
   }
-
+  
+  public Edit(_Sedes : Sedes): Observable<boolean>{
+    return this.httpClient.put<boolean>(urlPage + '/' + (_Sedes.idSede), _Sedes, environment.httpOptions);
+  }
    
   public create(_Sedes : Sedes): Observable<number>{
     return this.httpClient.post<number>(urlPage, _Sedes, environment.httpOptions);

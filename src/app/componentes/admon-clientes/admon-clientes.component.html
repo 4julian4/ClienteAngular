@@ -1,0 +1,153 @@
+<div>
+  <mat-tab-group>
+    <mat-tab label="Clientes">
+      <h3>Clientes</h3>
+      <form [formGroup]="clientesForm" (ngSubmit)="selectedCliente ? updateCliente() : createCliente()">
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre Cliente</mat-label>
+          <input matInput formControlName="nombreCliente" placeholder="Nombre Cliente" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Activo Hasta</mat-label>
+          <input matInput [matDatepicker]="picker1" formControlName="activoHasta" placeholder="Activo Hasta" />
+          <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Observación</mat-label>
+          <input matInput formControlName="observacion" placeholder="Observación" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit">{{ selectedCliente ? 'Actualizar' : 'Crear' }}</button>
+      </form>
+      <table mat-table [dataSource]="clientes" class="mat-elevation-z8">
+        <ng-container matColumnDef="nombreCliente">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let cliente"> {{cliente.nombreCliente}} </td>
+        </ng-container>
+        <ng-container matColumnDef="activoHasta">
+          <th mat-header-cell *matHeaderCellDef> Activo Hasta </th>
+          <td mat-cell *matCellDef="let cliente"> {{cliente.activoHasta | date}} </td>
+        </ng-container>
+        <ng-container matColumnDef="observacion">
+          <th mat-header-cell *matHeaderCellDef> Observación </th>
+          <td mat-cell *matCellDef="let cliente"> {{cliente.observacion}} </td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let cliente">
+            <button mat-button (click)="editCliente(cliente)">Editar</button>
+            <button mat-button (click)="deleteCliente(cliente.idCliente.toString())">Borrar</button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsClientes"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsClientes;"></tr>
+      </table>
+    </mat-tab>
+    <mat-tab label="Sedes">
+      <h3>Sedes</h3>
+      <form [formGroup]="sedesForm" (ngSubmit)="selectedSede ? updateSede() : createSede()">
+        <mat-form-field appearance="fill">
+          <mat-label>Cliente</mat-label>
+          <mat-select formControlName="idCliente">
+            <mat-option *ngFor="let cliente of clientes" [value]="cliente.idCliente">{{ cliente.nombreCliente }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre Sede</mat-label>
+          <input matInput formControlName="nombreSede" placeholder="Nombre Sede" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Identificador Local</mat-label>
+          <input matInput formControlName="identificadorLocal" placeholder="Identificador Local" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Observación</mat-label>
+          <input matInput formControlName="observacion" placeholder="Observación" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit">{{ selectedSede ? 'Actualizar' : 'Crear' }}</button>
+      </form>
+      <table mat-table [dataSource]="sedes" class="mat-elevation-z8">
+        <ng-container matColumnDef="nombreSede">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let sede"> {{sede.nombreSede}} </td>
+        </ng-container>
+        <ng-container matColumnDef="idCliente">
+          <th mat-header-cell *matHeaderCellDef> Cliente </th>
+          <td mat-cell *matCellDef="let sede"> {{sede.idCliente}} </td>
+        </ng-container>
+        <ng-container matColumnDef="identificadorLocal">
+          <th mat-header-cell *matHeaderCellDef> Identificador Local </th>
+          <td mat-cell *matCellDef="let sede"> {{sede.identificadorLocal}} </td>
+        </ng-container>
+        <ng-container matColumnDef="observacion">
+          <th mat-header-cell *matHeaderCellDef> Observación </th>
+          <td mat-cell *matCellDef="let sede"> {{sede.observacion}} </td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let sede">
+            <button mat-button (click)="editSede(sede)">Editar</button>
+            <button mat-button (click)="deleteSede(sede.idSede.toString())">Borrar</button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsSedes"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsSedes;"></tr>
+      </table>
+    </mat-tab>
+    <mat-tab label="Usuarios">
+      <h3>Usuarios</h3>
+      <form [formGroup]="usuariosForm" (ngSubmit)="selectedUsuario ? updateUsuario() : createUsuario()">
+        <mat-form-field appearance="fill">
+          <mat-label>Cliente</mat-label>
+          <mat-select formControlName="idCliente">
+            <mat-option *ngFor="let cliente of clientes" [value]="cliente.idCliente">{{ cliente.nombreCliente }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre Usuario</mat-label>
+          <input matInput formControlName="nombreUsuario" placeholder="Nombre Usuario" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Correo Usuario</mat-label>
+          <input matInput formControlName="correoUsuario" placeholder="Correo Usuario" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Estado</mat-label>
+          <input matInput formControlName="estado" placeholder="Estado" />
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Código Externo</mat-label>
+          <input matInput formControlName="codigoExternoUsuario" placeholder="Código Externo" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit">{{ selectedUsuario ? 'Actualizar' : 'Crear' }}</button>
+      </form>
+      <table mat-table [dataSource]="usuarios" class="mat-elevation-z8">
+        <ng-container matColumnDef="nombreUsuario">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let usuario"> {{usuario.nombreUsuario}} </td>
+        </ng-container>
+        <ng-container matColumnDef="idCliente">
+          <th mat-header-cell *matHeaderCellDef> Cliente </th>
+          <td mat-cell *matCellDef="let usuario"> {{usuario.idCliente}} </td>
+        </ng-container>
+        <ng-container matColumnDef="correoUsuario">
+          <th mat-header-cell *matHeaderCellDef> Correo </th>
+          <td mat-cell *matCellDef="let usuario"> {{usuario.correoUsuario}} </td>
+        </ng-container>
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef> Estado </th>
+          <td mat-cell *matCellDef="let usuario"> {{usuario.estado}} </td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let usuario">
+            <button mat-button (click)="editUsuario(usuario)">Editar</button>
+            <button mat-button (click)="deleteUsuario(usuario.idUsuario.toString())">Borrar</button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsUsuarios"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsUsuarios;"></tr>
+      </table>
+    </mat-tab>
+  </mat-tab-group>
+</div>

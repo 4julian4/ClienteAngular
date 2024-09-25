@@ -40,12 +40,13 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EstadoCuentaComponent } from './componentes/estado-cuenta/estado-cuenta.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar'; //
- 
+//import { ReactiveFormsModule } from '@angular/forms'; // Importa ReactiveFormsModule 
 import {RipsComponent} from './componentes/rips/rips.component';
 import { DatosAdministrativos, DatosAdministrativosComponent } from './componentes/datos-administrativos';
 import { HideColumnDirective } from './directives/hide-column.directive';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
+import { AdmonClientesComponent } from './componentes/admon-clientes';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -85,6 +86,7 @@ export const MY_DATE_FORMATS = {
         EstadoCuentaComponent,
         RipsComponent,
         DatosAdministrativosComponent,
+        AdmonClientesComponent,
         HideColumnDirective
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
