@@ -86,8 +86,18 @@ export class AdmonClientesComponent implements OnInit {
   createCliente(): void {
     console.log(this.clientesForm.value);
     console.log(this.clientesForm.valid);
+    
     if (this.clientesForm.valid) {
-      this.clientesService.create(this.clientesForm.value).subscribe(() => {
+      // Clonar el objeto del formulario para poder manipular la fecha
+      const formData = { ...this.clientesForm.value };
+  
+      // Formatear la fecha 'activoHasta' si está definida
+      if (formData.activoHasta) {
+        const fechaOriginal = new Date(formData.activoHasta);
+        formData.activoHasta = fechaOriginal.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+      }
+      console.log(formData);
+      this.clientesService.create(formData).subscribe(() => {
         this.loadClientes();
         this.clientesForm.reset();
       });
