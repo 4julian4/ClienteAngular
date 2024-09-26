@@ -84,6 +84,8 @@ export class AdmonClientesComponent implements OnInit {
   }
 
   createCliente(): void {
+    console.log(this.clientesForm.value);
+    console.log(this.clientesForm.valid);
     if (this.clientesForm.valid) {
       this.clientesService.create(this.clientesForm.value).subscribe(() => {
         this.loadClientes();
@@ -93,11 +95,13 @@ export class AdmonClientesComponent implements OnInit {
   }
 
   editCliente(cliente: Clientes): void {
+    console.log(cliente);
     this.selectedCliente = cliente;
     this.clientesForm.patchValue(cliente);
   }
 
   updateCliente(): void {
+    console.log(this.clientesForm.value);
     if (this.clientesForm.valid && this.selectedCliente) {
       this.clientesService.Edit(this.clientesForm.value).subscribe(() => {
         this.loadClientes();

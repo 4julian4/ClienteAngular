@@ -30,7 +30,15 @@ export  class ClientesService {
   }
   
   public create(_Clientes : Clientes): Observable<number>{
-    return this.httpClient.post<number>(urlPage, _Clientes, environment.httpOptions);
+    
+    try {
+      console.log(_Clientes);
+      return this.httpClient.post<number>(urlPage, _Clientes, environment.httpOptions);
+    } catch (error) {
+      console.log(error);
+      throw new Error(`Error al obtener datos: ${error}`);
+    }
+    //return new Observable<number>();
   }
 
   public delete(idCliente: string): Observable<void> {
