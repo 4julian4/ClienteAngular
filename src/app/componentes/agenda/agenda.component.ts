@@ -477,10 +477,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           return;
         }
         let lstPedirConfirmar = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => x.pedirConfirmar);
+        console.log('lstPedirConfirmar', lstPedirConfirmar);
         for (let confirmacion of lstPedirConfirmar) {
           if (confirmacion.pedirConfirmar) {
+            console.log('confirmacion', confirmacion);
+            console.log('confirmacion.mensaje', confirmacion.pedirConfirmar);
+            console.log('confirmacion.mensaje', confirmacion.mensaje);
             let respuesta = await this.mensajesUsuariosService.mensajeConfirmarSiNo(confirmacion.mensaje);
-            if (!respuesta) {
+            console.log('respuesta', respuesta);
+            if (!respuesta.resultado) {
+              console.log('entro para salir' );
               //this.formularioAgregarCita.reset();
               return;
             }
