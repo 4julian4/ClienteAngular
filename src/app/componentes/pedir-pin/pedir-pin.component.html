@@ -7,8 +7,8 @@
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions class="matdialogPedirPin">
-  <button mat-raised-button (click)="onNoClick()">Cancelar</button>
   <button mat-raised-button (click)="confirmar()">Confirmar</button>
+  <button mat-raised-button (click)="onNoClick()">Cancelar</button>
 </mat-dialog-actions>
 <div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
                     <mat-spinner></mat-spinner>

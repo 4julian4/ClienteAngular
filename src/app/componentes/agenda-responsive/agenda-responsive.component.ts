@@ -483,7 +483,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         for (let confirmacion of lstPedirConfirmar) {
           if (confirmacion.pedirConfirmar) {
             let respuesta = await this.mensajesUsuariosService.mensajeConfirmarSiNo(confirmacion.mensaje);
-            if (!respuesta) {
+            if (!respuesta.resultado) {
               //this.formularioAgregarCita.reset();
               return;
             }
