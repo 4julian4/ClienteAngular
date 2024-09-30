@@ -204,6 +204,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
     let sedeSeleccionadaConectada = null;
     console.log(idSede);
     console.log(this.usuarioActual);
+    //limpia datos 
+    this.limpiarVariablesCambioSede();
 
     sedeSeleccionadaConectada = await this.sedesConectadasService.startConnectionRespuestaObtenerActualizarSedesActivasPorCliente(this.usuarioActual.idCliente);
     this.sedesConectadas = sedeSeleccionadaConectada;
@@ -242,13 +244,25 @@ export class SidenavComponent implements OnInit, OnDestroy {
     else {
       await this.mensajesUsuariosService.mensajeInformativo('La sede no esta conectada');
       this.respuestaPinService.idSedeActualSignalREmit.emit("");
-      this.lstDoctores = [];
-      this.doctorSeleccionado = "";
-      this.totalPacientesDoctorSeleccionado = 0;
-      this.mostrarDoctores = false;
-      this.mostrarSedes = true;
+      this.limpiarVariablesCambioSede();
+      //this.lstDoctores = [];
+      //this.doctorSeleccionado = "";
+      //this.totalPacientesDoctorSeleccionado = 0;
+      //this.mostrarDoctores = false;
+      //this.mostrarSedes = true;
       return;
     }
+  }
+
+  limpiarVariablesCambioSede() {
+    this.lstDoctores = [];
+    this.doctorSeleccionado = "";
+    this.totalPacientesDoctorSeleccionado = 0;
+    this.mostrarDoctores = false;
+    this.mostrarSedes = true;
+    this.respuestaPinService.updateAnamnesisData(0);
+    this.respuestaPinService.updateNombrePacienteEscogidoData("");
+    this.respuestaPinService.updateNotaImportante("");
   }
 
   setMostrarBuscarHistoriaClinica(value: boolean) {
