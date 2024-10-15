@@ -8,13 +8,13 @@ import { Router } from '@angular/router';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
-  @HostListener('window:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
+  //@HostListener('window:keydown', ['$event'])
+  /*handleKeyboardEvent(event: KeyboardEvent) {
     // Cambia 'Control' y 'Alt' por las teclas que prefieras
     if (event.ctrlKey && event.altKey && event.key === 'm') {
       this.router.navigate(['/admon-clientes']);
     }
-  }
+  }*/
   constructor(
     private loginService : LoginService,
     private router: Router
