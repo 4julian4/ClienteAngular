@@ -60,9 +60,9 @@ export class AdmonClientesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadClientes();
-    this.loadSedes();
-    this.loadUsuarios();
+    //this.loadClientes();
+    //this.loadSedes();
+    //this.loadUsuarios();
   }
 
   loadClientes(): void {
