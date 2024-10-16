@@ -46,7 +46,20 @@ export class LoginCallbackGoogleComponent implements OnInit, OnDestroy {
       if (params.code) {
         //console.log(params.code);
         //cambiar este await a una suscripcion
-        this.loginCallBackService.Post(params.code, params.state ?? "").pipe(
+        (async () => {
+          try {
+            const data = await this.loginCallBackService.startConnectionPostLoginCallbackGoogle("1", params.code, params.state ?? "");
+            if (data.autenticado && data.respuesta != null && data.respuesta != "") {
+              this.loginService.saveToken(data.respuesta);
+              if (this.loginService.IsSingned()) {
+                window.location.href = "/";
+              }
+            }
+          } catch (err) {
+            this.handleError(err); // Manejar el error si ocurre.
+          }
+        })();
+        /*this.loginCallBackService.Post(params.code, params.state ?? "").pipe(
           timeout(5000), // Timeout de 5 segundos
           catchError(this.handleError.bind(this)) // Asegúrate de que el contexto de this sea correcto
         ).subscribe(data => {
@@ -56,7 +69,7 @@ export class LoginCallbackGoogleComponent implements OnInit, OnDestroy {
               window.location.href = "/"
             }
           }
-        });
+        });*/
         
       }
     });
