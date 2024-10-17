@@ -118,6 +118,7 @@ export class LoginCallbackGoogleService {
         this.signalRService.hubConnection.off('RespuestaPostLoginCallbackGoogle');
         this.signalRService.hubConnection.on('RespuestaPostLoginCallbackGoogle', async (clienteId: string, objPostLoginCallbackGoogleEmit: string) => {
           try {
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Esperar 1,5 segundos antes de procesar la respuesta
             const respuesta = JSON.parse(objPostLoginCallbackGoogleEmit);
             await this.signalRService.hubConnection.stop();
             console.log('Conexión detenida después de recibir respuesta.');
