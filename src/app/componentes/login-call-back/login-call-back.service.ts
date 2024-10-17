@@ -70,21 +70,37 @@ export class LoginCallBackService {
         this.signalRService.hubConnection.off('RespuestaPostLoginCallback');
         this.signalRService.hubConnection.on('RespuestaPostLoginCallback', async (clienteId: string, objPostLoginCallbackEmit: string) => {
           try {
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Esperar 1,5 segundos antes de procesar la respuesta
             const respuesta = JSON.parse(objPostLoginCallbackEmit);
-            await this.signalRService.hubConnection.stop();
-            console.log('Conexión detenida después de recibir respuesta.');
-            this.respuestaPostLoginCallbackEmit.emit(respuesta);
-            console.log('Respuesta recibida: ' + JSON.stringify(respuesta));
-            // Resolver la promesa con la respuesta
-            resolve({
-              autenticado: respuesta.autenticado, // Asumiendo que la respuesta tiene esta propiedad
-              respuesta: respuesta.respuesta // Asumiendo que la respuesta tiene esta propiedad
-            });
-  
+          
+            // Verificar que la respuesta no esté vacía
+            if (respuesta && respuesta.autenticado !== undefined && respuesta.respuesta !== undefined) {
+              
+              // Detener la conexión solo después de asegurarse de que la respuesta es válida
+              await this.signalRService.hubConnection.stop();
+              console.log('Conexión detenida después de recibir respuesta.');
+          
+              // Emitir la respuesta solo si es válida
+              this.respuestaPostLoginCallbackEmit.emit(respuesta);
+              console.log('Respuesta recibida: ' + JSON.stringify(respuesta));
+          
+              // Resolver la promesa con la respuesta validada
+              resolve({
+                autenticado: respuesta.autenticado, // Asumiendo que la respuesta tiene esta propiedad
+                respuesta: respuesta.respuesta // Asumiendo que la respuesta tiene esta propiedad
+              });
+              
+            } else {
+              // Si la respuesta no es válida, rechaza la promesa con un mensaje de error
+              reject(new Error('La respuesta es inválida o incompleta.'));
+            }
+          
             await this.signalRService.stopConnection();
           } catch (error) {
-            reject(error); // Rechaza la promesa si hay error al procesar la respuesta
+            // Rechazar la promesa si hay un error al procesar la respuesta
+            reject(error);
           }
+          
         });
   
         await this.signalRService.hubConnection.invoke('PostLoginCallback', clienteId, code, state).catch(err => {
@@ -92,7 +108,7 @@ export class LoginCallBackService {
           reject(err); // Rechaza la promesa si hay error en la invocación
         });
   
-        this.respuestaPinService.updateisLoading(true);
+        //this.respuestaPinService.updateisLoading(true);
   
       } catch (err) {
         console.log('Error al conectar con SignalR: ' + err);
