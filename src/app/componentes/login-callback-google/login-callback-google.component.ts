@@ -42,7 +42,7 @@ export class LoginCallbackGoogleComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(async (params: any) => {
-
+      console.log(params);
       if (params.code) {
         //console.log(params.code);
         //cambiar este await a una suscripcion
