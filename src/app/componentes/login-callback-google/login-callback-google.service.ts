@@ -99,7 +99,7 @@ export class LoginCallbackGoogleService {
         // Esperar hasta que la conexión esté en el estado 'Disconnected'
         while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
           console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
   
         // Iniciar la conexión
@@ -120,16 +120,25 @@ export class LoginCallbackGoogleService {
           try {
             await new Promise(resolve => setTimeout(resolve, 1500)); // Esperar 1,5 segundos antes de procesar la respuesta
             const respuesta = JSON.parse(objPostLoginCallbackGoogleEmit);
-            await this.signalRService.hubConnection.stop();
-            console.log('Conexión detenida después de recibir respuesta.');
-            this.respuestaPostLoginCallbackGoogleEmit.emit(respuesta);
-  
-            // Resolver la promesa con la respuesta
-            resolve({
-              autenticado: respuesta.autenticado, // Asumiendo que la respuesta tiene esta propiedad
-              respuesta: respuesta.respuesta // Asumiendo que la respuesta tiene esta propiedad
-            });
-  
+            // Verificar que la respuesta no esté vacía
+            if (respuesta && respuesta.autenticado !== undefined && respuesta.respuesta !== undefined) {
+              // Detener la conexión solo después de asegurarse de que la respuesta es válida
+              await this.signalRService.hubConnection.stop();
+              console.log('Conexión detenida después de recibir respuesta.');
+
+              // Emitir la respuesta solo si es válida
+              this.respuestaPostLoginCallbackGoogleEmit.emit(respuesta);
+              console.log('Respuesta recibida: ' + JSON.stringify(respuesta));
+
+              // Resolver la promesa con la respuesta
+              resolve({
+                autenticado: respuesta.autenticado, // Asumiendo que la respuesta tiene esta propiedad
+                respuesta: respuesta.respuesta // Asumiendo que la respuesta tiene esta propiedad
+              });
+            } else {
+              // Si la respuesta no es válida, rechaza la promesa con un mensaje de error
+              reject(new Error('La respuesta es inválida o incompleta.'));
+            }
             await this.signalRService.stopConnection();
           } catch (error) {
             reject(error); // Rechaza la promesa si hay error al procesar la respuesta
@@ -141,7 +150,7 @@ export class LoginCallbackGoogleService {
           reject(err); // Rechaza la promesa si hay error en la invocación
         });
   
-        this.respuestaPinService.updateisLoading(true);
+        //this.respuestaPinService.updateisLoading(true);
   
       } catch (err) {
         console.log('Error al conectar con SignalR: ' + err);
