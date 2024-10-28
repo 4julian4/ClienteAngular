@@ -51,7 +51,7 @@ export class LoginCallBackService {
         // Esperar hasta que la conexión esté en el estado 'Disconnected'
         while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
           console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
   
         // Iniciar la conexión
