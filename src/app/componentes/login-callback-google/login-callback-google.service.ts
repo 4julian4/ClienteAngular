@@ -34,56 +34,9 @@ export class LoginCallbackGoogleService {
     private respuestaPinService: RespuestaPinService
   ) { }
 
+ 
 
-  /*async startConnectionPostLoginCallbackGoogle(clienteId: string, code: string, state: string) {
-    try {
-      console.log('Iniciando proceso de conexión...');
-
-      // Verificar si la conexión está conectada o conectándose, en ese caso detenerla
-      if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-        this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-        console.log('Deteniendo conexión existente...');
-        await this.signalRService.hubConnection.stop();
-        console.log('Conexión detenida.');
-      }
-
-      // Esperar hasta que la conexión esté en el estado 'Disconnected'
-      while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
-        console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
-      // Iniciar la conexión
-      console.log('Iniciando nueva conexión...');
-      await this.signalRService.hubConnection.start();
-      console.log('Conexión iniciada.');
-
-      // Configurar eventos de SignalR
-      this.signalRService.hubConnection.off('ErrorConexion');
-      this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-        console.log('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
-        this.interruptionService.interrupt();
-      });
-
-      this.signalRService.hubConnection.off('RespuestaPostLoginCallbackGoogle');
-      this.signalRService.hubConnection.on('RespuestaPostLoginCallbackGoogle', async (clienteId: string, objPostLoginCallbackGoogleEmit: string) => {
-
-        let respuesta = JSON.parse(objPostLoginCallbackGoogleEmit);
-        await this.signalRService.hubConnection.stop();
-        console.log('Conexión detenida después de recibir respuesta.');
-        this.respuestaPostLoginCallbackGoogleEmit.emit(respuesta);
-        //podriamos hacer algo con la respuesta
-
-        await this.signalRService.stopConnection();
-      });
-      await this.signalRService.hubConnection.invoke('PostLoginCallbackGoogle', clienteId, code, state).catch(err => console.error(err));
-      this.respuestaPinService.updateisLoading(true);
-    } catch (err) {
-      console.log('Error al conectar con SignalR: ' + err);
-    }
-  }*/
-
-  async startConnectionPostLoginCallbackGoogle(clienteId: string, code: string, state: string): Promise<{ autenticado: boolean, respuesta: string }> {
+  async startConnectionPostLoginCallbackGoogle(clienteId: string, code: string, state: string): Promise<PostLoginCallbackGoogleResponse> {
     return new Promise(async (resolve, reject) => {
       try {
         console.log('Iniciando proceso de conexión...');
@@ -99,7 +52,7 @@ export class LoginCallbackGoogleService {
         // Esperar hasta que la conexión esté en el estado 'Disconnected'
         while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
           console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
   
         // Iniciar la conexión
