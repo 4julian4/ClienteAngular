@@ -11,7 +11,7 @@ export class LoginCallbackGoogleService {
 
   constructor(private httpClient : HttpClient) { }
 
-  
+  //nueva prueba para ver por que no se arreglo
   public async Post(code : string, state : string): Promise<any>{
     const categories$ =  this.httpClient.post<any>(urlPage, {"code":code, "state" : state} , environment.httpOptions);
     const res = await lastValueFrom(categories$);
