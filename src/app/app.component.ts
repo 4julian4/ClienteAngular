@@ -62,6 +62,7 @@ export class AppComponent implements OnInit {
     //this.signalRService.mensajes$.subscribe((mensaje: string) => {
     //this.mensajes.push(mensaje);
     //});
+    await this.signalRService.ensureConnection();
     this.interruptionSubscription = this.interruptionService.onInterrupt().subscribe(() => {
       this.detenerProceso();
     });
