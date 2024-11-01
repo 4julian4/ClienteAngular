@@ -17,7 +17,9 @@ export class SignalRService {
   mensajes$: Observable<string> = this.mensajeSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.startConnection();
+    //this.startConnection();
+    console.log('SignalRService constructor');
+    
   }
 
   private async startConnection(): Promise<void> {

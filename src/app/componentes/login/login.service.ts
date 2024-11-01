@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Location } from '@angular/common';
-import { jwtDecode } from 'jwt-decode'; 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';import { SignalRService } from 'src/app/signalr.service';
+ 'jwt-decode';
 const UsuarioLoguiadoKey= 'usuario-autenticado';
 const TOKEN_KEY = 'auth-token';
 @Injectable({
@@ -12,7 +13,8 @@ export class LoginService {
 
   constructor(
     private location1: Location, 
-    public router: Router
+    public router: Router,
+    public signalRService: SignalRService
     ) { }
 
     public redirectToMSNLogin(){
@@ -22,6 +24,7 @@ export class LoginService {
     }
   
     public redirectToGoogleLogin(){
+      //this.signalRService.hubConnection.stop();
       let s = `${"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&prompt=select_account&"}`
       + `${"client_id="}`+ `${environment.OAuthGoogle.ClientId}` +`${"&scope=openid%20email&"}`
       + `${"redirect_uri="}`+ `${environment.OAuthGoogle.RedirectURI}`;

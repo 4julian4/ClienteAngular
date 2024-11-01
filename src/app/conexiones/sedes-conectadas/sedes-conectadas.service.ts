@@ -22,22 +22,7 @@ export class SedesConectadasService {
 
   async startConnectionRespuestaObtenerActualizarSedesActivasPorCliente(idCliente: number): Promise<SedesConectadas[]> {
     // Verificar si ya hay una conexión activa o en proceso de conexión
-    if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-      this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-  
-    console.log('Conexión activa o en proceso de conexión. No se necesita reiniciar.');
-  } else {
-    console.log('Iniciando conexión a SignalR...');
-  
-    // Intentar iniciar la conexión
-    try {
-      await this.signalRService.hubConnection.start();
-      console.log('Conexión a SignalR establecida.');
-    } catch (err) {
-      console.log('Error al conectar con SignalR: ' + err);
-      throw err; // Lanza el error para manejarlo en la llamada a la función
-    }
-  }
+    await this.signalRService.ensureConnection();
 
     return new Promise<SedesConectadas[]>((resolve, reject) => {
       // Configurar eventos de SignalR después de iniciar la conexión
