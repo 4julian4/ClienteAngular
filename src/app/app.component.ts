@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
 
   constructor(private signalRService: SignalRService,
     private sedesService: SedesService,
-    private sedesConectadasService: SedesConectadasService,
+    //private sedesConectadasService: SedesConectadasService,
     private usuariosService: UsuariosService,
     private respuestaPinService: RespuestaPinService,
     private interruptionService: InterruptionService,
@@ -53,7 +53,7 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
-
+    console.log('Iniciando aplicación...');
     this.router.events.subscribe(() => {
       // Verifica si la ruta actual es la raíz o página de inicio
       this.showImage = this.router.url === '/';
@@ -76,6 +76,7 @@ export class AppComponent implements OnInit {
     this.respuestaPinService.idSedeActualSignalREmit.subscribe(async (value: string) => {
       this.idSedeActualSignalR = value;
     });
+    console.log('Aplicación iniciada.');
   }
 
 

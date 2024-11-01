@@ -25,10 +25,11 @@ export class CodigosEpsService {
   }
 
   async startConnectionRespuestaObtenerCodigosEps(clienteId: string) {
-    if (this.signalRService.hubConnection.state !== signalR.HubConnectionState.Connected) {
+    
+    /*if (this.signalRService.hubConnection.state !== signalR.HubConnectionState.Connected) {
       await this.signalRService.hubConnection.start().catch(err => console.log('Error al conectar con SignalR: ' + err));
-    }
-  
+    }*/
+    await this.signalRService.ensureConnection();
     //On es un evento que va pasar y lo que hay dentro de el no se ejecuta sino hasta cuando el se dispara
     //aca clienteId 
     this.signalRService.hubConnection.off('RespuestaObtenerCodigosEps');

@@ -106,6 +106,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
   }
   async ngOnInit() {
+    console.log('sidenav');
     this.mostrarTitulo = true;
     this.renderer.setAttribute(document.body, 'id', 'body');
 
@@ -143,6 +144,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
       }
     });
+    console.log('sidenav2');
     this.logeado = false;
     if (this.loginService.IsSingned()) {
       let loginToken = this.loginService.decodeToken();
@@ -157,6 +159,9 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
       }
     }
+    console.log('sidenav3');
+    
+    
   }
 
   async mostrarHistoria() {

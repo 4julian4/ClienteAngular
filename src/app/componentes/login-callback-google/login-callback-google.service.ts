@@ -41,24 +41,8 @@ export class LoginCallbackGoogleService {
       try {
         console.log('Iniciando proceso de conexión...');
   
+        await this.signalRService.ensureConnection();
         // Verificar si la conexión está conectada o conectándose, en ese caso detenerla
-        if (this.signalRService.hubConnection.state === HubConnectionState.Connected ||
-          this.signalRService.hubConnection.state === HubConnectionState.Connecting) {
-          console.log('Deteniendo conexión existente...');
-          await this.signalRService.hubConnection.stop();
-          console.log('Conexión detenida.');
-        }
-  
-        // Esperar hasta que la conexión esté en el estado 'Disconnected'
-        while (this.signalRService.hubConnection.state !== HubConnectionState.Disconnected) {
-          console.log('Esperando a que la conexión esté en estado "Disconnected"... Estado actual: ' + this.signalRService.hubConnection.state);
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-  
-        // Iniciar la conexión
-        console.log('Iniciando nueva conexión...');
-        await this.signalRService.hubConnection.start();
-        console.log('Conexión iniciada.');
   
         // Configurar eventos de SignalR
         this.signalRService.hubConnection.off('ErrorConexion');
