@@ -1,119 +1,22 @@
 import { HttpClient } from '@angular/common/http';
-import { EventEmitter, Injectable, Output } from '@angular/core';
-import { Router } from '@angular/router';
-import { HubConnectionState } from '@microsoft/signalr';
-import { Observable, catchError, lastValueFrom, throwError, timeout } from 'rxjs';
-import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
-import { InterruptionService } from 'src/app/helpers/interruption';
-import { SignalRService } from 'src/app/signalr.service';
+import { Injectable } from '@angular/core';
+import { Observable, lastValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 const urlPage = environment.apiUrl +'/auth/authgoogle';
-
-//interfaz para el manejo de la respuesta
-export interface PostLoginCallbackGoogleResponse {
-  autenticado: boolean;
-  respuesta: string;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginCallbackGoogleService {
 
-  
-
- 
-
-  @Output() respuestaPostLoginCallbackGoogleEmit: EventEmitter<PostLoginCallbackGoogleResponse> = new EventEmitter<PostLoginCallbackGoogleResponse>();
-
-  constructor(
-    private httpClient : HttpClient,
-    private signalRService: SignalRService,
-    private router: Router,
-    private interruptionService: InterruptionService,
-    private respuestaPinService: RespuestaPinService
-  ) { }
-
- 
-
-  async startConnectionPostLoginCallbackGoogle(clienteId: string, code: string, state: string): Promise<PostLoginCallbackGoogleResponse> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        console.log('Iniciando proceso de conexión...');
-  
-        await this.signalRService.ensureConnection();
-        // Verificar si la conexión está conectada o conectándose, en ese caso detenerla
-  
-        // Configurar eventos de SignalR
-        this.signalRService.hubConnection.off('ErrorConexion');
-        this.signalRService.hubConnection.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
-          console.log('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
-          this.interruptionService.interrupt();
-          reject(new Error(mensajeError)); // Rechaza la promesa si hay error de conexión.
-        });
-  
-        this.signalRService.hubConnection.off('RespuestaPostLoginCallbackGoogle');
-        this.signalRService.hubConnection.on('RespuestaPostLoginCallbackGoogle', async (clienteId: string, objPostLoginCallbackGoogleEmit: string) => {
-          try {
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Esperar 1,5 segundos antes de procesar la respuesta
-            const respuesta = JSON.parse(objPostLoginCallbackGoogleEmit);
-            // Verificar que la respuesta no esté vacía
-            if (respuesta && respuesta.autenticado !== undefined && respuesta.respuesta !== undefined) {
-              // Detener la conexión solo después de asegurarse de que la respuesta es válida
-              await this.signalRService.hubConnection.stop();
-              console.log('Conexión detenida después de recibir respuesta.');
-
-              // Emitir la respuesta solo si es válida
-              this.respuestaPostLoginCallbackGoogleEmit.emit(respuesta);
-              console.log('Respuesta recibida: ' + JSON.stringify(respuesta));
-
-              // Resolver la promesa con la respuesta
-              resolve({
-                autenticado: respuesta.autenticado, // Asumiendo que la respuesta tiene esta propiedad
-                respuesta: respuesta.respuesta // Asumiendo que la respuesta tiene esta propiedad
-              });
-            } else {
-              // Si la respuesta no es válida, rechaza la promesa con un mensaje de error
-              reject(new Error('La respuesta es inválida o incompleta.'));
-            }
-            await this.signalRService.stopConnection();
-          } catch (error) {
-            reject(error); // Rechaza la promesa si hay error al procesar la respuesta
-          }
-        });
-  
-        await this.signalRService.hubConnection.invoke('PostLoginCallbackGoogle', clienteId, code, state).catch(err => {
-          console.error(err);
-          reject(err); // Rechaza la promesa si hay error en la invocación
-        });
-  
-        //this.respuestaPinService.updateisLoading(true);
-  
-      } catch (err) {
-        console.log('Error al conectar con SignalR: ' + err);
-        reject(err); // Rechaza la promesa si hay error general
-      }
-    });
-  }
-  
+  constructor(private httpClient : HttpClient) { }
 
   
-
-  private handleError(error: any) {
-    let errorMessage = '';
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      errorMessage = `Código de error: ${error.status}\nMensaje: ${error.message}`;
-    }
-    return throwError(() => new Error(errorMessage));
-  }
-
-  public Post(code: string, state: string) {
-    return this.httpClient.post<any>(urlPage, { "code": code, "state": state }, environment.httpOptions)
-      .pipe(
-        timeout(5000),
-        catchError(this.handleError)
-      );
+  public async Post(code : string, state : string): Promise<any>{
+    const categories$ =  this.httpClient.post<any>(urlPage, {"code":code, "state" : state} , environment.httpOptions);
+    const res = await lastValueFrom(categories$);
+    //alert(JSON.stringify(res));
+    
+    return res;
   }
 }
