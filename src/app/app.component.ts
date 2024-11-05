@@ -51,7 +51,7 @@ export class AppComponent implements OnInit {
       await this.signalRService.hubConnection.stop();
     }
   }
-
+  //cambio pa solucionar error
   async ngOnInit() {
     console.log('Iniciando aplicación...');
     this.router.events.subscribe(() => {
