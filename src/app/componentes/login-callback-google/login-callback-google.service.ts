@@ -13,8 +13,13 @@ export class LoginCallbackGoogleService {
 
   //nueva prueba para ver por que no se arreglo
   public async Post(code : string, state : string): Promise<any>{
+    console.log(code);
+    console.log(state);
+    const data = {"code":code, "state" : state};
+    console.log(data);
     const categories$ =  this.httpClient.post<any>(urlPage, {"code":code, "state" : state} , environment.httpOptions);
     const res = await lastValueFrom(categories$);
+    console.log(res);
     //alert(JSON.stringify(res));
     
     return res;

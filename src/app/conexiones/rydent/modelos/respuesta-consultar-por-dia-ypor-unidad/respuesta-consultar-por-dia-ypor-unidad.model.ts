@@ -55,6 +55,7 @@ export class P_Agenda1Model {
     OUT_FECHA_SUCESO: Date= new Date();
     OUT_CELULAR: string="";
     OUT_IDCALENDARIO: string="";
+    OUT_CEDULA: string="";
 }
 
 

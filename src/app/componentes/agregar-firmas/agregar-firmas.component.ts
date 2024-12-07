@@ -43,112 +43,120 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
   }
 
   initializeCanvas() {
+    // Verifica si el elemento canvas está disponible
     if (!this.canvas) {
       console.error('No se pudo inicializar el elemento canvas.');
       return;
     }
-
+  
+    // Obtiene el elemento canvas y su elemento contenedor padre
     const canvasElement = this.canvas.nativeElement;
     const parentElement = canvasElement.parentElement as HTMLElement;
-
-    // Ajustar el tamaño del canvas basado en el tamaño del contenedor
+  
+    // Ajusta el tamaño del canvas al tamaño del contenedor padre
     canvasElement.width = parentElement.clientWidth;
     canvasElement.height = parentElement.clientHeight;
-
+  
+    // Obtiene el contexto 2D del canvas para dibujar
     this.ctx = canvasElement.getContext('2d')!;
     if (!this.ctx) {
       console.error('No se pudo obtener el contexto 2D del canvas.');
     }
   }
-
+  
   setupCanvasDrawing() {
+    // Verifica si el contexto 2D y el elemento canvas están inicializados
     if (!this.ctx || !this.canvas) {
       return;
     }
-
+  
     const canvasElement = this.canvas.nativeElement;
-
-    // Eventos de ratón
+  
+    // Observables para eventos del ratón
     const mouseDownStream: Observable<MouseEvent> = fromEvent<MouseEvent>(canvasElement, 'mousedown');
     const mouseMoveStream: Observable<MouseEvent> = fromEvent<MouseEvent>(canvasElement, 'mousemove');
     const mouseUpStream: Observable<MouseEvent> = fromEvent<MouseEvent>(window, 'mouseup');
-
-    // Eventos táctiles
+  
+    // Observables para eventos táctiles
     const touchStartStream: Observable<TouchEvent> = fromEvent<TouchEvent>(canvasElement, 'touchstart');
     const touchMoveStream: Observable<TouchEvent> = fromEvent<TouchEvent>(canvasElement, 'touchmove');
     const touchEndStream: Observable<TouchEvent> = fromEvent<TouchEvent>(window, 'touchend');
-
-    // Convertir eventos táctiles a eventos de ratón equivalentes
+  
+    // Función para convertir eventos táctiles en eventos equivalentes de ratón
     const touchToMouse = (touchEvent: TouchEvent): MouseEvent => {
       const touch = touchEvent.touches[0] || touchEvent.changedTouches[0];
       return new MouseEvent('mousedown', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
+        clientX: touch.clientX, // Coordenada X del evento táctil
+        clientY: touch.clientY  // Coordenada Y del evento táctil
       });
     };
-
-    // Ajustar las coordenadas del evento al canvas
+  
+    // Función para ajustar las coordenadas del evento al canvas
     const getCanvasAdjustedCoordinates = (event: MouseEvent): { offsetX: number, offsetY: number } => {
-      const rect = canvasElement.getBoundingClientRect();
-      const scaleX = canvasElement.width / rect.width;
-      const scaleY = canvasElement.height / rect.height;
-
+      const rect = canvasElement.getBoundingClientRect(); // Obtiene las dimensiones y posición del canvas
+      const scaleX = canvasElement.width / rect.width; // Escala horizontal del canvas
+      const scaleY = canvasElement.height / rect.height; // Escala vertical del canvas
+  
+      // Ajusta las coordenadas X e Y para el canvas
       const offsetX = (event.clientX - rect.left) * scaleX;
       const offsetY = (event.clientY - rect.top) * scaleY;
-
+  
       console.log(`Adjusted Coordinates: X=${offsetX}, Y=${offsetY}`);
-
       return { offsetX, offsetY };
     };
-
-    // Combinar streams de ratón y táctiles
+  
+    // Combina eventos de inicio (ratón y táctil)
     const startStream = merge(
       mouseDownStream,
-      touchStartStream.pipe(map(touchToMouse))
+      touchStartStream.pipe(map(touchToMouse)) // Convierte eventos táctiles en eventos de ratón
     );
-
+  
+    // Combina eventos de movimiento (ratón y táctil)
     const moveStream = merge(
       mouseMoveStream,
-      touchMoveStream.pipe(map(touchToMouse))
+      touchMoveStream.pipe(map(touchToMouse)) // Convierte eventos táctiles en eventos de ratón
     );
-
+  
+    // Combina eventos de finalización (ratón y táctil)
     const endStream = merge(
       mouseUpStream,
-      touchEndStream.pipe(map(touchToMouse))
+      touchEndStream.pipe(map(touchToMouse)) // Convierte eventos táctiles en eventos de ratón
     );
-
+  
+    // Suscripción al stream de inicio
     startStream.pipe(
       tap((event: MouseEvent) => {
         if (this.ctx) {
-          this.ctx.beginPath();
-          this.ctx.strokeStyle = 'black';
-          this.ctx.lineWidth = 5;
-          this.ctx.lineJoin = 'round';
-
+          this.ctx.beginPath(); // Inicia un nuevo trazado
+          this.ctx.strokeStyle = 'black'; // Color del trazo
+          this.ctx.lineWidth = 5; // Ancho de la línea
+          this.ctx.lineJoin = 'round'; // Tipo de unión de las líneas
+  
           const { offsetX, offsetY } = getCanvasAdjustedCoordinates(event);
-          this.ctx.moveTo(offsetX, offsetY);
+          this.ctx.moveTo(offsetX, offsetY); // Mueve el lápiz a las coordenadas ajustadas
         }
       }),
       switchMap(() => moveStream.pipe(
         map((event: MouseEvent) => {
-          event.preventDefault();
-          return getCanvasAdjustedCoordinates(event);
+          event.preventDefault(); // Evita el comportamiento predeterminado (como desplazarse)
+          return getCanvasAdjustedCoordinates(event); // Ajusta las coordenadas al canvas
         }),
         tap(({ offsetX, offsetY }) => {
           if (this.ctx) {
-            this.ctx.lineTo(offsetX, offsetY);
-            this.ctx.stroke();
+            this.ctx.lineTo(offsetX, offsetY); // Dibuja una línea hasta las nuevas coordenadas
+            this.ctx.stroke(); // Realiza el trazo
           }
         }),
-        takeUntil(endStream),
+        takeUntil(endStream), // Finaliza el trazado al terminar el evento
         finalize(() => {
           if (this.ctx) {
-            this.ctx.closePath();
+            this.ctx.closePath(); // Cierra el trazado
           }
         })
       ))
-    ).subscribe();
+    ).subscribe(); // Inicia la suscripción para escuchar los eventos
   }
+  
 
   limpiarCanvas() {
     if (this.ctx && this.canvas && this.canvas.nativeElement) {

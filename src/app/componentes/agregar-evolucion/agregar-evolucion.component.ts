@@ -80,8 +80,7 @@ export class AgregarEvolucionComponent implements OnInit {
       }
     });
 
-
-
+    
     this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
       if (data != null) {
         this.doctorSeleccionado = data;
@@ -267,7 +266,10 @@ export class AgregarEvolucionComponent implements OnInit {
 
 
   async cancelarEvolucion() {
+    this.formularioAgregarEvolucion.reset();
     this.router.navigate(['/evolucion']);
+    this.evolucionService.cambiarFirmaDoctor('');
+    this.evolucionService.cambiarFirmaPaciente('');
     // this.obtenerEvolucionPaciente(this.resultadoBusquedaDatosPersonalesCompletos.IDANAMNESIS);
   }
 

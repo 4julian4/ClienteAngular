@@ -19,19 +19,24 @@ export class LoginCallbackGoogleComponent implements OnInit {
     public router: Router
     ) {}
 
-  ngOnInit() {    
-    this.route.queryParams.subscribe(async (params : any) => {
-        
-        if (params.code){
-          //console.log(params.code);
+  ngOnInit() {
+    this.route.queryParams.subscribe(async (params: any) => {
+      if (params.code) {
+        console.log(params.code);
+        try {
           var data = await this.loginCallBackService.Post(params.code, params.state ?? "");
-            if (data.autenticado && data.respuesta != null && data.respuesta != ""){
-              this.loginService.saveToken(data.respuesta);
-              if (this.loginService.IsSingned()){
-                window.location.href="/"
-              }
+          if (data.autenticado && data.respuesta != null && data.respuesta != "") {
+            this.loginService.saveToken(data.respuesta);
+            if (this.loginService.IsSingned()) {
+              window.location.href = "/";
             }
+          } else {
+            console.error('Autenticación fallida:', data);
+          }
+        } catch (error) {
+          console.error('Error al autenticar:', error);
         }
+      }
     });
   }
 

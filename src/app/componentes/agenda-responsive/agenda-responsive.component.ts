@@ -78,6 +78,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   mostrarFormulario = false;
   mostrarColumna = false;
   mostrarBotonAgendar = true;
+  esFechaValidaParaRecordatorio: boolean = false;
+  agendaRecordada : boolean = false;
   resultadosBusquedaAgendaPorFecha: P_Agenda1Model[] = [];
   //resultadosBusquedaAgendaPorFecha[]: RespuestaConsultarPorDiaYPorUnidad[] = new RespuestaConsultarPorDiaYPorUnidad();
   idSedeActualSignalR: string = '';
@@ -376,6 +378,10 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       //if (this.refrescoAgenda) {
       this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
       this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
+      // ojo aca estoy buscando si en algun momento la agenda de este dia ha sido recordadda a los pacientes
+      console.log('this.resultadosBusquedaAgendaPorFecha', this.resultadosBusquedaAgendaPorFecha);
+      this.agendaRecordada = !!this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_CEDULA === 'SI');
+      console.log('this.agendaRecordada', this.agendaRecordada);
       if (this.localizandoCita) {
         let intervaloCita = this.resultadosBusquedaAgendaPorFecha.find(r =>
           r.OUT_IDCONSECUTIVO === this.selectedRowBuscarCita.IDCONSECUTIVO
@@ -808,6 +814,37 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     }
     await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
     this.router.navigate(['/agregar-evolucion-agenda']);
+  }
+
+  async recordarCita() {
+    if (this.selectedRow.OUT_HORA_CITA) {
+      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de enviar mensaje recordando la cita de este dia?');
+
+      if (!confirmacion.resultado) {
+        console.log('No envio mensaje recordando la cita');
+        return;
+      }
+
+      //if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
+      //console.log('No se borro la cita');
+      // return;
+
+      //}
+      //this.removeFocus();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
+      objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
+      objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'RECORDARCITA';
+      objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
+    }
+    else {
+      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER ENVIAR MENSAJE RECORDANDO LA CITA');
+    }
   }
 
   async borrarCita() {
@@ -1281,11 +1318,34 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
 
   async cambiarFecha() {
+    const fechaActual = new Date();
+    fechaActual.setHours(0, 0, 0, 0); // Establece la hora a las 00:00
+
+
     if (this.idSedeActualSignalR != '') {
       await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
+      // Esperar medio segundo (500 ms)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Llama a la función después de completar el await
+      this.validarFechaYAgenda();
     }
   }
 
+  async validarFechaYAgenda() {
+    const fechaActual = new Date();
+    fechaActual.setHours(0, 0, 0, 0); // Ignorar horas en la comparación
+    console.log('Fecha actual:', fechaActual);
+    console.log('Fecha seleccionada:', this.fechaSeleccionada);
+    console.log('Agenda recordada:', this.agendaRecordada);
+  
+    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada) {
+      this.esFechaValidaParaRecordatorio = false;
+      console.log('fecha invalida');
+    } else {
+      this.esFechaValidaParaRecordatorio = true;
+      console.log('fecha valida');
+    }
+  }
 
 
 
