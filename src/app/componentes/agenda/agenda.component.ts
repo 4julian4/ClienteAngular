@@ -58,6 +58,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   modoEdicion: boolean = false;
   estaCambiandoFecha = false;
   fechaSeleccionada: Date = new Date(); // Fecha seleccionada
+  agendaRecordada: boolean = false;
+  esFechaValidaParaRecordatorio: boolean = false;
   nombre: string = '';
   telefono: string = '';
   celular: string = '';
@@ -190,7 +192,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
     this.agendaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
       if (data) {
-        //alert('refrescar agendaService');
         await this.cambiarFecha();
       }
     });
@@ -255,7 +256,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges
           .pipe(
             startWith(''),
-            map(value =>this.desactivarFiltro ? this.lstTelefonoPacienteParaAgendar: this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstTelefonoPacienteParaAgendar : this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
           );
 
         // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
@@ -268,7 +269,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita.get('celular')!.valueChanges
           .pipe(
             startWith(''),
-            map(value =>this.desactivarFiltro ? this.lstCelularPacienteParaAgendar: this._filterNombre(value, this.lstCelularPacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstCelularPacienteParaAgendar : this._filterNombre(value, this.lstCelularPacienteParaAgendar))
           );
 
         this.listaHistoriaPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
@@ -276,14 +277,14 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita.get('numHistoria')!.valueChanges
           .pipe(
             startWith(''),
-            map(value =>this.desactivarFiltro ? this.lstHistoriaPacienteParaAgendar: this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstHistoriaPacienteParaAgendar : this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
           );
 
 
         //----------------suscribo para cambiar datos segun lo seleccionado-----------//
 
         this.formularioAgregarCita.get('nombre')!.valueChanges.subscribe(value => {
-          if(this.suscripcionActivaFiltros){
+          if (this.suscripcionActivaFiltros) {
             const selectedPaciente = this.lstNombrePacienteParaAgendar.find(paciente => paciente.nombre === value);
             if (selectedPaciente) {
               const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
@@ -310,7 +311,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
 
         this.formularioAgregarCita.get('numHistoria')!.valueChanges.subscribe(value => {
-          if(this.suscripcionActivaFiltros){
+          if (this.suscripcionActivaFiltros) {
             const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(historia => historia.nombre === value);
             if (selectedHistoria) {
               const correspondingNombre = this.lstNombrePacienteParaAgendar.find(item => item.id === selectedHistoria.id);
@@ -372,6 +373,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       //if (this.refrescoAgenda) {
       this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
       this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
+      // ojo aca estoy buscando si en algun momento la agenda de este dia ha sido recordadda a los pacientes
+      console.log('this.resultadosBusquedaAgendaPorFecha', this.resultadosBusquedaAgendaPorFecha);
+      this.agendaRecordada = !!this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_CEDULA === 'SI');
+      console.log('this.agendaRecordada', this.agendaRecordada);
       if (this.localizandoCita) {
         let intervaloCita = this.resultadosBusquedaAgendaPorFecha.find(r =>
           r.OUT_IDCONSECUTIVO === this.selectedRowBuscarCita.IDCONSECUTIVO
@@ -486,7 +491,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
             let respuesta = await this.mensajesUsuariosService.mensajeConfirmarSiNo(confirmacion.mensaje);
             console.log('respuesta', respuesta);
             if (!respuesta.resultado) {
-              console.log('entro para salir' );
+              console.log('entro para salir');
               //this.formularioAgregarCita.reset();
               return;
             }
@@ -613,7 +618,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         });
 
         // Reactivar el filtro después de un breve retraso
-        
+
         this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
         this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
         // Combina focus y setSelectionRange en un solo setTimeout
@@ -621,9 +626,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           const inputElement = this.nombreInput.nativeElement as HTMLInputElement;
           inputElement.focus();
           inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
-          
+
         }, 400);
-        
+
         //setTimeout(() => this.nombreInput.nativeElement.focus(), 100);
         //setTimeout(() => this.nombreInput.nativeElement.inputElement.setSelectionRange(this.nombreInput.nativeElement.inputElement.value.length, this.nombreInput.nativeElement.inputElement.value.length), 100);
 
@@ -638,7 +643,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         }
         setTimeout(() => this.desactivarFiltro = false, 300);
         setTimeout(() => this.suscripcionActivaFiltros = true, 330);
-        
+
 
       }
     }
@@ -790,6 +795,37 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
     await this.respuestaPinService.updateDeDondeAgregaEvolucionData('AGENDA');
     this.router.navigate(['/agregar-evolucion-agenda']);
+  }
+
+  async recordarCita() {
+    if (this.selectedRow.OUT_HORA_CITA) {
+      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de enviar mensaje recordando la cita de este dia?');
+
+      if (!confirmacion.resultado) {
+        console.log('No envio mensaje recordando la cita');
+        return;
+      }
+
+      //if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('Estas seguro de borrar esta cita?')) {
+      //console.log('No se borro la cita');
+      // return;
+
+      //}
+      //this.removeFocus();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
+      objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
+      objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'RECORDARCITA';
+      objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
+    }
+    else {
+      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER ENVIAR MENSAJE RECORDANDO LA CITA');
+    }
   }
 
   async borrarCita() {
@@ -1197,7 +1233,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   async onRowClickedAgenda(intervalo: any) {
     this.desactivarFiltro = true;
-    
+
     this.selectedRow = intervalo;
     //prueba para refrescar agenda
     console.log(intervalo);
@@ -1221,7 +1257,6 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     let sillaComoNumero = Number(this.selectedRowBuscarCita.SILLA_CITA);
     this.sillaSeleccionada = sillaComoNumero;
     this.fechaSeleccionada = new Date(this.selectedRowBuscarCita.FECHA_CITA);
-
     this.miCalendario.activeDate = this.fechaSeleccionada;
     this.changeDetectorRef.detectChanges();
     this.localizandoCita = true;
@@ -1268,8 +1303,33 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
 
   async cambiarFecha() {
+    const fechaActual = new Date();
+    fechaActual.setHours(0, 0, 0, 0); // Establece la hora a las 00:00
+
+
     if (this.idSedeActualSignalR != '') {
       await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
+      // Esperar medio segundo (500 ms)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Llama a la función después de completar el await
+      this.validarFechaYAgenda();
+    }
+
+  }
+
+  async validarFechaYAgenda() {
+    const fechaActual = new Date();
+    fechaActual.setHours(0, 0, 0, 0); // Ignorar horas en la comparación
+    console.log('Fecha actual:', fechaActual);
+    console.log('Fecha seleccionada:', this.fechaSeleccionada);
+    console.log('Agenda recordada:', this.agendaRecordada);
+  
+    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada) {
+      this.esFechaValidaParaRecordatorio = false;
+      console.log('fecha invalida');
+    } else {
+      this.esFechaValidaParaRecordatorio = true;
+      console.log('fecha valida');
     }
   }
 

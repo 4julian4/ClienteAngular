@@ -2,7 +2,7 @@
     "/api": {
         "target1": "https://localhost:63363",
         "targetJuli": "https://localhost:7028",
-        "target": "https://rydentwebdv.azurewebsites.net",
+        "target": "https://rydentweb-001-site1.jtempurl.com",
         "secure": false
     }
 }

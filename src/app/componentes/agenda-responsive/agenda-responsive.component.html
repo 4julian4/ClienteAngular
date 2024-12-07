@@ -323,6 +323,9 @@
                     <button mat-menu-item (click)="editarCita()">Editar</button>
                     <button mat-menu-item (click)="borrarCita()">Borrar</button>
                     <button mat-menu-item (click)="detallarCita()">Detalle</button>
+                    <button mat-menu-item *ngIf="esFechaValidaParaRecordatorio"(click)="recordarCita()">
+                        Recordar Cita
+                    </button>
                     <button mat-menu-item (click)="agregarEvolucion()">Agregar Evolucion</button> 
                 </mat-menu>
 
