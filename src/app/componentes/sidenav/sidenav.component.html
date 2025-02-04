@@ -37,6 +37,12 @@
             </button>
 
             <!-- Opciones siempre visibles -->
+
+            <button mat-menu-item routerLink="/agregar-datos-personales" (click)="setMostrarBuscarHistoriaClinica(false)">
+                <mat-icon>person_add</mat-icon>
+                <span>Crear Paciente</span>
+            </button>
+
             <button mat-menu-item routerLink="/datos-administrativos" (click)="setMostrarBuscarHistoriaClinica(false)">
                 <mat-icon>equalizer</mat-icon>
                 <span>Datos Administrativos</span>

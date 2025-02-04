@@ -54,7 +54,7 @@ export class DatosPersonales {
     CODIGO_DEPARTAMENTO: string="";
     CODIGO_EPS: string="";
     CODIGO_EPS_LISTADO: string="";
-    NUMERO_TTITULAR: string="";
+    NUMERO_TTITULAR: number=0;
     NOMBREPADRE: string="";
     TELEFONOPADRE: string="";
     NOMBRE_MADRE: string="";
@@ -67,6 +67,8 @@ export class DatosPersonales {
     RELACIONPADRES: string="";
     ACTIVO: number=0;
     IDREFERIDOPOR: number=0;
+    COD_DOCTOR : number=0;
+    DOCTOR : string="";
 }
 
 

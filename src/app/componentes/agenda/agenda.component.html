@@ -34,13 +34,16 @@
                                     </mat-option>-->
                                 </mat-autocomplete>
 
-
-
                                 <button mat-icon-button
                                     (click)="buscarCitasPaciente(datosPacienteParaBuscarAgendaControl.value)">
                                     <mat-icon>search</mat-icon>
                                 </button>
                             </div>
+                            
+                            <button mat-icon-button *ngIf="esFechaValidaParaRecordatorio"(click)="recordarCita()" matTooltip="Recordar cita pacientes">
+                                <mat-icon svgIcon="whatsapp"></mat-icon>
+                                <!--<mat-icon>message</mat-icon>-->
+                            </button>
                         </div>
                     </div>
                 </mat-panel-description>
@@ -318,9 +321,6 @@
                     <button mat-menu-item (click)="agendarCita()">Agregar</button>
                     <button mat-menu-item (click)="editarCita()">Editar</button>
                     <button mat-menu-item (click)="borrarCita()">Borrar</button>
-                    <button mat-menu-item *ngIf="esFechaValidaParaRecordatorio"(click)="recordarCita()">
-                        Recordar Cita
-                    </button>
                     <button mat-menu-item (click)="agregarEvolucion()">Agregar Evolucion</button> 
                 </mat-menu>
 

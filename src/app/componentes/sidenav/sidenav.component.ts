@@ -292,7 +292,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
       this.doctorEscogido = this.lstDoctores.filter(x => x.id == idDoctor)[0].nombre;
       if (this.doctorEscogido) {
         this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
-
+        this.respuestaPinService.updateIdDoctorSeleccionado(idDoctor);
       }
       this.respuestaPinService.updateCambiarDoctorSeleccionado(this.doctorEscogido);
 

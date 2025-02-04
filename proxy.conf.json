@@ -1,7 +1,7 @@
 {
     "/api": {
         "target1": "https://localhost:63363",
-        "targetJuli": "https://localhost:7028",
+        "targetjuli": "https://localhost:7028",
         "target": "https://rydentweb-001-site1.jtempurl.com",
         "secure": false
     }
