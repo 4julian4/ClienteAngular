@@ -1,0 +1,329 @@
+.divFormularioFila1 {
+    //width: 80%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.divFormularioFila1 mat-form-field {
+    margin: 0 5px;
+    /* Ajusta este valor para obtener el margen que deseas */
+}
+
+.divFormularioFila2 {
+   // width: 80%;
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila2 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila3 {
+    //width: 80%;
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila3 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+
+.divFormularioFila4 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila4 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila5 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila5 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila6 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila6 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila7 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila7 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila8 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila8 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila9 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila9 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila10 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila10 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.divFormularioFila11 {
+    display: flex;
+    justify-content: space-between;
+
+    .campoFila11 {
+        flex: 1;
+
+        &:not(:last-child) {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
+.scrollable-content {
+    max-height: calc(100vh - 200px);
+    /* Ajusta este valor según el tamaño de tus botones */
+    overflow-y: auto;
+}
+
+.formulariodatosPersonales {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    /* Esto redondea las esquinas */
+    padding: 20px;
+    width: 90%;
+    /* Evita que se desborde el contenido */
+    box-sizing: border-box;
+    
+    /* Ajusta esto a lo que necesites */
+    margin: 0 auto;
+    /* Centra la caja en la página */
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+
+    .divContenedorDeBotones {
+        text-align: right;
+
+        .BotonGuardar {
+            margin: 5px;
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+
+        .BotonCancelar {
+            background-color: rgb(28, 197, 244);
+            color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+            /* Ajusta estos valores para obtener el efecto de sombra que deseas */
+        }
+    }
+
+    .divFotoFrontal {
+        flex: 0 0 20%;
+        height: 100%; /* Puedes ajustar la altura fija aquí */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+       // position: relative;
+        overflow: hidden; /* Para asegurarse de que la imagen no sobresalga del contenedor */
+       // background-color: #f5f5f5; /* Color de fondo opcional para el contenedor */
+    }
+
+    .foto {
+        width: 70%; /* La imagen ocupará el 100% del ancho del contenedor */
+        height: 70%; /* La imagen ocupará el 100% de la altura del contenedor */
+        object-fit: contain; /* Ajusta la imagen dentro del contenedor sin distorsionarla */
+        object-position: center; /* Centra la imagen dentro del contenedor */
+    }
+   
+}
+
+
+
+
+// Responsive design
+@media (max-width: 1200px) {
+    .formulariodatosPersonales {
+        width: 95%;
+    }
+}
+
+@media (max-width: 992px) {
+    .formulariodatosPersonales {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .divFormularioFila1,
+    .divFormularioFila2,
+    .divFormularioFila3,
+    .divFormularioFila4,
+    .divFormularioFila5,
+    .divFormularioFila6,
+    .divFormularioFila7,
+    .divFormularioFila8,
+    .divFormularioFila9,
+    .divFormularioFila10,
+    .divFormularioFila11 {
+        flex-direction: column;
+        align-items: stretch;
+
+        mat-form-field {
+            width: 100%;
+            margin: 10px 0;
+        }
+    }
+
+    .scrollable-content {
+        max-height: calc(100vh - 150px); // Reduce for smaller screens
+    }
+}
+
+@media (max-width: 768px) {
+    .formulariodatosPersonales {
+        padding: 10px;
+    }
+
+    .divContenedorDeBotones {
+        text-align: center;
+
+        .BotonGuardar,
+        .BotonCancelar {
+            width: 100%;
+            margin: 10px 0;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .formulariodatosPersonales {
+        padding: 5px;
+    }
+
+    .divFormularioFila1,
+    .divFormularioFila2,
+    .divFormularioFila3,
+    .divFormularioFila4,
+    .divFormularioFila5,
+    .divFormularioFila6,
+    .divFormularioFila7,
+    .divFormularioFila8,
+    .divFormularioFila9,
+    .divFormularioFila10,
+    .divFormularioFila11 {
+        mat-form-field {
+            margin: 5px 0;
+        }
+    }
+
+    .scrollable-content {
+        max-height: calc(100vh - 100px); // Further reduce for small screens
+    }
+}
+

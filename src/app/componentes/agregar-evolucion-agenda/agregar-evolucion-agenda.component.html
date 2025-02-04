@@ -4,6 +4,11 @@
         <!-- NOMBRES y APELLIDOS -->
         <div class="divFormularioFila1">
             <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Nombre del Paciente</mat-label>
+                <input matInput [value]="nombrePacienteSeleccionado" readonly>
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill" class="campoFila1">
                 <mat-label>Fecha</mat-label>
                 <input matInput [matDatepicker]="picker" formControlName="FECHA" placeholder="Choose a date">
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>

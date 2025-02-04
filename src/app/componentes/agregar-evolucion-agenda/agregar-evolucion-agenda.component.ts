@@ -31,6 +31,7 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
   formularioAgregarEvolucion!: FormGroup;
   idSedeActualSignalR: string = "";
   idAnamnesisPacienteSeleccionado: number = 0;
+  nombrePacienteSeleccionado: string = "";
   doctorSeleccionado = "";
   listaDoctores: RespuestaPin = new RespuestaPin();
   lstDoctores: { id: number, nombre: string }[] = [];
@@ -62,6 +63,13 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
     this.respuestaPinService.sharedAnamnesisEvolucionarAgendaData.subscribe(data => {
       if (data != null) {
         this.idAnamnesisPacienteSeleccionado = data;
+      }
+    });
+
+    this.respuestaPinService.sharedNombrePacienteEvolucionarAgendaData.subscribe(data => {
+      if (data != null) {
+        this.nombrePacienteSeleccionado = data;
+        console.log(this.nombrePacienteSeleccionado);
       }
     });
 
@@ -146,6 +154,7 @@ export class AgregarEvolucionAgendaComponent implements OnInit {
     } else {
       this.router.navigate(['/agenda']);
     }
+    //this.respuestaPinService.updateDeDondeAgregaEvolucionData(true);
   }
 
   inicializarFormulario() {

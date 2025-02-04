@@ -56,6 +56,9 @@
                                     <mat-icon>search</mat-icon>
                                 </button>
                             </div>
+                            <button mat-icon-button *ngIf="esFechaValidaParaRecordatorio"(click)="recordarCita()" matTooltip="Recordar citas">
+                                <mat-icon svgIcon="whatsapp"></mat-icon>
+                            </button>
                         </div>
                     </div>
                 </mat-panel-description>
@@ -323,9 +326,6 @@
                     <button mat-menu-item (click)="editarCita()">Editar</button>
                     <button mat-menu-item (click)="borrarCita()">Borrar</button>
                     <button mat-menu-item (click)="detallarCita()">Detalle</button>
-                    <button mat-menu-item *ngIf="esFechaValidaParaRecordatorio"(click)="recordarCita()">
-                        Recordar Cita
-                    </button>
                     <button mat-menu-item (click)="agregarEvolucion()">Agregar Evolucion</button> 
                 </mat-menu>
 

@@ -1,29 +1,30 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-
-
+import { Subject, takeUntil } from 'rxjs';
 import { Antecedentes, AntecedentesService } from 'src/app/conexiones/rydent/modelos/antecedentes';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { AgregarAntecedentesService } from './agregar-antecedentes.service';
 
 @Component({
-  selector: 'app-antecedentes',
-  templateUrl: './antecedentes.component.html',
-  styleUrl: './antecedentes.component.scss'
+  selector: 'app-agregar-antecedentes',
+  templateUrl: './agregar-antecedentes.component.html',
+  styleUrl: './agregar-antecedentes.component.scss'
 })
-export class AntecedentesComponent implements OnInit {
+export class AgregarAntecedentesComponent implements OnInit {
   @Input() respuestaAntecedentes: Antecedentes = new Antecedentes();
   formularioAntecedentes!: FormGroup;
   resultadoBusquedaAntecedentes: Antecedentes = new Antecedentes();
   idSedeActualSignalR: string = "";
   idAnamnesisPacienteSeleccionado: number = 0;
+  private destruir$: Subject<boolean> = new Subject<boolean>();
   constructor(
     private formBuilder: FormBuilder,
     private antecedentesService: AntecedentesService,
     private respuestaPinService: RespuestaPinService,
-    private router: Router
+    private router: Router,
+    private agregarAntecedentesService: AgregarAntecedentesService
   ) { }
-
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
     this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
@@ -37,7 +38,25 @@ export class AntecedentesComponent implements OnInit {
         this.idSedeActualSignalR = data;
       }
     });
-    await this.obtenerAntecedentesPaciente(this.idAnamnesisPacienteSeleccionado);
+    this.formularioAntecedentes.valueChanges.pipe(takeUntil(this.destruir$)).subscribe(valores => {
+      Object.keys(valores).forEach(campo => {
+        if (typeof valores[campo] === 'string') {
+          // Convertir a mayúsculas y actualizar el valor del campo
+          this.formularioAntecedentes.get(campo)?.setValue(valores[campo].toUpperCase(), { emitEvent: false });
+        }
+      });
+    });
+
+    this.respuestaPinService.sharedantecedentesPacienteParaEditarData.pipe(takeUntil(this.destruir$)).subscribe(data => {
+      if (data != null) {
+        this.resultadoBusquedaAntecedentes = data;
+        this.formularioAntecedentes.patchValue({
+          ...this.resultadoBusquedaAntecedentes
+        });
+        this.formularioAntecedentes.patchValue(data);
+      }
+    });
+    //await this.obtenerAntecedentesPaciente(this.idAnamnesisPacienteSeleccionado);
 
     //Antecedente
     this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
@@ -46,7 +65,6 @@ export class AntecedentesComponent implements OnInit {
       //this.formularioAntecedentes.disable();
     });
   }
-
   async obtenerAntecedentesPaciente(idAnamnesis: number) {
 
     if (this.idSedeActualSignalR != '') {
@@ -149,28 +167,38 @@ export class AntecedentesComponent implements OnInit {
     //this.formularioAntecedentes.patchValue(this.resultadoBusquedaAntecedentesCompletos);
   }
 
-  async editarAntecedentes() {
-    let antecedentesPaciente: Antecedentes = this.formularioAntecedentes.getRawValue();
-    await this.respuestaPinService.updateantecedentesPacienteParaEditar(antecedentesPaciente);
-    this.router.navigate(['/agregar-antecedentes']);
-    console.log('Datos del paciente para editar:', antecedentesPaciente);
+
+
+  async guardarAntecedentes() {
+    let datosParaEditarAntecedentes: Antecedentes = new Antecedentes();
+    let datosFormularioParaEditarAntecedentes = { ...this.formularioAntecedentes.value };
+
+    // 🔹 Convertir todos los valores de tipo string a mayúsculas
+    Object.keys(datosFormularioParaEditarAntecedentes).forEach(campo => {
+      if (typeof datosFormularioParaEditarAntecedentes[campo] === 'string') {
+        datosFormularioParaEditarAntecedentes[campo] = datosFormularioParaEditarAntecedentes[campo].toUpperCase();
+      }
+    });
+
+    datosParaEditarAntecedentes = datosFormularioParaEditarAntecedentes;
+    console.log(datosParaEditarAntecedentes);
+
+
+    await this.agregarAntecedentesService.startConnectionEditarAntecedentesPaciente(this.idSedeActualSignalR, JSON.stringify(datosParaEditarAntecedentes));
   }
 
-  guardarAntecedentes() {
-    // Lógica para guardar los datos del formulario
-  }
 
-  cancelarAntecedentes() {
-    // Lógica para cancelar la edición del formulario
-  }
-
-  async mostrarAntecedentes() {
-    //this.obtenerAntecedentesPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);  
-  }
-
-  async mostrarEvolucion() {
-    // this.obtenerEvolucionPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);
-  }
-
+cancelarAntecedentes() {
+  this.respuestaPinService.updateantecedentesPacienteParaEditar(new Antecedentes());
+  this.router.navigate(['/antecedentes']);
 }
 
+  async mostrarAntecedentes() {
+  //this.obtenerAntecedentesPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);  
+}
+
+  async mostrarEvolucion() {
+  // this.obtenerEvolucionPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);
+}
+
+}

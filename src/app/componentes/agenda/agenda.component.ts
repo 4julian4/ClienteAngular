@@ -59,7 +59,9 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   estaCambiandoFecha = false;
   fechaSeleccionada: Date = new Date(); // Fecha seleccionada
   agendaRecordada: boolean = false;
+  noHayCitasAsignadas: boolean = false;
   esFechaValidaParaRecordatorio: boolean = false;
+  evolucionoAgenda: string = '';
   nombre: string = '';
   telefono: string = '';
   celular: string = '';
@@ -69,6 +71,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   selectedRowBuscarCita: any;
   showSearch = false;
   searchTerm = '';
+  horaCitaRecordarAgenda: Date = new Date();
   resultadosBusquedaAgendaPorFecha: P_Agenda1Model[] = [];
   //resultadosBusquedaAgendaPorFecha[]: RespuestaConsultarPorDiaYPorUnidad[] = new RespuestaConsultarPorDiaYPorUnidad();
   idSedeActualSignalR: string = '';
@@ -94,12 +97,13 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   sedeSeleccionada: SedesConectadas = new SedesConectadas();
   idSede: number = 0;
   doctorSeleccionado = "";
+  intervaloSeleccionadoParaEvolucionar: P_Agenda1Model = new P_Agenda1Model();
   doctorProgramadoCronograma = "";
   horaCitaSeleccionada = "";
   desactivarFiltro: boolean = false;
   suscripcionActivaFiltros: boolean = true;
   resultadosBusquedaCitaPacienteAgenda: RespuestaBusquedaCitasPaciente[] = [];
-
+  horaCitaSeleccionadaEvolucionada: Date = new Date();
   listaNombrePacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
   lstNombrePacienteParaAgendar: { id: string, nombre: string }[] = [];
   filteredNombrePacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
@@ -373,10 +377,20 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       //if (this.refrescoAgenda) {
       this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
       this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
+
       // ojo aca estoy buscando si en algun momento la agenda de este dia ha sido recordadda a los pacientes
       console.log('this.resultadosBusquedaAgendaPorFecha', this.resultadosBusquedaAgendaPorFecha);
+      var registroConNombre = this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_NOMBRE !== '');
+      this.noHayCitasAsignadas = !registroConNombre; // Será true si no se encuentra ningún registro
+      if (registroConNombre && registroConNombre.OUT_HORA_CITA) {
+        this.horaCitaRecordarAgenda = registroConNombre.OUT_HORA_CITA;
+      }
+
+
       this.agendaRecordada = !!this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_CEDULA === 'SI');
+
       console.log('this.agendaRecordada', this.agendaRecordada);
+
       if (this.localizandoCita) {
         let intervaloCita = this.resultadosBusquedaAgendaPorFecha.find(r =>
           r.OUT_IDCONSECUTIVO === this.selectedRowBuscarCita.IDCONSECUTIVO
@@ -409,7 +423,38 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       }
 
     });
-    await this.cambiarFecha();
+    this.respuestaPinService.sharedDeDondeAgregaEvolucionData.subscribe(data => {
+      if (data != null) {
+        this.evolucionoAgenda = data;
+      }
+    });
+
+
+    if (this.evolucionoAgenda === 'AGENDA') {
+      this.respuestaPinService.sharedfechaEvolucionarAgendaData.subscribe(data => {
+        if (data != null) {
+          this.fechaSeleccionada = data;
+        }
+      });
+
+      this.respuestaPinService.sharedsillaEvolucionarAgendaData.subscribe(data => {
+        if (data != null) {
+          this.sillaSeleccionada = data;
+        }
+      });
+      this.respuestaPinService.sharedhoraEvolucionarAgendaData.subscribe(data => {
+        if (data != null) {
+          this.horaCitaSeleccionadaEvolucionada = data;
+        }
+      });
+      await this.cambiarFecha();
+      this.miCalendario.activeDate = this.fechaSeleccionada;
+      this.scrollToSelectedRow(this.horaCitaSeleccionadaEvolucionada);
+      await this.respuestaPinService.updateDeDondeAgregaEvolucionData('');
+    } else {
+      await this.cambiarFecha(); // Si cambiarFecha es asincrónico
+    }
+
     this.recibirRespuestaAgendarCitaEmitida();
 
     this.agendaService.respuestaBuscarCitasPacienteAgendaEmit.subscribe(async (respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[]) => {
@@ -421,6 +466,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       }
 
     });
+
 
   }
 
@@ -450,6 +496,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       selectedRow.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
     }
   }
+
+
 
 
   private _filterBuscarAgenda(nombre: string): { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] {
@@ -512,13 +560,31 @@ export class AgendaComponent implements OnInit, AfterViewInit {
         }
         else {
           this.formularioAgregarCita.reset();
-          //this.agendaService.refrescarAgendaEmit.emit(true);
-          //await this.cambiarFecha();
         }
       }
 
     });
   }
+
+
+
+  async scrollToSelectedRow(identificador: Date) {
+    let citaEvolucionada = this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_HORA_CITA === identificador);
+
+    if (citaEvolucionada) {
+      const index = this.resultadosBusquedaAgendaPorFecha.indexOf(citaEvolucionada);
+      if (index >= 0 && index < this.rows.length) {
+        const element = this.rows.toArray()[index].nativeElement;
+
+        // Utiliza scrollIntoView para desplazar el elemento a la vista
+        element.scrollIntoView({ behavior: 'auto', block: 'center' });
+      } else {
+      }
+    } else {
+      console.log('No se encontró un intervalo que cumpla con las condiciones especificadas');
+    }
+  }
+  
   //llena el select del campo duracion en la agenda
   async llenarIntervalos() {
     if (this.intervalos) {
@@ -794,12 +860,18 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
     await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
     await this.respuestaPinService.updateDeDondeAgregaEvolucionData('AGENDA');
+    await this.respuestaPinService.updateNombrePacienteEvolucionarAgendaData(this.selectedRow.OUT_NOMBRE);
+    //await this.respuestaPinService.updateintervaloSeleccionadoAgendaData(this.selectedRow);
+
+    await this.respuestaPinService.updatefechaEvolucionarAgendaData(this.fechaSeleccionada);
+    await this.respuestaPinService.updatesillaEvolucionarAgendaData(this.sillaSeleccionada);
+    await this.respuestaPinService.updatehoraEvolucionarAgendaData(this.selectedRow.OUT_HORA_CITA);
     this.router.navigate(['/agregar-evolucion-agenda']);
   }
 
   async recordarCita() {
-    if (this.selectedRow.OUT_HORA_CITA) {
-      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de enviar mensaje recordando la cita de este dia?');
+    if (this.fechaSeleccionada && this.sillaSeleccionada) {
+      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Deseas enviar un recordatorio de las citas programadas para este día y esta silla a los pacientes?');
 
       if (!confirmacion.resultado) {
         console.log('No envio mensaje recordando la cita');
@@ -812,11 +884,14 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
       //}
       //this.removeFocus();
+      console.log(this.fechaSeleccionada);
+      console.log(this.sillaSeleccionada);
+      console.log(this.horaCitaRecordarAgenda);
       let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.horaCitaRecordarAgenda;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'RECORDARCITA';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
@@ -1258,9 +1333,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.sillaSeleccionada = sillaComoNumero;
     this.fechaSeleccionada = new Date(this.selectedRowBuscarCita.FECHA_CITA);
     this.miCalendario.activeDate = this.fechaSeleccionada;
+    //this.miCalendario.activeDate = this.fechaSeleccionada;
     this.changeDetectorRef.detectChanges();
     this.localizandoCita = true;
     await this.cambiarFecha();
+    //this.fechaSeleccionada = new Date(this.selectedRowBuscarCita.FECHA_CITA);
     this.miPanelBucarCitas.close();
     //this.resultadosBusquedaCita = false;
   }
@@ -1323,8 +1400,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     console.log('Fecha actual:', fechaActual);
     console.log('Fecha seleccionada:', this.fechaSeleccionada);
     console.log('Agenda recordada:', this.agendaRecordada);
-  
-    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada) {
+
+    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada || this.noHayCitasAsignadas) {
       this.esFechaValidaParaRecordatorio = false;
       console.log('fecha invalida');
     } else {

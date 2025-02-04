@@ -73,13 +73,15 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   suscrpcionActivaFiltros: boolean = true;
   showSearch = false;
   searchTerm = '';
+  horaCitaRecordarAgenda: Date = new Date();
   mostrarSelectSilla = true;
   mostrarBuscarAgenda = false;
   mostrarFormulario = false;
   mostrarColumna = false;
   mostrarBotonAgendar = true;
   esFechaValidaParaRecordatorio: boolean = false;
-  agendaRecordada : boolean = false;
+  agendaRecordada: boolean = false;
+  noHayCitasAsignadas: boolean = false;
   resultadosBusquedaAgendaPorFecha: P_Agenda1Model[] = [];
   //resultadosBusquedaAgendaPorFecha[]: RespuestaConsultarPorDiaYPorUnidad[] = new RespuestaConsultarPorDiaYPorUnidad();
   idSedeActualSignalR: string = '';
@@ -95,6 +97,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   busqueda: string = '';
   showForm: boolean = true;
   esFestivo: boolean = false;
+  horaCitaSeleccionadaEvolucionada: Date = new Date();
   formularioAgregarCita!: FormGroup;
   lstFestivos: TFestivos[] = [];
   lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
@@ -109,6 +112,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   doctorProgramadoCronograma = "";
   horaCitaSeleccionada = "";
   desactivarFiltro: boolean = false;
+  evolucionoAgenda: string = '';
   resultadosBusquedaCitaPacienteAgenda: RespuestaBusquedaCitasPaciente[] = [];
 
   listaNombrePacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
@@ -223,6 +227,13 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       }
     });
 
+    this.respuestaPinService.sharedDeDondeAgregaEvolucionData.subscribe(data => {
+      if (data != null) {
+        //alert('evolucionoAgenda'+ data);
+        this.evolucionoAgenda = data;
+      }
+    });
+
     this.respuestaPinService.sharedSedeSeleccionada.subscribe(data => {
       if (data != null) {
         this.idSede = data;
@@ -269,7 +280,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges
           .pipe(
             startWith(''),
-            map(value =>this.desactivarFiltro ? this.lstTelefonoPacienteParaAgendar: this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstTelefonoPacienteParaAgendar : this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
           );
 
         // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
@@ -282,7 +293,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita.get('celular')!.valueChanges
           .pipe(
             startWith(''),
-            map(value =>this.desactivarFiltro ? this.lstCelularPacienteParaAgendar: this._filterNombre(value, this.lstCelularPacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstCelularPacienteParaAgendar : this._filterNombre(value, this.lstCelularPacienteParaAgendar))
           );
 
         this.listaHistoriaPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
@@ -290,14 +301,14 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita.get('numHistoria')!.valueChanges
           .pipe(
             startWith(''),
-            map(value =>this.desactivarFiltro ? this.lstHistoriaPacienteParaAgendar: this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
+            map(value => this.desactivarFiltro ? this.lstHistoriaPacienteParaAgendar : this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
           );
 
 
         //----------------suscribo para cambiar datos segun lo seleccionado-----------//
 
         this.formularioAgregarCita.get('nombre')!.valueChanges.subscribe(value => {
-          if(this.suscrpcionActivaFiltros){
+          if (this.suscrpcionActivaFiltros) {
             const selectedPaciente = this.lstNombrePacienteParaAgendar.find(paciente => paciente.nombre === value);
             if (selectedPaciente) {
               const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
@@ -324,7 +335,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
 
         this.formularioAgregarCita.get('numHistoria')!.valueChanges.subscribe(value => {
-          if(this.suscrpcionActivaFiltros){
+          if (this.suscrpcionActivaFiltros) {
             const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(historia => historia.nombre === value);
             if (selectedHistoria) {
               const correspondingNombre = this.lstNombrePacienteParaAgendar.find(item => item.id === selectedHistoria.id);
@@ -378,8 +389,15 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       //if (this.refrescoAgenda) {
       this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
       this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
+
       // ojo aca estoy buscando si en algun momento la agenda de este dia ha sido recordadda a los pacientes
       console.log('this.resultadosBusquedaAgendaPorFecha', this.resultadosBusquedaAgendaPorFecha);
+      var registroConNombre = this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_NOMBRE !== '');
+      this.noHayCitasAsignadas = !registroConNombre; // Será true si no se encuentra ningún registro
+      if (registroConNombre && registroConNombre.OUT_HORA_CITA) {
+        this.horaCitaRecordarAgenda = registroConNombre.OUT_HORA_CITA;
+      }
+
       this.agendaRecordada = !!this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_CEDULA === 'SI');
       console.log('this.agendaRecordada', this.agendaRecordada);
       if (this.localizandoCita) {
@@ -412,9 +430,34 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         this.agendaService.refrescarAgendaEmit.emit(true);
         //this.isloading = false;
       }
-
     });
-    await this.cambiarFecha();
+
+
+    if (this.evolucionoAgenda === 'AGENDA') {
+      this.respuestaPinService.sharedfechaEvolucionarAgendaData.subscribe(data => {
+        if (data != null) {
+          this.fechaSeleccionada = data;
+        }
+      });
+
+      this.respuestaPinService.sharedsillaEvolucionarAgendaData.subscribe(data => {
+        if (data != null) {
+          this.sillaSeleccionada = data;
+        }
+      });
+      this.respuestaPinService.sharedhoraEvolucionarAgendaData.subscribe(data => {
+        if (data != null) {
+          this.horaCitaSeleccionadaEvolucionada = data;
+        }
+      });
+      await this.cambiarFecha();
+      this.miCalendario.activeDate = this.fechaSeleccionada;
+      this.scrollToSelectedRow(this.horaCitaSeleccionadaEvolucionada);
+      await this.respuestaPinService.updateDeDondeAgregaEvolucionData('');
+    } else {
+      await this.cambiarFecha(); // Si cambiarFecha es asincrónico
+    }
+
     this.recibirRespuestaAgendarCitaEmitida();
 
     this.agendaService.respuestaBuscarCitasPacienteAgendaEmit.subscribe(async (respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[]) => {
@@ -516,6 +559,23 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       }
 
     });
+  }
+
+  async scrollToSelectedRow(identificador: Date) {
+    let citaEvolucionada = this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_HORA_CITA === identificador);
+
+    if (citaEvolucionada) {
+      const index = this.resultadosBusquedaAgendaPorFecha.indexOf(citaEvolucionada);
+      if (index >= 0 && index < this.rows.length) {
+        const element = this.rows.toArray()[index].nativeElement;
+
+        // Utiliza scrollIntoView para desplazar el elemento a la vista
+        element.scrollIntoView({ behavior: 'auto', block: 'center' });
+      } else {
+      }
+    } else {
+      console.log('No se encontró un intervalo que cumpla con las condiciones especificadas');
+    }
   }
 
   //llena el select del campo duracion en la agenda
@@ -813,12 +873,18 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       return;
     }
     await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
+    await this.respuestaPinService.updateDeDondeAgregaEvolucionData('AGENDA');
+    await this.respuestaPinService.updateNombrePacienteEvolucionarAgendaData(this.selectedRow.OUT_NOMBRE);
+    await this.respuestaPinService.updatefechaEvolucionarAgendaData(this.fechaSeleccionada);
+    //await this.respuestaPinService.updateintervaloSeleccionadoAgendaData(this.selectedRow);
+    await this.respuestaPinService.updatesillaEvolucionarAgendaData(this.sillaSeleccionada);
+    await this.respuestaPinService.updatehoraEvolucionarAgendaData(this.selectedRow.OUT_HORA_CITA);
     this.router.navigate(['/agregar-evolucion-agenda']);
   }
 
   async recordarCita() {
-    if (this.selectedRow.OUT_HORA_CITA) {
-      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de enviar mensaje recordando la cita de este dia?');
+    if (this.fechaSeleccionada && this.sillaSeleccionada) {
+      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Deseas enviar un recordatorio de las citas programadas para este día y esta silla a los pacientes?');
 
       if (!confirmacion.resultado) {
         console.log('No envio mensaje recordando la cita');
@@ -835,7 +901,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.horaCitaRecordarAgenda;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'RECORDARCITA';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
@@ -1337,8 +1403,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     console.log('Fecha actual:', fechaActual);
     console.log('Fecha seleccionada:', this.fechaSeleccionada);
     console.log('Agenda recordada:', this.agendaRecordada);
-  
-    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada) {
+
+    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada || this.noHayCitasAsignadas) {
       this.esFechaValidaParaRecordatorio = false;
       console.log('fecha invalida');
     } else {

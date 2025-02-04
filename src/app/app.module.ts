@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
@@ -12,7 +12,7 @@ import {MaterialModule} from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 
 import { LoginComponent } from './componentes/login/login.component';
 import { SpinnerComponent } from './componentes/spinner/spinner.component';
@@ -47,6 +47,8 @@ import { HideColumnDirective } from './directives/hide-column.directive';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
 import { AdmonClientesComponent } from './componentes/admon-clientes';
+import { AgregarDatosPersonalesComponent } from './componentes/agregar-datos-personales/agregar-datos-personales.component';
+import { AgregarAntecedentesComponent } from './componentes/agregar-antecedentes/agregar-antecedentes.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -66,10 +68,7 @@ export const MY_DATE_FORMATS = {
         AppComponent,
         LoginComponent,
         SpinnerComponent,
-        
-        
         SidenavComponent,
-        //PedirPin,
         PedirPinComponent,
         MensajesUsuariosComponent,
         AgendaComponent,
@@ -87,7 +86,9 @@ export const MY_DATE_FORMATS = {
         RipsComponent,
         DatosAdministrativosComponent,
         AdmonClientesComponent,
-        HideColumnDirective
+        HideColumnDirective,
+        AgregarDatosPersonalesComponent,
+        AgregarAntecedentesComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
@@ -113,4 +114,12 @@ export const MY_DATE_FORMATS = {
         { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
         provideHttpClient(withInterceptorsFromDi())
     ] })
-export class AppModule { }
+export class AppModule { 
+    constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
+        this.matIconRegistry.addSvgIcon(
+          'whatsapp',
+          this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/whatsapp.svg')
+        );
+      }
+}
+
