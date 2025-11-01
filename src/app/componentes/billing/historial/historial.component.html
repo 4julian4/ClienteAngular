@@ -1,0 +1,47 @@
+<h2>Historial / Estado</h2>
+
+<section>
+  <h3>Consulta Status por ID (UUID o consecutivo interno)</h3>
+  <div class="row">
+    <label
+      >ID: <input [(ngModel)]="statusId" placeholder="UUID_O_CONSECUTIVO"
+    /></label>
+    <button mat-flat-button color="primary" (click)="consultarStatus()">
+      Consultar
+    </button>
+  </div>
+  <pre class="json">{{ statusResp | json }}</pre>
+</section>
+
+<hr />
+
+<section>
+  <h3>Descarga PDF / XML por Prefijo+Número</h3>
+  <div class="row">
+    <label
+      >Prefijo+Número: <input [(ngModel)]="prefijoNum" placeholder="FEE2015"
+    /></label>
+    <label>TenantId: <input [(ngModel)]="tenantId" /></label>
+    <label><input type="checkbox" [(ngModel)]="redirect" /> redirect</label>
+  </div>
+  <div class="row">
+    <button mat-stroked-button color="primary" (click)="obtenerPdf()">
+      PDF
+    </button>
+    <button mat-stroked-button color="accent" (click)="obtenerXml()">
+      XML
+    </button>
+  </div>
+
+  <h4>PDF response</h4>
+  <pre class="json">{{ pdfResp | json }}</pre>
+  <div *ngIf="pdfResp?.pdfUrl">
+    <a [href]="pdfResp.pdfUrl" target="_blank" rel="noopener">Abrir PDF</a>
+  </div>
+
+  <h4>XML response</h4>
+  <pre class="json">{{ xmlResp | json }}</pre>
+  <div *ngIf="xmlResp?.xmlUrl">
+    <a [href]="xmlResp.xmlUrl" target="_blank" rel="noopener">Abrir XML</a>
+  </div>
+</section>

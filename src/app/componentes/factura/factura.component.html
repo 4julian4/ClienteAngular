@@ -1,0 +1,190 @@
+<div class="toolbar">
+  <!-- Tipo de listado -->
+  <mat-form-field appearance="fill">
+    <mat-label>Listado</mat-label>
+    <mat-select [formControl]="filtroTipoListado">
+      <mat-option value="pendientes">Pendientes</mat-option>
+      <mat-option value="creadas">Creadas</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- N° Factura (solo para “creadas”) -->
+  <mat-form-field
+    appearance="fill"
+    *ngIf="filtroTipoListado.value === 'creadas'"
+  >
+    <mat-label>N° factura (opcional)</mat-label>
+    <input
+      matInput
+      placeholder="Ej: F001-123"
+      [formControl]="filtroNumeroFactura"
+    />
+  </mat-form-field>
+
+  <!-- Doctor responsable = Prestador único (con “Todos”) -->
+  <mat-form-field appearance="fill">
+    <mat-label>Doctor responsable</mat-label>
+    <mat-select [formControl]="filtroPrestador">
+      <mat-option value="">Todos</mat-option>
+      <mat-option *ngFor="let p of prestadoresUnicos" [value]="p">{{
+        p
+      }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Texto libre -->
+  <mat-form-field appearance="fill">
+    <mat-label>Buscar</mat-label>
+    <input
+      matInput
+      placeholder="Paciente, factura, prestador…"
+      [formControl]="filtroTexto"
+    />
+  </mat-form-field>
+
+  <!-- Fechas -->
+  <mat-form-field appearance="fill">
+    <mat-label>Fecha inicial</mat-label>
+    <input matInput [matDatepicker]="dp1" [formControl]="filtroFechaIni" />
+    <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+    <mat-datepicker #dp1></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Fecha final</mat-label>
+    <input matInput [matDatepicker]="dp2" [formControl]="filtroFechaFin" />
+    <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+    <mat-datepicker #dp2></mat-datepicker>
+  </mat-form-field>
+
+  <!-- Botón consultar -->
+  <div class="toolbar__cta">
+    <button class="btn-primario" mat-raised-button (click)="consultar()">
+      Consultar
+    </button>
+  </div>
+</div>
+
+<div class="tabla-wrapper" *ngIf="!isLoading; else cargandoTpl">
+  <div class="tabla-scroll">
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      matSort
+      class="mat-elevation-z8 tabla"
+    >
+      <!-- Fecha -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+        <td mat-cell *matCellDef="let r">
+          {{ r.fecha | date : "dd/MM/yyyy" }}
+        </td>
+      </ng-container>
+
+      <!-- Factura -->
+      <ng-container matColumnDef="factura">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Factura</th>
+        <td mat-cell *matCellDef="let r">{{ r.factura }}</td>
+      </ng-container>
+
+      <!-- Paciente -->
+      <ng-container matColumnDef="nombrePaciente">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Paciente</th>
+        <td mat-cell *matCellDef="let r">{{ r.nombre_Paciente }}</td>
+      </ng-container>
+
+      <!-- Valor -->
+      <ng-container matColumnDef="valorTotal">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Valor</th>
+        <td mat-cell *matCellDef="let r">
+          {{ r.valor_Total | number : "1.0-0" }}
+        </td>
+      </ng-container>
+
+      <!-- Prestador -->
+      <ng-container matColumnDef="prestador">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          class="col-prestador"
+        >
+          Prestador
+        </th>
+        <td mat-cell *matCellDef="let r" class="col-prestador">
+          {{ r.prestador }}
+        </td>
+      </ng-container>
+
+      <!-- Doctor (solo existe en pendientes; si no, muestra “-”) -->
+      <ng-container matColumnDef="doctor">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          class="col-doctor"
+        >
+          Doctor
+        </th>
+        <td mat-cell *matCellDef="let r" class="col-doctor">
+          {{ getDoctor(r) }}
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="col-acciones">Acciones</th>
+        <td mat-cell *matCellDef="let r" class="col-acciones">
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="menuAcciones"
+            matTooltip="Acciones"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menuAcciones="matMenu">
+            <!-- Pendientes -->
+            <ng-container *ngIf="filtroTipoListado.value === 'pendientes'">
+              <button mat-menu-item (click)="registrarEnDian(r)">
+                <mat-icon>cloud_upload</mat-icon>
+                <span>Registrar en DIAN</span>
+              </button>
+              <button mat-menu-item (click)="descargarXml(r)">
+                <mat-icon>download</mat-icon>
+                <span>Descargar XML</span>
+              </button>
+            </ng-container>
+
+            <!-- Creadas -->
+            <ng-container *ngIf="filtroTipoListado.value === 'creadas'">
+              <button mat-menu-item (click)="descargarPdf(r)">
+                <mat-icon>picture_as_pdf</mat-icon>
+                <span>Descargar PDF</span>
+              </button>
+              <button mat-menu-item (click)="descargarXml(r)">
+                <mat-icon>download</mat-icon>
+                <span>Descargar XML</span>
+              </button>
+            </ng-container>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [pageSize]="10"
+    [pageSizeOptions]="[10, 25, 50]"
+    showFirstLastButtons
+  >
+  </mat-paginator>
+</div>
+
+<ng-template #cargandoTpl>
+  <div class="cargando">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

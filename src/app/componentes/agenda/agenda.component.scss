@@ -9,10 +9,10 @@
 
 .mat-expansion-panel {
     background-color: transparent; // Hace que el panel sea transparente
-     // Ajusta este valor según tus necesidades
+    // Ajusta este valor según tus necesidades
 }
 
-.mat-expansion-description-panel{
+.mat-expansion-description-panel {
     background-color: transparent;
     height: 45px;
 }
@@ -39,9 +39,17 @@
 }
 
 @keyframes blink {
-    0% {opacity: 1;}
-    50% {opacity: 0;}
-    100% {opacity: 1;}
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .blink {
@@ -80,7 +88,7 @@
 
 .filaClickeable {
     cursor: pointer;
-  }
+}
 
 .custom-select select {
     width: 100%;
@@ -324,16 +332,7 @@
     }
 }
 
-x
-
-
-
-
-
-
-
-
-.tabla-horarios {
+x .tabla-horarios {
     height: 100%;
     border-collapse: collapse;
     border: none;
@@ -341,10 +340,9 @@ x
     border-radius: 8px;
 
     //background-color: white;
+    
+    
 }
-
-
-
 
 /* Estilo para la fila del encabezado de la tabla */
 .fila-superior {
@@ -352,7 +350,7 @@ x
     top: 0;
     z-index: 1;
     //background-color: white;
-   // background-color: transparent; // Hace que el fondo sea transparente
+    // background-color: transparent; // Hace que el fondo sea transparente
 }
 
 .seleccionado {
@@ -417,20 +415,23 @@ x
 /* Media Queries para adaptar a tablets y móviles */
 @media (max-width: 768px) {
     .custom-select {
-        width: 30%; /* Aumenta el ancho en pantallas más pequeñas */
+        width: 30%;
+        /* Aumenta el ancho en pantallas más pequeñas */
     }
-    
+
     .contenedor-izquierdo {
         width: 25%;
     }
-    
+
     .mi-calendario {
         width: 100%;
-        height: 30%; /* Ajusta la altura para pantallas más pequeñas */
+        height: 30%;
+        /* Ajusta la altura para pantallas más pequeñas */
     }
 
     .formulario-cita {
-        height: auto; /* Ajusta la altura del formulario para pantallas más pequeñas */
+        height: auto;
+        /* Ajusta la altura del formulario para pantallas más pequeñas */
     }
 
     .buscarAgenda {
@@ -443,12 +444,13 @@ x
     .custom-select {
         width: 50%;
     }
-    
+
     .contenedor-izquierdo {
         width: 40%;
     }
 
-    .barra-superior, .contenedorArriba {
+    .barra-superior,
+    .contenedorArriba {
         height: auto;
         padding: 5px;
     }
@@ -476,22 +478,25 @@ x
         flex-wrap: nowrap;
     }
 
-    .contenedor-derecho > .columna {
+    .contenedor-derecho>.columna {
         box-sizing: border-box;
         padding: 10px;
         border-right: 1px solid #ccc;
     }
 
-    .contenedor-derecho > .columna:not(.hora) {
+    .contenedor-derecho>.columna:not(.hora) {
         flex: 0 0 auto;
         min-width: 200px;
     }
 
-    .contenedor-derecho > .columna.hora {
-        flex: 0 0 50px; /* Ajuste a 50px para un ancho menor */
-        min-width: 50px; /* Mantiene un ancho mínimo de 50px */
-        padding: 5px; /* Reduce el padding interno */
-        text-align: center; /* Centra el texto */
+    .contenedor-derecho>.columna.hora {
+        flex: 0 0 50px;
+        /* Ajuste a 50px para un ancho menor */
+        min-width: 50px;
+        /* Mantiene un ancho mínimo de 50px */
+        padding: 5px;
+        /* Reduce el padding interno */
+        text-align: center;
+        /* Centra el texto */
     }
 }
-

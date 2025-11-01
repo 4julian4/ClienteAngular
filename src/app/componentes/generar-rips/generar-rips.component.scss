@@ -1,0 +1,170 @@
+.gestion-presentar-generar-rips {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+
+    form {
+        margin-top: 100px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+
+        mat-form-field {
+            width: 100%;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            grid-column: span 4;
+            justify-self: end;
+            justify-content: flex-end;
+        }
+    }
+
+    .BotonGenerar,
+    .BotonDescargar{
+        margin-left: auto;
+        background-color: rgb(28, 197, 244);
+        color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0px 0px 10px rgba(0, 0, 0, 0.5); // Combinar las sombras
+        border-radius: 5px; // Agregar bordes redondeados a los botones
+        padding: 10px 20px; // Aumentar el relleno de los botones
+        transition: all 0.3s ease; // Agregar una transición suave a los botones
+
+        &:hover {
+            background-color: rgb(22, 160, 200); // Cambiar el color de fondo en hover
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3), inset 0px 0px 10px rgba(0, 0, 0, 0.5); // Aumentar la sombra en hover
+        }
+    }
+
+    // ubicar boton al lado derecho
+    .BotonCancelar {
+        margin-left: auto;
+        background-color: rgb(28, 197, 244);
+        color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0px 0px 10px rgba(0, 0, 0, 0.5); // Combinar las sombras
+        border-radius: 5px; // Agregar bordes redondeados a los botones
+        padding: 10px 20px; // Aumentar el relleno de los botones
+        transition: all 0.3s ease; // Agregar una transición suave a los botones
+
+        &:hover {
+            background-color: rgb(22, 160, 200); // Cambiar el color de fondo en hover
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3), inset 0px 0px 10px rgba(0, 0, 0, 0.5); // Aumentar la sombra en hover
+        }
+    }
+
+    .divContenedorDeBotones {
+        grid-column: 3; /* Lo mueve a la última fila */
+        display: flex;
+        //justify-content: center;
+        //display: flex;
+        justify-content: flex-end; // Mueve el botón a la derech
+        /* Centra los botones */
+        gap: 2px;
+        /* Espaciado entre botones */
+        margin-top: 5px;
+        /* Margen superior */
+    }
+
+    
+    .divcotenedorBotonCancelar {
+        display: flex;
+        justify-content: flex-end; // Mueve el botón a la derecha
+        margin-top: 10px; // Agrega separación con la tabla
+    }
+
+    .scrollable-table-container {
+        overflow-x: auto;
+        /* Permite desplazamiento horizontal si es necesario */
+        max-width: 100%;
+        /* Limita la anchura */
+        max-height: 68vh; 
+        /* Limita la altura de la tabla */
+    }
+
+    table {
+        width: 100%;
+        /* La tabla ocupa todo el ancho */
+        //border-collapse: collapse;
+        border: 1px solid #ddd; // Asegura el borde perimetral completo
+        border-radius: 8px;
+        /* Elimina espacios entre celdas */
+    }
+
+    th,
+    td {
+        padding: 2px 5px;
+        /* Espaciado interno en las celdas */
+        border: 1px solid #ddd;
+        /* Bordes sutiles */
+        //height: 20px; /* Disminuye la altura mínima */
+        line-height: 1.2;
+        /* Reduce el espaciado entre líneas */
+        text-align: left;
+        /* Alineación del texto */
+    }
+
+
+    th {
+        background-color: #f8f9fa;
+        /* Fondo gris claro para encabezados */
+        font-weight: bold;
+        /* Texto en negrita */
+        padding: 5px 8px;
+        /* Espaciado interno en los encabezados */
+        height: 10px;
+        font-size: 14px
+    }
+
+
+    .encabezadoPrincipal {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        /* Asegura que el encabezado esté sobre las filas */
+        background-color: white;
+        /* Para que no se superponga con las filas al hacer scroll */
+    }
+
+
+    .search {
+        margin-bottom: 20px;
+        /* Margen inferior */
+        display: flex;
+        align-items: center;
+        /* Centra los elementos verticalmente */
+        border: 1px solid #ccc;
+        /* Borde del input */
+        border-radius: 25px;
+        /* Bordes redondeados */
+        padding: 5px 10px;
+        /* Espaciado interno */
+        background-color: #f9f9f9;
+        /* Fondo claro */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Sombra ligera */
+
+        input {
+            width: 50%;
+            /* Ocupa la mitad del ancho */
+            min-width: 300px;
+            /* Ancho mínimo para evitar reducción excesiva */
+            font-size: 16px;
+            /* Tamaño de fuente adecuado */
+            border: none;
+            /* Sin borde */
+            outline: none;
+            /* Elimina contorno en foco */
+            padding: 10px;
+            /* Espaciado interno */
+            background-color: transparent;
+            /* Fondo transparente */
+        }
+    }
+}

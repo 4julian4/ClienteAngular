@@ -1,0 +1,289 @@
+<div class="gestion-presentar-generar-rips">
+     <!-- Input para el filtrado -->
+    
+
+    <div *ngIf="mostrarTablaRipsGenerados" class="ripsGenerado">
+        <div class="search">
+            <input matInput placeholder="Buscar Factura..." (input)="aplicarFiltro($event)" />
+        </div>
+        <div class="scrollable-table-container"> 
+            <table mat-table [dataSource]="tableData" class="mat-elevation-z8">
+            
+                <ng-container matColumnDef="facturas">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Factura</th>
+                    <td mat-cell *matCellDef="let element">{{element.factura}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="numNota">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Num Nota</th>
+                    <td mat-cell *matCellDef="let element">{{element.numNota}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="tipoNota">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">T.N.</th>
+                    <td mat-cell *matCellDef="let element">{{element.tipoNota}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="usuarios">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Usuarios</th>
+                    <td mat-cell *matCellDef="let element">
+                        
+                        <table mat-table [dataSource]="element.usuarios">
+                            <ng-container matColumnDef="tipoDocumentoIdentificacion">
+                                <th mat-header-cell *matHeaderCellDef class="tipo-doc">T.D.</th>
+                                <td mat-cell *matCellDef="let user">{{user.tipoDocumentoIdentificacion}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="numDocumentoIdentificacion">
+                                <th mat-header-cell *matHeaderCellDef>Documento</th>
+                                <td mat-cell *matCellDef="let user">{{user.numDocumentoIdentificacion}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="servicios">
+                                <th mat-header-cell *matHeaderCellDef class="servicios">Servicios</th>
+                                <td mat-cell *matCellDef="let user">
+                                   <!-- <mat-divider></mat-divider>
+                                    <h4 mat-subheader>Consultas</h4>
+                                     Tabla anidada para Consultas -->
+                                    <table mat-table [dataSource]="user.servicios?.consultas">
+                                        <ng-container matColumnDef="codConsulta">
+                                            <th mat-header-cell *matHeaderCellDef>Cd. Cons</th>
+                                            <td mat-cell *matCellDef="let consulta">{{consulta.codConsulta}}</td>
+                                        </ng-container>
+                                        
+                                        <ng-container matColumnDef="conceptoRecaudo">
+                                            <th mat-header-cell *matHeaderCellDef>C.R.</th>
+                                            <td mat-cell *matCellDef="let consulta">{{consulta.conceptoRecaudo}}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="fechaInicioAtencion">
+                                            <th mat-header-cell *matHeaderCellDef>Fecha Atencion</th>
+                                            <td mat-cell *matCellDef="let consulta">{{consulta.fechaInicioAtencion}}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="vrServicio">
+                                            <th mat-header-cell *matHeaderCellDef>Valor Serv</th>
+                                            <td mat-cell *matCellDef="let consulta">{{consulta.vrServicio}}</td>
+                                        </ng-container>
+
+                                        <tr mat-header-row *matHeaderRowDef="['codConsulta','conceptoRecaudo','fechaInicioAtencion' ,'vrServicio'];"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: ['codConsulta','conceptoRecaudo','fechaInicioAtencion' ,'vrServicio'];"></tr>
+                                    </table>
+
+                                    <!--<mat-divider></mat-divider>
+                                    <h4 mat-subheader>Procedimientos</h4>
+                                     Tabla anidada para Procedimientos -->
+                                    <table mat-table [dataSource]="user.servicios?.procedimientos">
+                                        <ng-container matColumnDef="codProcedimiento">
+                                            <th mat-header-cell *matHeaderCellDef>Cd. Proc</th>
+                                            <td mat-cell *matCellDef="let procedimiento">{{procedimiento.codProcedimiento}}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="conceptoRecaudo">
+                                            <th mat-header-cell *matHeaderCellDef>C.R.</th>
+                                            <td mat-cell *matCellDef="let procedimiento">{{procedimiento.conceptoRecaudo}}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="fechaInicioAtencion">
+                                            <th mat-header-cell *matHeaderCellDef>Fecha Atencion</th>
+                                            <td mat-cell *matCellDef="let procedimiento">{{procedimiento.fechaInicioAtencion}}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="vrServicio">
+                                            <th mat-header-cell *matHeaderCellDef>Valor Serv</th>
+                                            <td mat-cell *matCellDef="let procedimiento">{{procedimiento.vrServicio}}</td>
+                                        </ng-container>
+
+                                        <tr mat-header-row *matHeaderRowDef="['codProcedimiento','conceptoRecaudo', 'fechaInicioAtencion', 'vrServicio'];"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: ['codProcedimiento','conceptoRecaudo', 'fechaInicioAtencion', 'vrServicio'];"></tr>
+                                    </table>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="['tipoDocumentoIdentificacion', 'numDocumentoIdentificacion', 'servicios'];"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ['tipoDocumentoIdentificacion', 'numDocumentoIdentificacion', 'servicios'];"></tr>
+                        </table>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['facturas', 'tipoNota', 'numNota', 'usuarios'];"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['facturas', 'tipoNota', 'numNota', 'usuarios'];"></tr>
+            
+            </table>
+        </div>
+        <div class="divcotenedorBotonCancelar">
+            <button class="BotonCancelar" mat-raised-button (click)="cancelarGenerarRips()">Cancelar</button>
+        </div>
+    </div>
+
+
+    <div *ngIf="mostrarTablaRespuestaRipsPresentados" class="ripsGenerado">
+        <div class="search">
+            <input matInput placeholder="Buscar Factura..." (input)="aplicarFiltro($event)" />
+        </div>
+        <div class="scrollable-table-container"> 
+            <table mat-table [dataSource]="tableDataRespuesta" class="mat-elevation-z8">
+            
+                <ng-container matColumnDef="numFactura">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Factura</th>
+                    <td mat-cell *matCellDef="let element">{{element.Factura}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="codigoUnicoValidacion">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Codigo Val</th>
+                    <td mat-cell *matCellDef="let element">{{element.Codigo}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="resultState">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Resultado</th>
+                    <td mat-cell *matCellDef="let element">{{element.Estado}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="resultadosValidacion">
+                    <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Resultados Validacion</th>
+                    <td mat-cell *matCellDef="let element">
+                        
+                        <table mat-table [dataSource]="element.Resultados">
+                            <ng-container matColumnDef="Clase">
+                                <th mat-header-cell *matHeaderCellDef class="tipo-doc">Clase</th>
+                                <td mat-cell *matCellDef="let user">{{user.Clase}}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="Codigo">
+                                <th mat-header-cell *matHeaderCellDef class="tipo-doc">Codigo</th>
+                                <td mat-cell *matCellDef="let user">{{user.Codigo}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="Descripcion">
+                                <th mat-header-cell *matHeaderCellDef>Descripcion</th>
+                                <td mat-cell *matCellDef="let user">{{user.Descripcion}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="Observaciones">
+                                <th mat-header-cell *matHeaderCellDef>Observaciones</th>
+                                <td mat-cell *matCellDef="let user">{{user.Observaciones}}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="['Clase','Codigo', 'Descripcion', 'Observaciones'];"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ['Clase','Codigo', 'Descripcion', 'Observaciones'];"></tr>
+                        </table>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['numFactura', 'codigoUnicoValidacion', 'resultState', 'resultadosValidacion'];"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['numFactura', 'codigoUnicoValidacion', 'resultState', 'resultadosValidacion'];"></tr>
+            
+            </table>
+        </div>
+        <div class="divcotenedorBotonCancelar">
+            <button class="BotonCancelar" mat-raised-button (click)="cancelarGenerarRips()">Cancelar</button>
+        </div>
+    </div>
+  
+  
+
+   <!-- Formulario de creación/edición -->
+   <div [hidden]="mostrarFormulario" class="formularioGenerarRips">
+       <form  [formGroup]="ripsForm">
+            
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Fecha Inicio</mat-label>
+                <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" placeholder="Fecha Inicio">
+                    <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Fecha Fin</mat-label>
+                <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" placeholder="Fecha Fin">
+                    <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Código EPS</mat-label>
+                <input matInput formControlName="codigoEps" placeholder="Código EPS">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="campoFila1">
+                <mat-label>Factura</mat-label>
+                <input matInput formControlName="factura" placeholder="Factura">
+            </mat-form-field>
+        
+        
+
+
+        
+        <!-- Select ID Reporte -->
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Razón Social </mat-label>
+                <mat-select formControlName="idReporte">
+                <mat-option *ngFor="let reporte of listaInformacionReporte" [value]="reporte.id">
+                    {{ reporte.nombre }}
+                </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Select ID Doctor -->
+            <mat-form-field appearance="fill" class="campoFila2">
+                <mat-label>Doctor</mat-label>
+                <mat-select formControlName="idDoctor">
+                <mat-option value="">Seleccione uno</mat-option>
+                <mat-option value="-1">[ TODOS ]</mat-option>
+                <mat-option *ngFor="let doctor of listaDoctores" [value]="doctor.id">
+                    {{ doctor.nombre }}
+                </mat-option>
+                </mat-select>
+            </mat-form-field>
+            
+
+            <div class="divContenedorDeBotones">
+                <!-- Botón Presentar -->
+                <button mat-raised-button [matMenuTriggerFor]="menuPresentar" class="BotonGenerar">
+                    Presentar RIPS
+                </button>
+
+                <mat-menu #menuPresentar="matMenu">
+                    <button mat-menu-item (click)="presentarRips(0)">📤 Presentar RIPS</button>
+                    <button mat-menu-item (click)="presentarRips(1)">🏢 Presentar RIPS Sede</button>
+                </mat-menu>
+
+                <!-- Botón Descargar -->
+                <button mat-raised-button [matMenuTriggerFor]="menuDescargar" class="BotonDescargar">
+                    Descargar RIPS
+                </button>
+
+                <mat-menu #menuDescargar="matMenu">
+                    <button mat-menu-item (click)="generarRips(0)">⬇️ Descargar RIPS</button>
+                    <button mat-menu-item (click)="generarRips(1)">📥 Descargar RIPS Sede</button>
+                </mat-menu>
+            </div>
+
+            <div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
+                    <mat-spinner></mat-spinner>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

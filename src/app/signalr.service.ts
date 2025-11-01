@@ -171,9 +171,9 @@ export class SignalRService {
     }
   }
 
-  async obtenerPin(clienteId: string, pin: string) {
+  async obtenerPin(clienteId: string, pin: string, maxIdAnamnesis: number): Promise<void> {
     try {
-      await this.hubConnection.invoke('ObtenerPin', clienteId, pin);
+      await this.hubConnection.invoke('ObtenerPin', clienteId, pin, maxIdAnamnesis);
     } catch (err) {
       if (err instanceof Error) {
         console.error('Error al obtener el pin: ', err.message);

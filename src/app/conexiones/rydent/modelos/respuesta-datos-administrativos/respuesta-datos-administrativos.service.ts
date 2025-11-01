@@ -14,7 +14,7 @@ export class RespuestaDatosAdministrativosService {
     private interruptionService: InterruptionService
   ) { }
 
-  async startConnectionRespuestaDatosAdministrativos(clienteId: string, fechaInicio: Date, fechaFin: Date): Promise<void> {
+  async startConnectionRespuestaDatosAdministrativos(clienteId: string, idDoctor:number, fechaInicio: Date, fechaFin: Date): Promise<void> {
     try {
       // Asegurar que la conexión está activa
       await this.signalRService.ensureConnection();
@@ -39,7 +39,11 @@ export class RespuestaDatosAdministrativosService {
   
       // Invocar el método en el servidor
       console.log('Invocando método ObtenerDatosAdministrativos...');
-      await this.signalRService.hubConnection.invoke('ObtenerDatosAdministrativos', clienteId, fechaInicio, fechaFin);
+      console.log("clienteId:", clienteId, "Tipo:", typeof clienteId);
+      console.log("idDoctor:", idDoctor, "Tipo:", typeof idDoctor);
+      console.log("fechaInicio:", fechaInicio, "Tipo:", typeof fechaInicio);
+      console.log("fechaFin:", fechaFin, "Tipo:", typeof fechaFin);
+      await this.signalRService.hubConnection.invoke('ObtenerDatosAdministrativos', clienteId, Number(idDoctor), fechaInicio, fechaFin);
     } catch (err) {
       console.error('Error al conectar con SignalR: ', err);
     }

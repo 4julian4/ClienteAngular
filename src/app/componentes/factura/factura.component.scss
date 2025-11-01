@@ -1,0 +1,101 @@
+/* ===== Toolbar responsive ===== */
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+
+  .toolbar__cta {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    .toolbar__cta {
+      grid-column: 1 / -1;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    .toolbar__cta {
+      grid-column: 1 / -1;
+      justify-content: stretch;
+
+      .btn-primario {
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* ===== Botón con look de tu app (.boton-agendar) ===== */
+.btn-primario {
+  padding: 6px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: transparent;
+  color: rgb(28, 197, 244);
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    background-color: rgb(28, 197, 244);
+    color: #fff;
+  }
+}
+
+/* ===== Tabla contenedor con scroll horizontal en móvil ===== */
+.tabla-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla {
+  width: 100%;
+  min-width: 760px; /* asegura scroll en móviles cuando falte espacio */
+}
+
+.cargando {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 180px;
+}
+
+/* ===== Columnas: esconder en pantallas pequeñas ===== */
+@media (max-width: 600px) {
+  .col-prestador,
+  .col-doctor {
+    display: none;
+  }
+  .tabla {
+    min-width: 560px;
+  }
+  .mat-header-cell,
+  .mat-cell {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .col-acciones button {
+    width: 40px;
+    height: 40px;
+  }
+}

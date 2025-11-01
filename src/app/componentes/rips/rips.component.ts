@@ -8,6 +8,8 @@ import { Observable, debounceTime, map, startWith, take } from 'rxjs';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Router } from '@angular/router';
 import { MensajesUsuariosService } from '../mensajes-usuarios';
+import { RespuestaConsultarFacturasEntreFechas } from './rips.model';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-rips',
@@ -46,6 +48,16 @@ export class RipsComponent implements OnInit {
   filteredCodigosProcedimientos?: Observable<{ id: string, nombre: string }[]>;
   codigoProcedimientoControl = new FormControl();
   valorTotalRips = new FormControl('');
+  modeloDatosParaConsultarFacturasEntreFechas: RespuestaConsultarFacturasEntreFechas = new RespuestaConsultarFacturasEntreFechas();
+  dataSourceFacturas: MatTableDataSource<RespuestaConsultarFacturasEntreFechas> = new MatTableDataSource<RespuestaConsultarFacturasEntreFechas>();
+
+  mostrarTablaFacturas : boolean = false;
+  mostrarFormulario: boolean = true;
+  displayedColumns: string[] = ['FECHA', 'FACTURA', 'DESCRIPCION', 'ACCIONES'];
+  facturaSeleccionada: RespuestaConsultarFacturasEntreFechas = new RespuestaConsultarFacturasEntreFechas();
+  fechaInicio!: Date;
+  fechaFin!: Date;
+  isloading: boolean = false;
 
   constructor(
     private respuestaPinService: RespuestaPinService,
@@ -80,6 +92,10 @@ export class RipsComponent implements OnInit {
       if (data != null) {
         this.idAnamnesisPacienteSeleccionado = data;
       }
+    });
+
+    this.respuestaPinService.sharedisLoading.subscribe(data => {
+      this.isloading = data || false;
     });
 
     this.respuestaPinService.shareddatosRespuestaPinData.subscribe(data => {
@@ -204,12 +220,18 @@ export class RipsComponent implements OnInit {
           }
         }
         );
-
       }
     });
 
     this.ripsService.respuestaDatosGuardarRipsEmit.subscribe(async (respuestaGuardarRips: boolean) => {
       this.resultadoGuardarRips = respuestaGuardarRips;
+    });
+
+    this.ripsService.respuestaObtenerFacturasPorIdEntreFechasEmit.subscribe(async (respuestaConsultarFacturasPorIdEntreFechas: RespuestaConsultarFacturasEntreFechas[]) => {
+      console.log('respuestaConsultarFacturasEntreFechas', respuestaConsultarFacturasPorIdEntreFechas);
+      // Asignar datos correctamente
+      this.dataSourceFacturas.data = respuestaConsultarFacturasPorIdEntreFechas;
+      console.log('dataSourceFacturas', this.dataSourceFacturas.data);
     });
     this.inicializarFormulario();
   }
@@ -345,6 +367,31 @@ export class RipsComponent implements OnInit {
     this.router.navigate(['/evolucion']);
   }
 
+  async seleccionarFactura(factura: RespuestaConsultarFacturasEntreFechas) {
+    try {
+      this.facturaSeleccionada = factura;
+      console.log('Factura seleccionada:', factura);
+      this.formularioAgregarRips.controls['NFACTURA'].setValue(factura.FACTURA);
+      this.mostrarTablaFacturas = false;
+      this.mostrarFormulario = true;
+    } catch (error) {
+      console.error('Error al seleccionar factura: ', error);
+    }
+  }
+  
+
+  async listarFacturas(fechaInicio: Date, fechaFin: Date) {
+    this.modeloDatosParaConsultarFacturasEntreFechas.FECHAINI = fechaInicio;
+    this.modeloDatosParaConsultarFacturasEntreFechas.FECHAFIN = fechaFin;
+    this.modeloDatosParaConsultarFacturasEntreFechas.IDANAMNESIS = this.idAnamnesisPacienteSeleccionado;
+    await this.ripsService.startConnectionConsultarFacturasPorIdPorEntreFechas(this.idSedeActualSignalR, JSON.stringify(this.modeloDatosParaConsultarFacturasEntreFechas));
+  }
+  
+  async buscarFactura() {
+     this.mostrarTablaFacturas = true;
+     this.mostrarFormulario = false;
+  }
+
   async guardarRips() {
     let diagnostico = this.codigoDiagnosticoPrincipalControl.value;
     let procedimiento = this.codigoProcedimientoControl.value;
@@ -352,7 +399,7 @@ export class RipsComponent implements OnInit {
     console.log('diagnostico', diagnostico);
     console.log('procedimiento', procedimiento);
     console.log('consulta', consulta);
-    if ((diagnostico != '' &&  (procedimiento != '' || consulta != '')) && (diagnostico != null && (procedimiento != null || consulta != null)) ){
+    if ((diagnostico != '' && (procedimiento != '' || consulta != '')) && (diagnostico != null && (procedimiento != null || consulta != null))) {
       if (this.idSedeActualSignalR != '') {
         let datosParaGurdarRips: DatosGuardarRips = new DatosGuardarRips();
         datosParaGurdarRips.IDANAMNESIS = this.idAnamnesisPacienteSeleccionado;
@@ -395,9 +442,9 @@ export class RipsComponent implements OnInit {
         await this.ripsService.startConnectionGuardarDatosRips(this.idSedeActualSignalR, JSON.stringify(datosParaGurdarRips));
 
       }
-    }else{
+    } else {
       await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DIAGNOSTICO PRINCIPAL Y UN PROCEDIMIENTO O CONSULTA PARA GUARDAR EL RIPS');
     }
   }
 
-  }
+}

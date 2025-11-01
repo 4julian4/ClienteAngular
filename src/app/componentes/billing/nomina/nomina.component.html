@@ -1,0 +1,68 @@
+<h2>Nómina electrónica (NE, NDE, NR)</h2>
+
+<div class="actions">
+  <button mat-raised-button color="primary" (click)="autofillNE()">
+    Autollenar NE
+  </button>
+  <button mat-raised-button color="primary" (click)="autofillNDE()">
+    Autollenar NDE
+  </button>
+  <button mat-raised-button color="primary" (click)="autofillNR()">
+    Autollenar NR
+  </button>
+</div>
+
+<div class="send">
+  <button
+    mat-flat-button
+    color="accent"
+    (click)="submitNE()"
+    [disabled]="sending"
+  >
+    Enviar NE
+  </button>
+  <button
+    mat-flat-button
+    color="warn"
+    (click)="submitNDE()"
+    [disabled]="sending"
+  >
+    Enviar NDE
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submitNR()"
+    [disabled]="sending"
+  >
+    Enviar NR
+  </button>
+</div>
+
+<h3>Request</h3>
+<pre class="json">{{ requestBody | json }}</pre>
+
+<h3>Response</h3>
+<pre class="json">{{ response | json }}</pre>
+
+<hr />
+
+<h2>Consulta (GET)</h2>
+<div class="row">
+  <label>
+    Tipo:
+    <select [(ngModel)]="kind">
+      <option value="entry">NE (entries)</option>
+      <option value="deletion">NDE (deletions)</option>
+    </select>
+  </label>
+  <label>Prefix: <input [(ngModel)]="qPrefix" /></label>
+  <label>Número: <input [(ngModel)]="qNumber" /></label>
+  <label>TenantId: <input [(ngModel)]="qTenantId" /></label>
+  <label><input type="checkbox" [(ngModel)]="qStaging" /> staging</label>
+  <label><input type="checkbox" [(ngModel)]="qIncludePdf" /> includePdf</label>
+  <button mat-stroked-button (click)="consultar()">Consultar</button>
+</div>
+
+<h3>Consulta Response</h3>
+<pre class="json">{{ qResponse | json }}</pre>

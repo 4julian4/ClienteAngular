@@ -13,6 +13,7 @@ import { THorariosAsuntos } from "../../tablas/thorarios-asuntos";
 export class RespuestaPin {
     clave:Clave = new Clave();
     lstDoctores : ListadoItem[] = [];
+    lstInformacionReporte : ListadoItem[] = [];
     lstEps : CodigosEps[] = [];
     lstProcedimientos : CodigosProcedimientos[] = [];
     lstConsultas : CodigosConsultas[] = [];

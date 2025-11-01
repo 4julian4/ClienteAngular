@@ -1,0 +1,35 @@
+<h2>Sector Salud (POST /api/invoices con operation)</h2>
+
+<div class="actions">
+  <button mat-raised-button color="primary" (click)="autofillRecaudo()">
+    Autollenar SS_RECAUDO
+  </button>
+  <button mat-raised-button color="primary" (click)="autofillCufe()">
+    Autollenar SS_CUFE
+  </button>
+  <button mat-raised-button color="primary" (click)="autofillReporte()">
+    Autollenar SS_REPORTE
+  </button>
+  <button mat-raised-button color="primary" (click)="autofillSinAporte()">
+    Autollenar SS_SIN_APORTE
+  </button>
+</div>
+
+<div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+<div class="send">
+  <button
+    mat-flat-button
+    color="accent"
+    (click)="submit()"
+    [disabled]="sending"
+  >
+    Enviar
+  </button>
+</div>
+
+<h3>Request</h3>
+<pre class="json">{{ requestBody | json }}</pre>
+
+<h3>Response</h3>
+<pre class="json">{{ response | json }}</pre>
