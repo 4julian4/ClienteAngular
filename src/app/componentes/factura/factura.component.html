@@ -26,9 +26,9 @@
     <mat-label>Doctor responsable</mat-label>
     <mat-select [formControl]="filtroPrestador">
       <mat-option value="">Todos</mat-option>
-      <mat-option *ngFor="let p of prestadoresUnicos" [value]="p">{{
-        p
-      }}</mat-option>
+      <mat-option *ngFor="let p of prestadoresUnicos" [value]="p">
+        {{ p }}
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
@@ -57,10 +57,22 @@
     <mat-datepicker #dp2></mat-datepicker>
   </mat-form-field>
 
-  <!-- Botón consultar -->
+  <!-- Acciones de la toolbar -->
   <div class="toolbar__cta">
     <button class="btn-primario" mat-raised-button (click)="consultar()">
       Consultar
+    </button>
+
+    <!-- Botón masivo: solo en pendientes y si hay selección -->
+    <button
+      *ngIf="filtroTipoListado.value === 'pendientes' && selection.hasValue()"
+      mat-raised-button
+      color="primary"
+      (click)="presentarSeleccionadas()"
+      class="btn-primario"
+      style="margin-left: 8px"
+    >
+      Prsentar ({{ selection.selected.length }})
     </button>
   </div>
 </div>
@@ -72,7 +84,34 @@
       [dataSource]="dataSource"
       matSort
       class="mat-elevation-z8 tabla"
+      [trackBy]="trackByRow"
     >
+      <!-- Columna de selección (solo para 'pendientes') -->
+      <ng-container
+        *ngIf="filtroTipoListado.value === 'pendientes'"
+        matColumnDef="select"
+      >
+        <th mat-header-cell *matHeaderCellDef class="col-select">
+          <mat-checkbox
+            [indeterminate]="isIndeterminate()"
+            [checked]="isAllSelected()"
+            (change)="masterToggle()"
+            aria-label="Seleccionar todas las facturas pendientes"
+          >
+          </mat-checkbox>
+        </th>
+
+        <td mat-cell *matCellDef="let r" class="col-select">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="toggleRow(r)"
+            [checked]="selection.isSelected(r)"
+            aria-label="Seleccionar esta factura"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
       <!-- Fecha -->
       <ng-container matColumnDef="fecha">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
@@ -170,6 +209,7 @@
         </td>
       </ng-container>
 
+      <!-- Filas -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>

@@ -1,23 +1,36 @@
-/* ===== Toolbar responsive ===== */
+:host {
+  display: block;
+}
+
+/* ===== Toolbar / filtros ===== */
 .toolbar {
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 8px 0 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+
   display: grid;
-  grid-template-columns: repeat(7, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
-  align-items: end;
-  margin-bottom: 12px;
+
+  .mat-mdc-form-field,
+  .mat-form-field {
+    width: 100%;
+  }
 
   .toolbar__cta {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
+    justify-content: flex-end;
   }
 
   @media (max-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr 1fr;
+    padding: 10px;
     .toolbar__cta {
       grid-column: 1 / -1;
       justify-content: center;
@@ -25,42 +38,46 @@
   }
 
   @media (max-width: 480px) {
-    grid-template-columns: 1fr;
+    padding: 8px;
     .toolbar__cta {
-      grid-column: 1 / -1;
-      justify-content: stretch;
-
-      .btn-primario {
+      .btn-primario,
+      .botonBuscarPaciente {
         width: 100%;
       }
     }
   }
 }
 
-/* ===== Botón con look de tu app (.boton-agendar) ===== */
+/* ===== Botón “Consultar” y “Presentar seleccionadas” ===== */
+.botonBuscarPaciente,
 .btn-primario {
-  padding: 6px 24px;
+  margin-left: 10px;
+  background-color: rgb(28, 197, 244) !important;
+  color: #fff !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0px 0px 10px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  transition: all 0.3s ease !important;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: transparent;
-  color: rgb(28, 197, 244);
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 
   &:hover {
-    background-color: rgb(28, 197, 244);
-    color: #fff;
+    filter: brightness(0.95);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    filter: brightness(0.92);
   }
 }
 
-/* ===== Tabla contenedor con scroll horizontal en móvil ===== */
+/* ===== Tabla y contenedores ===== */
 .tabla-wrapper {
   background: #fff;
   border-radius: 10px;
   padding: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
 .tabla-scroll {
@@ -70,9 +87,42 @@
 
 .tabla {
   width: 100%;
-  min-width: 760px; /* asegura scroll en móviles cuando falte espacio */
+  min-width: 760px;
 }
 
+/* Ajustes de celdas */
+.mat-header-cell,
+.mat-cell {
+  padding: 10px 12px;
+}
+
+/* Columna de selección: más angosta */
+.col-select {
+  width: 44px;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  text-align: center;
+}
+
+/* Ocultar columnas secundarias en móviles si quieres más legibilidad */
+@media (max-width: 600px) {
+  .col-prestador,
+  .col-doctor {
+    display: none;
+  }
+
+  .tabla {
+    min-width: 560px;
+  }
+
+  .mat-header-cell,
+  .mat-cell {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* Loader */
 .cargando {
   display: flex;
   justify-content: center;
@@ -80,22 +130,8 @@
   min-height: 180px;
 }
 
-/* ===== Columnas: esconder en pantallas pequeñas ===== */
-@media (max-width: 600px) {
-  .col-prestador,
-  .col-doctor {
-    display: none;
-  }
-  .tabla {
-    min-width: 560px;
-  }
-  .mat-header-cell,
-  .mat-cell {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  .col-acciones button {
-    width: 40px;
-    height: 40px;
-  }
+/* Igualar altura visual de form-field */
+.mdc-text-field,
+.mat-mdc-form-field-flex {
+  min-height: 48px;
 }

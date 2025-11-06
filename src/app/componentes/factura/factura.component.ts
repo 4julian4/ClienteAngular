@@ -3,6 +3,8 @@ import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 
 import {
@@ -16,6 +18,9 @@ import {
 } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-facturas-creadas';
 
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+
+// ⇩ NUEVO: importar el servicio batch para presentar
+import { PresentarDianService } from 'src/app/conexiones/rydent/modelos/presentar-dian';
 
 type RowFactura =
   | RespuestaBusquedaFacturasPendientes
@@ -57,13 +62,22 @@ export class FacturaComponent implements OnInit, OnDestroy {
   // Señal cloud
   idSedeActualSignalR: string = '';
 
+  // Selección múltiple (solo aplica en 'pendientes')
+  selection = new SelectionModel<RowFactura>(true, []);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
     private pendientesSvc: RespuestaBusquedaFacturasPendientesService,
     private creadasSvc: RespuestaBusquedaFacturasCreadasService,
-    private pinSvc: RespuestaPinService
+    private pinSvc: RespuestaPinService,
+
+    // ⇩ NUEVO: inyectar servicio para presentar al worker
+    private presentarSvc: PresentarDianService,
+
+    // ⇩ Opcional para feedback visual
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -79,6 +93,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.pendientesSvc.respuestaBusquedaFacturasPendientesEmit.subscribe(
         (lista) => {
           this.isLoading = false;
+          this.selection.clear(); // reset selección al cambiar dataset
           this.pintarTabla(lista, 'pendientes');
         }
       )
@@ -87,6 +102,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.creadasSvc.respuestaBusquedaFacturasCreadasEmit.subscribe(
         (lista) => {
           this.isLoading = false;
+          this.selection.clear(); // por si veníamos de 'pendientes'
           this.pintarTabla(lista, 'creadas');
         }
       )
@@ -95,6 +111,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
     // Cambiar columnas cuando cambie el tipo
     this.subs.push(
       this.filtroTipoListado.valueChanges.subscribe((tipo) => {
+        this.selection.clear(); // limpiar selección al cambiar de pestaña
         this.configurarColumnas(tipo ?? 'pendientes');
         this.applyFilter();
       })
@@ -112,6 +129,35 @@ export class FacturaComponent implements OnInit, OnDestroy {
     );
     this.subs.push(
       this.filtroFechaFin.valueChanges.subscribe(() => this.applyFilter())
+    );
+
+    // ⇩ NUEVO: escuchar el resumen que devuelve el worker
+    this.subs.push(
+      this.presentarSvc.resumenOk.subscribe((summary) => {
+        this.snackBar.open(
+          `Presentadas ${summary.ok}/${summary.total}.`,
+          'OK',
+          { duration: 3000 }
+        );
+        // refrescar listado si quieres
+        this.consultar();
+        this.selection.clear();
+        console.log('Resumen OK:', summary);
+      })
+    );
+
+    this.subs.push(
+      this.presentarSvc.resumenConError.subscribe((summary) => {
+        this.snackBar.open(
+          `Exitosas: ${summary.ok} · Fallidas: ${summary.fail}`,
+          'Ver',
+          { duration: 5000 }
+        );
+        // refrescar listado si quieres
+        this.consultar();
+        this.selection.clear();
+        console.warn('Resumen con errores:', summary);
+      })
     );
   }
 
@@ -145,7 +191,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
   /** Render / configuración según el tipo */
   private pintarTabla(lista: RowFactura[], tipo: 'pendientes' | 'creadas') {
     this.configurarColumnas(tipo);
-    this.dataSource.data = lista;
+    this.dataSource.data = lista ?? [];
 
     // Prestadores únicos para el filtro “Doctor responsable”
     this.prestadoresUnicos = Array.from(
@@ -199,7 +245,9 @@ export class FacturaComponent implements OnInit, OnDestroy {
         'acciones',
       ];
     } else {
+      // En pendientes anteponemos la columna de selección
       this.displayedColumns = [
+        'select',
         'fecha',
         'factura',
         'nombrePaciente',
@@ -211,7 +259,90 @@ export class FacturaComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Al final de la clase FacturaComponent
+  // ====== Selección (solo pendientes) ======
+
+  /** Filas visibles (tras aplicar filtros). MatTableDataSource expone filteredData */
+  get visibleRows(): RowFactura[] {
+    const ds = this.dataSource as MatTableDataSource<RowFactura>;
+    return (ds.filteredData?.length ? ds.filteredData : ds.data) ?? [];
+  }
+
+  /** ¿Todas las visibles están seleccionadas? */
+  isAllSelected(): boolean {
+    const rows = this.visibleRows;
+    if (!rows.length) return false;
+    // Solo debe contar filas de PENDIENTES (las creadas no tienen checkbox)
+    return rows
+      .filter((r) => this.isPendiente(r))
+      .every((r) => this.selection.isSelected(r));
+  }
+
+  /** ¿Indeterminado (algunas sí y otras no)? */
+  isIndeterminate(): boolean {
+    const rows = this.visibleRows.filter((r) => this.isPendiente(r));
+    if (!rows.length) return false;
+    const some = rows.some((r) => this.selection.isSelected(r));
+    return some && !this.isAllSelected();
+  }
+
+  /** Toggle del checkbox maestro con las reglas pedidas */
+  masterToggle(): void {
+    if (this.filtroTipoListado.value !== 'pendientes') return;
+
+    const rows = this.visibleRows.filter((r) => this.isPendiente(r));
+    if (!rows.length) {
+      this.selection.clear();
+      return;
+    }
+
+    // Si todas están seleccionadas, des-seleccionar todas
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+
+    // Si algunas o ninguna, seleccionar todas las visibles
+    rows.forEach((r) => this.selection.select(r));
+  }
+
+  /** Toggle por fila */
+  toggleRow(row: RowFactura): void {
+    if (!this.isPendiente(row)) return; // seguridad
+    this.selection.toggle(row);
+  }
+
+  /** Acción masiva: presentar seleccionadas (solo pendientes) */
+  async presentarSeleccionadas(): Promise<void> {
+    if (
+      this.filtroTipoListado.value !== 'pendientes' ||
+      !this.selection.hasValue()
+    ) {
+      return;
+    }
+
+    const seleccionadas = this.selection.selected.filter((r) =>
+      this.isPendiente(r)
+    ) as RespuestaBusquedaFacturasPendientes[];
+
+    if (!seleccionadas.length) return;
+
+    try {
+      // Enviamos TODO en un solo batch; el worker procesa una-a-una
+      await this.presentarSvc.presentarBatch(
+        seleccionadas,
+        this.idSedeActualSignalR,
+        'FES_REGISTRAR_EN_DIAN'
+      );
+    } catch (e) {
+      console.error('Error al invocar PresentarFacturasEnDian:', e);
+      this.snackBar.open('No fue posible iniciar la presentación.', 'OK', {
+        duration: 4000,
+      });
+    }
+  }
+
+  // ====== Utilidades y acciones ======
+
   getDoctor(r: RowFactura): string {
     // Solo el modelo de “pendientes” trae NOMBRE_RESPONS
     return r && 'NOMBRE_RESPONS' in r && (r as any).NOMBRE_RESPONS
@@ -219,20 +350,29 @@ export class FacturaComponent implements OnInit, OnDestroy {
       : '-';
   }
 
-  /** Acciones (placeholders para conectar) */
-  registrarEnDian(row: RowFactura) {
-    // Solo aplica a pendientes: las pendientes traen NOMBRE_RESPONS en el modelo
-    if (this.isPendiente(row)) {
-      console.log('Registrar en DIAN:', row);
-      // TODO: conectar flujo real
+  /** Acción individual desde el menú de cada fila */
+  async registrarEnDian(row: RowFactura) {
+    if (!this.isPendiente(row)) return;
+    try {
+      await this.presentarSvc.presentarIndividual(
+        row,
+        this.idSedeActualSignalR,
+        'FES_REGISTRAR_EN_DIAN'
+      );
+    } catch (e) {
+      console.error('Error al invocar presentarIndividual:', e);
+      this.snackBar.open('No fue posible presentar la factura.', 'OK', {
+        duration: 4000,
+      });
     }
   }
+
   descargarXml(row: RowFactura) {
     console.log('Descargar XML:', row);
     // TODO: conectar flujo real
   }
+
   descargarPdf(row: RowFactura) {
-    // Solo aplicaría a creadas
     if (!this.isPendiente(row)) {
       console.log('Descargar PDF:', row);
       // TODO: conectar flujo real
@@ -246,7 +386,6 @@ export class FacturaComponent implements OnInit, OnDestroy {
     return (row as any).NOMBRE_RESPONS !== undefined;
   }
 
-  /** Utils */
   private toYMD(d: Date | string): string {
     const dt = d instanceof Date ? d : new Date(d);
     const yyyy = dt.getFullYear();
@@ -273,4 +412,10 @@ export class FacturaComponent implements OnInit, OnDestroy {
 
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
+
+  /** trackBy para mejorar rendimiento en tablas grandes */
+  trackByRow = (_i: number, row: RowFactura) => {
+    // Ajusta el id estable que tengas: ej. (row as any).idRelacion || row.factura
+    return (row as any).idRelacion ?? (row as any).factura ?? row;
+  };
 }

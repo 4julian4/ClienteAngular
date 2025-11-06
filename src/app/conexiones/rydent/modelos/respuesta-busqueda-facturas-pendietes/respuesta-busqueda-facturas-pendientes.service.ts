@@ -56,6 +56,7 @@ export class RespuestaBusquedaFacturasPendientesService {
           try {
             // El backend envía un string JSON. En algunos flujos tú comprimes; por eso:
             const jsonString = this.tryDecompress(payload);
+
             const rawList = JSON.parse(jsonString);
             const typedList =
               RespuestaBusquedaFacturasPendientes.listFromJson(rawList);
