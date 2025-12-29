@@ -60,7 +60,10 @@ export class RespuestaBusquedaFacturasPendientesService {
             const rawList = JSON.parse(jsonString);
             const typedList =
               RespuestaBusquedaFacturasPendientes.listFromJson(rawList);
-
+            console.log(
+              'RespuestaObtenerFacturasPendientes recibida:',
+              typedList
+            );
             // Emitir al resto de la app
             this.respuestaBusquedaFacturasPendientesEmit.emit(typedList);
           } catch (error) {

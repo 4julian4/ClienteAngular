@@ -27,6 +27,7 @@ import { FacturasComponent } from './componentes/billing/facturas/facturas.scomp
 import { BillingDashboardComponent } from './componentes/billing/dashboard/dashboard.component';
 
 import { FacturaComponent } from './componentes/factura/factura.component';
+import { NominaElectronicaComponent } from './componentes/nomina-electronica';
 
 const routes: Routes = [
   { path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -58,6 +59,7 @@ const routes: Routes = [
   { path: 'generar-rips', component: GenerarRipsComponent },
 
   { path: 'factura', component: FacturaComponent },
+  { path: 'nomina', component: NominaElectronicaComponent },
   // Rutas para el módulo de facturación electrónica
   { path: 'billing/dashboard', component: BillingDashboardComponent },
   { path: 'billing/facturas', component: FacturasComponent },

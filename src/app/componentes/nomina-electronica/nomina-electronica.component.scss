@@ -1,0 +1,163 @@
+/* src/app/componentes/nomina-electronica/nomina-electronica.component.scss */
+
+:host {
+  display: block;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* ===== Toolbar ===== */
+.toolbar {
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 8px 0 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+
+  display: grid;
+  /* Más compacto para que entre mejor en una sola línea en desktop */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+
+  .mat-mdc-form-field,
+  .mat-form-field {
+    width: 100%;
+  }
+
+  .toolbar__cta {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    /* separación horizontal entre botones en escritorio */
+    button + button {
+      margin-left: 8px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
+
+    .toolbar__cta {
+      grid-column: 1 / -1; /* que los botones ocupen toda la fila abajo */
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px;
+
+    .toolbar__cta {
+      flex-direction: column;
+      width: 100%;
+
+      .btn-primario,
+      .btn-buscar {
+        width: 100%;
+        justify-content: center;
+      }
+
+      button + button {
+        margin-left: 0;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+/* ===== Botones ===== */
+
+/* Azul que ya usas en facturas (.btn-primario) */
+.btn-primario {
+  margin-left: 10px;
+  background-color: rgb(28, 197, 244) !important;
+  color: #fff !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0px 0px 10px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  transition: all 0.3s ease !important;
+  border: none;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    filter: brightness(0.92);
+  }
+}
+
+/* Por si quieres algún ajuste específico al botón blanco */
+.btn-buscar {
+  /* aquí puedes ajustar bordes, etc., si lo necesitas */
+}
+
+/* ===== Tabla ===== */
+.tabla-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla {
+  width: 100%;
+  min-width: 760px;
+}
+
+.col-select {
+  width: 44px;
+  text-align: center;
+}
+
+.muted {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+/* Pills */
+.pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.ok {
+    background: #e8f7ef;
+    color: #137a3c;
+  }
+}
+
+/* Footer (si lo usas más adelante) */
+.acciones-final {
+  margin-top: 12px;
+  text-align: right;
+}
+
+/* Loader */
+.cargando {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Ajustes extra para móviles: reducir min-width de la tabla
+   y dejar que se haga scroll horizontal sin romper el diseño */
+@media (max-width: 600px) {
+  .tabla {
+    min-width: 560px;
+  }
+}

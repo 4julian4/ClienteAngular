@@ -1,0 +1,366 @@
+<!-- src/app/componentes/nomina-electronica/crear-nomina-dialog/crear-nomina-dialog.component.html -->
+
+<h2 mat-dialog-title class="title">Crear Nómina Electrónica</h2>
+
+<mat-dialog-content class="content">
+  <form class="form" [formGroup]="form">
+    <!-- ===== Sección 1: Configuración básica ===== -->
+    <div class="section section--header">
+      <div class="section__title">
+        <span class="dot"></span>
+        <span>Configuración básica</span>
+      </div>
+
+      <div class="row row--checks">
+        <div class="checks-inline">
+          <mat-checkbox formControlName="sendToDian">
+            Enviar a DIAN
+          </mat-checkbox>
+          <mat-checkbox formControlName="sendEmail">
+            Enviar por correo
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Número interno *</mat-label>
+          <input matInput formControlName="number" placeholder="NE001" />
+        </mat-form-field>
+
+        <div class="numbering">
+          <mat-form-field appearance="outline">
+            <mat-label>Prefijo</mat-label>
+            <input matInput formControlName="prefix" placeholder="NE" />
+          </mat-form-field>
+
+          <mat-checkbox formControlName="flexible" class="numbering__check">
+            Flexible
+          </mat-checkbox>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Resolución (opcional)</mat-label>
+            <input
+              matInput
+              formControlName="resolutionNumber"
+              placeholder="18764075630070"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha inicio período *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dpIni"
+            formControlName="periodStartDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dpIni"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dpIni></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha fin período *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dpFin"
+            formControlName="periodEndDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dpFin"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dpFin></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de emisión *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dpIssue"
+            formControlName="issueDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dpIssue"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dpIssue></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de pago *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dpPay"
+            formControlName="paymentDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dpPay"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dpPay></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Periodicidad</mat-label>
+          <mat-select formControlName="periodicity">
+            <mat-option value="MENSUAL">Mensual</mat-option>
+            <mat-option value="QUINCENAL">Quincenal</mat-option>
+            <mat-option value="SEMANAL">Semanal</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- ===== Sección 2: Empleado ===== -->
+    <div class="section" formGroupName="employee">
+      <div class="section__title">
+        <span class="dot"></span>
+        <span>Datos del empleado</span>
+      </div>
+
+      <div class="row row--3col">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo identificación *</mat-label>
+          <mat-select formControlName="identificationType">
+            <mat-option value="CC">CC</mat-option>
+            <mat-option value="CE">CE</mat-option>
+            <mat-option value="NIT">NIT</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Identificación *</mat-label>
+          <input matInput formControlName="identification" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Código interno</mat-label>
+          <input matInput formControlName="code" />
+        </mat-form-field>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Primer nombre *</mat-label>
+          <input matInput formControlName="firstName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Apellido *</mat-label>
+          <input matInput formControlName="familyName" />
+        </mat-form-field>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Otros nombres</mat-label>
+          <input matInput formControlName="otherNames" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Segundo apellido</mat-label>
+          <input matInput formControlName="secondLastName" />
+        </mat-form-field>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de contrato *</mat-label>
+          <mat-select formControlName="contractType">
+            <mat-option value="INDEFINIDO">Indefinido</mat-option>
+            <mat-option value="FIJO">Fijo</mat-option>
+            <mat-option value="OBRA_LABOR">Obra o labor</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha inicio contrato *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dpContrIni"
+            formControlName="contractStartDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dpContrIni"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dpContrIni></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="row row--2col">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha fin contrato</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dpContrFin"
+            formControlName="contractEndDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dpContrFin"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dpContrFin></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Salario</mat-label>
+          <input matInput type="number" formControlName="salary" />
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Días trabajados</mat-label>
+          <input matInput type="number" formControlName="workDays" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- ===== Sección 3: Devengados ===== -->
+    <div class="section">
+      <div class="section__title">
+        <span class="dot"></span>
+        <span>Devengados</span>
+      </div>
+
+      <div class="row">
+        <div formArrayName="earnings" class="sub-list">
+          <div
+            class="sub-row"
+            *ngFor="let eg of earningsFA.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <mat-form-field appearance="outline">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="code" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Monto *</mat-label>
+              <input matInput type="number" formControlName="amount" />
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="removeEarning(i)"
+              [disabled]="earningsFA.length === 1"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="addEarning()"
+          >
+            + Agregar devengado
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sección 4: Deducciones ===== -->
+    <div class="section">
+      <div class="section__title">
+        <span class="dot"></span>
+        <span>Deducciones</span>
+      </div>
+
+      <div class="row">
+        <div formArrayName="deductions" class="sub-list">
+          <div
+            class="sub-row"
+            *ngFor="let dg of deductionsFA.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <mat-form-field appearance="outline">
+              <mat-label>Código *</mat-label>
+              <input matInput formControlName="code" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Monto *</mat-label>
+              <input matInput type="number" formControlName="amount" />
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="removeDeduction(i)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="addDeduction()"
+          >
+            + Agregar deducción
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sección 5: Notas ===== -->
+    <div class="section">
+      <div class="section__title">
+        <span class="dot"></span>
+        <span>Notas</span>
+      </div>
+
+      <div class="row">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Notas (separar con “;”)</mat-label>
+          <input
+            matInput
+            formControlName="notesText"
+            placeholder="Ej: NÓMINA ORDINARIA; BONO DE PRODUCTIVIDAD"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="acciones">
+  <button mat-stroked-button (click)="cancelar()" [disabled]="cargando">
+    Cancelar
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="guardar()"
+    [disabled]="form.invalid || cargando"
+  >
+    {{ cargando ? "Guardando…" : "Crear nómina" }}
+  </button>
+</mat-dialog-actions>

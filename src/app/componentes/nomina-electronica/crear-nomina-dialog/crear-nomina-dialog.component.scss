@@ -1,0 +1,195 @@
+/* src/app/componentes/nomina-electronica/crear-nomina-dialog/crear-nomina-dialog.component.scss */
+
+/* Tamaño del diálogo y comportamiento del contenedor */
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Evita scroll horizontal del contenedor del diálogo */
+:host ::ng-deep .mdc-dialog__surface,
+:host ::ng-deep .mat-mdc-dialog-container {
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+/* Título */
+.title {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+/* Contenido: solo scroll vertical, sin forzar ancho */
+mat-dialog-content.content {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 16px 8px;
+  box-sizing: border-box;
+}
+
+/* Formulario base */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Secciones tipo "tarjeta" */
+.section {
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px 14px 10px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  min-width: 0;
+
+  &--header {
+    margin-top: 4px;
+  }
+
+  .mat-mdc-form-field,
+  .mat-form-field {
+    width: 100%;
+  }
+}
+
+/* Título de sección con mini indicador */
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #555;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #1ac5f4;
+}
+
+/* Filas genéricas */
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-width: 0;
+
+  & + .row {
+    margin-top: 8px;
+  }
+}
+
+.row--2col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 12px;
+}
+
+.row--3col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 12px;
+}
+
+/* Checks en línea */
+.row--checks {
+  margin-top: 4px;
+}
+
+.checks-inline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 2px;
+}
+
+/* Numbering */
+.numbering {
+  display: grid;
+  grid-template-columns: 1.2fr auto 1.6fr;
+  align-items: center;
+  column-gap: 8px;
+  min-width: 0;
+
+  .numbering__check {
+    margin-top: 6px;
+  }
+}
+
+/* Sub-listas (devengados/deducciones) */
+.sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sub-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1.2fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+/* Footer del diálogo */
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 8px;
+  box-sizing: border-box;
+
+  button[mat-flat-button] {
+    background-color: rgb(28, 197, 244);
+    color: #fff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2),
+      inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .row--2col,
+  .row--3col {
+    grid-template-columns: 1fr;
+  }
+
+  .numbering {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    align-items: flex-start;
+  }
+
+  .sub-row {
+    grid-template-columns: 1fr;
+  }
+
+  mat-dialog-content.content {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .section {
+    padding: 10px 10px 8px;
+  }
+
+  .section__title {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,132 @@
+// src/app/conexiones/rydent/modelos/presentar-dian/resumen-presentacion-dialog/resumen-presentacion-dialog.component.scss
+
+/* Tamaño del diálogo (contenedor). Evita que se desborde */
+:host {
+  display: block;
+  width: min(90vw, 840px);
+  max-width: 90vw;
+}
+
+/* Quita overflow del surface del dialog y de su contenedor para evitar barras horizontales */
+:host ::ng-deep .mdc-dialog__surface,
+:host ::ng-deep .mat-mdc-dialog-container {
+  overflow: hidden !important;
+}
+
+/* Título */
+.title {
+  margin: 0 0 8px 0;
+}
+
+/* KPIs */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.kpi {
+  background: #f8f9fb;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+
+  &.ok {
+    background: #effaf3;
+  }
+  &.fail {
+    background: #fff3f3;
+  }
+}
+.kpi__title {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.kpi__value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Solo el contenido hace scroll vertical */
+mat-dialog-content.content {
+  max-height: 65vh;
+  overflow-y: auto;
+  overflow-x: hidden; /* ← bloquea scroll horizontal */
+  padding-right: 4px; /* respiro para la barra */
+}
+
+/* Tabla */
+.table-wrap {
+  min-height: 0;
+}
+
+.tabla {
+  width: 100%;
+  table-layout: fixed; /* ← evita que las columnas fuercen ancho */
+}
+
+/* Header pegado y sin crear ancho extra */
+.tabla th.mat-header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+}
+
+/* Permite envolver texto y cortar ids largos */
+.tabla th.mat-header-cell,
+.tabla td.mat-cell,
+.tabla td.mat-footer-cell {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.col-mensaje {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.col-externalid {
+  word-break: break-all; /* por si vienen UUIDs sin separadores */
+  overflow-wrap: anywhere;
+}
+
+/* Pills */
+.pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.ok {
+    background: #e8f7ef;
+    color: #137a3c;
+  }
+  &.fail {
+    background: #fde8e8;
+    color: #b42318;
+  }
+}
+
+/* Vacío */
+.empty {
+  text-align: center;
+  padding: 18px;
+  opacity: 0.7;
+}
+
+/* Footer */
+.acciones {
+  padding-top: 4px;
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  :host {
+    width: 96vw;
+  }
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+}

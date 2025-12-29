@@ -21,13 +21,16 @@
     />
   </mat-form-field>
 
-  <!-- Doctor responsable = Prestador único (con “Todos”) -->
+  <!-- Nuevo: filtro por DOCTOR (usa listaDoctores) -->
   <mat-form-field appearance="fill">
     <mat-label>Doctor responsable</mat-label>
-    <mat-select [formControl]="filtroPrestador">
-      <mat-option value="">Todos</mat-option>
-      <mat-option *ngFor="let p of prestadoresUnicos" [value]="p">
-        {{ p }}
+    <mat-select [formControl]="filtroDoctor">
+      <!-- Opción para consultar todos los doctores -->
+      <mat-option value="TODOS">Todos los doctores</mat-option>
+
+      <!-- Una opción por cada doctor -->
+      <mat-option *ngFor="let doc of listaDoctores" [value]="doc.id">
+        {{ doc.nombre }}
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -57,22 +60,31 @@
     <mat-datepicker #dp2></mat-datepicker>
   </mat-form-field>
 
-  <!-- Acciones de la toolbar -->
+  <!-- Acciones de la toolbar + progreso -->
   <div class="toolbar__cta">
+    <!-- Chip de progreso (se muestra solo si total > 0) -->
+    <ng-container *ngIf="progreso$ | async as p">
+      <span
+        *ngIf="p.total > 0"
+        class="chip-progreso"
+        matTooltip="Avance de presentación"
+      >
+        {{ p.processed }}/{{ p.total }} · OK {{ p.ok }} · Fail {{ p.fail }}
+      </span>
+    </ng-container>
+
     <button class="btn-primario" mat-raised-button (click)="consultar()">
       Consultar
     </button>
-
     <!-- Botón masivo: solo en pendientes y si hay selección -->
     <button
       *ngIf="filtroTipoListado.value === 'pendientes' && selection.hasValue()"
       mat-raised-button
-      color="primary"
-      (click)="presentarSeleccionadas()"
       class="btn-primario"
       style="margin-left: 8px"
+      (click)="presentarSeleccionadas()"
     >
-      Prsentar ({{ selection.selected.length }})
+      Presentar ({{ selection.selected.length }})
     </button>
   </div>
 </div>
@@ -83,6 +95,7 @@
       mat-table
       [dataSource]="dataSource"
       matSort
+      [multiTemplateDataRows]="true"
       class="mat-elevation-z8 tabla"
       [trackBy]="trackByRow"
     >
@@ -132,6 +145,12 @@
         <td mat-cell *matCellDef="let r">{{ r.nombre_Paciente }}</td>
       </ng-container>
 
+      <!-- Documento -->
+      <ng-container matColumnDef="documentoPaciente">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Documento</th>
+        <td mat-cell *matCellDef="let r">{{ r.documento }}</td>
+      </ng-container>
+
       <!-- Valor -->
       <ng-container matColumnDef="valorTotal">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Valor</th>
@@ -178,6 +197,7 @@
             mat-icon-button
             [matMenuTriggerFor]="menuAcciones"
             matTooltip="Acciones"
+            (click)="$event.stopPropagation()"
           >
             <mat-icon>more_vert</mat-icon>
           </button>
@@ -204,14 +224,189 @@
                 <mat-icon>download</mat-icon>
                 <span>Descargar XML</span>
               </button>
+
+              <mat-divider></mat-divider>
+
+              <!-- Crear Notas -->
+              <button mat-menu-item (click)="abrirCrearNota('NC', r)">
+                <mat-icon>note_add</mat-icon>
+                <span>Crear Nota Crédito (NC)</span>
+              </button>
+              <button mat-menu-item (click)="abrirCrearNota('ND', r)">
+                <mat-icon>note_add</mat-icon>
+                <span>Crear Nota Débito (ND)</span>
+              </button>
+
+              <mat-divider></mat-divider>
+
+              <!-- Ver notas (fila de detalle) -->
+              <button mat-menu-item (click)="verNotasFactura(r)">
+                <mat-icon>list</mat-icon>
+                <span>Ver notas de esta factura</span>
+              </button>
             </ng-container>
           </mat-menu>
         </td>
       </ng-container>
 
-      <!-- Filas -->
+      <!-- ====== Fila de detalle (panel de notas debajo de la factura) ====== -->
+      <ng-container matColumnDef="expandedDetail">
+        <td
+          mat-cell
+          *matCellDef="let row"
+          class="detalle-notas-cell"
+          [attr.colspan]="displayedColumns.length"
+        >
+          <div
+            class="detalle-notas"
+            *ngIf="notaPanelFactura === row"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="detalle-notas__header">
+              <div class="detalle-notas__title">
+                Notas de la factura
+                <strong>{{ row.factura }}</strong>
+              </div>
+              <button
+                mat-icon-button
+                class="detalle-notas__close"
+                (click)="cerrarPanelNotas($event)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <ng-container
+              *ngIf="notasFacturaSeleccionada.length; else sinNotasTpl"
+            >
+              <table class="detalle-notas__tabla">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Número</th>
+                    <th>Fecha</th>
+                    <th>Valor</th>
+                    <th>Estado DIAN</th>
+                    <th>Estado interno</th>
+                    <th class="col-acciones-nota">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let n of notasFacturaSeleccionada">
+                    <td>
+                      <span
+                        class="pill"
+                        [class.pill--nc]="n.noteType === 'NC'"
+                        [class.pill--nd]="n.noteType === 'ND'"
+                      >
+                        {{ n.noteType }}
+                      </span>
+                    </td>
+
+                    <td>{{ n.number }}</td>
+                    <td>{{ n.issueDate }}</td>
+
+                    <td>{{ n.totalAmount || 0 | number : "1.0-0" }}</td>
+
+                    <td>
+                      <span
+                        class="pill pill--estado"
+                        [class.pill--ok]="n.dianStatus === 'ACEPTADO'"
+                      >
+                        {{ n.dianStatus || "-" }}
+                      </span>
+                    </td>
+
+                    <td>
+                      <small class="muted">
+                        {{ n.internalStatus || "-" }}
+                      </small>
+                    </td>
+
+                    <td class="col-acciones-nota">
+                      <button
+                        mat-icon-button
+                        [matMenuTriggerFor]="menuNota"
+                        (click)="$event.stopPropagation()"
+                        matTooltip="Acciones de la nota"
+                      >
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+
+                      <mat-menu #menuNota="matMenu">
+                        <!-- Descargar PDF (solo habilitado si hay pdfUrl) -->
+                        <button
+                          mat-menu-item
+                          (click)="descargarPdfNota(n, $event)"
+                          [disabled]="!n.pdfUrl"
+                        >
+                          <mat-icon>picture_as_pdf</mat-icon>
+                          <span>Ver PDF</span>
+                        </button>
+
+                        <!-- Descargar XML (solo habilitado si hay xmlUrl) -->
+                        <button
+                          mat-menu-item
+                          (click)="descargarXmlNota(n, $event)"
+                          [disabled]="!n.xmlUrl"
+                        >
+                          <mat-icon>download</mat-icon>
+                          <span>Ver XML</span>
+                        </button>
+
+                        <mat-divider></mat-divider>
+
+                        <!-- Editar -->
+                        <button
+                          mat-menu-item
+                          (click)="editarNota(n, $event)"
+                          [disabled]="esNotaBloqueada(n)"
+                        >
+                          <mat-icon>edit</mat-icon>
+                          <span>Editar</span>
+                        </button>
+
+                        <!-- Eliminar -->
+                        <button
+                          mat-menu-item
+                          (click)="borrarNota(n, $event)"
+                          [disabled]="esNotaBloqueada(n)"
+                        >
+                          <mat-icon>delete</mat-icon>
+                          <span>Eliminar</span>
+                        </button>
+                      </mat-menu>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ng-container>
+
+            <ng-template #sinNotasTpl>
+              <div class="detalle-notas__empty">
+                No hay notas aún para esta factura.
+              </div>
+            </ng-template>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Filas principales -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="factura-row"
+      ></tr>
+
+      <!-- Fila de detalle: una por cada row, solo se ve la que coincide -->
+      <tr
+        mat-row
+        *matRowDef="let row; columns: ['expandedDetail']"
+        class="detalle-notas-row"
+        [class.detalle-notas-row--visible]="notaPanelFactura === row"
+      ></tr>
     </table>
   </div>
 

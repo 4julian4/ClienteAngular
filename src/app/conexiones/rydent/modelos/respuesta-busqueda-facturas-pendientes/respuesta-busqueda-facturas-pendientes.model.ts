@@ -5,6 +5,7 @@ export class RespuestaBusquedaFacturasPendientes {
   idResolucion_Dian!: number;
   prestador!: string;
   codigo_Prestador!: string;
+  codigo_Prestador_Ppal!: string;
   nombre_Paciente!: string;
   documento!: string;
   tipo_Documento!: string;
@@ -13,6 +14,7 @@ export class RespuestaBusquedaFacturasPendientes {
   fecha!: Date; // Normalizamos a Date en el front
   idRelacion!: number;
   tipoFactura!: number;
+  tipoOperacion!: string;
   DOCUMENTO_RESPONS!: string;
   NOMBRE_RESPONS!: string;
   TIENERESPONSABLE!: number; // 0/1
@@ -28,6 +30,9 @@ export class RespuestaBusquedaFacturasPendientes {
     r.codigo_Prestador = String(
       raw?.codigo_Prestador ?? raw?.codigo_prestador ?? ''
     );
+    r.codigo_Prestador_Ppal = String(
+      raw?.codigo_Prestador_Ppal ?? raw?.codigo_prestador_ppal ?? ''
+    );
     r.nombre_Paciente = String(
       raw?.nombre_Paciente ?? raw?.nombre_paciente ?? ''
     );
@@ -38,6 +43,7 @@ export class RespuestaBusquedaFacturasPendientes {
     r.fecha = raw?.fecha ? new Date(raw.fecha) : new Date();
     r.idRelacion = Number(raw?.idRelacion ?? raw?.id_relacion ?? 0);
     r.tipoFactura = Number(raw?.tipoFactura ?? raw?.tipo_factura ?? 0);
+    r.tipoOperacion = String(raw?.tipoOperacion ?? raw?.tipo_operacion ?? '');
     r.DOCUMENTO_RESPONS = String(
       raw?.DOCUMENTO_RESPONS ?? raw?.documento_respons ?? ''
     );

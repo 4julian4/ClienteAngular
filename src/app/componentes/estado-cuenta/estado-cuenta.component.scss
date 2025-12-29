@@ -1,136 +1,169 @@
+.card-estado-cuenta {
+  margin-top: 10px;
+}
+
+/* Header del card: título + botón */
+.estado-cuenta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 10px 0 10px;
+  flex-wrap: wrap;
+}
+
+.titulo-estado-cuenta {
+  display: flex;
+  flex-direction: column;
+}
+
+.titulo-principal {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.subtitulo-doctor {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Botones azules unificados con el resto de la app */
+.BotonGuardar,
+.BotonCancelar,
+.BotonFirmar {
+  margin: 5px;
+  background-color: rgb(28, 197, 244);
+  color: #ffffff;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.boton-agregar-estado {
+  min-width: 200px;
+}
+
+/* Barra superior en vista detalle */
+.toolbar-detalle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px;
+  flex-wrap: wrap;
+}
+
+.boton-volver {
+  display: inline-flex;
+  align-items: center;
+}
+
+.info-tratamiento-detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.info-tratamiento-detalle span strong {
+  font-weight: 600;
+}
+
+/* Contenedor principal con sombra suave */
 .contenedorEstadoCuenta {
-  border-radius: 15px; // Bordes redondeados
-  border: 1px solid #ddd; // Borde del contenedor
-  margin: 10px; // Margen alrededor del contenedor
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); // Sombra alrededor del contenedor
-  transition: 0.3s; // Transiciones suaves de las propiedades
-  padding: 20px; // Espacio interior del contenedor
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  margin: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+  padding: 20px;
 }
 
+/* Contenedor scroll horizontal para las tablas */
 .contenedor-de-la-tabla {
-  overflow-x: auto; /* Habilita el scroll horizontal */
-  white-space: nowrap; /* Evita que el contenido se envuelva a la siguiente línea */
-  max-width: 100%; /* Limita el ancho máximo del contenedor */
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
-// Estilo para una celda específica
+/* Tabla de tratamientos (listado principal) */
+.tabla-tratamientos {
+  width: 100%;
+}
+
+/* Columnas específicas */
 .columna-FECHA {
-  overflow: hidden; // Oculta el contenido que desborda el ancho máximo
-  text-overflow: ellipsis; // Agrega puntos suspensivos para indicar contenido truncado
-  min-width: 14ch; // Ancho mínimo para la columna Fecha
-  max-width: 14ch; // Ancho máximo para la columna Fecha
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 14ch;
+  max-width: 14ch;
 }
 
 .columna-DESCRIPCION {
-  max-width: 20ch; // Ancho máximo para una celda específica
-  min-width: 20ch; // Ancho mínimo para la columna Descripción
+  max-width: 20ch;
+  min-width: 20ch;
 }
 
 .columna-NOMBREDOCTOR {
-  max-width: 25ch; // Ancho máximo para una celda específica
-  min-width: 25ch; // Ancho mínimo para la columna Nombre del Doctor
+  max-width: 25ch;
+  min-width: 25ch;
 }
 
-// Estilo para las celdas de encabezado
+/* Estilo para encabezados de tabla */
 .mat-header-cell {
-  background-color: #f2f2f2; // Color de fondo de las celdas de encabezado
-  font-weight: bold; // Texto en negrita en las celdas de encabezado
+  background-color: #f2f2f2;
+  font-weight: bold;
 }
 
-// Estilo para filas impares
+/* Filas impares */
 .mat-row:nth-child(odd) {
-  background-color: #f9f9f9; // Color de fondo para las filas impares
+  background-color: #f9f9f9;
 }
 
-// Estilo para filas al pasar el mouse
+/* Hover en filas */
 .mat-row:hover {
-  background-color: #f0f0f0; // Color de fondo para las filas al pasar el mouse
+  background-color: #f0f0f0;
 }
 
-// Estilo para el primer conjunto de campos del formulario
-.divFormularioFila1 {
-  width: 100%; // Ocupa el 100% del ancho del contenedor
-  display: flex; // Se usa flexbox para el diseño
-  justify-content: space-between; // Distribuye los elementos uniformemente en el eje horizontal
-  padding: 0px; // Sin espacio interior
-
-  .campoFila1 {
-    flex: 1; // Cada campo ocupa un espacio igual en la fila
-
-    &:not(:last-child) {
-      margin-right: 5px; // Margen a la derecha
-    }
-
-    &:not(:first-child) {
-      margin-left: 5px; // Margen a la izquierda
-    }
-  }
+/* Fila seleccionada */
+.fila-seleccionada {
+  background-color: #e0f7fa !important;
 }
 
-// Estilo similar al anterior para el segundo conjunto de campos del formulario
-.divFormularioFila2 {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
+/* ===================== */
+/*   RESPONSIVE          */
+/* ===================== */
 
-  .campoFila2 {
-    flex: 1;
-
-    &:not(:last-child) {
-      margin-right: 5px;
-    }
-
-    &:not(:first-child) {
-      margin-left: 5px;
-    }
-  }
-}
-
-// Media queries para hacer el diseño responsive
-// Para pantallas pequeñas (móviles)
+/* Móviles */
 @media (max-width: 600px) {
   .contenedorEstadoCuenta {
-    padding: 10px; // Reduce el padding
-    margin: 5px; // Reduce el margen
+    padding: 10px;
+    margin: 5px;
   }
 
   .columna-FECHA,
   .columna-DESCRIPCION,
   .columna-NOMBREDOCTOR {
-    max-width: 100%; // Permite que las columnas ocupen todo el ancho
-    min-width: auto; // Elimina el ancho mínimo
+    max-width: 100%;
+    min-width: auto;
   }
 
-  .divFormularioFila1, 
-  .divFormularioFila2 {
-    flex-direction: column; // Cambia la dirección a columna
-    .campoFila1, 
-    .campoFila2 {
-      margin: 0 0 10px 0; // Espacio inferior entre campos
-    }
+  .toolbar-detalle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 
-// Para pantallas medianas (tabletas)
+/* Tabletas */
 @media (min-width: 601px) and (max-width: 1024px) {
   .contenedorEstadoCuenta {
-    padding: 15px; // Ajusta el padding para tabletas
-    margin: 10px; // Mantén el margen
-  }
-
-  .divFormularioFila1,
-  .divFormularioFila2 {
-    .campoFila1, 
-    .campoFila2 {
-      margin: 0 5px; // Reduce los márgenes laterales
-    }
+    padding: 15px;
+    margin: 10px;
   }
 }
 
-// Para pantallas grandes (escritorios)
+/* Escritorios */
 @media (min-width: 1025px) {
   .contenedorEstadoCuenta {
-    padding: 20px; // Mantiene el padding original
-    margin: 10px; // Mantiene el margen original
+    padding: 20px;
+    margin: 10px;
   }
 }

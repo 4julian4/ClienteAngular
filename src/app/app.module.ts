@@ -71,6 +71,12 @@ import { NominaComponent } from './componentes/billing/nomina/nomina.component';
 import { BillingDashboardComponent } from './componentes/billing/dashboard/dashboard.component';
 import { FacturaComponent } from './componentes/factura/factura.component';
 import { FacturasComponent } from './componentes/billing/facturas/facturas.scomponent';
+import { NominaElectronicaComponent } from './componentes/nomina-electronica';
+import { CrearNominaDialogComponent } from './componentes/nomina-electronica/crear-nomina-dialog/crear-nomina-dialog.component';
+import { MatDividerModule } from '@angular/material/divider';
+import { AbonoTratamientoDialogComponent } from './componentes/estado-cuenta/abono-tratamiento-dialog.component';
+import { AdicionalTratamientoDialogComponent } from './componentes/estado-cuenta/adicional-tratamiento-dialog.component';
+import { AgregarEstadoCuentaDialogComponent } from './componentes/estado-cuenta/agregar-estado-cuenta-dialog.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -105,6 +111,9 @@ export const MY_DATE_FORMATS = {
     AgregarEvolucionAgendaComponent,
     AgregarFirmasComponent,
     EstadoCuentaComponent,
+    AbonoTratamientoDialogComponent,
+    AdicionalTratamientoDialogComponent,
+    AgregarEstadoCuentaDialogComponent,
     RipsComponent,
     DatosAdministrativosComponent,
     AdmonClientesComponent,
@@ -115,10 +124,12 @@ export const MY_DATE_FORMATS = {
     BillingDashboardComponent,
     FacturaComponent,
     FacturasComponent,
+    NominaElectronicaComponent,
     HistorialComponent,
     SaludComponent,
     NotasComponent,
     NominaComponent,
+    CrearNominaDialogComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -142,6 +153,9 @@ export const MY_DATE_FORMATS = {
     MatCardModule,
     BrowserAnimationsModule, // 👈 requerido por Angular Material
     MatIconModule,
+    MatDividerModule,
+    MatDatepickerModule, // <-- nuevo
+    MatNativeDateModule,
   ],
   providers: [
     DatePipe,

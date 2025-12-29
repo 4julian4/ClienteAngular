@@ -11,7 +11,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 
   .mat-mdc-form-field,
@@ -46,6 +46,20 @@
       }
     }
   }
+}
+
+/* Chip de progreso */
+.chip-progreso {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1a52b8;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(26, 82, 184, 0.15);
 }
 
 /* ===== Botón “Consultar” y “Presentar seleccionadas” ===== */
@@ -134,4 +148,134 @@
 .mdc-text-field,
 .mat-mdc-form-field-flex {
   min-height: 48px;
+}
+
+/* ======== Panel de notas (fila de detalle) ======== */
+
+.detalle-notas-row {
+  display: none;
+  background: #f9fbff;
+}
+
+.detalle-notas-row--visible {
+  display: table-row;
+}
+
+.detalle-notas-cell {
+  padding: 0 !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.detalle-notas {
+  padding: 10px 12px 12px;
+  background: #f9fbff;
+  border-radius: 0 0 8px 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.detalle-notas__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.detalle-notas__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.detalle-notas__close {
+  margin-right: -4px;
+}
+
+.detalle-notas__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.detalle-notas__tabla th,
+.detalle-notas__tabla td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.detalle-notas__tabla th {
+  font-weight: 600;
+  color: #444;
+}
+
+.detalle-notas__tabla tr:last-child td {
+  border-bottom: none;
+}
+
+.col-acciones-nota {
+  white-space: nowrap;
+}
+
+.btn-nota {
+  margin-right: 4px;
+  margin-bottom: 4px;
+  padding-inline: 10px !important;
+}
+
+/* Pills */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.pill--nc {
+  background: #e8f3ff;
+  color: #1a52b8;
+}
+
+.pill--nd {
+  background: #fff3e0;
+  color: #b86a1a;
+}
+
+.pill--estado {
+  background: #f3f4f6;
+  color: #555;
+}
+
+.pill--ok {
+  background: #e8f7ef;
+  color: #137a3c;
+}
+
+.muted {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+.detalle-notas__empty {
+  font-size: 13px;
+  color: #666;
+  padding: 4px 0;
+}
+
+/* Responsive panel de notas */
+@media (max-width: 768px) {
+  .detalle-notas__tabla th,
+  .detalle-notas__tabla td {
+    font-size: 12px;
+    padding: 3px 4px;
+  }
+
+  .btn-nota {
+    padding-inline: 6px !important;
+    font-size: 11px;
+  }
 }

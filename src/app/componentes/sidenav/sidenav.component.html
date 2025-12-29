@@ -115,6 +115,15 @@
           <span>Facturas</span>
         </button>
 
+        <button
+          mat-menu-item
+          routerLink="/nomina"
+          (click)="setMostrarBuscarHistoriaClinica(false)"
+        >
+          <mat-icon>badge</mat-icon>
+          <span>Nómina Electrónica</span>
+        </button>
+
         <button mat-menu-item (click)="cerrarSession()">
           <mat-icon>exit_to_app</mat-icon>
           <span>Cerrar sesion</span>
