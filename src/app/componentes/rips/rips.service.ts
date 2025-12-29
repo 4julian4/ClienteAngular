@@ -5,12 +5,19 @@ import { SignalRService } from 'src/app/signalr.service';
 import signalR, { HubConnectionState } from '@microsoft/signalr';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { RespuestaConsultarFacturasEntreFechas } from './rips.model';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RipsService {
   @Output() respuestaDatosGuardarRipsEmit: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() respuestaObtenerFacturasPorIdEntreFechasEmit: EventEmitter<string> = new EventEmitter<string>();
+  
+  private facturaSeleccionadaData = new BehaviorSubject<string | null>(null);
+  sharedfacturaSeleccionadaData = this.facturaSeleccionadaData.asObservable();
+
   constructor(
     private signalRService: SignalRService,
     private router: Router,
@@ -38,6 +45,7 @@ export class RipsService {
           // Comprobar si se guardó correctamente
           if (objRespuestaDatosGuardarRipsEmit) { // Verificar la respuesta aquí
             // Navegar al componente de evolución
+            this.respuestaPinService.updateisLoading(false);
             this.router.navigate(['/evolucion']);
           }
         } catch (error) {
@@ -53,6 +61,45 @@ export class RipsService {
     } catch (err) {
       console.error('Error al conectar con SignalR: ', err);
     }
+  }
+
+  async startConnectionConsultarFacturasPorIdPorEntreFechas(clienteId: string, modeloDatosParaConsultarFacturasEntreFechas: string): Promise<void> {
+    try {
+      // Asegurar que la conexión esté establecida
+      await this.signalRService.ensureConnection();
+
+      // Configurar eventos de SignalR
+      this.signalRService.off('ErrorConexion');
+      this.signalRService.on('ErrorConexion', (clienteId: string, mensajeError: string) => {
+        alert('Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId);
+        this.interruptionService.interrupt();
+      });
+
+      this.signalRService.off('RespuestaObtenerFacturasPorIdEntreFechas');
+      this.signalRService.on('RespuestaObtenerFacturasPorIdEntreFechas', async (clienteId: string, respuesta: string) => {
+        try {
+          // Comprobar si se guardó correctamente
+          if (respuesta) { // Verificar la respuesta aquí
+            // Navegar al componente de evolución
+            this.respuestaObtenerFacturasPorIdEntreFechasEmit.emit(JSON.parse(respuesta));
+          }
+        } catch (error) {
+          console.error('Error durante el procesamiento de la respuesta: ', error);
+        }
+      });
+
+      // Invocar el método en el servidor
+      //console.log('Invocando método GuardarDatosRips...');
+      await this.signalRService.invoke('ObtenerFacturasPorIdEntreFechas', clienteId, modeloDatosParaConsultarFacturasEntreFechas);
+      this.respuestaPinService.updateisLoading(true);
+
+    } catch (err) {
+      console.error('Error al conectar con SignalR: ', err);
+    }
+  }
+
+  async updatefacturaSeleccionadaData(data: string) {
+    this.facturaSeleccionadaData.next(data);
   }
 
 }

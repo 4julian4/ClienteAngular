@@ -338,6 +338,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
           }
         });
         //----------------------------------------------------------------------------//
+        //this.lstHorariosAgenda = []; // Limpiar opciones
         this.lstHorariosAsuntos = data.lstHorariosAsuntos;
         console.log('lstHorariosAsuntos', this.lstHorariosAsuntos);
         this.lstHorariosAgenda = data.lstHorariosAgenda.sort((a, b) => a.SILLA - b.SILLA);

@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SignalRService {
   public hubConnection: signalR.HubConnection = {} as signalR.HubConnection;
@@ -16,29 +16,32 @@ export class SignalRService {
 
   mensajes$: Observable<string> = this.mensajeSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor() {
     //this.startConnection();
     console.log('SignalRService constructor');
-    
   }
 
   private async startConnection(): Promise<void> {
-    if (this.hubConnection.state === signalR.HubConnectionState.Connected ||
-        this.hubConnection.state === signalR.HubConnectionState.Connecting) {
-      console.log('Conexión ya activa o en proceso de conexión. No se necesita reiniciar.');
+    if (
+      this.hubConnection.state === signalR.HubConnectionState.Connected ||
+      this.hubConnection.state === signalR.HubConnectionState.Connecting
+    ) {
+      console.log(
+        'Conexión ya activa o en proceso de conexión. No se necesita reiniciar.'
+      );
       return;
     }
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.signalRUrl, {
         transport: signalR.HttpTransportType.WebSockets,
-        withCredentials: false
+        withCredentials: false,
       })
       .withAutomaticReconnect({
-        nextRetryDelayInMilliseconds: retryContext => {
+        nextRetryDelayInMilliseconds: (retryContext) => {
           const delays = [1000, 2000, 5000, 10000, 30000];
           return delays[retryContext.previousRetryCount] || 30000;
-        }
+        },
       })
       .configureLogging(signalR.LogLevel.Information)
       .build();
@@ -46,7 +49,9 @@ export class SignalRService {
     this.hubConnection.onclose(() => this.reconnect());
     this.hubConnection.onreconnecting((error) => {
       if (error && error.message.includes('404')) {
-        console.warn('Error 404 durante la reconexión. Verifica las rutas de negociación.');
+        console.warn(
+          'Error 404 durante la reconexión. Verifica las rutas de negociación.'
+        );
       } else {
         console.warn(`Intentando reconectar: ${error}`);
       }
@@ -70,8 +75,12 @@ export class SignalRService {
     console.error('Error al iniciar la conexión: ', err.message);
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      console.log(`Reintentando conexión en 5 segundos... (Intento #${this.reconnectAttempts + 1})`);
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      console.log(
+        `Reintentando conexión en 5 segundos... (Intento #${
+          this.reconnectAttempts + 1
+        })`
+      );
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       this.reconnectAttempts++;
       await this.startConnection();
     } else {
@@ -87,9 +96,11 @@ export class SignalRService {
 
     if (this.hubConnection.state === signalR.HubConnectionState.Connecting) {
       console.log('Conexión en proceso, esperando...');
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         const checkConnectionState = setInterval(() => {
-          if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+          if (
+            this.hubConnection.state === signalR.HubConnectionState.Connected
+          ) {
             clearInterval(checkConnectionState);
             resolve();
           }
@@ -117,7 +128,9 @@ export class SignalRService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = Math.pow(2, this.reconnectAttempts) * 1000;
-      console.log(`Intento de reconexión #${this.reconnectAttempts} en ${delay} ms`);
+      console.log(
+        `Intento de reconexión #${this.reconnectAttempts} en ${delay} ms`
+      );
       setTimeout(async () => {
         await this.startConnection();
         this.reconnecting = false;
@@ -166,14 +179,25 @@ export class SignalRService {
         }
       }
     } else {
-      console.warn('No se puede invocar el método. La conexión no está en el estado de conexión.');
+      console.warn(
+        'No se puede invocar el método. La conexión no está en el estado de conexión.'
+      );
       // Puedes optar por intentar reconectar aquí si es necesario.
     }
   }
 
-  async obtenerPin(clienteId: string, pin: string) {
+  async obtenerPin(
+    clienteId: string,
+    pin: string,
+    maxIdAnamnesis: number
+  ): Promise<void> {
     try {
-      await this.hubConnection.invoke('ObtenerPin', clienteId, pin);
+      await this.hubConnection.invoke(
+        'ObtenerPin',
+        clienteId,
+        pin,
+        maxIdAnamnesis
+      );
     } catch (err) {
       if (err instanceof Error) {
         console.error('Error al obtener el pin: ', err.message);

@@ -1,0 +1,66 @@
+<!--DOCTYPE html> src/app/conexiones/rydent/modelos/presentar-dian/resumen-presentacion-dialog/resumen-presentacion-dialog.component.html -->
+<!-- src/app/conexiones/rydent/modelos/presentar-dian/resumen-presentacion-dialog/resumen-presentacion-dialog.component.html -->
+<h2 mat-dialog-title class="title">Resumen de presentación</h2>
+
+<mat-dialog-content class="content">
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi__title">Total</div>
+      <div class="kpi__value">{{ data.summary.total }}</div>
+    </div>
+    <div class="kpi ok">
+      <div class="kpi__title">Exitosas</div>
+      <div class="kpi__value">{{ data.summary.ok }}</div>
+    </div>
+    <div class="kpi fail">
+      <div class="kpi__title">Fallidas</div>
+      <div class="kpi__value">{{ data.summary.fail }}</div>
+    </div>
+  </div>
+
+  <div class="table-wrap" *ngIf="data.summary.results?.length; else emptyTpl">
+    <table
+      mat-table
+      [dataSource]="data.summary.results"
+      class="tabla mat-elevation-z2"
+    >
+      <ng-container matColumnDef="tenantCode">
+        <th mat-header-cell *matHeaderCellDef>Tenant</th>
+        <td mat-cell *matCellDef="let r">{{ r.tenantCode || "-" }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="numeroFactura">
+        <th mat-header-cell *matHeaderCellDef>Factura</th>
+        <td mat-cell *matCellDef="let r">{{ r.numeroFactura || "-" }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ok">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let r">
+          <span class="pill" [class.ok]="r.ok" [class.fail]="!r.ok">{{
+            r.ok ? "OK" : "FAIL"
+          }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="mensaje">
+        <th mat-header-cell *matHeaderCellDef>Mensaje</th>
+        <td mat-cell *matCellDef="let r" class="col-mensaje">
+          {{ r.mensaje || r.message || "-" }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayed"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayed"></tr>
+    </table>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="empty">Sin resultados para mostrar.</div>
+  </ng-template>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="acciones">
+  <button mat-stroked-button (click)="exportCsv()">Exportar CSV</button>
+  <button mat-flat-button color="primary" (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

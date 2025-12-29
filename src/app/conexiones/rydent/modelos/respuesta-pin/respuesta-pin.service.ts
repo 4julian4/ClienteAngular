@@ -96,6 +96,11 @@ export class RespuestaPinService {
   private horaEvolucionarAgendaData = new BehaviorSubject<Date | null>(null);
   sharedhoraEvolucionarAgendaData = this.horaEvolucionarAgendaData.asObservable();
 
+  private respuestaGenerarJsonRipsPresentado = new BehaviorSubject<any[]>([]);
+  sharedrespuestaGenerarJsonRipsPresentado = this.respuestaGenerarJsonRipsPresentado.asObservable();
+
+  private respuestaDockerJsonRipsPresentado = new BehaviorSubject<any[]>([]);
+  sharedrespuestaDockerJsonRipsPresentado = this.respuestaDockerJsonRipsPresentado.asObservable();
 
   //-------------------------------------------------------------------------------//
   @Output() respuestaPinModel: EventEmitter<RespuestaPin> = new EventEmitter<RespuestaPin>();
@@ -219,6 +224,14 @@ export class RespuestaPinService {
 
   updateisLoading(data: boolean) {
     this.isLoading.next(data);
+  }
+
+  async updateRespuestaGenerarJsonRipsPresentado(data: any[]) {
+    this.respuestaGenerarJsonRipsPresentado.next(data);
+  }
+
+  async updateRespuestaDockerJsonRipsPresentado(data: any[]) {
+    this.respuestaDockerJsonRipsPresentado.next(data);
   }
 
 }

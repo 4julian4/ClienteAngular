@@ -1,4 +1,4 @@
-<form class="formularioAgregarRips" [formGroup]="formularioAgregarRips">
+<form *ngIf="mostrarFormulario" class="formularioAgregarRips" [formGroup]="formularioAgregarRips">
     <div class="divFormularioFila1">
         <mat-form-field appearance="fill" class="campoFila1">
             <mat-label>Fecha</mat-label>
@@ -123,7 +123,69 @@
 
     </div>
     <div class="divContenedorDeBotones">
+        <button class="BotonCargarFactura" mat-raised-button (click)="buscarFactura()">Factura</button>
         <button class="BotonGuardar" mat-raised-button (click)="guardarRips()">Guardar</button>
         <button class="BotonCancelar" mat-raised-button (click)="cancelarGuardarRips()">Cancelar</button>
     </div>
+    <div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
+        <mat-spinner></mat-spinner>
+    </div>
 </form>
+
+<div *ngIf="mostrarTablaFacturas" class="ripsGenerado">
+    <div class="contenedor-calendarios">
+        <mat-form-field class="calendario" appearance="fill">
+            <mat-label>Fecha inicial</mat-label>
+            <input matInput [matDatepicker]="picker1" [(ngModel)]="fechaInicio" name="fechaInicio">
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="calendario" appearance="fill">
+            <mat-label>Fecha final</mat-label>
+            <input matInput [matDatepicker]="picker2" [(ngModel)]="fechaFin" name="fechaFin">
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+    </div>
+
+    <button mat-raised-button color="primary" type="submit"
+        (click)="listarFacturas(fechaInicio, fechaFin)">Consultar</button>
+    <div class="scrollable-table-container"> 
+        <table mat-table [dataSource]="dataSourceFacturas" class="mat-elevation-z8">
+        
+            <ng-container matColumnDef="FECHA">
+                <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Fecha</th>
+                <td mat-cell *matCellDef="let element">{{element.FECHA}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="FACTURA">
+                <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Factura</th>
+                <td mat-cell *matCellDef="let element">{{element.FACTURA}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="DESCRIPCION">
+                <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">Descripcion</th>
+                <td mat-cell *matCellDef="let element">{{element.DESCRIPCION}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="ACCIONES">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let factura">
+                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="seleccionarFactura(factura)">
+                        <mat-icon>block</mat-icon>
+                        <span>Seleccionar</span>
+                    </button>
+                    </mat-menu>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </div>
+</div>
+

@@ -1,4 +1,5 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 //import { Chart, LineController, LineElement, LinearScale, PointElement, BarController, BarElement, PieController, ArcElement, CategoryScale, Tooltip, Legend } from 'chart.js';
 import { PacientesNuevos, RespuestaDatosAdministrativos, RespuestaDatosAdministrativosService } from 'src/app/conexiones/rydent/modelos/respuesta-datos-administrativos';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
@@ -28,6 +29,8 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
   totalAbonos!: number;
   totalMora!: number;
   totalCartera!: number;
+  idDoctorSeleccionado!: number;
+  private destruir$: Subject<boolean> = new Subject<boolean>();
   //pieChart?: Chart<'pie', number[], string>;
   //doughnutChart?: Chart<'doughnut', number[], string>;
 //lineChart?:Chart | null = null;
@@ -69,6 +72,15 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
       
       //this.initLineChart();
     });
+    //cargar id doctor seleccionado
+    
+
+    this.respuestaPinService.sharedidDoctorSeleccionadoData.pipe(takeUntil(this.destruir$)).subscribe(data => {
+      if (data != null) {
+        this.idDoctorSeleccionado = data;
+      }
+    });
+
   }
 
   ngAfterViewInit(): void {
@@ -80,7 +92,13 @@ export class DatosAdministrativosComponent implements AfterViewInit, OnInit {
   
 
   async consultarDatosAdministrativos(fechaInicio: Date, fechaFin: Date) {
-    await this.respuestaDatosAdministrativosService.startConnectionRespuestaDatosAdministrativos(this.idSedeActualSignalR, fechaInicio, fechaFin);
+    //log parametros
+    console.log(fechaInicio);
+    console.log(fechaFin);
+    console.log(this.idDoctorSeleccionado);
+    console.log(this.idSedeActualSignalR);
+    //llamar servicio
+    await this.respuestaDatosAdministrativosService.startConnectionRespuestaDatosAdministrativos(this.idSedeActualSignalR,this.idDoctorSeleccionado, fechaInicio, fechaFin);
 
   }
 }

@@ -1,0 +1,579 @@
+/* =========================================================
+   DIÁLOGO ABONO TRATAMIENTO - ESTILOS COMPLETOS
+   ========================================================= */
+
+$altura-control: 28px; // altura estándar para inputs, select, checkbox y botón
+
+/* ================= CONTENEDOR GENERAL ================= */
+
+.contenido-dialogo-abono {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* Opcional: ensanchar un poco el diálogo */
+:host ::ng-deep .mat-dialog-container {
+  max-width: 980px !important;
+  width: 980px;
+}
+
+/* ================= ENCABEZADO CON RESUMEN EN HEADER ================= */
+
+.bloque-encabezado-abono {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #ffffff;
+}
+
+/* Título del bloque CON totales en la misma línea */
+.header-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Resumen financiero en el header (Total Concepto / Total Abono / Saldo) */
+.resumen-financiero-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.item-resumen-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-left: 3px solid #ddd;
+}
+
+.item-resumen-header .label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.item-resumen-header .valor {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Colores específicos para cada indicador */
+.item-total-concepto {
+  border-left-color: #2196f3;
+}
+
+.item-total-concepto .valor {
+  color: #2196f3;
+}
+
+.item-total-abono {
+  border-left-color: #4caf50;
+}
+
+.item-total-abono .valor {
+  color: #4caf50;
+}
+
+.item-saldo-header {
+  border-left-color: #ff9800;
+}
+
+.item-saldo-header .valor {
+  color: #ff9800;
+}
+
+/* Fila con los campos de entrada (Fecha, Recibo, Factura, Doctor) */
+.fila-encabezado-abono {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* Campos del encabezado */
+.campo-encabezado {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+/* Doctor más ancho */
+.campo-encabezado-doctor {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+/* ================= INPUTS PERSONALIZADOS ================= */
+
+.campo-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.campo-input-wrapper label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+/* Input / select compactos (misma altura) */
+.input-compacto {
+  height: $altura-control;
+  line-height: $altura-control;
+  padding: 0 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.input-compacto:focus {
+  border-color: rgb(28, 197, 244);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(28, 197, 244, 0.1);
+}
+
+.input-compacto:hover {
+  border-color: #b0b0b0;
+}
+
+select.input-compacto {
+  cursor: pointer;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px 10px;
+  appearance: none;
+}
+
+/* ================= CHECKBOX PERSONALIZADO ================= */
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 11px;
+  color: #333;
+  height: $altura-control;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: rgb(28, 197, 244);
+}
+
+.checkbox-wrapper span {
+  font-weight: 500;
+}
+
+/* ================= CONCEPTOS ================= */
+
+.bloque-conceptos {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Encabezados de sección (Conceptos / Forma de pago) */
+.header-conceptos,
+.header-formas-pago {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.titulo-seccion {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Botón pequeño "Agregar / Cerrar" */
+.boton-toggle-seccion {
+  font-size: 11px;
+  padding: 2px 12px;
+  height: 24px;
+  background-color: transparent;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #555;
+  font-weight: 500;
+}
+
+.boton-toggle-seccion:hover {
+  background-color: #f0f0f0;
+  border-color: #b0b0b0;
+}
+
+.boton-toggle-seccion:active {
+  background-color: #e0e0e0;
+}
+
+/* Panel expandible de conceptos */
+.panel-agregar-concepto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* Tablas de catálogo y de conceptos agregados */
+.contenedor-tabla-conceptos,
+.contenedor-tabla-formas-pago {
+  max-height: 180px;
+  overflow: auto;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+}
+
+/* Solo la tabla de CATÁLOGO: altura más pequeña (~2 filas) */
+.contenedor-tabla-conceptos--catalogo {
+  max-height: 145px;
+}
+
+.tabla-conceptos-disponibles,
+.tabla-conceptos-agregados,
+.tabla-formas-pago {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-conceptos-disponibles thead,
+.tabla-conceptos-agregados thead,
+.tabla-formas-pago thead {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+}
+
+.tabla-conceptos-disponibles th,
+.tabla-conceptos-disponibles td,
+.tabla-conceptos-agregados th,
+.tabla-conceptos-agregados td,
+.tabla-formas-pago th,
+.tabla-formas-pago td {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.tabla-conceptos-disponibles th,
+.tabla-conceptos-agregados th,
+.tabla-formas-pago th {
+  font-weight: 600;
+  color: #555;
+  font-size: 12px;
+}
+
+.tabla-conceptos-disponibles tbody tr:hover {
+  background-color: #e0f7fa;
+  cursor: pointer;
+}
+
+/* Fila única de edición de concepto */
+.fila-concepto-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+/* Tamaños específicos de campos en concepto */
+.campo-codigo {
+  flex: 0 0 80px;
+  min-width: 80px;
+}
+
+.campo-descripcion-concepto {
+  flex: 1 1 150px;
+  min-width: 150px;
+}
+
+.campo-valor {
+  flex: 0 0 80px;
+  min-width: 80px;
+}
+
+.campo-cantidad {
+  flex: 0 0 60px;
+  min-width: 60px;
+}
+
+.campo-iva-porcentaje {
+  flex: 0 0 70px;
+  min-width: 70px;
+}
+
+/* Ajuste fino: checkbox alineado visualmente */
+.checkbox-iva-incluido {
+  padding-bottom: 2px;
+}
+
+/* ================= FORMAS DE PAGO ================= */
+
+.bloque-formas-pago {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fila-forma-pago {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Tamaños específicos en forma de pago */
+.campo-forma-pago-select {
+  width: 140px;
+}
+
+.campo-descripcion-pago {
+  flex: 1;
+  min-width: 220px;
+}
+
+.campo-valor-pago {
+  width: 110px;
+}
+
+/* ================= BOTONES REUTILIZABLES ================= */
+
+.boton-agregar {
+  height: $altura-control;
+  padding: 0 18px;
+  background-color: rgb(28, 197, 244);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.boton-agregar:hover {
+  background-color: rgb(20, 180, 230);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.boton-agregar:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Icono de eliminar (pequeño, sin recuadro) */
+.boton-icono-eliminar {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  color: #ff5252;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.boton-icono-eliminar:hover {
+  color: #d32f2f;
+  background-color: transparent;
+}
+
+/* Botones de pie de diálogo */
+.BotonGuardar,
+.BotonCancelar {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  height: 36px;
+}
+
+.BotonGuardar {
+  background-color: rgb(28, 197, 244);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.BotonGuardar:hover {
+  background-color: rgb(20, 180, 230);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.BotonCancelar {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #d0d0d0;
+}
+
+.BotonCancelar:hover {
+  background-color: #f5f5f5;
+  border-color: #b0b0b0;
+}
+
+/* ================= RECIBIDO POR ================= */
+
+.bloque-recibido {
+  margin-top: 4px;
+}
+
+.campo-recibido {
+  width: 100%;
+}
+
+/* ================= MENSAJES DE ERROR ================= */
+
+.mensaje-error {
+  color: #d32f2f;
+  font-size: 11px;
+  padding: 4px 8px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border-left: 3px solid #d32f2f;
+}
+
+/* ================= ACCIONES DEL DIÁLOGO ================= */
+
+.acciones-dialogo-abono {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px !important;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 850px) {
+  .header-encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .resumen-financiero-header {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .item-resumen-header {
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .item-resumen-header .valor {
+    text-align: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .fila-encabezado-abono {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .campo-encabezado {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .resumen-financiero-header {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .item-resumen-header {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .item-resumen-header .label {
+    text-align: left;
+  }
+
+  .item-resumen-header .valor {
+    text-align: right;
+  }
+
+  .fila-concepto-editor,
+  .fila-forma-pago {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .campo-codigo,
+  .campo-descripcion-concepto,
+  .campo-valor,
+  .campo-cantidad,
+  .campo-iva-porcentaje,
+  .campo-forma-pago-select,
+  .campo-descripcion-pago,
+  .campo-valor-pago {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .boton-agregar {
+    width: 100%;
+  }
+}

@@ -1,0 +1,76 @@
+<!-- src/app/conexiones/rydent/modelos/notas/resumen-nota-dialog/resumen-nota-dialog.component.html -->
+<h2 mat-dialog-title class="title">
+  Resumen {{ data.tipo }} #{{ data.numero }}
+</h2>
+
+<mat-dialog-content class="content">
+  <div class="kpis">
+    <div
+      class="kpi"
+      [class.ok]="data.response?.success"
+      [class.fail]="!data.response?.success"
+    >
+      <div class="kpi__title">Resultado</div>
+      <div class="kpi__value">
+        {{ data.response?.success ? "Éxito" : "Error" }}
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__title">UUID</div>
+      <div class="kpi__value mono">{{ data.response?.uuid || "-" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__title">CUFE</div>
+      <div class="kpi__value mono">{{ data.response?.cufe || "-" }}</div>
+    </div>
+  </div>
+
+  <div class="msg">
+    <div class="label">Mensaje</div>
+    <div class="value">{{ data.response?.message || "-" }}</div>
+  </div>
+
+  <div class="msg" *ngIf="data.response?.dianStatus">
+    <div class="label">Estado DIAN</div>
+    <div class="value">{{ data.response?.dianStatus }}</div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <div class="label">PDF URL</div>
+      <div class="value wrap mono">{{ data.response?.pdfUrl || "-" }}</div>
+    </div>
+    <div>
+      <div class="label">XML URL</div>
+      <div class="value wrap mono">{{ data.response?.xmlUrl || "-" }}</div>
+    </div>
+  </div>
+
+  <div class="errors" *ngIf="data.response?.errors?.length">
+    <div class="label">Errores</div>
+    <ul>
+      <li *ngFor="let e of data.response.errors">
+        <span class="mono">{{ e.field }}</span
+        >: {{ e.error }}
+      </li>
+    </ul>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="acciones">
+  <button
+    mat-stroked-button
+    (click)="descargarPdf()"
+    [disabled]="!data.response?.uuid || !data.onDescargarPdf"
+  >
+    Descargar PDF
+  </button>
+  <button
+    mat-stroked-button
+    (click)="descargarXml()"
+    [disabled]="!data.response?.uuid || !data.onDescargarXml"
+  >
+    Descargar XML
+  </button>
+  <button mat-flat-button color="primary" (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

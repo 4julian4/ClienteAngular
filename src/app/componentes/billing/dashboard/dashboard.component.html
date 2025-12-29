@@ -1,0 +1,41 @@
+<h2>Billing — Dashboard</h2>
+
+<div class="grid">
+  <button class="card primary" (click)="goFacturas()">
+    <mat-icon>request_quote</mat-icon>
+    <div class="title">Facturar</div>
+    <div class="desc">FEE y Sector Salud (SS_*)</div>
+  </button>
+
+  <button class="card accent" (click)="goNotas()">
+    <mat-icon>note_add</mat-icon>
+    <div class="title">Notas Salud</div>
+    <div class="desc">Crédito y Débito (NC / ND)</div>
+  </button>
+
+  <button class="card warn" (click)="goNomina()">
+    <mat-icon>badge</mat-icon>
+    <div class="title">Nómina</div>
+    <div class="desc">NE, NDE, NR y consultas</div>
+  </button>
+
+  <button class="card neutral" (click)="goHistorial()">
+    <mat-icon>history</mat-icon>
+    <div class="title">Historial</div>
+    <div class="desc">Estado, PDF y XML</div>
+  </button>
+
+  <!-- Espacio para métricas recientes (opcional) -->
+  <div class="panel">
+    <div class="panel-title">
+      <mat-icon>insights</mat-icon> Últimos movimientos
+    </div>
+    <div class="panel-body">
+      <p class="muted">
+        Aquí puedes listar los últimos 5 envíos (facturas, notas o nómina) con
+        estado “OK / Rechazado”.
+      </p>
+      <p class="muted">Luego lo conectamos a /invoices/status, etc.</p>
+    </div>
+  </div>
+</div>

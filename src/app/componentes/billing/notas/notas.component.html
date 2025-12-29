@@ -1,0 +1,35 @@
+<h2>Notas Salud (Crédito / Débito)</h2>
+
+<div class="actions">
+  <button mat-raised-button color="primary" (click)="autofillCredito()">
+    Autollenar Nota CRÉDITO (SS_CUFE)
+  </button>
+  <button mat-raised-button color="primary" (click)="autofillDebito()">
+    Autollenar Nota DÉBITO (SS_REPORTE)
+  </button>
+</div>
+
+<div class="send">
+  <button
+    mat-flat-button
+    color="accent"
+    (click)="submitCredit()"
+    [disabled]="sending"
+  >
+    Enviar Crédito
+  </button>
+  <button
+    mat-flat-button
+    color="warn"
+    (click)="submitDebit()"
+    [disabled]="sending"
+  >
+    Enviar Débito
+  </button>
+</div>
+
+<h3>Request</h3>
+<pre class="json">{{ requestBody | json }}</pre>
+
+<h3>Response</h3>
+<pre class="json">{{ response | json }}</pre>

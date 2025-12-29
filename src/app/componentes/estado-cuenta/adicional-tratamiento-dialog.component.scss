@@ -1,0 +1,419 @@
+/* =========================================================
+   DIÁLOGO ADICIONALES DEL TRATAMIENTO - ESTILOS COMPACTOS
+   ========================================================= */
+
+$altura-control: 28px;
+
+/* ================= CONTENEDOR GENERAL ================= */
+
+.contenido-dialogo-adicionales {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* Opcional: ensanchar el diálogo */
+:host ::ng-deep .mat-dialog-container {
+  max-width: 900px !important;
+  width: 900px;
+}
+
+/* ================= BLOQUES CON ESTILO UNIFICADO ================= */
+
+.bloque-encabezado,
+.bloque-adicionales,
+.bloque-otro {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #ffffff;
+}
+
+/* Header de cada sección */
+.header-seccion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.titulo-seccion {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Botón pequeño "Agregar / Cerrar" */
+.boton-toggle-seccion {
+  font-size: 11px;
+  padding: 2px 12px;
+  height: 24px;
+  background-color: transparent;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #555;
+  font-weight: 500;
+}
+
+.boton-toggle-seccion:hover {
+  background-color: #f0f0f0;
+  border-color: #b0b0b0;
+}
+
+.boton-toggle-seccion:active {
+  background-color: #e0e0e0;
+}
+
+/* ================= INPUTS PERSONALIZADOS ================= */
+
+.campo-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.campo-input-wrapper label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+/* Input / select compactos */
+.input-compacto {
+  height: $altura-control;
+  line-height: $altura-control;
+  padding: 0 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.input-compacto:focus {
+  border-color: rgb(28, 197, 244);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(28, 197, 244, 0.1);
+}
+
+.input-compacto:hover:not(:disabled):not(.input-readonly) {
+  border-color: #b0b0b0;
+}
+
+/* Input readonly para el total calculado */
+.input-readonly {
+  background-color: #f0f0f0;
+  color: #666;
+  cursor: not-allowed;
+  font-weight: 600;
+}
+
+/* Select con flecha personalizada */
+select.input-compacto {
+  cursor: pointer;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px 10px;
+  appearance: none;
+}
+
+/* ================= FILA ENCABEZADO ================= */
+
+.fila-encabezado {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.campo-form {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.campo-form-recibido {
+  flex: 2 1 220px;
+  min-width: 200px;
+}
+
+/* ================= EDITORES Y TABLAS DE ADICIONALES ================= */
+
+.panel-agregar-adicional {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.editor-otro-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* Tabla de catálogo de adicionales */
+.contenedor-tabla-catalogo {
+  max-height: 145px;
+  overflow: auto;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+}
+
+.tabla-catalogo-adicionales {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-catalogo-adicionales thead {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+}
+
+.tabla-catalogo-adicionales th,
+.tabla-catalogo-adicionales td {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.tabla-catalogo-adicionales th {
+  font-weight: 600;
+  color: #555;
+  font-size: 12px;
+}
+
+.tabla-catalogo-adicionales tbody tr:hover {
+  background-color: #e0f7fa;
+  cursor: pointer;
+}
+
+/* Fila de edición */
+.fila-adicional-editor,
+.fila-otro-editor {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.campo-motivo-editor {
+  flex: 2 1 220px;
+  min-width: 180px;
+}
+
+.campo-otro-motivo {
+  flex: 2 1 280px;
+  min-width: 220px;
+}
+
+.campo-valor {
+  flex: 1 1 110px;
+  min-width: 100px;
+}
+
+.campo-cantidad {
+  flex: 0 0 85px;
+  min-width: 75px;
+}
+
+.campo-total {
+  flex: 1 1 110px;
+  min-width: 100px;
+}
+
+/* Tablas de items agregados */
+.contenedor-tabla-adicionales,
+.contenedor-tabla-otros {
+  max-height: 200px;
+  overflow: auto;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  margin-top: 8px;
+}
+
+.tabla-adicionales-agregados,
+.tabla-otros-agregados {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-adicionales-agregados thead,
+.tabla-otros-agregados thead {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+}
+
+.tabla-adicionales-agregados th,
+.tabla-adicionales-agregados td,
+.tabla-otros-agregados th,
+.tabla-otros-agregados td {
+  padding: 6px 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.tabla-adicionales-agregados th,
+.tabla-otros-agregados th {
+  font-weight: 600;
+  color: #555;
+  font-size: 11px;
+}
+
+/* ================= BOTONES ================= */
+
+.boton-agregar {
+  height: $altura-control;
+  padding: 0 16px;
+  background-color: rgb(28, 197, 244);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.boton-agregar:hover {
+  background-color: rgb(20, 180, 230);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.boton-agregar:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.boton-icono-eliminar {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  color: #ff5252;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.boton-icono-eliminar:hover {
+  color: #d32f2f;
+}
+
+.BotonGuardar,
+.BotonCancelar {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  height: 36px;
+}
+
+.BotonGuardar {
+  background-color: rgb(28, 197, 244);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.BotonGuardar:hover {
+  background-color: rgb(20, 180, 230);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.BotonCancelar {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #d0d0d0;
+}
+
+.BotonCancelar:hover {
+  background-color: #f5f5f5;
+  border-color: #b0b0b0;
+}
+
+/* ================= MENSAJES DE ERROR ================= */
+
+.mensaje-error {
+  color: #d32f2f;
+  font-size: 11px;
+  padding: 4px 8px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border-left: 3px solid #d32f2f;
+}
+
+/* ================= ACCIONES DEL DIÁLOGO ================= */
+
+.acciones-dialogo {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px !important;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .fila-encabezado,
+  .fila-adicional-editor,
+  .fila-otro-editor {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .campo-form,
+  .campo-form-recibido,
+  .campo-motivo-editor,
+  .campo-otro-motivo,
+  .campo-valor,
+  .campo-cantidad,
+  .campo-total {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .boton-agregar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  :host ::ng-deep .mat-dialog-container {
+    max-width: 100% !important;
+    width: auto;
+    margin: 16px;
+  }
+}

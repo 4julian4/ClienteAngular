@@ -1,0 +1,45 @@
+<h2>Facturas (FEE / Salud)</h2>
+
+<button mat-raised-button color="primary" (click)="autofillFEE()">
+  Autollenar ejemplo válido (FEE)
+</button>
+<label style="margin-left: 12px">
+  <input type="checkbox" [(ngModel)]="sendDian" /> Enviar a DIAN (send_dian)
+</label>
+
+<div style="margin: 12px 0">
+  <button
+    mat-flat-button
+    color="accent"
+    (click)="submit()"
+    [disabled]="sending"
+  >
+    Enviar
+  </button>
+</div>
+
+<h3>Request</h3>
+<pre
+  style="
+    background: #0b1020;
+    color: #e8f0ff;
+    padding: 12px;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow: auto;
+  "
+  >{{ requestBody | json }}</pre
+>
+
+<h3>Response</h3>
+<pre
+  style="
+    background: #0b1020;
+    color: #e8f0ff;
+    padding: 12px;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow: auto;
+  "
+  >{{ response | json }}</pre
+>

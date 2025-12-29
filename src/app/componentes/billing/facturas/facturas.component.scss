@@ -1,0 +1,106 @@
+// ===== Factura (FEE / Salud) =====
+
+.factura-wrap {
+  display: grid;
+  gap: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    user-select: none;
+
+    input[type="checkbox"] {
+      transform: translateY(1px);
+      cursor: pointer;
+    }
+  }
+}
+
+.send {
+  margin: 12px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  button[disabled] {
+    opacity: 0.6;
+  }
+}
+
+.section-title {
+  margin: 6px 0 4px;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.json {
+  background: #0b1020;
+  color: #e8f0ff;
+  padding: 12px;
+  border-radius: 8px;
+  max-height: 320px;
+  overflow: auto;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) inset;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.92rem;
+  line-height: 1.25rem;
+}
+
+.hint {
+  color: #6b7280; // gris 500
+  font-size: 0.85rem;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin: 12px 0;
+}
+
+/* Grid opcional para futuros campos de factura */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Material helpers (si usas mat-form-field en esta pantalla) */
+:host ::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-raised-button,
+:host ::ng-deep .mat-mdc-unelevated-button,
+:host ::ng-deep .mat-mdc-outlined-button,
+:host ::ng-deep .mat-mdc-stroked-button {
+  border-radius: 8px;
+}
+
+/* Espaciado entre bloques */
+.block {
+  padding: 8px 0;
+}
+
+/* Estados */
+.error {
+  color: #c62828;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  padding: 8px 12px;
+  border-radius: 6px;
+}

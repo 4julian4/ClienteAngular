@@ -1,0 +1,332 @@
+<h2 mat-dialog-title>Registrar Adicionales del Tratamiento</h2>
+
+<mat-dialog-content
+  class="contenido-dialogo-adicionales"
+  *ngIf="formAdicionales"
+  [formGroup]="formAdicionales"
+>
+  <!-- ============================= -->
+  <!-- ENCABEZADO -->
+  <!-- ============================= -->
+  <section class="bloque-encabezado">
+    <div class="fila-encabezado">
+      <div class="campo-input-wrapper campo-form">
+        <label>Fecha*</label>
+        <input type="date" class="input-compacto" formControlName="fecha" />
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formAdicionales.get('fecha')?.hasError('required') &&
+            formAdicionales.get('fecha')?.touched
+          "
+        >
+          La fecha es obligatoria
+        </span>
+      </div>
+
+      <div class="campo-input-wrapper campo-form">
+        <label>Convenio*</label>
+        <select class="input-compacto" formControlName="convenioId">
+          <option [ngValue]="null">Seleccione...</option>
+          <option *ngFor="let c of listaConvenios" [ngValue]="c.id">
+            {{ c.nombre }}
+          </option>
+        </select>
+
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formAdicionales.get('convenioId')?.hasError('required') &&
+            formAdicionales.get('convenioId')?.touched
+          "
+        >
+          Debes seleccionar un convenio
+        </span>
+      </div>
+
+      <div class="campo-input-wrapper campo-form-recibido">
+        <label>Recibido por*</label>
+
+        <select class="input-compacto" formControlName="idRecibidoPor">
+          <option
+            *ngIf="data?.rules?.permiteRecibidoPorEnBlanco"
+            [ngValue]="null"
+          >
+            (En blanco)
+          </option>
+
+          <option
+            *ngFor="let d of data?.doctoresRecibidoPor ?? []"
+            [ngValue]="d.id"
+          >
+            {{ d.nombre }}
+          </option>
+        </select>
+
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formAdicionales.get('idRecibidoPor')?.hasError('required') &&
+            formAdicionales.get('idRecibidoPor')?.touched
+          "
+        >
+          Debes seleccionar un doctor
+        </span>
+      </div>
+
+      <div class="campo-input-wrapper campo-form" *ngIf="data?.consecutivo">
+        <label>Consecutivo</label>
+        <input
+          type="text"
+          class="input-compacto input-readonly"
+          [value]="data.consecutivo"
+          readonly
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- ADICIONALES (CATÁLOGO REAL)   -->
+  <!-- ============================= -->
+  <section class="bloque-adicionales">
+    <div class="header-seccion">
+      <span class="titulo-seccion">Agregar adicionales</span>
+      <button
+        class="boton-toggle-seccion"
+        type="button"
+        (click)="toggleEditorAdicional()"
+      >
+        {{ mostrarEditorAdicional ? "Cerrar" : "Agregar" }}
+      </button>
+    </div>
+
+    <div class="panel-agregar-adicional" *ngIf="mostrarEditorAdicional">
+      <div class="campo-input-wrapper">
+        <label>Buscar por motivo o código</label>
+        <input
+          type="text"
+          class="input-compacto"
+          placeholder="Ej: consulta / 890201"
+          [(ngModel)]="textoBusquedaAdicional"
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </div>
+
+      <div class="contenedor-tabla-catalogo" *ngIf="motivosCatalogo.length > 0">
+        <table class="tabla-catalogo-adicionales">
+          <thead>
+            <tr>
+              <th>Motivo</th>
+              <th style="width: 120px">Código</th>
+              <th style="width: 120px">Costo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let m of motivosFiltrados"
+              (click)="seleccionarMotivo(m)"
+              title="Click para seleccionar"
+            >
+              <td>{{ m.nombre }}</td>
+              <td>{{ getMotivoCodigo(m) }}</td>
+              <td>{{ formatearMiles(getMotivoCosto(m)) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mensaje-error" *ngIf="motivosCatalogo.length === 0">
+        No hay motivos cargados desde el backend.
+      </div>
+
+      <div class="fila-adicional-editor">
+        <div class="campo-input-wrapper campo-motivo-editor">
+          <label>Motivo</label>
+          <input
+            type="text"
+            class="input-compacto"
+            [value]="adicionalTemporal.descripcion"
+            readonly
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-valor">
+          <label>Valor unitario</label>
+          <input
+            type="text"
+            class="input-compacto"
+            [value]="valorTemporalFormateado"
+            (input)="onValorInput($event)"
+            placeholder="0"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-cantidad">
+          <label>Cantidad</label>
+          <input
+            type="number"
+            class="input-compacto"
+            [(ngModel)]="adicionalTemporal.cantidad"
+            [ngModelOptions]="{ standalone: true }"
+            min="1"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-total">
+          <label>Total</label>
+          <input
+            type="text"
+            class="input-compacto input-readonly"
+            [value]="totalTemporalFormateado"
+            readonly
+          />
+        </div>
+
+        <button
+          class="boton-agregar"
+          type="button"
+          (click)="agregarAdicional()"
+        >
+          Agregar
+        </button>
+      </div>
+
+      <div class="mensaje-error" *ngIf="mensajeErrorAdicional">
+        {{ mensajeErrorAdicional }}
+      </div>
+    </div>
+
+    <div
+      class="contenedor-tabla-adicionales"
+      *ngIf="adicionalesAgregados.length > 0"
+    >
+      <table class="tabla-adicionales-agregados">
+        <thead>
+          <tr>
+            <th>Motivo</th>
+            <th>Valor</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of adicionalesAgregados; let i = index">
+            <td>{{ a.descripcion }}</td>
+            <td>{{ formatearMiles(a.valorUnitario) }}</td>
+            <td>{{ a.cantidad }}</td>
+            <td>{{ formatearMiles(a.valorUnitario * a.cantidad) }}</td>
+            <td>
+              <button
+                class="boton-icono-eliminar"
+                type="button"
+                (click)="eliminarAdicional(i)"
+                title="Eliminar"
+              >
+                🗑
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- OTRO -->
+  <!-- ============================= -->
+  <section class="bloque-adicionales">
+    <div class="header-seccion">
+      <span class="titulo-seccion">Otro</span>
+      <button
+        class="boton-toggle-seccion"
+        type="button"
+        (click)="toggleEditorOtro()"
+      >
+        {{ mostrarEditorOtro ? "Cerrar" : "Agregar" }}
+      </button>
+    </div>
+
+    <div class="panel-agregar-adicional" *ngIf="mostrarEditorOtro">
+      <div class="fila-adicional-editor">
+        <div class="campo-input-wrapper campo-motivo-editor">
+          <label>Descripción</label>
+          <input
+            type="text"
+            class="input-compacto"
+            [(ngModel)]="otroTemporal.descripcion"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-valor">
+          <label>Valor unitario</label>
+          <input
+            type="text"
+            class="input-compacto"
+            [value]="formatearMiles(otroTemporal.valorUnitario)"
+            (input)="onOtroValorInput($event)"
+            placeholder="0"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-cantidad">
+          <label>Cantidad</label>
+          <input
+            type="number"
+            class="input-compacto"
+            [(ngModel)]="otroTemporal.cantidad"
+            [ngModelOptions]="{ standalone: true }"
+            min="1"
+          />
+        </div>
+
+        <button class="boton-agregar" type="button" (click)="agregarOtro()">
+          Agregar
+        </button>
+      </div>
+
+      <div class="mensaje-error" *ngIf="mensajeErrorOtro">
+        {{ mensajeErrorOtro }}
+      </div>
+    </div>
+
+    <div class="contenedor-tabla-adicionales" *ngIf="otrosAgregados.length > 0">
+      <table class="tabla-adicionales-agregados">
+        <thead>
+          <tr>
+            <th>Descripción</th>
+            <th>Valor</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of otrosAgregados; let i = index">
+            <td>{{ a.descripcion }}</td>
+            <td>{{ formatearMiles(a.valorUnitario) }}</td>
+            <td>{{ a.cantidad }}</td>
+            <td>{{ formatearMiles(a.valorUnitario * a.cantidad) }}</td>
+            <td>
+              <button
+                class="boton-icono-eliminar"
+                type="button"
+                (click)="eliminarOtro(i)"
+                title="Eliminar"
+              >
+                🗑
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="acciones-dialogo">
+  <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
+  <button class="BotonGuardar" (click)="onAgregar()">Guardar</button>
+</mat-dialog-actions>

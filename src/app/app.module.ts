@@ -1,14 +1,23 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+} from '@angular/material/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {MaterialModule} from './material/material.module';
+import { MaterialModule } from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -28,7 +37,7 @@ import { DetalleCitasComponent } from './componentes/detalle-citas/detalle-citas
 import { BuscarHitoriaClinicaComponent } from './componentes/buscar-hitoria-clinica/buscar-hitoria-clinica.component';
 import { DatosPersonales } from './conexiones/rydent/modelos/datos-personales';
 import { DatosPersonalesComponent } from './componentes/datos-personales/datos-personales.component';
-import { Antecedentes } from './conexiones/rydent/modelos/antecedentes';  
+import { Antecedentes } from './conexiones/rydent/modelos/antecedentes';
 import { MatMenuModule } from '@angular/material/menu';
 import { AntecedentesComponent } from './componentes/antecedentes/antecedentes.component';
 import { EvolucionComponent } from './componentes/evolucion/evolucion.component';
@@ -40,86 +49,144 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EstadoCuentaComponent } from './componentes/estado-cuenta/estado-cuenta.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar'; //
-//import { ReactiveFormsModule } from '@angular/forms'; // Importa ReactiveFormsModule 
-import {RipsComponent} from './componentes/rips/rips.component';
-import { DatosAdministrativos, DatosAdministrativosComponent } from './componentes/datos-administrativos';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+//import { ReactiveFormsModule } from '@angular/forms'; // Importa ReactiveFormsModule
+import { RipsComponent } from './componentes/rips/rips.component';
+import {
+  DatosAdministrativos,
+  DatosAdministrativosComponent,
+} from './componentes/datos-administrativos';
 import { HideColumnDirective } from './directives/hide-column.directive';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
 import { AdmonClientesComponent } from './componentes/admon-clientes';
 import { AgregarDatosPersonalesComponent } from './componentes/agregar-datos-personales/agregar-datos-personales.component';
 import { AgregarAntecedentesComponent } from './componentes/agregar-antecedentes/agregar-antecedentes.component';
+import { GenerarRipsComponent } from './componentes/generar-rips';
+import { TenantInterceptor } from './componentes/billing/tenant.interceptor';
+import { HistorialComponent } from './componentes/billing/historial/historial.component';
+import { SaludComponent } from './componentes/billing/salud/salud.component';
+import { NotasComponent } from './componentes/billing/notas/notas.component';
+import { NominaComponent } from './componentes/billing/nomina/nomina.component';
+import { BillingDashboardComponent } from './componentes/billing/dashboard/dashboard.component';
+import { FacturaComponent } from './componentes/factura/factura.component';
+import { FacturasComponent } from './componentes/billing/facturas/facturas.scomponent';
+import { NominaElectronicaComponent } from './componentes/nomina-electronica';
+import { CrearNominaDialogComponent } from './componentes/nomina-electronica/crear-nomina-dialog/crear-nomina-dialog.component';
+import { MatDividerModule } from '@angular/material/divider';
+import { AbonoTratamientoDialogComponent } from './componentes/estado-cuenta/abono-tratamiento-dialog.component';
+import { AdicionalTratamientoDialogComponent } from './componentes/estado-cuenta/adicional-tratamiento-dialog.component';
+import { AgregarEstadoCuentaDialogComponent } from './componentes/estado-cuenta/agregar-estado-cuenta-dialog.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
   parse: {
-      dateInput: 'DD/MM/YYYY',
+    dateInput: 'DD/MM/YYYY',
   },
   display: {
-      dateInput: 'DD/MM/YYYY',
-      monthYearLabel: 'MMM YYYY',
-      dateA11yLabel: 'LL',
-      monthYearA11yLabel: 'MMMM YYYY',
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
   },
 };
 
+@NgModule({
+  declarations: [
+    AppComponent,
+    LoginComponent,
+    SpinnerComponent,
+    SidenavComponent,
+    PedirPinComponent,
+    MensajesUsuariosComponent,
+    AgendaComponent,
+    AgendaResponsiveComponent,
+    CitasComponent,
+    DetalleCitasComponent,
+    BuscarHitoriaClinicaComponent,
+    DatosPersonalesComponent,
+    AntecedentesComponent,
+    EvolucionComponent,
+    AgregarEvolucionComponent,
+    AgregarEvolucionAgendaComponent,
+    AgregarFirmasComponent,
+    EstadoCuentaComponent,
+    AbonoTratamientoDialogComponent,
+    AdicionalTratamientoDialogComponent,
+    AgregarEstadoCuentaDialogComponent,
+    RipsComponent,
+    DatosAdministrativosComponent,
+    AdmonClientesComponent,
+    HideColumnDirective,
+    AgregarDatosPersonalesComponent,
+    AgregarAntecedentesComponent,
+    GenerarRipsComponent,
+    BillingDashboardComponent,
+    FacturaComponent,
+    FacturasComponent,
+    NominaElectronicaComponent,
+    HistorialComponent,
+    SaludComponent,
+    NotasComponent,
+    NominaComponent,
+    CrearNominaDialogComponent,
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    MaterialModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTabsModule,
+    MatMenuModule,
+    MatIconModule,
+    MatProgressBarModule,
+    NgxMaterialTimepickerModule,
+    MatAutocompleteModule,
+    MatButtonToggleModule,
+    MatCardModule,
+    BrowserAnimationsModule, // 👈 requerido por Angular Material
+    MatIconModule,
+    MatDividerModule,
+    MatDatepickerModule, // <-- nuevo
+    MatNativeDateModule,
+  ],
+  providers: [
+    DatePipe,
+    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
+    {
+      provide: DateAdapter,
+      useClass: NativeDateAdapter,
+      deps: [MAT_DATE_LOCALE],
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: httpLoadingInterceptorInterceptor,
+      multi: true,
+    },
+    // app.module.ts (providers)
+    { provide: HTTP_INTERCEPTORS, useClass: TenantInterceptor, multi: true },
 
-@NgModule({ declarations: [
-        AppComponent,
-        LoginComponent,
-        SpinnerComponent,
-        SidenavComponent,
-        PedirPinComponent,
-        MensajesUsuariosComponent,
-        AgendaComponent,
-        AgendaResponsiveComponent,
-        CitasComponent,
-        DetalleCitasComponent,
-        BuscarHitoriaClinicaComponent,
-        DatosPersonalesComponent,
-        AntecedentesComponent,
-        EvolucionComponent,
-        AgregarEvolucionComponent,
-        AgregarEvolucionAgendaComponent,
-        AgregarFirmasComponent,
-        EstadoCuentaComponent,
-        RipsComponent,
-        DatosAdministrativosComponent,
-        AdmonClientesComponent,
-        HideColumnDirective,
-        AgregarDatosPersonalesComponent,
-        AgregarAntecedentesComponent
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
-        AppRoutingModule,
-        FormsModule,
-        BrowserAnimationsModule,
-        MaterialModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatDialogModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatTabsModule,
-        MatMenuModule,
-        MatIconModule,
-        MatProgressBarModule,
-        NgxMaterialTimepickerModule,
-        MatAutocompleteModule,
-        MatCardModule], providers: [
-        DatePipe,
-        { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
-        { provide: DateAdapter, useClass: NativeDateAdapter, deps: [MAT_DATE_LOCALE] },
-        { provide: HTTP_INTERCEPTORS, useClass: httpLoadingInterceptorInterceptor, multi: true },
-        { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
-        provideHttpClient(withInterceptorsFromDi())
-    ] })
-export class AppModule { 
-    constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
-        this.matIconRegistry.addSvgIcon(
-          'whatsapp',
-          this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/whatsapp.svg')
-        );
-      }
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
+})
+export class AppModule {
+  constructor(
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer
+  ) {
+    this.matIconRegistry.addSvgIcon(
+      'whatsapp',
+      this.domSanitizer.bypassSecurityTrustResourceUrl(
+        'assets/icons/whatsapp.svg'
+      )
+    );
+  }
 }
-

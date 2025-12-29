@@ -1,0 +1,351 @@
+<h2 mat-dialog-title>Agregar Abono</h2>
+
+<mat-dialog-content class="contenido-dialogo-abono" [formGroup]="formAbono">
+  <!-- ============================= -->
+  <!-- ENCABEZADO CON RESUMEN        -->
+  <!-- ============================= -->
+  <section class="bloque-encabezado-abono">
+    <!-- Título del bloque CON TOTALES en la misma línea -->
+    <div class="header-encabezado">
+      <span class="titulo-seccion">Datos del abono</span>
+
+      <!-- Resumen financiero alineado a la derecha -->
+      <div class="resumen-financiero-header">
+        <div class="item-resumen-header item-total-concepto">
+          <span class="label">Total Concepto</span>
+          <span class="valor">{{ totalConceptos | number : "1.0-0" }}</span>
+        </div>
+
+        <div class="item-resumen-header item-total-abono">
+          <span class="label">Total Abono</span>
+          <span class="valor">{{ totalPagos | number : "1.0-0" }}</span>
+        </div>
+
+        <div class="item-resumen-header item-saldo-header">
+          <span class="label">Saldo</span>
+          <span class="valor">{{ saldoPendiente | number : "1.0-0" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fila con los campos de entrada -->
+    <div class="fila-encabezado-abono">
+      <div class="campo-input-wrapper campo-encabezado">
+        <label>Fecha*</label>
+        <input
+          type="date"
+          class="input-compacto"
+          formControlName="fechaAbono"
+        />
+      </div>
+
+      <div class="campo-input-wrapper campo-encabezado campo-encabezado-doctor">
+        <label>Doctor(a)*</label>
+
+        <select class="input-compacto" formControlName="doctorSeleccionado">
+          <!-- ✅ Si Delphi permite blanco (ItemIndex=-1) -->
+          <option *ngIf="data?.rules?.permiteRecibidoPorEnBlanco" value="">
+            (En blanco)
+          </option>
+
+          <option *ngFor="let doctor of listaDoctores" [value]="doctor.id">
+            {{ doctor.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <!-- ✅ Recibo (solo si aplica) -->
+      <div class="campo-input-wrapper campo-encabezado" *ngIf="mostrarRecibo">
+        <label>Recibo</label>
+        <input
+          type="text"
+          class="input-compacto"
+          formControlName="numeroRecibo"
+        />
+      </div>
+
+      <!-- ✅ Factura (solo si aplica) -->
+      <div class="campo-input-wrapper campo-encabezado" *ngIf="mostrarFactura">
+        <label>Factura</label>
+        <input
+          type="text"
+          class="input-compacto"
+          formControlName="numeroFactura"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- CONCEPTOS DEL ABONO          -->
+  <!-- ============================= -->
+  <section class="bloque-conceptos">
+    <div class="header-conceptos">
+      <span class="titulo-seccion">Conceptos</span>
+      <button
+        class="boton-toggle-seccion"
+        type="button"
+        (click)="toggleEditorConcepto()"
+      >
+        {{ mostrarEditorConcepto ? "Cerrar" : "Agregar" }}
+      </button>
+    </div>
+
+    <div *ngIf="mostrarEditorConcepto" class="panel-agregar-concepto">
+      <!-- Búsqueda de conceptos -->
+      <div class="campo-input-wrapper">
+        <label>Buscar por código o nombre</label>
+        <input
+          type="text"
+          class="input-compacto"
+          placeholder="Ej: 232102 o RESINA"
+          formControlName="textoBusquedaConcepto"
+        />
+      </div>
+
+      <!-- Tabla de catálogo de conceptos -->
+      <div
+        class="contenedor-tabla-conceptos contenedor-tabla-conceptos--catalogo"
+      >
+        <table class="tabla-conceptos-disponibles">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let c of conceptosFiltrados"
+              (click)="seleccionarConcepto(c)"
+            >
+              <td>{{ c.codigo }}</td>
+              <td>{{ c.descripcion }}</td>
+              <td>{{ c.valor | number : "1.0-0" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Edición del concepto actual - UNA SOLA LÍNEA -->
+      <div [formGroup]="conceptoActualGroup">
+        <div class="fila-concepto-editor">
+          <div class="campo-input-wrapper campo-codigo">
+            <label>Concepto</label>
+            <input
+              type="text"
+              class="input-compacto"
+              formControlName="codigo"
+            />
+          </div>
+
+          <div class="campo-input-wrapper campo-descripcion-concepto">
+            <label>Descripción</label>
+            <input
+              type="text"
+              class="input-compacto"
+              formControlName="descripcion"
+            />
+          </div>
+
+          <div class="campo-input-wrapper campo-valor">
+            <label>Valor</label>
+            <input
+              type="text"
+              class="input-compacto"
+              formControlName="valorUnitario"
+            />
+          </div>
+
+          <div class="campo-input-wrapper campo-cantidad">
+            <label>Cantidad</label>
+            <input
+              type="number"
+              class="input-compacto"
+              formControlName="cantidad"
+            />
+          </div>
+
+          <label class="checkbox-wrapper checkbox-iva-incluido">
+            <input type="checkbox" formControlName="ivaIncluido" />
+            <span>IVA incluido</span>
+          </label>
+
+          <div class="campo-input-wrapper campo-iva-porcentaje">
+            <label>% IVA</label>
+            <select class="input-compacto" formControlName="porcentajeIva">
+              <option *ngFor="let p of opcionesIva" [value]="p">
+                {{ p }}
+              </option>
+            </select>
+          </div>
+
+          <button
+            class="boton-agregar"
+            type="button"
+            (click)="agregarConcepto()"
+          >
+            Agregar
+          </button>
+        </div>
+
+        <div class="mensaje-error" *ngIf="mensajeErrorConceptos">
+          {{ mensajeErrorConceptos }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de conceptos agregados -->
+    <div class="contenedor-tabla-conceptos">
+      <table
+        class="tabla-conceptos-agregados"
+        *ngIf="conceptosAgregados.length"
+      >
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Concepto</th>
+            <th>Valor</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th>IVA %</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of conceptosAgregados; let i = index">
+            <td>{{ c.codigo }}</td>
+            <td>{{ c.descripcion }}</td>
+            <td>{{ c.valorUnitario | number : "1.0-0" }}</td>
+            <td>{{ c.cantidad }}</td>
+            <td>{{ c.total | number : "1.0-0" }}</td>
+            <td>{{ c.ivaIncluido ? c.porcentajeIva : 0 }}</td>
+            <td>
+              <button
+                class="boton-icono-eliminar"
+                type="button"
+                (click)="eliminarConcepto(i)"
+                title="Eliminar"
+              >
+                🗑
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- FORMAS DE PAGO                -->
+  <!-- ============================= -->
+  <section class="bloque-formas-pago" [formGroup]="formaPagoActualGroup">
+    <div class="header-formas-pago">
+      <span class="titulo-seccion">Forma de Pago</span>
+      <button
+        class="boton-toggle-seccion"
+        type="button"
+        (click)="toggleEditorFormaPago()"
+      >
+        {{ mostrarEditorFormaPago ? "Cerrar" : "Agregar" }}
+      </button>
+    </div>
+
+    <div class="editor-forma-pago-wrapper" *ngIf="mostrarEditorFormaPago">
+      <div class="fila-forma-pago">
+        <div class="campo-input-wrapper campo-forma-pago-select">
+          <label>Forma de pago</label>
+          <select class="input-compacto" formControlName="formaPago">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let f of formasPagoDisponibles" [value]="f">
+              {{ f }}
+            </option>
+          </select>
+        </div>
+
+        <div class="campo-input-wrapper campo-descripcion-pago">
+          <label>Descripción</label>
+          <input
+            type="text"
+            class="input-compacto"
+            formControlName="descripcion"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-valor-pago">
+          <label>Valor</label>
+          <input type="text" class="input-compacto" formControlName="valor" />
+        </div>
+
+        <button
+          class="boton-agregar"
+          type="button"
+          (click)="agregarFormaPago()"
+        >
+          Agregar
+        </button>
+      </div>
+
+      <div class="mensaje-error" *ngIf="mensajeErrorPagos">
+        {{ mensajeErrorPagos }}
+      </div>
+    </div>
+
+    <!-- Tabla de formas de pago agregadas -->
+    <div class="contenedor-tabla-formas-pago">
+      <table class="tabla-formas-pago" *ngIf="formasPagoAgregadas.length">
+        <thead>
+          <tr>
+            <th>Forma de pago</th>
+            <th>Descripción</th>
+            <th>Valor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of formasPagoAgregadas; let i = index">
+            <td>{{ p.formaPago }}</td>
+            <td>{{ p.descripcion }}</td>
+            <td>{{ p.valor | number : "1.0-0" }}</td>
+            <td>
+              <button
+                class="boton-icono-eliminar"
+                type="button"
+                (click)="eliminarFormaPago(i)"
+                title="Eliminar"
+              >
+                🗑
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================= -->
+  <!-- RECIBIDO POR                  -->
+  <!-- ============================= -->
+  <section class="bloque-recibido">
+    <div class="campo-input-wrapper campo-recibido">
+      <label>Recibido por</label>
+
+      <select class="input-compacto" formControlName="recibidoPor">
+        <!-- Si Delphi permite blanco (ItemIndex=-1) -->
+        <option *ngIf="data?.rules?.permiteRecibidoPorEnBlanco" value="">
+          (En blanco)
+        </option>
+
+        <option *ngFor="let n of nombresRecibe" [value]="n">
+          {{ n }}
+        </option>
+      </select>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="acciones-dialogo-abono">
+  <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
+  <button class="BotonGuardar" (click)="onGuardar()">Aceptar</button>
+</mat-dialog-actions>

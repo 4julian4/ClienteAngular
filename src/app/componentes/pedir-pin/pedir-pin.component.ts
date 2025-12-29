@@ -21,19 +21,19 @@ import { Subscription } from 'rxjs';
 
 
 export class PedirPinComponent {
-  
-  listadoEps: CodigosEps= new CodigosEps();
+  maxIdAnamnesis: number = 0;
+  listadoEps: CodigosEps = new CodigosEps();
   public obtenerPinRepuesta: RespuestaPin = new RespuestaPin();
   isloading: boolean = false;
   private respuestaPinSubscription: Subscription | null = null;;
   //data = { name: 'Usuario', pin: '' };
 
   constructor(private dialogRef: MatDialogRef<PedirPinComponent>,
-              private signalRService: SignalRService,
-              private respuestaPinService: RespuestaPinService,
-              private codigosEpsService: CodigosEpsService,
-              private mensajesUsuariosService: MensajesUsuariosService,
-              @Inject(MAT_DIALOG_DATA) public data: any) { }
+    private signalRService: SignalRService,
+    private respuestaPinService: RespuestaPinService,
+    private codigosEpsService: CodigosEpsService,
+    private mensajesUsuariosService: MensajesUsuariosService,
+    @Inject(MAT_DIALOG_DATA) public data: any) { }
 
   onNoClick() {
     this.dialogRef.close('no-action');
@@ -41,11 +41,11 @@ export class PedirPinComponent {
 
 
   async confirmar() {
-    this.isloading= true;
+    this.isloading = true;
     console.log("entro a confirmar");
     // Aquí puedes hacer algo con this.data.pin, como verificarlo o enviarlo a un servidor
     await this.respuestaPinService.startConnectionRespuestaObtenerPin();
-    
+
     // Desuscribirse de la suscripción anterior si existe
     if (this.respuestaPinSubscription) {
       this.respuestaPinSubscription.unsubscribe();
@@ -66,9 +66,14 @@ export class PedirPinComponent {
         await this.mensajesUsuariosService.mensajeInformativo('CLAVE INCORRECTA');
         return;
       }
+      if (this.obtenerPinRepuesta.lstAnamnesisParaAgendayBuscadores) {
+        this.maxIdAnamnesis = Math.max(...this.obtenerPinRepuesta.lstAnamnesisParaAgendayBuscadores.map(item => item.IDANAMNESIS!));
+      } else {
+        this.maxIdAnamnesis = 0; // Si la lista es null o undefined, asignamos 0
+      }
     });
 
-    await this.signalRService.obtenerPin(this.data.clienteId, this.data.pin);
+    await this.signalRService.obtenerPin(this.data.clienteId, this.data.pin, this.maxIdAnamnesis);
   }
 
 

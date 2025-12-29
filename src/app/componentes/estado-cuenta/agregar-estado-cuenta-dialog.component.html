@@ -1,0 +1,193 @@
+<h2 mat-dialog-title>Agregar Estado de Cuenta</h2>
+
+<mat-dialog-content class="contenido-dialogo-estado" [formGroup]="formEstado">
+  <!-- ============================= -->
+  <!-- DATOS DEL ESTADO DE CUENTA    -->
+  <!-- ============================= -->
+  <section class="bloque-datos-estado">
+    <div class="header-seccion">
+      <span class="titulo-seccion">Información del Tratamiento</span>
+    </div>
+
+    <!-- Primera fila: Fecha, Tipo, Convenio, Costo Tratamiento -->
+    <div class="fila-formulario">
+      <div class="campo-input-wrapper campo-form">
+        <label>Fecha*</label>
+        <input
+          type="date"
+          class="input-compacto"
+          formControlName="fechaInicio"
+        />
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formEstado.get('fechaInicio')?.hasError('required') &&
+            formEstado.get('fechaInicio')?.touched
+          "
+        >
+          La fecha es obligatoria
+        </span>
+      </div>
+
+      <div class="campo-input-wrapper campo-form">
+        <label>Tipo*</label>
+        <select class="input-compacto" formControlName="tipoEstado">
+          <option value="SIN_FINANCIAR">Sin Financiar</option>
+          <option value="FINANCIADO">Financiado</option>
+        </select>
+      </div>
+
+      <div class="campo-input-wrapper campo-form-convenio">
+        <label>Convenio*</label>
+
+        <select class="input-compacto" formControlName="convenio">
+          <option [ngValue]="null">Seleccione...</option>
+
+          <option *ngFor="let c of listaConvenios" [value]="c.id">
+            {{ c.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo-input-wrapper campo-form">
+        <label>Costo Tratamiento*</label>
+        <input
+          type="text"
+          class="input-compacto"
+          formControlName="costoTratamiento"
+          (input)="formatearNumero($event, 'costoTratamiento')"
+          (blur)="formatearNumero($event, 'costoTratamiento')"
+          placeholder="0"
+        />
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formEstado.get('costoTratamiento')?.hasError('required') &&
+            formEstado.get('costoTratamiento')?.touched
+          "
+        >
+          El costo es obligatorio
+        </span>
+      </div>
+    </div>
+
+    <!-- ===== CAMPOS ESPECÍFICOS PARA FINANCIADO ===== -->
+    <ng-container *ngIf="esFinanciado">
+      <!-- Fila: Cuota Inicial con checkbox para financiar -->
+      <div class="fila-formulario">
+        <div class="campo-input-wrapper campo-form-reducido">
+          <label>{{
+            cuotaInicialFinanciada
+              ? "Cuota Inicial Financiada"
+              : "Cuota Inicial"
+          }}</label>
+          <input
+            type="text"
+            class="input-compacto"
+            formControlName="cuotaInicial"
+            (input)="formatearNumero($event, 'cuotaInicial')"
+            (blur)="formatearNumero($event, 'cuotaInicial')"
+            placeholder="0"
+          />
+        </div>
+
+        <!-- Checkbox para financiar cuota inicial -->
+        <div class="campo-input-wrapper campo-checkbox-financiar">
+          <label class="label-invisible">Financiar</label>
+          <div class="checkbox-wrapper">
+            <input
+              type="checkbox"
+              id="financiarCuotaInicial"
+              formControlName="financiarCuotaInicial"
+            />
+            <span>Financiar Cuota Inicial</span>
+          </div>
+        </div>
+
+        <!-- Campo de cuotas para la cuota inicial financiada -->
+        <div
+          class="campo-input-wrapper campo-form-mini"
+          *ngIf="cuotaInicialFinanciada"
+        >
+          <label>Cuotas*</label>
+          <input
+            type="number"
+            class="input-compacto"
+            formControlName="cuotasCuotaInicial"
+            min="1"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-form-reducido">
+          <label>Intervalo</label>
+          <select class="input-compacto" formControlName="intervalo">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+
+        <div class="campo-input-wrapper campo-form-reducido">
+          <label>Cuotas*</label>
+          <input
+            type="number"
+            class="input-compacto"
+            formControlName="numeroCuotas"
+            min="1"
+          />
+        </div>
+
+        <div class="campo-input-wrapper campo-form-reducido">
+          <label>Valor de C/Cuota</label>
+          <input
+            type="text"
+            class="input-compacto input-readonly"
+            [value]="valorCuotaFormateado"
+            readonly
+          />
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Segunda fila: Descripción (como textarea) -->
+    <div class="fila-formulario">
+      <div class="campo-input-wrapper campo-descripcion-textarea">
+        <label>Descripción*</label>
+        <textarea
+          class="textarea-compacto"
+          formControlName="descripcion"
+          rows="2"
+          placeholder="Descripción del tratamiento..."
+        ></textarea>
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formEstado.get('descripcion')?.hasError('required') &&
+            formEstado.get('descripcion')?.touched
+          "
+        >
+          La descripción es obligatoria
+        </span>
+      </div>
+    </div>
+
+    <!-- Observaciones (siempre visible) -->
+    <div class="fila-formulario">
+      <div class="campo-input-wrapper campo-observaciones">
+        <label>Observaciones</label>
+        <textarea
+          class="textarea-compacto"
+          formControlName="observaciones"
+          rows="2"
+          placeholder="Ingrese observaciones adicionales..."
+        ></textarea>
+      </div>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="acciones-dialogo">
+  <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
+  <button class="BotonGuardar" (click)="onGuardar()">Aceptar</button>
+</mat-dialog-actions>

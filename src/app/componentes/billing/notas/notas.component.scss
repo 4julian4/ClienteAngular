@@ -1,0 +1,19 @@
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.send {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+.json {
+  background: #0b1020;
+  color: #e8f0ff;
+  padding: 12px;
+  border-radius: 8px;
+  max-height: 320px;
+  overflow: auto;
+}
