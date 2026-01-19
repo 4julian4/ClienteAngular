@@ -77,6 +77,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AbonoTratamientoDialogComponent } from './componentes/estado-cuenta/abono-tratamiento-dialog.component';
 import { AdicionalTratamientoDialogComponent } from './componentes/estado-cuenta/adicional-tratamiento-dialog.component';
 import { AgregarEstadoCuentaDialogComponent } from './componentes/estado-cuenta/agregar-estado-cuenta-dialog.component';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -156,6 +157,7 @@ export const MY_DATE_FORMATS = {
     MatDividerModule,
     MatDatepickerModule, // <-- nuevo
     MatNativeDateModule,
+    NgxMatSelectSearchModule,
   ],
   providers: [
     DatePipe,

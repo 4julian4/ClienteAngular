@@ -140,3 +140,23 @@ export interface InsertarAbonoResponse {
 
   moraTotalActualizada?: number | null;
 }
+
+// -------------------------
+// 3) CONSULTAR SUGERIDOS ABONO (CHANGE DOCTOR)
+// -------------------------
+export interface ConsultarSugeridosAbonoRequest {
+  idPaciente: number;
+  fase: number;
+  idDoctorTratante: number;
+  idDoctorSeleccionado: number; // doctor del select
+}
+
+export interface ConsultarSugeridosAbonoResponse {
+  ok: boolean;
+  mensaje?: string | null;
+
+  ocultarFactura: boolean;
+  reciboSugerido?: string | null;
+  facturaSugerida?: string | null;
+  idResolucionDian?: number | null;
+}

@@ -167,3 +167,77 @@
     margin: 10px;
   }
 }
+
+/* ✅ Números alineados a la derecha */
+::ng-deep .tabla-tratamientos th.col-num,
+::ng-deep .tabla-tratamientos td.col-num {
+  text-align: right !important;
+}
+
+/* ✅ Contenedor acciones (Volver + Agregar + resumen) */
+.acciones-estado-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ✅ Resumen en el header (a la izquierda de Volver/Agregar) */
+.resumen-tratamiento-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.resumen-tratamiento-header span strong {
+  font-weight: 700;
+}
+
+/* En móvil: que el resumen baje bien */
+@media (max-width: 600px) {
+  .acciones-estado-cuenta {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .resumen-tratamiento-header {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+/* ✅ Mensaje cuando no hay abonos */
+.mensaje-sin-abonos {
+  font-weight: 700;
+  background: #fff7f7;
+  border: 1px solid #f0caca;
+}
+
+::ng-deep table[mat-table] th.col-num,
+::ng-deep table[mat-table] td.col-num {
+  text-align: right !important;
+}
+
+/* Contenedor con scroll vertical SOLO para la tabla */
+.tabla-scroll-y {
+  max-height: 60vh; /* ajusta: 50vh, 65vh, etc */
+  overflow-y: auto;
+  overflow-x: auto; /* mantiene tu scroll horizontal si hay muchas columnas */
+}
+
+/* Asegura que la tabla use el ancho completo */
+.tabla-scroll-y table {
+  width: 100%;
+}
+
+/* (Opcional recomendado) Header pegado mientras haces scroll */
+::ng-deep .tabla-scroll-y .mat-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f2f2f2; /* igual a tu header */
+}

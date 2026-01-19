@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import {
   P_CONSULTAR_ESTACUENTA,
   P_CONSULTAR_ESTACUENTAPACIENTE,
@@ -46,6 +46,7 @@ import {
   PrepararInsertarAdicionalRequest,
   PrepararInsertarAdicionalResponse,
 } from 'src/app/conexiones/rydent/modelos/estado-cuenta/preparar-insertar-adicional.dto';
+import { Subject, takeUntil } from 'rxjs';
 
 type ModoVistaEstadoCuenta = 'lista' | 'detalle';
 
@@ -54,7 +55,8 @@ type ModoVistaEstadoCuenta = 'lista' | 'detalle';
   templateUrl: './estado-cuenta.component.html',
   styleUrls: ['./estado-cuenta.component.scss'],
 })
-export class EstadoCuentaComponent implements OnInit {
+export class EstadoCuentaComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   @Input() respuestaConsultarEstadoCuentaEmit: RespuestaConsultarEstadoCuenta =
     new RespuestaConsultarEstadoCuenta();
 
@@ -93,35 +95,34 @@ export class EstadoCuentaComponent implements OnInit {
   saldoMora: number = 0;
   saldoTotal: number = 0;
 
+  mostrarMensajeSinAbonos: boolean = false;
+  mensajeSinAbonos: string = '';
+
   mostrarMensajeSinEstadoCuenta: boolean = false;
   modoVista: ModoVistaEstadoCuenta = 'lista';
 
   columnasMostradasTratamientosListado: string[] = [
-    'FECHA',
     'FASE',
+    'FECHA_INICIO',
     'VALOR_TRATAMIENTO',
     'ABONO',
     'MORA_ACTUAL',
-    'MORATOTAL',
-    'NUMERO_HISTORIA',
-    'TELEFONO',
-    'FECHA_INICIO',
+    'MORATOTAL', // se mostrará como "Saldo T" (header)
     'ACCIONES',
   ];
 
   columnasMostradasEstadoCuentaSinFinanciar: string[] = [
     'FECHA',
     'FACTURA',
-    'VALOR_FACTURA',
-    'RECIBIDO',
-    'DESCRIPCION',
-    'ADICIONAL',
+    'RECIBO',
     'ABONO',
+    'ADICIONAL',
     'NOTACREDITO',
+    'DESCRIPCION',
+    'PARCIAL',
     'SALDO_PARCIAL',
     'RECIBIDO_X_NOMBRE',
     'NOMBRE_RECIBE',
-    'CODIGO_DESCRIPCION',
     'ACCIONES',
   ];
 
@@ -129,13 +130,10 @@ export class EstadoCuentaComponent implements OnInit {
     'N_CUOTA',
     'FECHA',
     'FACTURA',
-    'VALOR_FACTURA',
-    'RECIBIDO',
-    'DEBEABONAR',
+    'RECIBO',
     'ABONO',
     'ADICIONAL',
     'NOTACREDITO',
-    'CODIGO_DESCRIPCION',
     'DESCRIPCION',
     'PARCIAL',
     'SALDO_PARCIAL',
@@ -166,149 +164,203 @@ export class EstadoCuentaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.respuestaPinService.sharedSedeData.subscribe((data) => {
-      if (data != null) this.idSedeActualSignalR = data;
-    });
+    this.respuestaPinService.sharedSedeData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) this.idSedeActualSignalR = data;
+      });
 
-    this.respuestaPinService.sharedAnamnesisData.subscribe((data) => {
-      if (data != null) this.idAnamnesisPacienteSeleccionado = data;
-    });
+    this.respuestaPinService.sharedAnamnesisData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) this.idAnamnesisPacienteSeleccionado = data;
+      });
 
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (!data) return;
-      this.listaDoctores = data;
-      this.lstDoctores = this.listaDoctores.lstDoctores.map((item) => ({
-        id: Number(item.id),
-        nombre: item.nombre,
-      }));
-    });
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (!data) return;
+        this.listaDoctores = data;
+        this.lstDoctores = this.listaDoctores.lstDoctores.map((item) => ({
+          id: Number(item.id),
+          nombre: item.nombre,
+        }));
+      });
 
-    this.respuestaPinService.shareddoctorSeleccionadoData.subscribe((data) => {
-      if (!data) return;
+    this.respuestaPinService.shareddoctorSeleccionadoData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (!data) return;
 
-      this.doctorSeleccionado = data;
-      const encontrado = this.lstDoctores.find(
-        (x) => x.nombre === this.doctorSeleccionado
-      );
-      this.idDoctor = encontrado?.id ?? 0;
-    });
+        this.doctorSeleccionado = data;
+        const encontrado = this.lstDoctores.find(
+          (x) => x.nombre === this.doctorSeleccionado
+        );
+        this.idDoctor = encontrado?.id ?? 0;
+      });
 
     // =========================
     // CONSULTAR (listado + detalle)
     // =========================
-    this.respuestaConsultarEstadoCuentaService.respuestaConsultarEstadoCuentaEmit.subscribe(
-      async (
-        respuestaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta
-      ) => {
-        this.resultadoConsultaEstadoCuenta = respuestaConsultarEstadoCuenta;
-        this.mostrarMensajeSinEstadoCuenta = false;
+    this.respuestaConsultarEstadoCuentaService.respuestaConsultarEstadoCuentaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        async (
+          respuestaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta
+        ) => {
+          this.resultadoConsultaEstadoCuenta = respuestaConsultarEstadoCuenta;
+          this.mostrarMensajeSinEstadoCuenta = false;
 
-        if (this.resultadoConsultaEstadoCuenta.mensajeSinTratamiento) {
-          this.mostrarMensajeSinEstadoCuenta = true;
-          this.lstFases = [];
-          this.lstRespuestaEstadoCuentaPorPaciente = [];
-          this.lstRespuestaEstadoCuentaPorPacientePorDoctor = [];
-          this.resultadosBusquedaEstadoCuentaSinFinanciar = [];
-          this.resultadosBusquedaEstadoCuentaFinanciado = [];
-          this.tratamientoSeleccionado = null;
-          return;
-        }
+          if (this.resultadoConsultaEstadoCuenta.mensajeSinTratamiento) {
+            this.mostrarMensajeSinEstadoCuenta = true;
+            this.lstFases = [];
+            this.lstRespuestaEstadoCuentaPorPaciente = [];
+            this.lstRespuestaEstadoCuentaPorPacientePorDoctor = [];
+            this.resultadosBusquedaEstadoCuentaSinFinanciar = [];
+            this.resultadosBusquedaEstadoCuentaFinanciado = [];
+            this.tratamientoSeleccionado = null;
+            return;
+          }
 
-        this.lstFases = this.resultadoConsultaEstadoCuenta.lstFases!.map(
-          (id) => ({ id: Number(id) })
-        );
-
-        this.resultadosBusquedaEstadoCuentaSinFinanciar =
-          this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA ?? [];
-        this.resultadosBusquedaEstadoCuentaFinanciado =
-          this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA ?? [];
-
-        this.tipoEstadoCuenta =
-          this.resultadoConsultaEstadoCuenta.tratamientoSinFinanciar ?? false;
-
-        const primeraFila =
-          this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0];
-        this.fechaInicio = (primeraFila?.FECHA_INICIO as any) ?? new Date();
-        this.descripcionTratamiento = primeraFila?.DESCRIPCION ?? '';
-        this.costoTratamiento = primeraFila?.VALOR_TRATAMIENTO ?? 0;
-        this.cuotaInicial = primeraFila?.VALOR_CUOTA_INI ?? 0;
-        this.numeroCuotas = primeraFila?.NUMERO_CUOTAS ?? 0;
-        this.valorCuota = primeraFila?.VALOR_CUOTA ?? 0;
-        this.saldoMora = primeraFila?.MORA_ACTUAL ?? 0;
-        this.saldoTotal = primeraFila?.MORATOTAL ?? 0;
-
-        this.lstRespuestaSaldoPorDoctor =
-          this.resultadoConsultaEstadoCuenta.RespuestaSaldoPorDoctor ?? [];
-        this.lstRespuestaEstadoCuentaPorPaciente =
-          this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTAPACIENTE ??
-          [];
-
-        this.lstRespuestaEstadoCuentaPorPacientePorDoctor =
-          this.lstRespuestaEstadoCuentaPorPaciente.filter(
-            (item) => item.NOMBRE_DOCTOR === this.doctorSeleccionado
+          this.lstFases = this.resultadoConsultaEstadoCuenta.lstFases!.map(
+            (id) => ({ id: Number(id) })
           );
 
-        if (this.lstRespuestaEstadoCuentaPorPacientePorDoctor.length > 0) {
-          const ultimo =
-            this.lstRespuestaEstadoCuentaPorPacientePorDoctor[
-              this.lstRespuestaEstadoCuentaPorPacientePorDoctor.length - 1
-            ];
-          this.tratamientoSeleccionado = ultimo;
-          this.selectedFase = ultimo.FASE ?? 0;
+          this.resultadosBusquedaEstadoCuentaSinFinanciar =
+            this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA ?? [];
+          this.resultadosBusquedaEstadoCuentaFinanciado =
+            this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA ?? [];
+          this.tipoEstadoCuenta =
+            this.resultadoConsultaEstadoCuenta.tratamientoSinFinanciar ?? false;
+          const lista = this.tipoEstadoCuenta
+            ? this.resultadosBusquedaEstadoCuentaSinFinanciar
+            : this.resultadosBusquedaEstadoCuentaFinanciado;
+
+          // ✅ Detectar abonos reales (mejor SIN usar FACTURA para evitar falsos positivos)
+          const hayAbonos = (lista ?? []).some((x: any) => {
+            const abono = Number(x.ABONO ?? 0);
+            const adicional = Number(x.ADICIONAL ?? 0);
+            const nota = Number(x.NOTACREDITO ?? 0);
+
+            return abono > 0 || adicional > 0 || nota > 0;
+          });
+
+          if (!hayAbonos && this.modoVista === 'detalle') {
+            this.mostrarMensajeSinAbonos = true;
+            this.mensajeSinAbonos = 'Este tratamiento aún no tiene abonos.';
+
+            // ✅ opcional: vaciar la tabla para que NO se vea la “fila basura”
+            if (this.tipoEstadoCuenta)
+              this.resultadosBusquedaEstadoCuentaSinFinanciar = [];
+            else this.resultadosBusquedaEstadoCuentaFinanciado = [];
+          } else {
+            this.mostrarMensajeSinAbonos = false;
+            this.mensajeSinAbonos = '';
+          }
+          const primeraFila =
+            this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTA?.[0];
+          this.fechaInicio = (primeraFila?.FECHA_INICIO as any) ?? new Date();
+          this.descripcionTratamiento = primeraFila?.DESCRIPCION ?? '';
+          this.costoTratamiento = primeraFila?.VALOR_TRATAMIENTO ?? 0;
+          this.cuotaInicial = primeraFila?.VALOR_CUOTA_INI ?? 0;
+          this.numeroCuotas = primeraFila?.NUMERO_CUOTAS ?? 0;
+          this.valorCuota = primeraFila?.VALOR_CUOTA ?? 0;
+          this.saldoMora = primeraFila?.MORA_ACTUAL ?? 0;
+          this.saldoTotal = primeraFila?.MORATOTAL ?? 0;
+
+          this.lstRespuestaSaldoPorDoctor =
+            this.resultadoConsultaEstadoCuenta.RespuestaSaldoPorDoctor ?? [];
+          this.lstRespuestaEstadoCuentaPorPaciente =
+            this.resultadoConsultaEstadoCuenta.P_CONSULTAR_ESTACUENTAPACIENTE ??
+            [];
+
+          this.lstRespuestaEstadoCuentaPorPacientePorDoctor =
+            this.lstRespuestaEstadoCuentaPorPaciente
+              .filter((item) => item.NOMBRE_DOCTOR === this.doctorSeleccionado)
+              .slice()
+              .sort((a, b) => Number(b.FASE ?? 0) - Number(a.FASE ?? 0));
+
+          if (this.lstRespuestaEstadoCuentaPorPacientePorDoctor.length > 0) {
+            // ✅ Si ya hay un tratamiento seleccionado, lo conservamos (si existe en la lista)
+            const faseActual = Number(this.tratamientoSeleccionado?.FASE ?? 0);
+
+            const encontrado =
+              this.lstRespuestaEstadoCuentaPorPacientePorDoctor.find(
+                (x) => Number(x.FASE ?? 0) === faseActual
+              );
+
+            // ✅ Si el seleccionado ya no existe, tomamos el más reciente (posición 0 porque ya ordenas desc)
+            const elegido =
+              encontrado ??
+              this.lstRespuestaEstadoCuentaPorPacientePorDoctor[0];
+
+            this.tratamientoSeleccionado = elegido;
+            this.selectedFase = Number(elegido.FASE ?? 0);
+          } else {
+            this.tratamientoSeleccionado = null;
+            this.selectedFase = 0;
+          }
         }
-      }
-    );
+      );
 
     // =========================
     // PREPARAR CREAR
     // =========================
-    this.estadoCuentaCommands.prepararEstadoCuentaEmit.subscribe((prep) => {
-      if (!prep?.ok) {
-        alert(prep?.mensaje ?? 'No se pudo preparar el Estado de Cuenta.');
-        return;
-      }
+    this.estadoCuentaCommands.prepararEstadoCuentaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((prep) => {
+        if (!prep?.ok) {
+          alert(prep?.mensaje ?? 'No se pudo preparar el Estado de Cuenta.');
+          return;
+        }
 
-      const dialogRef = this.dialog.open(AgregarEstadoCuentaDialogComponent, {
-        width: '900px',
-        maxWidth: '95vw',
-        data: {
-          pacienteId: this.idAnamnesisPacienteSeleccionado,
-          idDoctor: this.idDoctor,
-          nombreDoctor: this.doctorSeleccionado,
+        const dialogRef = this.dialog.open(AgregarEstadoCuentaDialogComponent, {
+          width: '900px',
+          maxWidth: '95vw',
+          data: {
+            pacienteId: this.idAnamnesisPacienteSeleccionado,
+            idDoctor: this.idDoctor,
+            nombreDoctor: this.doctorSeleccionado,
 
-          siguienteFase: prep.siguienteFase,
-          etiquetaFactura: prep.etiquetaFactura,
-          facturaSugerida: prep.facturaSugerida,
-          convenioSugeridoId: prep.convenioSugeridoId,
-          tipoFacturacion: prep.tipoFacturacion,
+            siguienteFase: prep.siguienteFase,
+            etiquetaFactura: prep.etiquetaFactura,
+            facturaSugerida: prep.facturaSugerida,
+            convenioSugeridoId: prep.convenioSugeridoId,
+            tipoFacturacion: prep.tipoFacturacion,
 
-          modo: 'crear',
-        },
+            modo: 'crear',
+          },
+        });
+
+        dialogRef
+          .afterClosed()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(async (resultadoDialogo) => {
+            if (!resultadoDialogo) return;
+
+            await this.estadoCuentaCommands.crearEstadoCuenta(
+              this.idSedeActualSignalR,
+              resultadoDialogo
+            );
+          });
       });
 
-      dialogRef.afterClosed().subscribe(async (resultadoDialogo) => {
-        if (!resultadoDialogo) return;
-
-        await this.estadoCuentaCommands.crearEstadoCuenta(
-          this.idSedeActualSignalR,
-          resultadoDialogo
-        );
+    this.estadoCuentaCommands.crearEstadoCuentaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp) => {
+        if (!resp?.ok) {
+          alert(resp?.mensaje ?? 'No se pudo crear el Estado de Cuenta.');
+          return;
+        }
+        this.buscarEstadoCuenta();
       });
-    });
-
-    this.estadoCuentaCommands.crearEstadoCuentaEmit.subscribe((resp) => {
-      if (!resp?.ok) {
-        alert(resp?.mensaje ?? 'No se pudo crear el Estado de Cuenta.');
-        return;
-      }
-      this.buscarEstadoCuenta();
-    });
 
     // =========================
     // PREPARAR EDITAR
     // =========================
-    this.estadoCuentaCommands.prepararEditarEstadoCuentaEmit.subscribe(
-      (prep: PrepararEditarEstadoCuentaResponse) => {
+    this.estadoCuentaCommands.prepararEditarEstadoCuentaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((prep: PrepararEditarEstadoCuentaResponse) => {
         if (!prep?.ok) {
           alert(prep?.mensaje ?? 'No se pudo preparar la edición.');
           return;
@@ -369,43 +421,50 @@ export class EstadoCuentaComponent implements OnInit {
           },
         });
 
-        dialogRef.afterClosed().subscribe(async (resultadoDialogo) => {
-          if (!resultadoDialogo) return;
+        dialogRef
+          .afterClosed()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(async (resultadoDialogo) => {
+            if (!resultadoDialogo) return;
 
-          const reqEditar: EditarEstadoCuentaRequest = {
-            ...resultadoDialogo,
-            fase: t.FASE ?? resultadoDialogo.fase,
-          } as any;
+            const reqEditar: EditarEstadoCuentaRequest = {
+              ...resultadoDialogo,
+              fase: t.FASE ?? resultadoDialogo.fase,
+            } as any;
 
-          await this.estadoCuentaCommands.editarEstadoCuenta(
-            this.idSedeActualSignalR,
-            reqEditar
-          );
-        });
-      }
-    );
+            await this.estadoCuentaCommands.editarEstadoCuenta(
+              this.idSedeActualSignalR,
+              reqEditar
+            );
+          });
+      });
 
-    this.estadoCuentaCommands.editarEstadoCuentaEmit.subscribe((resp) => {
-      if (!resp?.ok) {
-        alert(resp?.mensaje ?? 'No se pudo editar el Estado de Cuenta.');
-        return;
-      }
-      this.buscarEstadoCuenta();
-    });
+    this.estadoCuentaCommands.editarEstadoCuentaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp) => {
+        if (!resp?.ok) {
+          alert(resp?.mensaje ?? 'No se pudo editar el Estado de Cuenta.');
+          return;
+        }
+        this.buscarEstadoCuenta();
+      });
 
-    this.estadoCuentaCommands.borrarEstadoCuentaEmit.subscribe((resp) => {
-      if (!resp?.ok) {
-        alert(resp?.mensaje ?? 'No se pudo borrar el Estado de Cuenta.');
-        return;
-      }
-      this.buscarEstadoCuenta();
-    });
+    this.estadoCuentaCommands.borrarEstadoCuentaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp) => {
+        if (!resp?.ok) {
+          alert(resp?.mensaje ?? 'No se pudo borrar el Estado de Cuenta.');
+          return;
+        }
+        this.buscarEstadoCuenta();
+      });
 
     // =========================================================
     // ✅ PREPARAR INSERTAR ABONO -> abre modal con datos del worker
     // =========================================================
-    this.estadoCuentaCommands.prepararInsertarAbonoEmit.subscribe(
-      (prep: PrepararInsertarAbonoResponse) => {
+    this.estadoCuentaCommands.prepararInsertarAbonoEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((prep: PrepararInsertarAbonoResponse) => {
         if (!prep?.ok) {
           alert(prep?.mensaje ?? 'No se pudo preparar el abono.');
           return;
@@ -420,6 +479,7 @@ export class EstadoCuentaComponent implements OnInit {
           width: '900px',
           maxWidth: '95vw',
           data: {
+            clienteIdDestino: this.idSedeActualSignalR,
             // ✅ identidad real para el InsertarAbonoRequest
             idPaciente: prep.idPaciente,
             fase: prep.fase,
@@ -453,22 +513,25 @@ export class EstadoCuentaComponent implements OnInit {
           },
         });
 
-        dialogRef.afterClosed().subscribe(async (req: InsertarAbonoRequest) => {
-          if (!req) return;
-          console.log('InsertarAbonoRequest:', req);
-          await this.estadoCuentaCommands.insertarAbono(
-            this.idSedeActualSignalR,
-            req
-          );
-        });
-      }
-    );
+        dialogRef
+          .afterClosed()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(async (req: InsertarAbonoRequest) => {
+            if (!req) return;
+            console.log('InsertarAbonoRequest:', req);
+            await this.estadoCuentaCommands.insertarAbono(
+              this.idSedeActualSignalR,
+              req
+            );
+          });
+      });
 
     // =========================================================
     // ✅ INSERTAR ABONO -> refresca
     // =========================================================
-    this.estadoCuentaCommands.insertarAbonoEmit.subscribe(
-      (resp: InsertarAbonoResponse) => {
+    this.estadoCuentaCommands.insertarAbonoEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp: InsertarAbonoResponse) => {
         if (!resp?.ok) {
           alert(resp?.mensaje ?? 'No se pudo insertar el abono.');
           return;
@@ -476,18 +539,18 @@ export class EstadoCuentaComponent implements OnInit {
 
         this.abonoPendiente = null;
         this.buscarEstadoCuenta();
-      }
-    );
+      });
 
-    this.estadoCuentaCommands.prepararBorrarAbonoEmit.subscribe(
-      async (prep: PrepararBorrarAbonoResponse) => {
+    this.estadoCuentaCommands.prepararBorrarAbonoEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (prep: PrepararBorrarAbonoResponse) => {
         if (!prep?.ok) {
           alert(prep?.mensaje ?? 'No se pudo preparar el borrado del abono.');
           return;
         }
 
         const ok = confirm(
-          `¿Seguro que deseas BORRAR este ABONO COMPLETO?\n\n` +
+          `¿Seguro que deseas BORRAR este REGISTRO COMPLETO?\n\n` +
             `${prep.resumenParaConfirmar}\n` +
             `Relaciones a borrar: ${(prep.idRelaciones ?? []).length}`
         );
@@ -518,21 +581,21 @@ export class EstadoCuentaComponent implements OnInit {
           this.idSedeActualSignalR,
           req
         );
-      }
-    );
+      });
 
-    this.estadoCuentaCommands.borrarAbonoEmit.subscribe(
-      (resp: BorrarAbonoResponse) => {
+    this.estadoCuentaCommands.borrarAbonoEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp: BorrarAbonoResponse) => {
         if (!resp?.ok) {
           alert(resp?.mensaje ?? 'No se pudo borrar el abono.');
           return;
         }
         this.buscarEstadoCuenta();
-      }
-    );
+      });
 
-    this.estadoCuentaCommands.prepararInsertarAdicionalEmit.subscribe(
-      (prep: PrepararInsertarAdicionalResponse) => {
+    this.estadoCuentaCommands.prepararInsertarAdicionalEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((prep: PrepararInsertarAdicionalResponse) => {
         if (!prep?.ok) {
           alert(prep?.mensaje ?? 'No se pudo preparar el adicional.');
           return;
@@ -578,52 +641,55 @@ export class EstadoCuentaComponent implements OnInit {
           }
         );
 
-        dialogRef.afterClosed().subscribe(async (r: any) => {
-          if (!r) return;
+        dialogRef
+          .afterClosed()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(async (r: any) => {
+            if (!r) return;
 
-          // ✅ items vienen del dialog (N líneas)
-          const items = Array.isArray(r.items) ? r.items : [];
+            // ✅ items vienen del dialog (N líneas)
+            const items = Array.isArray(r.items) ? r.items : [];
 
-          const req: InsertarAdicionalRequest = {
-            idPaciente: prep.idPaciente,
-            fase: prep.fase,
-            idDoctorTratante: prep.idDoctorTratante,
+            const req: InsertarAdicionalRequest = {
+              idPaciente: prep.idPaciente,
+              fase: prep.fase,
+              idDoctorTratante: prep.idDoctorTratante,
 
-            idRecibidoPor: r.idRecibidoPor ?? null,
-            fecha: r.fecha,
+              idRecibidoPor: r.idRecibidoPor ?? null,
+              fecha: r.fecha,
 
-            // ✅ lo importante: enviar N items
-            items,
+              // ✅ lo importante: enviar N items
+              items,
 
-            // ✅ legacy (compatibilidad / logs)
-            descripcion: r.descripcion ?? null,
-            codigoConcepto: null,
-            valor: Number(r.valor ?? 0),
+              // ✅ legacy (compatibilidad / logs)
+              descripcion: r.descripcion ?? null,
+              codigoConcepto: null,
+              valor: Number(r.valor ?? 0),
 
-            ivaIncluido: !!r.ivaIncluido,
-            valorIva: r.valorIva ?? null,
+              ivaIncluido: !!r.ivaIncluido,
+              valorIva: r.valorIva ?? null,
 
-            nombreRecibe: r.nombreRecibe ?? null,
-            pagoTercero: 1,
+              nombreRecibe: r.nombreRecibe ?? null,
+              pagoTercero: 1,
 
-            relacionarAnticipos: r.relacionarAnticipos ?? true,
+              relacionarAnticipos: r.relacionarAnticipos ?? true,
 
-            idFirma: null,
-          };
+              idFirma: null,
+            };
 
-          await this.estadoCuentaCommands.insertarAdicional(
-            this.idSedeActualSignalR,
-            req
-          );
-        });
-      }
-    );
+            await this.estadoCuentaCommands.insertarAdicional(
+              this.idSedeActualSignalR,
+              req
+            );
+          });
+      });
 
     // =========================================================
     // ✅ INSERTAR ADICIONAL -> refresca
     // =========================================================
-    this.estadoCuentaCommands.insertarAdicionalEmit.subscribe(
-      (resp: InsertarAdicionalResponse) => {
+    this.estadoCuentaCommands.insertarAdicionalEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp: InsertarAdicionalResponse) => {
         if (!resp?.ok) {
           alert(resp?.mensaje ?? 'No se pudo insertar el adicional.');
           return;
@@ -631,10 +697,14 @@ export class EstadoCuentaComponent implements OnInit {
 
         this.adicionalPendiente = null;
         this.buscarEstadoCuenta();
-      }
-    );
+      });
 
     this.buscarEstadoCuenta();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // =========================
@@ -653,6 +723,7 @@ export class EstadoCuentaComponent implements OnInit {
 
     if (irADetalle) {
       this.modoVista = 'detalle';
+      this.mostrarMensajeSinAbonos = false;
       this.buscarEstadoCuenta();
     }
   }

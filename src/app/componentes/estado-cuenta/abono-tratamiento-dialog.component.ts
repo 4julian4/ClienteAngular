@@ -1,6 +1,9 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import {
   P_CONSULTAR_ESTACUENTA,
   P_CONSULTAR_ESTACUENTAPACIENTE,
@@ -13,10 +16,16 @@ import {
   DoctorItemDto,
   InsertarAbonoRequest,
   MotivoItemDto,
+  ConsultarSugeridosAbonoRequest,
+  ConsultarSugeridosAbonoResponse,
 } from 'src/app/conexiones/rydent/modelos/estado-cuenta/preparar-insertar-abono.dto';
+
+import { EstadoCuentaCommandsService } from 'src/app/conexiones/rydent/modelos/estado-cuenta/estado-cuenta-commands.service';
 
 /** Datos que recibe el diálogo de Abono */
 export interface AbonoTratamientoDialogData {
+  clienteIdDestino: string;
+
   idPaciente: number;
   fase: number;
   idDoctorTratante: number;
@@ -34,10 +43,6 @@ export interface AbonoTratamientoDialogData {
   codigosConcepto: string[];
   recibidoPorHabilitado: boolean;
 
-  // (ojo) en el JSON del worker tú también traes:
-  // nombreRecibePorDefecto: "ADMIN"
-  // idRecibidoPorPorDefecto: 6
-  // pero aquí no lo tenías tipado; lo dejamos opcional para que compile.
   nombreRecibePorDefecto?: string;
 
   prefill: {
@@ -72,7 +77,7 @@ interface FormaPagoAbono {
   templateUrl: './abono-tratamiento-dialog.component.html',
   styleUrls: ['./abono-tratamiento-dialog.component.scss'],
 })
-export class AbonoTratamientoDialogComponent {
+export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
   formAbono: FormGroup;
 
   opcionesIva: number[] = [];
@@ -81,10 +86,10 @@ export class AbonoTratamientoDialogComponent {
   nombresRecibe: string[] = [];
   recibidoPorHabilitado = true;
 
+  // ✅ En ABONO: NO usamos valor del catálogo (ni mostrar, ni autollenar)
   catalogoConceptos: {
     codigo: string;
     descripcion: string;
-    valor: number | null;
   }[] = [];
 
   conceptosAgregados: ConceptoAbono[] = [];
@@ -97,7 +102,7 @@ export class AbonoTratamientoDialogComponent {
   mensajeErrorPagos: string | null = null;
   mensajeErrorConceptos: string | null = null;
 
-  // ✅ NUEVO: mostrar/ocultar campos según reglas Delphi/Worker
+  // ✅ Mostrar/ocultar campos según reglas Delphi/Worker
   mostrarFactura = true;
   mostrarRecibo = true;
 
@@ -114,10 +119,18 @@ export class AbonoTratamientoDialogComponent {
   mostrarEditorConcepto = false;
   mostrarEditorFormaPago = false;
 
+  // ✅ para limpiar subscriptions
+  private destroy$ = new Subject<void>();
+
+  // ✅ Para evitar pisar lo digitado por el usuario
+  private ultimoReciboSugerido = '';
+  private ultimaFacturaSugerida = '';
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AbonoTratamientoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AbonoTratamientoDialogData
+    @Inject(MAT_DIALOG_DATA) public data: AbonoTratamientoDialogData,
+    private estadoCuentaCommands: EstadoCuentaCommandsService
   ) {
     // ====== listas ======
     this.opcionesIva = data?.valoresIvaPermitidos?.length
@@ -135,36 +148,26 @@ export class AbonoTratamientoDialogComponent {
       ? data.nombresRecibe
       : [];
 
-    // ✅ OJO: no filtres por codigo porque la mayoría viene null
+    // ✅ ABONO: catálogo sin valor
     this.catalogoConceptos = (data?.motivos ?? [])
       .filter((m) => !!m?.nombre)
       .map((m) => ({
         codigo: String((m as any).codigo ?? (m as any).id), // fallback al id
         descripcion: String((m as any).nombre),
-        valor: (m as any)?.valor == null ? null : Number((m as any).valor),
       }));
 
     const rules = data.rules;
     const pre = data.prefill;
-    const descripcionConceptos = this.conceptosAgregados
-      .map(
-        (c) => `${c.codigo} ${c.descripcion} x${c.cantidad} ($${c.total | 0})`
-      )
-      .join(', ');
+
     // =====================================================
     // ✅ Mostrar/Ocultar campos según reglas (estilo Delphi)
     // =====================================================
-    // Recibo: si el worker envía rules.mostrarCampoRecibo = false => ocultar
-    // (si no existe la propiedad, se asume true)
     this.mostrarRecibo = (rules as any)?.mostrarCampoRecibo !== false;
 
-    // Factura: idealmente el worker manda un flag,
-    // pero mientras tanto inferimos así:
-    // - Si tipoFacturacion == 2 => NO aplica factura (Delphi)
-    // - Si prefill.factura viene vacío => normalmente el worker ya decidió ocultarla
+    // Por ahora se infiere con lo que viene en prepare.
+    // Luego, al cambiar doctor, ya lo mandará el worker explícito.
     const tipoFact = Number((rules as any)?.tipoFacturacion ?? 0);
     const facturaPrefill = (pre?.factura ?? '').trim();
-
     const ocultarFacturaInferida = tipoFact === 2 || facturaPrefill === '';
     this.mostrarFactura = !ocultarFacturaInferida;
 
@@ -233,7 +236,6 @@ export class AbonoTratamientoDialogComponent {
     }
 
     if (!(rules as any)?.permiteEditarFacturaYRecibo) {
-      // Si ya estaban ocultos/disable, no pasa nada.
       this.formAbono.get('numeroRecibo')?.disable({ emitEvent: false });
       this.formAbono.get('numeroFactura')?.disable({ emitEvent: false });
     }
@@ -249,43 +251,92 @@ export class AbonoTratamientoDialogComponent {
     const porcentajeIvaCtrl = conceptoGroup.get('porcentajeIva');
 
     if (ivaIncluidoCtrl && porcentajeIvaCtrl) {
-      ivaIncluidoCtrl.valueChanges.subscribe((checked: boolean) => {
-        if (checked) {
-          porcentajeIvaCtrl.enable({ emitEvent: false });
-        } else {
-          porcentajeIvaCtrl.setValue(0, { emitEvent: false });
-          porcentajeIvaCtrl.disable({ emitEvent: false });
-        }
-      });
+      ivaIncluidoCtrl.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((checked: boolean) => {
+          if (checked) {
+            porcentajeIvaCtrl.enable({ emitEvent: false });
+          } else {
+            porcentajeIvaCtrl.setValue(0, { emitEvent: false });
+            porcentajeIvaCtrl.disable({ emitEvent: false });
+          }
+        });
     }
 
     // ====== formateo valorUnitario ======
     const valorUnitarioCtrl = conceptoGroup.get('valorUnitario');
     if (valorUnitarioCtrl) {
-      valorUnitarioCtrl.valueChanges.subscribe((value) => {
-        if (value !== null && value !== undefined && value !== '') {
-          const numerico = this.quitarPuntuacion(value.toString());
-          const formateado = this.formatearConPuntos(numerico);
-          if (value !== formateado) {
-            valorUnitarioCtrl.setValue(formateado, { emitEvent: false });
+      valorUnitarioCtrl.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((value) => {
+          if (value !== null && value !== undefined && value !== '') {
+            const numerico = this.quitarPuntuacion(value.toString());
+            const formateado = this.formatearConPuntos(numerico);
+            if (value !== formateado) {
+              valorUnitarioCtrl.setValue(formateado, { emitEvent: false });
+            }
           }
-        }
-      });
+        });
     }
 
     // ====== formateo valor forma pago ======
     const valorPagoCtrl = this.formaPagoActualGroup.get('valor');
     if (valorPagoCtrl) {
-      valorPagoCtrl.valueChanges.subscribe((value) => {
-        if (value !== null && value !== undefined && value !== '') {
-          const numerico = this.quitarPuntuacion(value.toString());
-          const formateado = this.formatearConPuntos(numerico);
-          if (value !== formateado) {
-            valorPagoCtrl.setValue(formateado, { emitEvent: false });
+      valorPagoCtrl.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((value) => {
+          if (value !== null && value !== undefined && value !== '') {
+            const numerico = this.quitarPuntuacion(value.toString());
+            const formateado = this.formatearConPuntos(numerico);
+            if (value !== formateado) {
+              valorPagoCtrl.setValue(formateado, { emitEvent: false });
+            }
           }
-        }
-      });
+        });
     }
+
+    // ✅ guardar sugeridos iniciales para comparar (y no pisar)
+    this.ultimoReciboSugerido = (pre.recibo ?? '').trim();
+    this.ultimaFacturaSugerida = (pre.factura ?? '').trim();
+  }
+
+  ngOnInit(): void {
+    // =====================================
+    // ✅ Escuchar respuesta del worker
+    // =====================================
+    this.estadoCuentaCommands.consultarSugeridosAbonoEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((resp: ConsultarSugeridosAbonoResponse) => {
+        if (!resp?.ok) return;
+        this.aplicarSugeridosDesdeWorker(resp);
+      });
+
+    // =====================================
+    // ✅ Reconsultar cuando cambie doctor
+    // =====================================
+    const ctrl = this.formAbono.get('doctorSeleccionado');
+    if (!ctrl) return;
+
+    ctrl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value: string) => {
+        const id = value ? Number(value) : 0;
+
+        // Si permite blanco y quedó vacío
+        if (!id || Number.isNaN(id)) {
+          this.limpiarSugeridosPorDoctorEnBlanco();
+          return;
+        }
+
+        // Si el doctor está bloqueado por regla, no debería cambiar,
+        // pero igual dejamos seguro:
+        this.reconsultarSugeridos(id);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get conceptoActualGroup(): FormGroup {
@@ -305,18 +356,14 @@ export class AbonoTratamientoDialogComponent {
     );
   }
 
-  get conceptosFiltrados(): {
-    codigo: string;
-    descripcion: string;
-    valor: number | null;
-  }[] {
+  get conceptosFiltrados(): { codigo: string; descripcion: string }[] {
     if (!this.textoBusquedaConcepto) return this.catalogoConceptos;
+
     const filtro = this.textoBusquedaConcepto;
     return this.catalogoConceptos.filter((c) => {
       return (
         c.codigo.toUpperCase().includes(filtro) ||
-        c.descripcion.toUpperCase().includes(filtro) ||
-        (c.valor != null ? c.valor.toString().includes(filtro) : false)
+        c.descripcion.toUpperCase().includes(filtro)
       );
     });
   }
@@ -324,6 +371,11 @@ export class AbonoTratamientoDialogComponent {
   get formasPagoDisponibles(): string[] {
     const agregadas = this.formasPagoAgregadas.map((p) => p.formaPago);
     return this.formasPagoPosibles.filter((f) => !agregadas.includes(f));
+  }
+
+  // ✅ Oculta botones inferiores cuando estás editando/agregando
+  get ocultarAccionesInferiores(): boolean {
+    return this.mostrarEditorConcepto || this.mostrarEditorFormaPago;
   }
 
   private quitarPuntuacion(valor: string): string {
@@ -343,11 +395,17 @@ export class AbonoTratamientoDialogComponent {
   toggleEditorConcepto(): void {
     this.mostrarEditorConcepto = !this.mostrarEditorConcepto;
     this.mensajeErrorConceptos = null;
+
+    // Si abro conceptos, cierro pagos para evitar confusión
+    if (this.mostrarEditorConcepto) this.mostrarEditorFormaPago = false;
   }
 
   toggleEditorFormaPago(): void {
     this.mostrarEditorFormaPago = !this.mostrarEditorFormaPago;
     this.mensajeErrorPagos = null;
+
+    // Si abro pagos, cierro conceptos para evitar confusión
+    if (this.mostrarEditorFormaPago) this.mostrarEditorConcepto = false;
 
     if (this.mostrarEditorFormaPago) {
       const disponibles = this.formasPagoDisponibles;
@@ -364,30 +422,115 @@ export class AbonoTratamientoDialogComponent {
     }
   }
 
-  seleccionarConcepto(c: {
-    codigo: string;
-    descripcion: string;
-    valor?: number | null;
-  }): void {
+  // =====================================================
+  // ✅ RECONSULTA sugeridos al worker
+  // =====================================================
+  private reconsultarSugeridos(idDoctorSeleccionado: number): void {
+    const req: ConsultarSugeridosAbonoRequest = {
+      idPaciente: this.data.idPaciente,
+      fase: this.data.fase,
+      idDoctorTratante: this.data.idDoctorTratante,
+      idDoctorSeleccionado: idDoctorSeleccionado,
+    };
+
+    this.estadoCuentaCommands.consultarSugeridosAbono(
+      this.data.clienteIdDestino,
+      req
+    );
+  }
+
+  // =====================================================
+  // ✅ APLICAR sugeridos sin pisar al usuario
+  // =====================================================
+  private aplicarSugeridosDesdeWorker(
+    resp: ConsultarSugeridosAbonoResponse
+  ): void {
+    const reciboCtrl = this.formAbono.get('numeroRecibo');
+    const facturaCtrl = this.formAbono.get('numeroFactura');
+
+    // 1) Mostrar/ocultar factura según backend
+    const ocultarFactura = !!resp.ocultarFactura;
+    this.mostrarFactura = !ocultarFactura;
+
+    if (!this.mostrarFactura) {
+      if (facturaCtrl) {
+        facturaCtrl.setValue('', { emitEvent: false });
+        facturaCtrl.disable({ emitEvent: false });
+        facturaCtrl.markAsPristine();
+      }
+    } else {
+      if (facturaCtrl) {
+        // solo habilitar si la regla permite editar
+        if ((this.data.rules as any)?.permiteEditarFacturaYRecibo) {
+          facturaCtrl.enable({ emitEvent: false });
+        }
+      }
+    }
+
+    // 2) Recibo sugerido (solo autocompletar si el usuario NO lo tocó)
+    const nuevoRecibo = String(resp.reciboSugerido ?? '').trim();
+    if (this.mostrarRecibo && reciboCtrl && !reciboCtrl.disabled) {
+      const actual = String(reciboCtrl.value ?? '').trim();
+
+      if (!reciboCtrl.dirty || actual === this.ultimoReciboSugerido) {
+        reciboCtrl.setValue(nuevoRecibo, { emitEvent: false });
+        reciboCtrl.markAsPristine();
+      }
+    }
+    this.ultimoReciboSugerido = nuevoRecibo;
+
+    // 3) Factura sugerida (si aplica factura) - no pisar al usuario
+    const nuevaFactura = String(resp.facturaSugerida ?? '').trim();
+    if (this.mostrarFactura && facturaCtrl) {
+      const actual = String(facturaCtrl.value ?? '').trim();
+
+      if (!facturaCtrl.dirty || actual === this.ultimaFacturaSugerida) {
+        facturaCtrl.setValue(nuevaFactura, { emitEvent: false });
+        facturaCtrl.markAsPristine();
+      }
+    }
+    this.ultimaFacturaSugerida = nuevaFactura;
+  }
+
+  private limpiarSugeridosPorDoctorEnBlanco(): void {
+    const reciboCtrl = this.formAbono.get('numeroRecibo');
+    const facturaCtrl = this.formAbono.get('numeroFactura');
+
+    if (this.mostrarRecibo && reciboCtrl && !reciboCtrl.disabled) {
+      const actual = String(reciboCtrl.value ?? '').trim();
+      if (!reciboCtrl.dirty || actual === this.ultimoReciboSugerido) {
+        reciboCtrl.setValue('', { emitEvent: false });
+        reciboCtrl.markAsPristine();
+      }
+    }
+
+    if (facturaCtrl) {
+      // si quedó en blanco doctor, no sabemos si aplica factura,
+      // por seguridad la ocultamos y limpiamos
+      this.mostrarFactura = false;
+      facturaCtrl.setValue('', { emitEvent: false });
+      facturaCtrl.disable({ emitEvent: false });
+      facturaCtrl.markAsPristine();
+    }
+  }
+
+  // =====================================================
+  // ✅ CONCEPTOS
+  // =====================================================
+  seleccionarConcepto(c: { codigo: string; descripcion: string }): void {
     this.conceptoActualGroup.patchValue({
       codigo: c.codigo,
       descripcion: c.descripcion,
     });
 
-    // ✅ si viene valor del worker, lo ponemos en valorUnitario formateado
-    if (
-      c.valor != null &&
-      !Number.isNaN(Number(c.valor)) &&
-      Number(c.valor) > 0
-    ) {
-      this.conceptoActualGroup.patchValue(
-        { valorUnitario: this.formatearConPuntos(String(c.valor)) },
-        { emitEvent: false }
-      );
-    }
+    // ✅ ABONO: NO autollenar valor desde catálogo
+    // (el usuario debe escribir el valor manualmente)
 
     this.mensajeErrorConceptos = null;
     this.mostrarEditorConcepto = true;
+
+    // si abro conceptos, cierro pagos
+    this.mostrarEditorFormaPago = false;
   }
 
   agregarConcepto(): void {
@@ -435,6 +578,7 @@ export class AbonoTratamientoDialogComponent {
       ivaIncluido: false,
       porcentajeIva: 0,
     });
+
     this.mostrarEditorConcepto = false;
   }
 
@@ -443,6 +587,9 @@ export class AbonoTratamientoDialogComponent {
     this.calcularTotales();
   }
 
+  // =====================================================
+  // ✅ PAGOS
+  // =====================================================
   agregarFormaPago(): void {
     this.mensajeErrorPagos = null;
 
@@ -540,17 +687,21 @@ export class AbonoTratamientoDialogComponent {
       return;
     }
 
+    if (this.totalPagos < this.totalConceptos) {
+      this.mensajeErrorPagos =
+        'La suma de los pagos no puede ser menor que el total de conceptos.';
+      return;
+    }
+
     const fechaAbono = this.formAbono.get('fechaAbono')?.value as string;
     const recibo = (this.formAbono.get('numeroRecibo')?.value ?? '') as string;
 
-    // ✅ Si factura está oculta, NO se envía aunque el control exista
     const facturaRaw = (this.formAbono.get('numeroFactura')?.value ??
       '') as string;
     const factura = this.mostrarFactura ? facturaRaw.trim() : '';
 
     const doctorSeleccionado = this.formAbono.get('doctorSeleccionado')
       ?.value as string;
-
     const idRecibidoPor = doctorSeleccionado
       ? Number(doctorSeleccionado)
       : null;
@@ -558,12 +709,11 @@ export class AbonoTratamientoDialogComponent {
     const nombreRecibe = (this.formAbono.get('recibidoPor')?.value ??
       '') as string;
 
-    // ✅ Detalle conceptos (para guardar como Delphi por IDRELACION)
     const conceptosDetalle: AbonoConceptoDetalleDto[] =
       this.conceptosAgregados.map((c) => ({
         codigo: c.codigo,
         descripcion: c.descripcion,
-        valor: c.valorUnitario, // unitario
+        valor: c.valorUnitario,
         cantidad: c.cantidad,
         ivaIncluido: c.ivaIncluido,
         porcentajeIva: c.porcentajeIva ?? 0,
@@ -579,19 +729,13 @@ export class AbonoTratamientoDialogComponent {
       })
     );
 
-    // ✅ Resumen (para el registro principal)
-    const primerConcepto = this.conceptosAgregados[0]; // lo usamos como "concepto principal"
+    const primerConcepto = this.conceptosAgregados[0];
     const ivaIncluido = this.conceptosAgregados.some((c) => c.ivaIncluido);
-
-    // Valor IVA del abono (porcentaje): si hay al menos uno con ivaIncluido,
-    // tomamos el porcentaje del primero que tenga ivaIncluido; si no, null.
     const primerConIva = this.conceptosAgregados.find((c) => c.ivaIncluido);
     const valorIva = ivaIncluido ? primerConIva?.porcentajeIva ?? 0 : null;
 
     const descripcionConceptos = this.conceptosAgregados
-      .map(
-        (c) => `${c.codigo} ${c.descripcion} x${c.cantidad} ($${c.total | 0})`
-      )
+      .map((c) => `${c.codigo} ${c.descripcion} x${c.cantidad}`)
       .join(', ');
 
     const req: InsertarAbonoRequest = {
@@ -621,8 +765,6 @@ export class AbonoTratamientoDialogComponent {
         this.mostrarFactura && !!factura ? this.totalConceptos : null,
 
       tiposPago,
-
-      // ✅ AQUÍ VIAJA la lista (lo que Delphi insertaba por cada fila)
       conceptosDetalle,
 
       idFirma: null,

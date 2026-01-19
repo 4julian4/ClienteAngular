@@ -5,11 +5,9 @@
   <!-- ENCABEZADO CON RESUMEN        -->
   <!-- ============================= -->
   <section class="bloque-encabezado-abono">
-    <!-- Título del bloque CON TOTALES en la misma línea -->
     <div class="header-encabezado">
       <span class="titulo-seccion">Datos del abono</span>
 
-      <!-- Resumen financiero alineado a la derecha -->
       <div class="resumen-financiero-header">
         <div class="item-resumen-header item-total-concepto">
           <span class="label">Total Concepto</span>
@@ -28,7 +26,6 @@
       </div>
     </div>
 
-    <!-- Fila con los campos de entrada -->
     <div class="fila-encabezado-abono">
       <div class="campo-input-wrapper campo-encabezado">
         <label>Fecha*</label>
@@ -43,7 +40,6 @@
         <label>Doctor(a)*</label>
 
         <select class="input-compacto" formControlName="doctorSeleccionado">
-          <!-- ✅ Si Delphi permite blanco (ItemIndex=-1) -->
           <option *ngIf="data?.rules?.permiteRecibidoPorEnBlanco" value="">
             (En blanco)
           </option>
@@ -92,7 +88,6 @@
     </div>
 
     <div *ngIf="mostrarEditorConcepto" class="panel-agregar-concepto">
-      <!-- Búsqueda de conceptos -->
       <div class="campo-input-wrapper">
         <label>Buscar por código o nombre</label>
         <input
@@ -103,7 +98,7 @@
         />
       </div>
 
-      <!-- Tabla de catálogo de conceptos -->
+      <!-- ✅ Tabla catálogo SIN Valor -->
       <div
         class="contenedor-tabla-conceptos contenedor-tabla-conceptos--catalogo"
       >
@@ -112,7 +107,6 @@
             <tr>
               <th>Código</th>
               <th>Descripción</th>
-              <th>Valor</th>
             </tr>
           </thead>
           <tbody>
@@ -122,17 +116,16 @@
             >
               <td>{{ c.codigo }}</td>
               <td>{{ c.descripcion }}</td>
-              <td>{{ c.valor | number : "1.0-0" }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Edición del concepto actual - UNA SOLA LÍNEA -->
+      <!-- Edición del concepto actual -->
       <div [formGroup]="conceptoActualGroup">
         <div class="fila-concepto-editor">
           <div class="campo-input-wrapper campo-codigo">
-            <label>Concepto</label>
+            <label>Codigo</label>
             <input
               type="text"
               class="input-compacto"
@@ -175,9 +168,7 @@
           <div class="campo-input-wrapper campo-iva-porcentaje">
             <label>% IVA</label>
             <select class="input-compacto" formControlName="porcentajeIva">
-              <option *ngFor="let p of opcionesIva" [value]="p">
-                {{ p }}
-              </option>
+              <option *ngFor="let p of opcionesIva" [value]="p">{{ p }}</option>
             </select>
           </div>
 
@@ -332,7 +323,6 @@
       <label>Recibido por</label>
 
       <select class="input-compacto" formControlName="recibidoPor">
-        <!-- Si Delphi permite blanco (ItemIndex=-1) -->
         <option *ngIf="data?.rules?.permiteRecibidoPorEnBlanco" value="">
           (En blanco)
         </option>
@@ -344,8 +334,27 @@
     </div>
   </section>
 </mat-dialog-content>
+<!-- ✅ ERRORES GLOBALES (siempre visibles) -->
+<mat-dialog-actions
+  class="acciones-dialogo-abono acciones-dialogo-abono--split"
+  *ngIf="!ocultarAccionesInferiores"
+>
+  <!-- ✅ Mensaje a la izquierda -->
+  <div
+    class="mensaje-acciones"
+    *ngIf="mensajeErrorConceptos || mensajeErrorPagos"
+  >
+    <div class="mensaje-error" *ngIf="mensajeErrorConceptos">
+      {{ mensajeErrorConceptos }}
+    </div>
+    <div class="mensaje-error" *ngIf="mensajeErrorPagos">
+      {{ mensajeErrorPagos }}
+    </div>
+  </div>
 
-<mat-dialog-actions align="end" class="acciones-dialogo-abono">
-  <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
-  <button class="BotonGuardar" (click)="onGuardar()">Aceptar</button>
+  <!-- ✅ Botones a la derecha -->
+  <div class="botones-acciones">
+    <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
+    <button class="BotonGuardar" (click)="onGuardar()">Aceptar</button>
+  </div>
 </mat-dialog-actions>

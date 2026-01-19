@@ -1,152 +1,291 @@
 <mat-accordion>
-    <mat-expansion-panel #panelBuscarPaciente *ngIf="mostrarPanelBuscarPaciente" class="buscarPaciente"
-        [expanded]="openorclosePanelBuscarPaciente" (opened)="panelBuscarPacienteOpen()">
-        <mat-expansion-panel-header>
-            <mat-panel-title class="nombrePacienteSeleccionado" >
-                {{nombrePaciente}} {{numeroHistoria}}
-            </mat-panel-title>
-            <mat-panel-description>
-                <span class="notaImportantePaciente"  matTooltip="{{notaImportante}}"> {{mensajeNotaImportante}}</span>
-            </mat-panel-description>
-            <mat-icon class="custom-mat-icon" mat-expansion-indicator matTooltip="click aca para buscar paciente">search</mat-icon>
-            
-        </mat-expansion-panel-header>
-        <mat-card class="cardContenedorBusqueda">
-            <div class="divTituloFila1">
-                <h1>Buscar Paciente</h1>
-            </div>
-            <br>
-            <div class="contenedorBusqueda">
+  <mat-expansion-panel
+    #panelBuscarPaciente
+    *ngIf="mostrarPanelBuscarPaciente"
+    class="buscarPaciente"
+    [expanded]="openorclosePanelBuscarPaciente"
+    (opened)="panelBuscarPacienteOpen()"
+  >
+    <mat-expansion-panel-header>
+      <!--<mat-panel-title class="nombrePacienteSeleccionado">
+        {{ nombrePaciente }} {{ numeroHistoria }}
+      </mat-panel-title>-->
 
-                <div class="divBuscadorSelectFila2">
-                    <mat-select class="selectEscogerTipoBusqueda" [(value)]="opcionSeleccionada"
-                        (selectionChange)="buscarNombreValorSeleccionado()">
-                        <mat-option *ngFor="let opcion of opciones" [value]="opcion.id"> {{opcion.nombre}} </mat-option>
-                    </mat-select>
-                </div>
+      <mat-panel-title class="nombrePacienteSeleccionado">
+        {{ nombrePaciente }}
+      </mat-panel-title>
+      <mat-panel-description>
+        <div class="headerPacienteMeta">
+          <span
+            class="infoPacienteHeader"
+            *ngIf="documentoPaciente || telefonoPaciente"
+          >
+            CC: {{ documentoPaciente }} · Tel: {{ telefonoPaciente }}
+          </span>
 
-                
-                <div class="divBuscadorInput">
-                    <input #buscarPacienteInput type="text" placeholder="Buscar" [formControl]="datoPacienteParaBuscarControl"
-                        [matAutocomplete]="autoDatosPacienteParaBuscar" class="inputBuscar" style="text-transform: uppercase;" (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)">
-                    <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
-                        <!--<mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
-                            {{ datosPaciente.datoBuscar }}
-                        </mat-option>-->
-                    </mat-autocomplete>
-                </div>
-                <div class="divBotonesBuscarCancelar">    
-                    <button mat-raised-button class="botonBuscarPaciente" (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Buscar</button>
-                    <button mat-raised-button class="botonCancelarBuscarPaciente"
-                        (click)="buscarPaciente(datoPacienteParaBuscarControl.value)">Cancelar</button>
-                </div>
-            </div>
-            <div class="divContenedorDatosEncontrados">
-                <div class="scrollable-content">
-                    <table mat-table [dataSource]="resultadosBusqueda" class="tablaBusquedaPaciente">
-                        <!-- Definición de las columnas de la tabla -->
+          <span
+            class="notaImportantePaciente"
+            *ngIf="mensajeNotaImportante"
+            matTooltip="{{ notaImportante }}"
+          >
+            {{ mensajeNotaImportante }}
+          </span>
+        </div>
+      </mat-panel-description>
 
-                        <ng-container matColumnDef="idAnamnesis">
-                            <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis"> N° Historia </th>
-                            <td mat-cell *matCellDef="let datosPaciente" class="columnaIdAnamnesis"
-                                matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.IDANAMNESIS}}
-                            </td>
+      <mat-icon
+        class="custom-mat-icon"
+        mat-expansion-indicator
+        matTooltip="click aca para buscar paciente"
+        >search</mat-icon
+      >
+    </mat-expansion-panel-header>
 
-                        </ng-container>
-                        <ng-container matColumnDef="numHistoria">
-                            <th mat-header-cell *matHeaderCellDef> N° Historia </th>
-                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.IDANAMNESISTEXTO}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="nombre">
-                            <th mat-header-cell *matHeaderCellDef> Nombre </th>
-                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.NOMBRE_PACIENTE}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="cedula">
-                            <th mat-header-cell *matHeaderCellDef> Cedula </th>
-                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.NUMDOCUMENTO}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="telefono">
-                            <th mat-header-cell *matHeaderCellDef> Telefono </th>
-                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.TELEFONO}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="doctor">
-                            <th mat-header-cell *matHeaderCellDef> Doctor </th>
-                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.DOCTOR}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="numAfiliacion">
-                            <th mat-header-cell *matHeaderCellDef> N° Afiliacion </th>
-                            <td mat-cell *matCellDef="let datosPaciente" matTooltip="Haz clic para más detalles">
-                                {{datosPaciente.NUMAFILIACION}} </td>
-                        </ng-container>
+    <mat-card class="cardContenedorBusqueda">
+      <div class="divTituloFila1">
+        <h1>Buscar Paciente</h1>
+      </div>
+      <br />
 
-                        <!-- Aquí puedes agregar más columnas según sea necesario -->
+      <div class="contenedorBusqueda">
+        <div class="divBuscadorSelectFila2">
+          <mat-select
+            class="selectEscogerTipoBusqueda"
+            [(value)]="opcionSeleccionada"
+            (selectionChange)="buscarNombreValorSeleccionado()"
+          >
+            <mat-option *ngFor="let opcion of opciones" [value]="opcion.id">
+              {{ opcion.nombre }}
+            </mat-option>
+          </mat-select>
+        </div>
 
-                        <!-- Fila de encabezado y filas de datos -->
-                        <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
-                        <tr mat-row *matRowDef="let filaSeleccionada; columns: columnasMostradas;"
-                            (click)="onRowClicked(filaSeleccionada)" class="filaClickeable"></tr>
-                    </table>
-                </div>
-            </div>
-        </mat-card>
+        <div class="divBuscadorInput">
+          <input
+            #buscarPacienteInput
+            type="text"
+            placeholder="Buscar"
+            [formControl]="datoPacienteParaBuscarControl"
+            [matAutocomplete]="autoDatosPacienteParaBuscar"
+            class="inputBuscar"
+            style="text-transform: uppercase"
+            (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)"
+          />
+          <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
+            <!--<mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
+              {{ datosPaciente.datoBuscar }}
+            </mat-option>-->
+          </mat-autocomplete>
+        </div>
 
-    </mat-expansion-panel>
-    <mat-expansion-panel *ngIf="mostrarPanelMostrarDatosPersonalesPaciente"
-        class="mostrarDatosPersonalesCompletosPaciente" [expanded]="openorclosePanelMostrarDatosPersonalesPaciente"
-        (opened)="panelMostrarDatosPersonalesOpen()">
-        <mat-expansion-panel-header>
-            <mat-panel-title>
-                {{nombrePaciente}}
-            </mat-panel-title>
-            <mat-panel-description>
-                Datos personales
-            </mat-panel-description>
+        <div class="divBotonesBuscarCancelar">
+          <button
+            mat-raised-button
+            class="botonBuscarPaciente"
+            (click)="buscarPaciente(datoPacienteParaBuscarControl.value)"
+          >
+            Buscar
+          </button>
 
-        </mat-expansion-panel-header>
-        <form class="example-form" [formGroup]="formularioDatosPersonales">
+          <button
+            mat-raised-button
+            class="botonCancelarBuscarPaciente"
+            type="button"
+            (click)="cancelarBusquedaPaciente()"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
 
+      <div class="divContenedorDatosEncontrados">
+        <div class="scrollable-content">
+          <table
+            mat-table
+            [dataSource]="resultadosBusqueda"
+            class="tablaBusquedaPaciente"
+          >
+            <!-- Definición de las columnas de la tabla -->
 
-            <!-- NOMBRES y APELLIDOS -->
-            <div class="name-fields">
-                <mat-form-field appearance="fill" class="name-field">
-                    <mat-label>N° Historia</mat-label>
-                    <input matInput formControlName="IDANAMNESIS_TEXTO" placeholder="N° Historia">
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="name-field">
-                    <mat-label>N° Afiliacion</mat-label>
-                    <input matInput formControlName="NRO_AFILIACION" placeholder="N° Afiliacion">
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="name-field">
-                    <mat-label>Nombre</mat-label>
-                    <input matInput formControlName="NOMBRE_PACIENTE" placeholder="Nombres">
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="name-field">
-                    <mat-label>Cedula</mat-label>
-                    <input matInput formControlName="CEDULA_NUMERO" placeholder="Cedula">
-                </mat-form-field>
-            </div>
-            <!-- NOTA_IMPORTANTE -->
-            <mat-form-field appearance="fill">
-                <mat-label>Telefono</mat-label>
-                <input matInput formControlName="TELF_P" placeholder="Telefono">
-            </mat-form-field>
+            <ng-container matColumnDef="idAnamnesis">
+              <th mat-header-cell *matHeaderCellDef class="columnaIdAnamnesis">
+                N° Historia
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                class="columnaIdAnamnesis"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.IDANAMNESIS }}
+              </td>
+            </ng-container>
 
-            <!-- Otros campos aquí, sigue el mismo patrón -->
+            <ng-container matColumnDef="numHistoria">
+              <th mat-header-cell *matHeaderCellDef>N° Historia</th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.IDANAMNESISTEXTO }}
+              </td>
+            </ng-container>
 
-            <!-- Botones para guardar y cancelar -->
-            <div class="button-container">
-                <button mat-raised-button color="primary" (click)="guardarDatosPersonales()">Guardar</button>
-                <button mat-raised-button color="warn" (click)="cancelarDatosPersonales()">Cancelar</button>
-                <button mat-raised-button color="primary" (click)="mostrarAntecedentes()">Antecedentes</button>
-                <button mat-raised-button color="warn" (click)="mostrarEvolucion()">Evolucion</button>
-            </div>
-        </form>
-    </mat-expansion-panel>
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.NOMBRE_PACIENTE }}
+              </td>
+            </ng-container>
 
+            <ng-container matColumnDef="cedula">
+              <th mat-header-cell *matHeaderCellDef>Cedula</th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.NUMDOCUMENTO }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="telefono">
+              <th mat-header-cell *matHeaderCellDef>Telefono</th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.TELEFONO }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="doctor">
+              <th mat-header-cell *matHeaderCellDef>Doctor</th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.DOCTOR }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="numAfiliacion">
+              <th mat-header-cell *matHeaderCellDef>N° Afiliacion</th>
+              <td
+                mat-cell
+                *matCellDef="let datosPaciente"
+                matTooltip="Haz clic para más detalles"
+              >
+                {{ datosPaciente.NUMAFILIACION }}
+              </td>
+            </ng-container>
+
+            <!-- Fila de encabezado y filas de datos -->
+            <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
+            <tr
+              mat-row
+              *matRowDef="let filaSeleccionada; columns: columnasMostradas"
+              (click)="onRowClicked(filaSeleccionada)"
+              class="filaClickeable"
+            ></tr>
+          </table>
+        </div>
+      </div>
+    </mat-card>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel
+    *ngIf="mostrarPanelMostrarDatosPersonalesPaciente"
+    class="mostrarDatosPersonalesCompletosPaciente"
+    [expanded]="openorclosePanelMostrarDatosPersonalesPaciente"
+    (opened)="panelMostrarDatosPersonalesOpen()"
+  >
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{ nombrePaciente }}
+      </mat-panel-title>
+      <mat-panel-description> Datos personales </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <form class="example-form" [formGroup]="formularioDatosPersonales">
+      <!-- NOMBRES y APELLIDOS -->
+      <div class="name-fields">
+        <mat-form-field appearance="fill" class="name-field">
+          <mat-label>N° Historia</mat-label>
+          <input
+            matInput
+            formControlName="IDANAMNESIS_TEXTO"
+            placeholder="N° Historia"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="name-field">
+          <mat-label>N° Afiliacion</mat-label>
+          <input
+            matInput
+            formControlName="NRO_AFILIACION"
+            placeholder="N° Afiliacion"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="name-field">
+          <mat-label>Nombre</mat-label>
+          <input
+            matInput
+            formControlName="NOMBRE_PACIENTE"
+            placeholder="Nombres"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="name-field">
+          <mat-label>Cedula</mat-label>
+          <input
+            matInput
+            formControlName="CEDULA_NUMERO"
+            placeholder="Cedula"
+          />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Telefono</mat-label>
+        <input matInput formControlName="TELF_P" placeholder="Telefono" />
+      </mat-form-field>
+
+      <!-- Botones para guardar y cancelar -->
+      <div class="button-container">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="guardarDatosPersonales()"
+        >
+          Guardar
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="cancelarDatosPersonales()"
+        >
+          Cancelar
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="mostrarAntecedentes()"
+        >
+          Antecedentes
+        </button>
+        <button mat-raised-button color="warn" (click)="mostrarEvolucion()">
+          Evolucion
+        </button>
+      </div>
+    </form>
+  </mat-expansion-panel>
 </mat-accordion>

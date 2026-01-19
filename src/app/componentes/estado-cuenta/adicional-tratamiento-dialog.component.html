@@ -326,7 +326,11 @@
   </section>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end" class="acciones-dialogo">
+<mat-dialog-actions
+  align="end"
+  class="acciones-dialogo"
+  *ngIf="!ocultarAccionesInferiores"
+>
   <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
   <button class="BotonGuardar" (click)="onAgregar()">Guardar</button>
 </mat-dialog-actions>
