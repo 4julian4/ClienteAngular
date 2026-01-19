@@ -8,13 +8,54 @@
       </div>
     </div>
 
-    <button
-      mat-raised-button
-      class="BotonGuardar boton-agregar-estado"
-      (click)="onAgregarEstadoCuenta()"
-    >
-      Agregar Estado Cuenta
-    </button>
+    <!-- ✅ Zona de acciones a la derecha -->
+    <div class="acciones-estado-cuenta">
+      <!-- ✅ Resumen SOLO en detalle -->
+      <div
+        class="resumen-tratamiento-header"
+        *ngIf="modoVista === 'detalle' && tratamientoSeleccionado"
+      >
+        <span>
+          Fase: <strong>{{ tratamientoSeleccionado.FASE }}</strong>
+        </span>
+        <span>
+          Valor Tratamiento:
+          <strong>{{
+            tratamientoSeleccionado.VALOR_TRATAMIENTO | number : "1.0-0"
+          }}</strong>
+        </span>
+        <span>
+          Mora Actual:
+          <strong>{{
+            tratamientoSeleccionado.MORA_ACTUAL | number : "1.0-0"
+          }}</strong>
+        </span>
+        <span>
+          Mora Total:
+          <strong>{{
+            tratamientoSeleccionado.MORATOTAL | number : "1.0-0"
+          }}</strong>
+        </span>
+      </div>
+
+      <!-- ✅ Volver a la izquierda del botón agregar -->
+      <button
+        mat-stroked-button
+        class="BotonCancelar boton-volver"
+        *ngIf="modoVista === 'detalle'"
+        (click)="volverAlListado()"
+      >
+        Volver al listado
+      </button>
+
+      <button
+        mat-raised-button
+        class="BotonGuardar boton-agregar-estado"
+        (click)="onAgregarEstadoCuenta()"
+      >
+        Agregar Estado Cuenta
+      </button>
+    </div>
   </div>
 
   <mat-card-content>
@@ -30,145 +71,153 @@
       *ngIf="!mostrarMensajeSinEstadoCuenta && modoVista === 'lista'"
     >
       <div class="contenedorEstadoCuenta contenedor-de-la-tabla">
-        <table
-          mat-table
-          class="tabla-tratamientos"
-          [dataSource]="lstRespuestaEstadoCuentaPorPacientePorDoctor"
-        >
-          <!-- FECHA -->
-          <ng-container matColumnDef="FECHA">
-            <th mat-header-cell *matHeaderCellDef>Fecha</th>
-            <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
-              {{ elemento.FECHA | date : "dd-MM-yyyy" }}
-            </td>
-          </ng-container>
+        <div class="tabla-scroll-y">
+          <table
+            mat-table
+            class="tabla-tratamientos"
+            [dataSource]="lstRespuestaEstadoCuentaPorPacientePorDoctor"
+          >
+            <!-- FASE -->
+            <ng-container matColumnDef="FASE">
+              <th mat-header-cell *matHeaderCellDef>Fase</th>
+              <td mat-cell *matCellDef="let elemento">
+                {{ elemento.FASE }}
+              </td>
+            </ng-container>
 
-          <!-- FASE -->
-          <ng-container matColumnDef="FASE">
-            <th mat-header-cell *matHeaderCellDef>Fase</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.FASE }}
-            </td>
-          </ng-container>
+            <!-- FECHA INICIO -->
+            <ng-container matColumnDef="FECHA_INICIO">
+              <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
+              <td mat-cell *matCellDef="let elemento">
+                {{ elemento.FECHA_INICIO | date : "dd-MM-yyyy" }}
+              </td>
+            </ng-container>
 
-          <!-- VALOR TRATAMIENTO -->
-          <ng-container matColumnDef="VALOR_TRATAMIENTO">
-            <th mat-header-cell *matHeaderCellDef>Valor Tratamiento</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.VALOR_TRATAMIENTO | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <!-- ABONO -->
-          <ng-container matColumnDef="ABONO">
-            <th mat-header-cell *matHeaderCellDef>Abono</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.ABONO | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <!-- MORA ACTUAL -->
-          <ng-container matColumnDef="MORA_ACTUAL">
-            <th mat-header-cell *matHeaderCellDef>Mora Actual</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.MORA_ACTUAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <!-- MORA TOTAL -->
-          <ng-container matColumnDef="MORATOTAL">
-            <th mat-header-cell *matHeaderCellDef>Mora Total</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.MORATOTAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <!-- NUMERO HISTORIA -->
-          <ng-container matColumnDef="NUMERO_HISTORIA">
-            <th mat-header-cell *matHeaderCellDef>N° Historia</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.NUMERO_HISTORIA }}
-            </td>
-          </ng-container>
-
-          <!-- TELEFONO -->
-          <ng-container matColumnDef="TELEFONO">
-            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.TELEFONO }}
-            </td>
-          </ng-container>
-
-          <!-- FECHA INICIO -->
-          <ng-container matColumnDef="FECHA_INICIO">
-            <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.FECHA_INICIO | date : "dd-MM-yyyy" }}
-            </td>
-          </ng-container>
-
-          <!-- ACCIONES -->
-          <ng-container matColumnDef="ACCIONES">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let fila">
-              <button
-                mat-icon-button
-                [matMenuTriggerFor]="menuAccionesTratamiento"
-                (click)="
-                  $event.stopPropagation(); seleccionarTratamiento(fila, false)
-                "
+            <!-- VALOR TRATAMIENTO (abreviado: Valor T) -->
+            <ng-container matColumnDef="VALOR_TRATAMIENTO">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="col-num"
+                matTooltip="Valor Tratamiento"
               >
-                <mat-icon>more_vert</mat-icon>
-              </button>
+                Valor Trat
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.VALOR_TRATAMIENTO | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-              <mat-menu #menuAccionesTratamiento="matMenu">
+            <!-- ABONO (abreviado: T Abonado) -->
+            <ng-container matColumnDef="ABONO">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="col-num"
+                matTooltip="Total abono"
+              >
+                Total Abonado
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.ABONO | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- MORA ACTUAL -->
+            <ng-container matColumnDef="MORA_ACTUAL">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="col-num"
+                matTooltip="Mora actual"
+              >
+                Mora Actual
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.MORA_ACTUAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- MORA TOTAL (pero rotulado como Saldo T) -->
+            <ng-container matColumnDef="MORATOTAL">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="col-num"
+                matTooltip="Saldo total"
+              >
+                Saldo Total
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.MORATOTAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- ACCIONES -->
+            <ng-container matColumnDef="ACCIONES">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let fila">
                 <button
-                  mat-menu-item
-                  (click)="seleccionarTratamiento(fila, true)"
+                  mat-icon-button
+                  [matMenuTriggerFor]="menuAccionesTratamiento"
+                  (click)="
+                    $event.stopPropagation();
+                    seleccionarTratamiento(fila, false)
+                  "
                 >
-                  <mat-icon>receipt_long</mat-icon>
-                  <span>Ver pagos detallados</span>
+                  <mat-icon>more_vert</mat-icon>
                 </button>
 
-                <button mat-menu-item (click)="onAbonarTratamiento(fila)">
-                  <mat-icon>attach_money</mat-icon>
-                  <span>Abonar al tratamiento</span>
-                </button>
+                <mat-menu #menuAccionesTratamiento="matMenu">
+                  <button
+                    mat-menu-item
+                    (click)="seleccionarTratamiento(fila, true)"
+                  >
+                    <mat-icon>receipt_long</mat-icon>
+                    <span>Ver pagos detallados</span>
+                  </button>
 
-                <button mat-menu-item (click)="onAdicionalTratamiento(fila)">
-                  <mat-icon>add_circle_outline</mat-icon>
-                  <span>Adicionales del tratamiento</span>
-                </button>
+                  <button mat-menu-item (click)="onAbonarTratamiento(fila)">
+                    <mat-icon>attach_money</mat-icon>
+                    <span>Abonar al tratamiento</span>
+                  </button>
 
-                <mat-divider></mat-divider>
+                  <button mat-menu-item (click)="onAdicionalTratamiento(fila)">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    <span>Adicionales del tratamiento</span>
+                  </button>
 
-                <!-- ✅ Editar -->
-                <button mat-menu-item (click)="onEditarEstadoCuenta(fila)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Editar Estado de Cuenta</span>
-                </button>
+                  <mat-divider></mat-divider>
 
-                <!-- ✅ Borrar -->
-                <button mat-menu-item (click)="onBorrarEstadoCuenta(fila)">
-                  <mat-icon>delete</mat-icon>
-                  <span>Borrar Estado de Cuenta</span>
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
+                  <button mat-menu-item (click)="onEditarEstadoCuenta(fila)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar Estado de Cuenta</span>
+                  </button>
 
-          <tr
-            mat-header-row
-            *matHeaderRowDef="columnasMostradasTratamientosListado"
-          ></tr>
+                  <button mat-menu-item (click)="onBorrarEstadoCuenta(fila)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Borrar Estado de Cuenta</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
 
-          <tr
-            mat-row
-            *matRowDef="let fila; columns: columnasMostradasTratamientosListado"
-            (click)="onRowClick(fila)"
-            [class.fila-seleccionada]="tratamientoSeleccionado === fila"
-          ></tr>
-        </table>
+            <tr
+              mat-header-row
+              *matHeaderRowDef="columnasMostradasTratamientosListado"
+            ></tr>
+
+            <tr
+              mat-row
+              *matRowDef="
+                let fila;
+                columns: columnasMostradasTratamientosListado
+              "
+              (click)="onRowClick(fila)"
+              [class.fila-seleccionada]="tratamientoSeleccionado === fila"
+            ></tr>
+          </table>
+        </div>
       </div>
     </ng-container>
 
@@ -178,354 +227,360 @@
     <ng-container
       *ngIf="!mostrarMensajeSinEstadoCuenta && modoVista === 'detalle'"
     >
-      <div class="toolbar-detalle">
-        <button
-          mat-stroked-button
-          class="BotonCancelar boton-volver"
-          (click)="volverAlListado()"
-        >
-          Volver al listado
-        </button>
-
-        <div class="info-tratamiento-detalle" *ngIf="tratamientoSeleccionado">
-          <span>
-            Fase:
-            <strong>{{ tratamientoSeleccionado.FASE }}</strong>
-          </span>
-          <span>
-            Valor Tratamiento:
-            <strong>{{
-              tratamientoSeleccionado.VALOR_TRATAMIENTO | number : "1.0-0"
-            }}</strong>
-          </span>
-          <span>
-            Mora Actual:
-            <strong>{{
-              tratamientoSeleccionado.MORA_ACTUAL | number : "1.0-0"
-            }}</strong>
-          </span>
-          <span>
-            Mora Total:
-            <strong>{{
-              tratamientoSeleccionado.MORATOTAL | number : "1.0-0"
-            }}</strong>
-          </span>
-        </div>
+      <div
+        *ngIf="mostrarMensajeSinAbonos"
+        class="contenedorEstadoCuenta mensaje-sin-abonos"
+      >
+        {{ mensajeSinAbonos }}
       </div>
 
-      <div class="contenedorEstadoCuenta contenedor-de-la-tabla">
+      <div
+        *ngIf="!mostrarMensajeSinAbonos"
+        class="contenedorEstadoCuenta contenedor-de-la-tabla"
+      >
         <!-- ===================== SIN FINANCIAR ===================== -->
-        <table
-          mat-table
-          *ngIf="tipoEstadoCuenta"
-          [dataSource]="resultadosBusquedaEstadoCuentaSinFinanciar"
-        >
-          <ng-container matColumnDef="FECHA">
-            <th mat-header-cell *matHeaderCellDef class="columna-FECHA">
-              Fecha
-            </th>
-            <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
-              {{ elemento.FECHA | date : "dd-MM-yyyy" }}
-            </td>
-          </ng-container>
+        <div class="tabla-scroll-y">
+          <table
+            mat-table
+            *ngIf="tipoEstadoCuenta"
+            [dataSource]="resultadosBusquedaEstadoCuentaSinFinanciar"
+          >
+            <!-- FECHA -->
+            <ng-container matColumnDef="FECHA">
+              <th mat-header-cell *matHeaderCellDef class="columna-FECHA">
+                Fecha
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
+                {{ elemento.FECHA | date : "dd-MM-yyyy" }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="FACTURA">
-            <th mat-header-cell *matHeaderCellDef>Factura</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.FACTURA }}
-            </td>
-          </ng-container>
+            <!-- FACTURA -->
+            <ng-container matColumnDef="FACTURA">
+              <th mat-header-cell *matHeaderCellDef>Factura</th>
+              <td mat-cell *matCellDef="let elemento">
+                {{ elemento.FACTURA }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="VALOR_FACTURA">
-            <th mat-header-cell *matHeaderCellDef>Valor Factura</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.VALOR_FACTURA | number : "1.0-0" }}
-            </td>
-          </ng-container>
+            <!-- RECIBIDO (mostrado como Recibo) -->
+            <ng-container matColumnDef="RECIBO">
+              <th mat-header-cell *matHeaderCellDef>Recibo</th>
+              <td mat-cell *matCellDef="let elemento">{{ elemento.RECIBO }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="RECIBIDO">
-            <th mat-header-cell *matHeaderCellDef>Recibido</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.RECIBIDO }}
-            </td>
-          </ng-container>
+            <!-- ABONO -->
+            <ng-container matColumnDef="ABONO">
+              <th mat-header-cell *matHeaderCellDef class="col-num">Abono</th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.ABONO | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="DESCRIPCION">
-            <th mat-header-cell *matHeaderCellDef class="columna-DESCRIPCION">
-              Descripción
-            </th>
-            <td mat-cell *matCellDef="let elemento" class="columna-DESCRIPCION">
-              {{ elemento.DESCRIPCION }}
-            </td>
-          </ng-container>
+            <!-- ADICIONAL -->
+            <ng-container matColumnDef="ADICIONAL">
+              <th mat-header-cell *matHeaderCellDef class="col-num">
+                Adicional
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.ADICIONAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="ADICIONAL">
-            <th mat-header-cell *matHeaderCellDef>Adicional</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.ADICIONAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="ABONO">
-            <th mat-header-cell *matHeaderCellDef>Abono</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.ABONO | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="NOTACREDITO">
-            <th mat-header-cell *matHeaderCellDef>Nota Crédito</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.NOTACREDITO | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="SALDO_PARCIAL">
-            <th mat-header-cell *matHeaderCellDef>Saldo Parcial</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.SALDO_PARCIAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="RECIBIDO_X_NOMBRE">
-            <th mat-header-cell *matHeaderCellDef class="columna-NOMBREDOCTOR">
-              Recibido por Nombre
-            </th>
-            <td
-              mat-cell
-              *matCellDef="let elemento"
-              class="columna-NOMBREDOCTOR"
-            >
-              {{ elemento.RECIBIDO_X_NOMBRE }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="NOMBRE_RECIBE">
-            <th mat-header-cell *matHeaderCellDef class="columna-NOMBREDOCTOR">
-              Nombre Recibe
-            </th>
-            <td
-              mat-cell
-              *matCellDef="let elemento"
-              class="columna-NOMBREDOCTOR"
-            >
-              {{ elemento.NOMBRE_RECIBE }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="CODIGO_DESCRIPCION">
-            <th mat-header-cell *matHeaderCellDef>Código Descripción</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.CODIGO_DESCRIPCION }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="ACCIONES">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let elemento">
-              <button
-                mat-icon-button
-                [matMenuTriggerFor]="menuPago"
-                (click)="$event.stopPropagation()"
+            <!-- NOTA CREDITO (NC) -->
+            <ng-container matColumnDef="NOTACREDITO">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="col-num"
+                matTooltip="Nota Crédito"
               >
-                <mat-icon>more_vert</mat-icon>
-              </button>
+                NC
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.NOTACREDITO | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-              <mat-menu #menuPago="matMenu">
-                <button mat-menu-item (click)="onAbonarPago(elemento)">
-                  Abonar
-                </button>
-                <button mat-menu-item (click)="onAdicionalPago(elemento)">
-                  Adicionales
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
+            <!-- DESCRIPCION -->
+            <ng-container matColumnDef="DESCRIPCION">
+              <th mat-header-cell *matHeaderCellDef class="columna-DESCRIPCION">
+                Descripción
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let elemento"
+                class="columna-DESCRIPCION"
+              >
+                {{ elemento.DESCRIPCION }}
+              </td>
+            </ng-container>
 
-          <tr
-            mat-header-row
-            *matHeaderRowDef="columnasMostradasEstadoCuentaSinFinanciar"
-          ></tr>
-          <tr
-            mat-row
-            *matRowDef="
-              let fila;
-              columns: columnasMostradasEstadoCuentaSinFinanciar
-            "
-          ></tr>
-        </table>
+            <!-- PARCIAL -->
+            <ng-container matColumnDef="PARCIAL">
+              <th mat-header-cell *matHeaderCellDef class="col-num">Parcial</th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.PARCIAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- SALDO PARCIAL (mostrado como Saldo) -->
+            <ng-container matColumnDef="SALDO_PARCIAL">
+              <th mat-header-cell *matHeaderCellDef class="col-num">Saldo</th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.SALDO_PARCIAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- RECIBIDO POR NOMBRE (mostrado como Doctor) -->
+            <ng-container matColumnDef="RECIBIDO_X_NOMBRE">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="columna-NOMBREDOCTOR"
+              >
+                Doctor
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let elemento"
+                class="columna-NOMBREDOCTOR"
+              >
+                {{ elemento.RECIBIDO_X_NOMBRE }}
+              </td>
+            </ng-container>
+
+            <!-- NOMBRE RECIBE -->
+            <ng-container matColumnDef="NOMBRE_RECIBE">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="columna-NOMBREDOCTOR"
+              >
+                Nombre Recibe
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let elemento"
+                class="columna-NOMBREDOCTOR"
+              >
+                {{ elemento.NOMBRE_RECIBE }}
+              </td>
+            </ng-container>
+
+            <!-- ACCIONES -->
+            <ng-container matColumnDef="ACCIONES">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let elemento">
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="menuPago"
+                  (click)="$event.stopPropagation()"
+                >
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #menuPago="matMenu">
+                  <button mat-menu-item (click)="onAbonarPago(elemento)">
+                    Abonar
+                  </button>
+                  <button mat-menu-item (click)="onAdicionalPago(elemento)">
+                    Adicionales
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="columnasMostradasEstadoCuentaSinFinanciar"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="
+                let fila;
+                columns: columnasMostradasEstadoCuentaSinFinanciar
+              "
+            ></tr>
+          </table>
+        </div>
 
         <!-- ===================== FINANCIADO ===================== -->
-        <table
-          mat-table
-          *ngIf="!tipoEstadoCuenta"
-          [dataSource]="resultadosBusquedaEstadoCuentaFinanciado"
-        >
-          <ng-container matColumnDef="N_CUOTA">
-            <th mat-header-cell *matHeaderCellDef>N° Cuota</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.N_CUOTA }}
-            </td>
-          </ng-container>
+        <div class="tabla-scroll-y">
+          <table
+            mat-table
+            *ngIf="!tipoEstadoCuenta"
+            [dataSource]="resultadosBusquedaEstadoCuentaFinanciado"
+          >
+            <!-- N° CUOTA -->
+            <ng-container matColumnDef="N_CUOTA">
+              <th mat-header-cell *matHeaderCellDef>N° Cuota</th>
+              <td mat-cell *matCellDef="let elemento">
+                {{ elemento.N_CUOTA }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="FECHA">
-            <th mat-header-cell *matHeaderCellDef class="columna-FECHA">
-              Fecha
-            </th>
-            <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
-              {{ elemento.FECHA | date : "dd-MM-yyyy" }}
-            </td>
-          </ng-container>
+            <!-- FECHA -->
+            <ng-container matColumnDef="FECHA">
+              <th mat-header-cell *matHeaderCellDef class="columna-FECHA">
+                Fecha
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
+                {{ elemento.FECHA | date : "dd-MM-yyyy" }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="FACTURA">
-            <th mat-header-cell *matHeaderCellDef>Factura</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.FACTURA }}
-            </td>
-          </ng-container>
+            <!-- FACTURA -->
+            <ng-container matColumnDef="FACTURA">
+              <th mat-header-cell *matHeaderCellDef>Factura</th>
+              <td mat-cell *matCellDef="let elemento">
+                {{ elemento.FACTURA }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="VALOR_FACTURA">
-            <th mat-header-cell *matHeaderCellDef>Valor Factura</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.VALOR_FACTURA | number : "1.0-0" }}
-            </td>
-          </ng-container>
+            <!-- RECIBIDO (mostrado como Recibo) -->
+            <ng-container matColumnDef="RECIBO">
+              <th mat-header-cell *matHeaderCellDef>Recibo</th>
+              <td mat-cell *matCellDef="let elemento">{{ elemento.RECIBO }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="RECIBIDO">
-            <th mat-header-cell *matHeaderCellDef>Recibido</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.RECIBIDO }}
-            </td>
-          </ng-container>
+            <!-- ABONO -->
+            <ng-container matColumnDef="ABONO">
+              <th mat-header-cell *matHeaderCellDef class="col-num">Abono</th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.ABONO | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="DEBEABONAR">
-            <th mat-header-cell *matHeaderCellDef>Debe Abonar</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.DEBEABONAR | number : "1.0-0" }}
-            </td>
-          </ng-container>
+            <!-- ADICIONAL -->
+            <ng-container matColumnDef="ADICIONAL">
+              <th mat-header-cell *matHeaderCellDef class="col-num">
+                Adicional
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.ADICIONAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="ABONO">
-            <th mat-header-cell *matHeaderCellDef>Abono</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.ABONO | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="ADICIONAL">
-            <th mat-header-cell *matHeaderCellDef>Adicional</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.ADICIONAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="NOTACREDITO">
-            <th mat-header-cell *matHeaderCellDef>Nota Crédito</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.NOTACREDITO | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="CODIGO_DESCRIPCION">
-            <th mat-header-cell *matHeaderCellDef>Código Descripción</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.CODIGO_DESCRIPCION }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="DESCRIPCION">
-            <th mat-header-cell *matHeaderCellDef class="columna-DESCRIPCION">
-              Descripción
-            </th>
-            <td mat-cell *matCellDef="let elemento" class="columna-DESCRIPCION">
-              {{ elemento.DESCRIPCION }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="PARCIAL">
-            <th mat-header-cell *matHeaderCellDef>Parcial</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.PARCIAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="SALDO_PARCIAL">
-            <th mat-header-cell *matHeaderCellDef>Saldo Parcial</th>
-            <td mat-cell *matCellDef="let elemento">
-              {{ elemento.SALDO_PARCIAL | number : "1.0-0" }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="RECIBIDO_X_NOMBRE">
-            <th mat-header-cell *matHeaderCellDef class="columna-NOMBREDOCTOR">
-              Recibido por Nombre
-            </th>
-            <td
-              mat-cell
-              *matCellDef="let elemento"
-              class="columna-NOMBREDOCTOR"
-            >
-              {{ elemento.RECIBIDO_X_NOMBRE }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="NOMBRE_RECIBE">
-            <th mat-header-cell *matHeaderCellDef class="columna-NOMBREDOCTOR">
-              Nombre Recibe
-            </th>
-            <td
-              mat-cell
-              *matCellDef="let elemento"
-              class="columna-NOMBREDOCTOR"
-            >
-              {{ elemento.NOMBRE_RECIBE }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="ACCIONES">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let elemento">
-              <button
-                mat-icon-button
-                [matMenuTriggerFor]="menuPago"
-                (click)="$event.stopPropagation()"
+            <!-- NOTA CREDITO (NC) -->
+            <ng-container matColumnDef="NOTACREDITO">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="col-num"
+                matTooltip="Nota Crédito"
               >
-                <mat-icon>more_vert</mat-icon>
-              </button>
+                NC
+              </th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.NOTACREDITO | number : "1.0-0" }}
+              </td>
+            </ng-container>
 
-              <mat-menu #menuPago="matMenu">
-                <!--<button mat-menu-item (click)="onAbonarPago(elemento)">
-                  Abonar
-                </button>
-                <button mat-menu-item (click)="onAdicionalPago(elemento)">
-                  Adicionales
-                </button>
-                <mat-divider></mat-divider>-->
+            <!-- DESCRIPCION -->
+            <ng-container matColumnDef="DESCRIPCION">
+              <th mat-header-cell *matHeaderCellDef class="columna-DESCRIPCION">
+                Descripción
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let elemento"
+                class="columna-DESCRIPCION"
+              >
+                {{ elemento.DESCRIPCION }}
+              </td>
+            </ng-container>
 
+            <!-- PARCIAL -->
+            <ng-container matColumnDef="PARCIAL">
+              <th mat-header-cell *matHeaderCellDef class="col-num">Parcial</th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.PARCIAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- SALDO PARCIAL (mostrado como Saldo) -->
+            <ng-container matColumnDef="SALDO_PARCIAL">
+              <th mat-header-cell *matHeaderCellDef class="col-num">Saldo</th>
+              <td mat-cell *matCellDef="let elemento" class="col-num">
+                {{ elemento.SALDO_PARCIAL | number : "1.0-0" }}
+              </td>
+            </ng-container>
+
+            <!-- RECIBIDO POR NOMBRE (mostrado como Doctor) -->
+            <ng-container matColumnDef="RECIBIDO_X_NOMBRE">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="columna-NOMBREDOCTOR"
+              >
+                Doctor
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let elemento"
+                class="columna-NOMBREDOCTOR"
+              >
+                {{ elemento.RECIBIDO_X_NOMBRE }}
+              </td>
+            </ng-container>
+
+            <!-- NOMBRE RECIBE -->
+            <ng-container matColumnDef="NOMBRE_RECIBE">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="columna-NOMBREDOCTOR"
+              >
+                Nombre Recibe
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let elemento"
+                class="columna-NOMBREDOCTOR"
+              >
+                {{ elemento.NOMBRE_RECIBE }}
+              </td>
+            </ng-container>
+
+            <!-- ACCIONES -->
+            <ng-container matColumnDef="ACCIONES">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let elemento">
                 <button
-                  mat-menu-item
-                  *ngIf="(elemento.IDENTIFICADOR ?? 0) > 0"
-                  (click)="onBorrarAbono(elemento)"
+                  mat-icon-button
+                  [matMenuTriggerFor]="menuPago"
+                  (click)="$event.stopPropagation()"
                 >
-                  <mat-icon>delete</mat-icon>
-                  <span>Borrar</span>
+                  <mat-icon>more_vert</mat-icon>
                 </button>
-              </mat-menu>
-            </td>
-          </ng-container>
 
-          <tr
-            mat-header-row
-            *matHeaderRowDef="columnasMostradasEstadoCuentaFinanciado"
-          ></tr>
-          <tr
-            mat-row
-            *matRowDef="
-              let fila;
-              columns: columnasMostradasEstadoCuentaFinanciado
-            "
-          ></tr>
-        </table>
+                <mat-menu #menuPago="matMenu">
+                  <button
+                    mat-menu-item
+                    *ngIf="(elemento.IDENTIFICADOR ?? 0) > 0"
+                    (click)="onBorrarAbono(elemento)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                    <span>Borrar</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="columnasMostradasEstadoCuentaFinanciado"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="
+                let fila;
+                columns: columnasMostradasEstadoCuentaFinanciado
+              "
+            ></tr>
+          </table>
+        </div>
       </div>
     </ng-container>
   </mat-card-content>

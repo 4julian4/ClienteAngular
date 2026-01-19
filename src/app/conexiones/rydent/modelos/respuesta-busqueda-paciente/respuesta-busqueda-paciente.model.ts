@@ -1,11 +1,17 @@
 export class RespuestaBusquedaPaciente {
-    IDANAMNESIS: number=0;
-    NOMBRE_PACIENTE: string="";
-    IDANAMNESISTEXTO: string="";
-    NUMDOCUMENTO: string="";
-    DOCTOR: string="";
-    PERFIL: string="";
-    NUMAFILIACION: string="";
-    TELEFONO: string="";
+  IDANAMNESIS: number = 0;
+  NOMBRE_PACIENTE: string = '';
+  IDANAMNESISTEXTO: string = '';
+  NUMDOCUMENTO: string = '';
+  DOCTOR: string = '';
+  PERFIL: string = '';
+  NUMAFILIACION: string = '';
+  TELEFONO: string = '';
 }
 
+export interface PacienteHeaderInfo {
+  nombre: string;
+  documento: string;
+  telefono: string;
+  historia?: string; // opcional si quieres también
+}

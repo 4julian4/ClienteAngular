@@ -41,6 +41,8 @@ import {
   InsertarAbonoResponse,
   InsertarAbonoRequest,
   AbonoTipoPagoDto,
+  ConsultarSugeridosAbonoResponse,
+  ConsultarSugeridosAbonoRequest,
 } from './preparar-insertar-abono.dto';
 import {
   BorrarAbonoRequest,
@@ -70,6 +72,9 @@ export class EstadoCuentaCommandsService {
 
   public borrarEstadoCuentaEmit =
     new EventEmitter<BorrarEstadoCuentaResponse>();
+
+  public consultarSugeridosAbonoEmit =
+    new EventEmitter<ConsultarSugeridosAbonoResponse>();
 
   public prepararBorrarAbonoEmit =
     new EventEmitter<PrepararBorrarAbonoResponse>();
@@ -318,6 +323,39 @@ export class EstadoCuentaCommandsService {
           this.borrarEstadoCuentaEmit.emit(mapped);
         } catch (e) {
           console.error('Error procesando RespuestaBorrarEstadoCuenta:', e);
+        }
+      }
+    );
+
+    // =====================================
+    // ✅ CONSULTAR SUGERIDOS ABONO (por doctor seleccionado)
+    // =====================================
+    this.signalRService.off('RespuestaConsultarSugeridosAbono');
+    this.signalRService.on(
+      'RespuestaConsultarSugeridosAbono',
+      (_frontId: string, payload: string) => {
+        try {
+          const decompressed =
+            this.descomprimirDatosService.decompressString(payload);
+          const raw = JSON.parse(decompressed) as any;
+
+          const mapped: ConsultarSugeridosAbonoResponse = {
+            ok: raw.ok ?? raw.Ok ?? false,
+            mensaje: raw.mensaje ?? raw.Mensaje ?? null,
+
+            ocultarFactura: raw.ocultarFactura ?? raw.OcultarFactura ?? false,
+            reciboSugerido: raw.reciboSugerido ?? raw.ReciboSugerido ?? null,
+            facturaSugerida: raw.facturaSugerida ?? raw.FacturaSugerida ?? null,
+            idResolucionDian:
+              raw.idResolucionDian ?? raw.IdResolucionDian ?? null,
+          };
+
+          this.consultarSugeridosAbonoEmit.emit(mapped);
+        } catch (e) {
+          console.error(
+            'Error procesando RespuestaConsultarSugeridosAbono:',
+            e
+          );
         }
       }
     );
@@ -756,6 +794,29 @@ export class EstadoCuentaCommandsService {
 
     await this.signalRService.invoke(
       'BorrarEstadoCuenta',
+      clienteIdDestino,
+      JSON.stringify(payloadToWorker)
+    );
+  }
+
+  // =====================================
+  // ✅ CONSULTAR SUGERIDOS ABONO
+  // =====================================
+  async consultarSugeridosAbono(
+    clienteIdDestino: string,
+    req: ConsultarSugeridosAbonoRequest
+  ): Promise<void> {
+    await this.signalRService.ensureConnection();
+
+    const payloadToWorker = {
+      IdPaciente: req.idPaciente,
+      Fase: req.fase,
+      IdDoctorTratante: req.idDoctorTratante,
+      IdDoctorSeleccionado: req.idDoctorSeleccionado,
+    };
+
+    await this.signalRService.invoke(
+      'ConsultarSugeridosAbono',
       clienteIdDestino,
       JSON.stringify(payloadToWorker)
     );

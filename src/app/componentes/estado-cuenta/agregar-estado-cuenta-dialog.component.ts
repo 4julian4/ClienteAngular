@@ -1,5 +1,12 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
   CrearEstadoCuentaRequest,
@@ -21,6 +28,30 @@ export interface AgregarEstadoCuentaDialogData {
 
   modo?: 'crear' | 'editar';
   prefill?: Partial<CrearEstadoCuentaRequest>;
+}
+
+/**
+ * ✅ Validador: exige que el valor sea número y sea > 0
+ * - Si está vacío => deja que required se encargue
+ * - Si es 0 o menor => error { mayorQueCero: true }
+ */
+function mayorQueCero(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const raw = (control.value ?? '').toString().trim();
+
+    // vacío => lo maneja required (si lo tienes)
+    if (raw === '') return null;
+
+    // limpia puntos y todo lo que no sea dígito
+    const limpio = raw.replace(/\./g, '').replace(/[^\d]/g, '');
+    const n = parseInt(limpio, 10);
+
+    if (!Number.isFinite(n) || n <= 0) {
+      return { mayorQueCero: true };
+    }
+
+    return null;
+  };
 }
 
 @Component({
@@ -49,9 +80,13 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
       fechaInicio: [fechaLocal, Validators.required],
       tipoEstado: ['SIN_FINANCIAR', Validators.required],
 
-      // string para formateo
-      costoTratamiento: ['0', [Validators.required]],
-      descripcion: ['', Validators.required],
+      // ✅ requerido + debe ser > 0
+      // ojo: lo manejamos como string por tu formateo
+      costoTratamiento: ['0', [Validators.required, mayorQueCero()]],
+
+      // ✅ NO obligatoria
+      descripcion: [''],
+
       observaciones: [''],
 
       convenio: [null, Validators.required],
@@ -183,10 +218,23 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
     return parseInt(limpio, 10) || 0;
   }
 
+  /**
+   * ✅ IMPORTANTE:
+   * - Si el usuario borra todo => dejamos '' para que dispare required
+   * - Si hay valor => lo formateamos y guardamos como string numérica limpia
+   */
   formatearNumero(event: any, campo: string): void {
     const input = event.target as HTMLInputElement;
-    let valor = input.value;
+    let valor = (input.value ?? '').toString();
 
+    // si lo borró completo
+    if (valor.trim() === '') {
+      this.formEstado.get(campo)?.setValue('', { emitEvent: true });
+      input.value = '';
+      return;
+    }
+
+    // solo dígitos
     valor = valor.replace(/[^\d]/g, '');
 
     const numeroLimpio = parseInt(valor, 10) || 0;
@@ -280,19 +328,26 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
 
     const factura: string = (raw.compromisoCompraventa ?? '').toString().trim();
 
+    // ✅ DESCRIPCIÓN POR DEFECTO si viene vacía:
+    // Ej: "Tratamiento 1", "Tratamiento 2" según la fase.
+    const descripcionIngresada = (raw.descripcion ?? '').toString().trim();
+    const descripcionFinal =
+      descripcionIngresada !== ''
+        ? descripcionIngresada
+        : `Tratamiento ${this.data.siguienteFase}`;
+
     const req: CrearEstadoCuentaRequest = {
       pacienteId: this.data.pacienteId,
       idDoctor: this.data.idDoctor,
 
-      // en crear: viene del worker como "siguienteFase"
-      // en editar: le pasamos la fase del tratamiento a editar
+      // fase del tratamiento
       fase: this.data.siguienteFase,
 
       // tu backend dijo que si falta, lo consulta
       numeroHistoria: this.data.prefill?.numeroHistoria ?? '',
 
       fechaInicio: raw.fechaInicio,
-      descripcion: raw.descripcion,
+      descripcion: descripcionFinal, // ✅ usamos la default si venía vacía
       observaciones: raw.observaciones,
 
       factura,
@@ -306,7 +361,7 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
       valorCuota: Number(raw.valorCuota ?? 0),
 
       intervaloTiempo,
-      intervaloIni: intervaloTiempo, // si luego tienes intervalo inicial real, lo cambias aquí
+      intervaloIni: intervaloTiempo,
 
       convenioId,
 

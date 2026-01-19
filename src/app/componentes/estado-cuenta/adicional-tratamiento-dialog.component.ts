@@ -453,4 +453,8 @@ export class AdicionalTratamientoDialogComponent implements OnInit {
     const v = Number(m?.valor ?? m?.costo ?? 0);
     return Number.isFinite(v) ? Math.floor(v) : 0;
   }
+
+  get ocultarAccionesInferiores(): boolean {
+    return this.mostrarEditorAdicional || this.mostrarEditorOtro;
+  }
 }

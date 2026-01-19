@@ -4,18 +4,15 @@
   border-radius: 15px;
   border: 1px solid #ddd;
   margin: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: 0.3s;
   max-width: 100%;
   box-sizing: border-box;
 }
 
 .cardContenedorBusqueda:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 }
-
-
-
 
 .contenedorBusqueda {
   display: flex;
@@ -39,7 +36,7 @@
   align-items: center;
 }
 
-.divBotonesBuscarCancelar{
+.divBotonesBuscarCancelar {
   flex: 0 0 10%; /* Ocupa el 60% del contenedor */
   display: flex;
   gap: 10px; /* Espacio entre el input y los botones */
@@ -55,18 +52,15 @@
 
 .botonBuscarPaciente,
 .botonCancelarBuscarPaciente {
-    margin-left: 10px;
-    background-color: rgb(28, 197, 244) !important;
-    color: white !important;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2), inset 0px 0px 10px rgba(0, 0, 0, 0.5) !important;; // Combinar las sombras
-    border-radius: 5px !important;; // Agregar bordes redondeados a los botones
-    padding: 10px 20px !important; // Aumentar el relleno de los botones
-    transition: all 0.3s ease !important;; // Agregar una transición suave a los botones
-
+  margin-left: 10px;
+  background-color: rgb(28, 197, 244) !important;
+  color: white !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0px 0px 10px rgba(0, 0, 0, 0.5) !important; // Combinar las sombras
+  border-radius: 5px !important; // Agregar bordes redondeados a los botones
+  padding: 10px 20px !important; // Aumentar el relleno de los botones
+  transition: all 0.3s ease !important; // Agregar una transición suave a los botones
 }
-
-
-
 
 .botonCancelarBuscarPaciente {
   margin-left: 5px; /* Mayor margen para el botón Cancelar */
@@ -83,17 +77,17 @@
 }
 
 .nombrePacienteSeleccionado {
-  color: black; 
+  color: black;
   font-size: 1.5em;
 }
 
-.notaImportantePaciente{
+.notaImportantePaciente {
   color: red;
-  font-size: 1.0em;
+  font-size: 1em;
 }
 
 .scrollable-content {
-  max-height: calc(100vh - 150px); /* Ajusta este valor según el tamaño de tus botones */
+  max-height: calc(100vh - 150px);
   overflow-y: auto;
 }
 
@@ -107,7 +101,7 @@
 }
 
 .name-field:not(:last-child) {
-  margin-right: 10px; /* Define el espacio horizontal entre los campos */
+  margin-right: 10px;
 }
 
 .divBuscadorSelect mat-label,
@@ -115,7 +109,7 @@
 .divBuscadorInput mat-label,
 .divBuscadorInput input {
   height: 30px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
 }
 
@@ -129,36 +123,98 @@
   color: white;
 }
 
+/* ===========================================================
+   ✅ HEADER DEL PANEL (Nombre + CC/Tel + Nota + Lupa a la derecha)
+   =========================================================== */
 
-/* Media Queries */
+/* ✅ Mantiene el nombre SIN empujar todo al extremo derecho */
+::ng-deep .buscarPaciente .mat-expansion-panel-header-title {
+  flex: 0 0 auto !important; /* clave */
+  margin-right: 10px; /* espacio entre nombre y meta */
+  min-width: 0;
+}
+
+/* ✅ La descripción ocupa el espacio sobrante para empujar la lupa al final */
+::ng-deep .buscarPaciente .mat-expansion-panel-header-description {
+  flex: 1 1 auto !important; /* clave para que la lupa quede a la derecha */
+  justify-content: flex-start !important;
+  margin-left: 10px; /* evita que quede pegado al nombre */
+  margin-right: 10px; /* respiración antes de la lupa */
+  min-width: 0;
+}
+
+/* ✅ Asegura que la lupa se quede SIEMPRE a la derecha */
+::ng-deep .buscarPaciente .custom-mat-icon {
+  margin-left: auto !important;
+}
+
+/* ✅ Contenedor interno para separar CC/Tel de la nota importante */
+.headerPacienteMeta {
+  display: flex;
+  align-items: center;
+  gap: 18px; /* más separación entre CC/Tel y Nota */
+  flex-wrap: wrap; /* en pantallas pequeñas baja a otra línea */
+}
+
+/* CC/Tel */
+.infoPacienteHeader {
+  white-space: nowrap;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Nota importante (mantiene el color rojo que ya tenías arriba) */
+.notaImportantePaciente {
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+/* ✅ Responsive: en móvil la meta baja debajo del nombre */
+@media (max-width: 600px) {
+  ::ng-deep .buscarPaciente .mat-expansion-panel-header-content {
+    flex-wrap: wrap;
+  }
+
+  ::ng-deep .buscarPaciente .mat-expansion-panel-header-description {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* ===========================================================
+   Media Queries tuyas
+   =========================================================== */
 
 @media screen and (max-width: 1224px) and (min-width: 768px) {
   .contenedorBusqueda {
     display: flex;
-    flex-direction: row; /* Mantén los elementos en una fila */
-    align-items: center; /* Alinea los elementos verticalmente en el centro */
-    justify-content: space-between; /* Distribuye el espacio entre los elementos */
-    flex-wrap: nowrap; /* Evita que los elementos se envuelvan a la siguiente línea */
-    overflow: hidden; /* Evita que los elementos se salgan del contenedor */
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
-  .divBuscadorSelectFila2, .divBuscadorInput, .divBotonesBuscarCancelar {
-    flex: 1; /* Asegúrate de que los elementos ocupen el espacio disponible */
-    min-width: 0; /* Permite que los elementos se reduzcan en tamaño si es necesario */
-    margin: 0 5px; /* Añade un margen para separar los elementos */
+  .divBuscadorSelectFila2,
+  .divBuscadorInput,
+  .divBotonesBuscarCancelar {
+    flex: 1;
+    min-width: 0;
+    margin: 0 5px;
   }
 
-  .botonBuscarPaciente, .botonCancelarBuscarPaciente {
-    flex: 1; /* Asegúrate de que los botones ocupen el espacio disponible */
-    min-width: 0; /* Permite que los botones se reduzcan en tamaño si es necesario */
+  .botonBuscarPaciente,
+  .botonCancelarBuscarPaciente {
+    flex: 1;
+    min-width: 0;
   }
 }
 
 /* Para móviles */
 @media screen and (max-width: 600px) {
   .contenedorBusqueda {
-    flex-direction: column; /* Coloca los elementos en una sola columna */
-    gap: 5px; /* Menos espacio entre los elementos */
+    flex-direction: column;
+    gap: 5px;
     overflow: auto;
   }
 
@@ -169,13 +225,13 @@
 
   .botonBuscarPaciente,
   .botonCancelarBuscarPaciente {
-    width: 100%; /* Los botones ocupan todo el ancho disponible */
+    width: 100%;
     padding: 8px;
     font-size: 12px;
   }
 
   .name-fields {
-    flex-direction: column; /* Los campos de nombre se apilan en una columna */
+    flex-direction: column;
     margin-right: 0;
   }
 
@@ -183,7 +239,7 @@
     font-size: 10px;
   }
 
-  .nombrePacienteSeleccionado{
+  .nombrePacienteSeleccionado {
     font-size: 14px;
   }
 
@@ -193,14 +249,14 @@
 
   .selectEscogerTipoBusqueda {
     margin-left: 0;
-    width: 100%; /* El select ocupa todo el ancho disponible */
-    min-width: unset; /* Anula el ancho mínimo */
+    width: 100%;
+    min-width: unset;
   }
 
   .divBuscadorSelectFila2,
   .divBuscadorInput,
   .divBotonesBuscarCancelar {
-    width: 100%; /* Los divs ocupan todo el ancho disponible */
+    width: 100%;
     flex: 1 1 100%;
   }
 }

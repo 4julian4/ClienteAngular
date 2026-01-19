@@ -1,14 +1,45 @@
-import { Component, ElementRef, Input, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  Output,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatExpansionPanel } from '@angular/material/expansion';
-import { Antecedentes, AntecedentesService } from 'src/app/conexiones/rydent/modelos/antecedentes';
-import { DatosPersonales, DatosPersonalesService } from 'src/app/conexiones/rydent/modelos/datos-personales';
-import { RespuestaBusquedaPaciente, RespuestaBusquedaPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
-import { RespuestaEvolucionPaciente, RespuestaEvolucionPacienteService } from 'src/app/conexiones/rydent/modelos/respuesta-evolucion-paciente';
-import { RespuestaObtenerDoctor, RespuestaObtenerDoctorService } from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
-import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
+import {
+  Antecedentes,
+  AntecedentesService,
+} from 'src/app/conexiones/rydent/modelos/antecedentes';
+import {
+  DatosPersonales,
+  DatosPersonalesService,
+} from 'src/app/conexiones/rydent/modelos/datos-personales';
+import {
+  RespuestaBusquedaPaciente,
+  RespuestaBusquedaPacienteService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-paciente';
+import {
+  RespuestaEvolucionPaciente,
+  RespuestaEvolucionPacienteService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-evolucion-paciente';
+import {
+  RespuestaObtenerDoctor,
+  RespuestaObtenerDoctorService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-obtener-doctor';
+import {
+  SedesConectadas,
+  SedesConectadasService,
+} from 'src/app/conexiones/sedes-conectadas';
 import { Router } from '@angular/router';
-import { ListadoItem, RespuestaDatosPacientesParaLaAgenda, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import {
+  ListadoItem,
+  RespuestaDatosPacientesParaLaAgenda,
+  RespuestaPinService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { RespuestaDatosPersonales } from 'src/app/conexiones/rydent/modelos/respuesta-datos-personales';
 import { Observable, map, startWith } from 'rxjs';
 import { MensajesUsuariosService } from '../mensajes-usuarios';
@@ -16,56 +47,85 @@ import { MensajesUsuariosService } from '../mensajes-usuarios';
 @Component({
   selector: 'app-buscar-hitoria-clinica',
   templateUrl: './buscar-hitoria-clinica.component.html',
-  styleUrls: ['./buscar-hitoria-clinica.component.scss']
+  styleUrls: ['./buscar-hitoria-clinica.component.scss'],
 })
 export class BuscarHitoriaClinicaComponent implements OnInit {
-  // @ViewChildren(MatExpansionPanel) paneles: QueryList<MatExpansionPanel>;
-  //@Input() idSedeActualSignalR: string = '';
-  @Output() resultadoBusquedaDatosPersonalesCompletos: RespuestaDatosPersonales = new RespuestaDatosPersonales();
+  @Output()
+  resultadoBusquedaDatosPersonalesCompletos: RespuestaDatosPersonales =
+    new RespuestaDatosPersonales();
+
   formularioDatosPersonales!: FormGroup;
   sedeConectadaActual: SedesConectadas = new SedesConectadas();
-  respuestaObtenerDoctorModel: RespuestaObtenerDoctor = new RespuestaObtenerDoctor();
-  respuestaObtenerDoctorSiLoCambianModel: RespuestaObtenerDoctor = new RespuestaObtenerDoctor();
+  respuestaObtenerDoctorModel: RespuestaObtenerDoctor =
+    new RespuestaObtenerDoctor();
+  respuestaObtenerDoctorSiLoCambianModel: RespuestaObtenerDoctor =
+    new RespuestaObtenerDoctor();
   resultadosBusqueda: RespuestaBusquedaPaciente[] = [];
 
   resultadoBusquedaAntecedentes: Antecedentes = new Antecedentes();
-  resultadoBusquedaEvolucionPaciente: RespuestaEvolucionPaciente = new RespuestaEvolucionPaciente();
+  resultadoBusquedaEvolucionPaciente: RespuestaEvolucionPaciente =
+    new RespuestaEvolucionPaciente();
+
   mostrarPanelBuscarPaciente = true;
   openorclosePanelBuscarPaciente = false;
+
   mostrarPanelMostrarDatosPersonalesPaciente = false;
   openorclosePanelMostrarDatosPersonalesPaciente = false;
-  columnasMostradas = ['idAnamnesis', 'numHistoria', 'nombre', 'cedula', 'telefono', 'doctor', 'numAfiliacion']; // Añade aquí los nombres de las columnas que quieres mostrar
+
+  columnasMostradas = [
+    'idAnamnesis',
+    'numHistoria',
+    'nombre',
+    'cedula',
+    'telefono',
+    'doctor',
+    'numAfiliacion',
+  ];
+
   nombreDoctor: string = 'Nombre Doctor';
   nombrePaciente: string = '';
   numeroHistoria: string = '';
+
+  // ✅ NUEVO: para mostrar en el header
+  documentoPaciente: string = '';
+  telefonoPaciente: string = '';
+
   totalPacientes: number = 0;
   panelOpenState = false;
+
   opcionSeleccionada: string = '1';
   nombreValorSeleccionado: string = '';
+
   @ViewChild('valorABuscar') valorABuscar: ElementRef | undefined;
   @ViewChild('buscarPacienteInput') buscarPacienteInput!: ElementRef;
+  @ViewChild('panelBuscarPaciente') panelBuscarPaciente?: MatExpansionPanel;
+
   idAnamnesisParaMenu: number = 0;
   idSedeActualSignalR: string = '';
   idSedeActualSignalRMenu: string = '';
+
   mensajeNotaImportante: string = '';
   notaImportante: string = '';
 
   listaDatosPacienteParaBuscar?: RespuestaDatosPacientesParaLaAgenda[] = [];
-  lstDatosPacienteParaBuscar: { idAnamnesis: number, datoBuscar: string }[] = [];
-  filteredDatoPacienteParaBuscar?: Observable<{ idAnamnesis: number, datoBuscar: string }[]>;
+  lstDatosPacienteParaBuscar: { idAnamnesis: number; datoBuscar: string }[] =
+    [];
+  filteredDatoPacienteParaBuscar?: Observable<
+    { idAnamnesis: number; datoBuscar: string }[]
+  >;
+
   datoPacienteParaBuscarControl = new FormControl();
   listaDoctores: ListadoItem[] = [];
   sedeSeleccionada: SedesConectadas = new SedesConectadas();
   idSede: number = 0;
-
 
   opciones = [
     { id: '1', nombre: 'NOMBRE' },
     { id: '2', nombre: 'CEDULA' },
     { id: '3', nombre: 'HISTORIA' },
     { id: '4', nombre: 'AFILIACION' },
-    { id: '5', nombre: 'TELEFONO' }
-  ]
+    { id: '5', nombre: 'TELEFONO' },
+  ];
 
   constructor(
     private respuestaObtenerDoctorService: RespuestaObtenerDoctorService,
@@ -78,199 +138,253 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     private router: Router,
     private mensajesUsuariosService: MensajesUsuariosService,
     private sedesConectadasService: SedesConectadasService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.respuestaPinService.sharedSedeData.subscribe(data => {
+    this.respuestaPinService.sharedSedeData.subscribe((data) => {
       if (data != null) {
         this.idSedeActualSignalR = data;
-
       }
     });
 
-    this.respuestaPinService.sharedSedeSeleccionada.subscribe(data => {
+    this.respuestaPinService.sharedSedeSeleccionada.subscribe((data) => {
       if (data != null) {
         this.idSede = data;
       }
     });
 
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe(data => {
+    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
       if (data != null) {
-        this.listaDatosPacienteParaBuscar = data.lstAnamnesisParaAgendayBuscadores;
+        this.listaDatosPacienteParaBuscar =
+          data.lstAnamnesisParaAgendayBuscadores;
         this.listaDoctores = data.lstDoctores;
       }
     });
 
-    this.respuestaPinService.sharednotaImportante.subscribe(data => {
+    this.respuestaPinService.sharednotaImportante.subscribe((data) => {
       if (data != null) {
         this.notaImportante = data;
-        if (this.notaImportante != '' && this.notaImportante != 'no' && this.notaImportante != 'NO' && this.notaImportante != 'No' && this.notaImportante != null) {
-          this.mensajeNotaImportante = "EL PACIENTE TIENE NOTA IMPORTANTE";
-        }
-        else {
+        if (
+          this.notaImportante != '' &&
+          this.notaImportante != 'no' &&
+          this.notaImportante != 'NO' &&
+          this.notaImportante != 'No' &&
+          this.notaImportante != null
+        ) {
+          this.mensajeNotaImportante = 'EL PACIENTE TIENE NOTA IMPORTANTE';
+        } else {
           this.mensajeNotaImportante = '';
           this.notaImportante = '';
         }
       }
     });
 
-    this.respuestaPinService.sharedNombrePacienteEscogidoData.subscribe(data => {
-      if (data != null) {
-        this.nombrePaciente = data;
-      }
+    // ✅ NUEVO: escuchamos header completo (nombre + doc + tel + historia opcional)
+    this.respuestaPinService.sharedPacienteHeaderInfoData.subscribe((info) => {
+      if (!info) return;
+      this.nombrePaciente = info.nombre ?? '';
+      this.documentoPaciente = info.documento ?? '';
+      this.telefonoPaciente = info.telefono ?? '';
+      this.numeroHistoria = info.historia ?? this.numeroHistoria ?? '';
     });
-   
+
+    // ✅ dejo tu suscripción vieja por compatibilidad (si otros módulos la usan)
+    this.respuestaPinService.sharedNombrePacienteEscogidoData.subscribe(
+      (data) => {
+        if (data != null) {
+          this.nombrePaciente = data;
+        }
+      }
+    );
 
     this.inicializarFormulario();
 
-
     this.opcionSeleccionada = this.opciones[0].id;
-    //aca lleno el autocompletar para la busqueda segun el tipo
     this.buscarNombreValorSeleccionado();
 
-    this.respuestaObtenerDoctorService.respuestaObtenerDoctorModel.subscribe(async (respuestaObtenerDoctor: RespuestaObtenerDoctor) => {
-      this.respuestaObtenerDoctorModel = respuestaObtenerDoctor;
-      this.nombreDoctor = respuestaObtenerDoctor.doctor.NOMBRE;
-      this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
-      this.respuestaPinService.updateNumPacientesPorDoctor(this.totalPacientes);
-
-
-
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '' }));
-
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
-          startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
-        );
-      //alert('esta entrando ca antes o despues del error')
-      //this.panelBuscarPacienteOpen();
-    });
-
-    this.respuestaObtenerDoctorService.respuestaObtenerDoctorSiLoCambianModel.subscribe(async (respuestaObtenerDoctorSiLoCambian: RespuestaObtenerDoctor) => {
-
-      this.respuestaObtenerDoctorSiLoCambianModel = respuestaObtenerDoctorSiLoCambian;
-      this.nombreDoctor = this.respuestaObtenerDoctorSiLoCambianModel.doctor.NOMBRE;
-      this.totalPacientes = this.respuestaObtenerDoctorSiLoCambianModel.totalPacientes;
-      this.respuestaPinService.updateNumPacientesPorDoctor(this.totalPacientes);
-      //await this.obtenerDatosCompletosPaciente(this.idAnamnesisParaMenu);
-
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '' }));
-
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
-          startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
+    this.respuestaObtenerDoctorService.respuestaObtenerDoctorModel.subscribe(
+      async (respuestaObtenerDoctor: RespuestaObtenerDoctor) => {
+        this.respuestaObtenerDoctorModel = respuestaObtenerDoctor;
+        this.nombreDoctor = respuestaObtenerDoctor.doctor.NOMBRE;
+        this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
+        this.respuestaPinService.updateNumPacientesPorDoctor(
+          this.totalPacientes
         );
 
-      //this.panelBuscarPacienteOpen();
-    });
+        this.lstDatosPacienteParaBuscar =
+          this.listaDatosPacienteParaBuscar!.filter(
+            (item) => item.DOCTOR === this.nombreDoctor
+          ).map((item) => ({
+            idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+            datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
+          }));
 
+        this.filteredDatoPacienteParaBuscar =
+          this.datoPacienteParaBuscarControl.valueChanges.pipe(
+            startWith(''),
+            map((value) =>
+              this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+            )
+          );
+      }
+    );
 
+    this.respuestaObtenerDoctorService.respuestaObtenerDoctorSiLoCambianModel.subscribe(
+      async (respuestaObtenerDoctorSiLoCambian: RespuestaObtenerDoctor) => {
+        this.respuestaObtenerDoctorSiLoCambianModel =
+          respuestaObtenerDoctorSiLoCambian;
+        this.nombreDoctor =
+          this.respuestaObtenerDoctorSiLoCambianModel.doctor.NOMBRE;
+        this.totalPacientes =
+          this.respuestaObtenerDoctorSiLoCambianModel.totalPacientes;
 
-    this.respuestaBusquedaPacienteService.respuestaBuquedaPacienteModel.subscribe(async (respuestaBusquedaPaciente: RespuestaBusquedaPaciente[]) => {
-      this.resultadosBusqueda = respuestaBusquedaPaciente;
-    });
+        this.respuestaPinService.updateNumPacientesPorDoctor(
+          this.totalPacientes
+        );
 
-    //Datos Personales
-    // this.datosPersonalesService.respuestaDatosPersonalesEmit.subscribe(async (respuestaBusquedaDatosPersonales: RespuestaDatosPersonales) => {
-    //   this.resultadoBusquedaDatosPersonalesCompletos = respuestaBusquedaDatosPersonales;
-    //   //this.respuestaPinService.updatedatosPersonalesParaCambioDeDoctor(this.resultadoBusquedaDatosPersonalesCompletos);
-    //   this.nombrePaciente = this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.NOMBRE_PACIENTE;
-    //   this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales);
-    //   if (this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IMPORTANTE != '' && this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IMPORTANTE != 'no' && this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IMPORTANTE != 'NO' && this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IMPORTANTE != null) {
-    //     this.mensajeNotaImportante = "El Paciente Tiene Nota Importante";
-    //     this.notaImportante = this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IMPORTANTE;
-    //     // this.router.navigate(['/datos-personales']);
-    //   }
-    //   else {
-    //     this.mensajeNotaImportante = '';
-    //     this.notaImportante = '';
-    //     //this.router.navigate(['/datos-personales']);
-    //   }
-    //   this.router.navigate(['/datos-personales']);
+        this.lstDatosPacienteParaBuscar =
+          this.listaDatosPacienteParaBuscar!.filter(
+            (item) => item.DOCTOR === this.nombreDoctor
+          ).map((item) => ({
+            idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+            datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
+          }));
 
-    //   //this.inicializarFormulario();
-    // });
+        this.filteredDatoPacienteParaBuscar =
+          this.datoPacienteParaBuscarControl.valueChanges.pipe(
+            startWith(''),
+            map((value) =>
+              this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+            )
+          );
+      }
+    );
 
-    //Antecedentes
-    this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
-      this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
+    this.respuestaBusquedaPacienteService.respuestaBuquedaPacienteModel.subscribe(
+      async (respuestaBusquedaPaciente: RespuestaBusquedaPaciente[]) => {
+        this.resultadosBusqueda = respuestaBusquedaPaciente;
+      }
+    );
 
-    });
+    this.antecedentesService.respuestaAntecedentesEmit.subscribe(
+      async (respuestaBusquedaAntecedentes: Antecedentes) => {
+        this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
+      }
+    );
 
-    //Evolucion Paciente
-    this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(async (respuestaEvolucionPaciente: RespuestaEvolucionPaciente) => {
-      this.resultadoBusquedaEvolucionPaciente = respuestaEvolucionPaciente;
-    });
+    this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(
+      async (respuestaEvolucionPaciente: RespuestaEvolucionPaciente) => {
+        this.resultadoBusquedaEvolucionPaciente = respuestaEvolucionPaciente;
+      }
+    );
   }
 
-
-  private _filterNombre(value: string, list: { idAnamnesis: number, datoBuscar: string }[]): { idAnamnesis: number, datoBuscar: string }[] {
+  private _filterNombre(
+    value: string,
+    list: { idAnamnesis: number; datoBuscar: string }[]
+  ): { idAnamnesis: number; datoBuscar: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
+    return list.filter((option) =>
+      option.datoBuscar.toLowerCase().includes(filterValue)
+    );
+  }
 
-    return list.filter(option => option.datoBuscar.toLowerCase().includes(filterValue));
+  cancelarBusquedaPaciente(): void {
+    this.datoPacienteParaBuscarControl.setValue('', { emitEvent: false });
+    this.resultadosBusqueda = [];
+    this.openorclosePanelBuscarPaciente = false;
+    this.panelBuscarPaciente?.close();
   }
 
   llenarDatosPacienteParaBuscar() {
     if (this.nombreValorSeleccionado === 'NOMBRE') {
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '' }));
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
+      this.lstDatosPacienteParaBuscar =
+        this.listaDatosPacienteParaBuscar!.filter(
+          (item) => item.DOCTOR === this.nombreDoctor
+        ).map((item) => ({
+          idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+          datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
+        }));
+      this.filteredDatoPacienteParaBuscar =
+        this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
+          map((value) =>
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+          )
         );
     }
+
     if (this.nombreValorSeleccionado === 'CEDULA') {
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.CEDULA_NUMERO ? item.CEDULA_NUMERO : '' }));
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
+      this.lstDatosPacienteParaBuscar =
+        this.listaDatosPacienteParaBuscar!.filter(
+          (item) => item.DOCTOR === this.nombreDoctor
+        ).map((item) => ({
+          idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+          datoBuscar: item.CEDULA_NUMERO ? item.CEDULA_NUMERO : '',
+        }));
+      this.filteredDatoPacienteParaBuscar =
+        this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
+          map((value) =>
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+          )
         );
     }
+
     if (this.nombreValorSeleccionado === 'HISTORIA') {
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '' }));
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
+      this.lstDatosPacienteParaBuscar =
+        this.listaDatosPacienteParaBuscar!.filter(
+          (item) => item.DOCTOR === this.nombreDoctor
+        ).map((item) => ({
+          idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+          datoBuscar: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '',
+        }));
+      this.filteredDatoPacienteParaBuscar =
+        this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
+          map((value) =>
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+          )
         );
     }
+
     if (this.nombreValorSeleccionado === 'AFILIACION') {
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.NRO_AFILIACION ? item.NRO_AFILIACION : '' }));
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
+      this.lstDatosPacienteParaBuscar =
+        this.listaDatosPacienteParaBuscar!.filter(
+          (item) => item.DOCTOR === this.nombreDoctor
+        ).map((item) => ({
+          idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+          datoBuscar: item.NRO_AFILIACION ? item.NRO_AFILIACION : '',
+        }));
+      this.filteredDatoPacienteParaBuscar =
+        this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
+          map((value) =>
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+          )
         );
     }
+
     if (this.nombreValorSeleccionado === 'TELEFONO') {
-      this.lstDatosPacienteParaBuscar = this.listaDatosPacienteParaBuscar!
-        .filter(item => item.DOCTOR === this.nombreDoctor)
-        .map(item => ({ idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0, datoBuscar: item.TELF_P ? item.TELF_P : '' }));
-      this.filteredDatoPacienteParaBuscar = this.datoPacienteParaBuscarControl.valueChanges
-        .pipe(
+      this.lstDatosPacienteParaBuscar =
+        this.listaDatosPacienteParaBuscar!.filter(
+          (item) => item.DOCTOR === this.nombreDoctor
+        ).map((item) => ({
+          idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
+          datoBuscar: item.TELF_P ? item.TELF_P : '',
+        }));
+      this.filteredDatoPacienteParaBuscar =
+        this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
-          map(value => this._filterNombre(value, this.lstDatosPacienteParaBuscar))
+          map((value) =>
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
+          )
         );
     }
   }
 
   buscarNombreValorSeleccionado() {
-    const opcion = this.opciones.find(x => x.id == this.opcionSeleccionada);
+    const opcion = this.opciones.find((x) => x.id == this.opcionSeleccionada);
     if (opcion) {
       this.nombreValorSeleccionado = opcion.nombre;
     } else {
@@ -280,17 +394,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   panelBuscarPacienteOpen() {
-    this.openorclosePanelBuscarPaciente = true
+    this.openorclosePanelBuscarPaciente = true;
     setTimeout(() => {
       this.buscarPacienteInput.nativeElement.focus();
     }, 300);
-    //this.buscarPacienteInput.nativeElement.focus();
   }
 
   panelMostrarDatosPersonalesOpen() {
-    this.openorclosePanelMostrarDatosPersonalesPaciente = true
+    this.openorclosePanelMostrarDatosPersonalesPaciente = true;
   }
-
 
   inicializarFormulario() {
     this.formularioDatosPersonales = this.formBuilder.group({
@@ -360,85 +472,102 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       NUMEROHERMANOS: [''],
       RELACIONPADRES: [''],
       ACTIVO: ['0'],
-      IDREFERIDOPOR: ['0']
+      IDREFERIDOPOR: ['0'],
     });
-    // Llena el formulario con los datos de resultadoBusquedaDatosPersonalesCompletos
-    //this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
   }
 
   async buscarPaciente(nombrePaciente: string) {
-
     console.log(nombrePaciente);
     console.log(this.opcionSeleccionada);
     if (this.idSedeActualSignalR != '') {
-      await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(this.idSedeActualSignalR, this.opcionSeleccionada, nombrePaciente);
+      await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(
+        this.idSedeActualSignalR,
+        this.opcionSeleccionada,
+        nombrePaciente
+      );
     }
-
-
   }
 
   async obtenerDatosCompletosPaciente(idAnamnesis: number) {
-
     if (this.idSedeActualSignalR != '') {
-      await this.datosPersonalesService.startConnectionRespuestaDatosPersonales(this.idSedeActualSignalR, idAnamnesis.toString());
+      await this.datosPersonalesService.startConnectionRespuestaDatosPersonales(
+        this.idSedeActualSignalR,
+        idAnamnesis.toString()
+      );
     }
   }
 
   async obtenerAntecedentesPaciente(idAnamnesis: number) {
-
     if (this.idSedeActualSignalR != '') {
-      await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(this.idSedeActualSignalR, idAnamnesis.toString());
+      await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(
+        this.idSedeActualSignalR,
+        idAnamnesis.toString()
+      );
     }
   }
 
   async obtenerEvolucionPaciente(idAnamnesis: number) {
-
     if (this.idSedeActualSignalR != '') {
-      await this.respuestaEvolucionPacienteService.startConnectionRespuestaEvolucionPaciente(this.idSedeActualSignalR, idAnamnesis.toString());
+      await this.respuestaEvolucionPacienteService.startConnectionRespuestaEvolucionPaciente(
+        this.idSedeActualSignalR,
+        idAnamnesis.toString()
+      );
     }
   }
 
   async onRowClicked(filaSeleccionada: RespuestaBusquedaPaciente) {
-
-
     try {
       console.log('Fila seleccionada:', filaSeleccionada);
       this.openorclosePanelBuscarPaciente = false;
       this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
       this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
 
+      // ✅ Header completo (nombre + documento + teléfono + historia)
+      await this.respuestaPinService.updatePacienteHeaderInfo({
+        nombre: filaSeleccionada.NOMBRE_PACIENTE ?? '',
+        documento: filaSeleccionada.NUMDOCUMENTO ?? '',
+        telefono: filaSeleccionada.TELEFONO ?? '',
+        historia: filaSeleccionada.IDANAMNESISTEXTO ?? '',
+      });
+
       // Actualiza la anamnesis
-      await this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
+      await this.respuestaPinService.updateAnamnesisData(
+        filaSeleccionada.IDANAMNESIS
+      );
+
       // Actualiza el doctor
       await this.actualizarDoctor(filaSeleccionada);
-      this.nombrePaciente = filaSeleccionada.NOMBRE_PACIENTE;
-      this.respuestaPinService.updateNombrePacienteEscogidoData(this.nombrePaciente);
-      // Obtiene los datos completos del paciente
-      //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
 
-      // Navega a la página de datos personales
-
+      // (dejo esto por compatibilidad, no hace daño)
+      this.respuestaPinService.updateNombrePacienteEscogidoData(
+        filaSeleccionada.NOMBRE_PACIENTE
+      );
     } catch (error) {
       console.error('Error en onRowClicked:', error);
-      // Manejar el error adecuadamente
     }
-
   }
 
   async actualizarDoctor(filaSeleccionada: RespuestaBusquedaPaciente) {
-    //oo aca toca validar si no hay doctor asignado que debe hacer
     if (filaSeleccionada.DOCTOR != this.nombreDoctor) {
-      let idDoctor = this.listaDoctores.find(x => x.nombre == filaSeleccionada.DOCTOR)?.id;
+      let idDoctor = this.listaDoctores.find(
+        (x) => x.nombre == filaSeleccionada.DOCTOR
+      )?.id;
       console.log('ID Doctor:', idDoctor);
       if (!idDoctor) {
         throw new Error('No se encontró el ID del doctor.');
       }
       this.nombreDoctor = filaSeleccionada.DOCTOR;
-      await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(this.idSedeActualSignalR, parseInt(idDoctor));
-      //alert('esta entrando ca antes o despues del error')
+      await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(
+        this.idSedeActualSignalR,
+        parseInt(idDoctor)
+      );
       console.log('Doctor cambiado:', filaSeleccionada.DOCTOR);
-      this.respuestaPinService.updateCambiarDoctorSeleccionado(filaSeleccionada.DOCTOR);
-      this.respuestaPinService.updateDoctorSeleccionado(filaSeleccionada.DOCTOR);
+      this.respuestaPinService.updateCambiarDoctorSeleccionado(
+        filaSeleccionada.DOCTOR
+      );
+      this.respuestaPinService.updateDoctorSeleccionado(
+        filaSeleccionada.DOCTOR
+      );
     } else {
       this.router.routeReuseStrategy.shouldReuseRoute = function () {
         return false;
@@ -446,42 +575,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
 
       this.router.onSameUrlNavigation = 'reload';
       this.router.navigate(['/datos-personales']);
-      //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
     }
-    //setTimeout(() => {
-    //await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
-    //}, 2000);
   }
-
-  // async onRowClicked(filaSeleccionada: RespuestaBusquedaPaciente) {
-  //   this.openorclosePanelBuscarPaciente = false;
-  //   this.idAnamnesisParaMenu = filaSeleccionada.IDANAMNESIS;
-  //   this.idSedeActualSignalRMenu = this.idSedeActualSignalR;
-  //   // Aca se actualizara idSignalR para todos y idAnanesis estos servicios estaran en 
-  //   // Las conexiones rydent modelos respuesta pin
-  //   this.respuestaPinService.updateAnamnesisData(filaSeleccionada.IDANAMNESIS);
-
-  //   //this.respuestaPinService.updateSedeData(this.idSedeActualSignalRMenu);
-  //   //setTimeout(() => {
-  //   if (filaSeleccionada.DOCTOR != this.nombreDoctor) {
-  //     let idDoctor = this.listaDoctores.find(x => x.nombre == filaSeleccionada.DOCTOR)?.id;
-  //     if (!idDoctor) {
-  //       throw new Error('No se encontró el ID del doctor.');
-  //     }
-
-  //     // Hacer que updateCambiarDoctorSeleccionado devuelva una promesa
-  //     await this.respuestaPinService.updateCambiarDoctorSeleccionadoAsync(filaSeleccionada.DOCTOR, idDoctor);
-  //     this.nombreDoctor = filaSeleccionada.DOCTOR;
-  //   }
-  //   //}, 1000);
-  //   //this.mostrarPanelBuscarPaciente = !this.mostrarPanelBuscarPaciente;
-  //   await this.obtenerDatosCompletosPaciente(filaSeleccionada.IDANAMNESIS);
-  //   //setTimeout(() => {
-  //   //  this.router.navigate(['/datos-personales']);
-
-  //   //}, 2000);
-  //   // this.router.navigate(['/datos-personales']);
-  // }
 
   guardarDatosPersonales() {
     // Lógica para guardar los datos del formulario
@@ -492,12 +587,14 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   }
 
   async mostrarAntecedentes() {
-    this.obtenerAntecedentesPaciente(this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IDANAMNESIS);
+    this.obtenerAntecedentesPaciente(
+      this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IDANAMNESIS
+    );
   }
 
   async mostrarEvolucion() {
-    this.obtenerEvolucionPaciente(this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IDANAMNESIS);
+    this.obtenerEvolucionPaciente(
+      this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IDANAMNESIS
+    );
   }
-
-
 }

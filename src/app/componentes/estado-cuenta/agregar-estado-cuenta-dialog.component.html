@@ -59,6 +59,8 @@
           (blur)="formatearNumero($event, 'costoTratamiento')"
           placeholder="0"
         />
+
+        <!-- ✅ 1) si está vacío -->
         <span
           class="mensaje-error"
           *ngIf="
@@ -67,6 +69,17 @@
           "
         >
           El costo es obligatorio
+        </span>
+
+        <!-- ✅ 2) si es 0 o menor -->
+        <span
+          class="mensaje-error"
+          *ngIf="
+            formEstado.get('costoTratamiento')?.hasError('mayorQueCero') &&
+            formEstado.get('costoTratamiento')?.touched
+          "
+        >
+          El costo debe ser mayor que 0
         </span>
       </div>
     </div>
@@ -153,22 +166,13 @@
     <!-- Segunda fila: Descripción (como textarea) -->
     <div class="fila-formulario">
       <div class="campo-input-wrapper campo-descripcion-textarea">
-        <label>Descripción*</label>
+        <label>Descripción</label>
         <textarea
           class="textarea-compacto"
           formControlName="descripcion"
           rows="2"
           placeholder="Descripción del tratamiento..."
         ></textarea>
-        <span
-          class="mensaje-error"
-          *ngIf="
-            formEstado.get('descripcion')?.hasError('required') &&
-            formEstado.get('descripcion')?.touched
-          "
-        >
-          La descripción es obligatoria
-        </span>
       </div>
     </div>
 
