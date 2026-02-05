@@ -94,12 +94,12 @@ export class EstadoCuentaCommandsService {
 
   public insertarAbonoEmit = new EventEmitter<InsertarAbonoResponse>();
 
-  private listenersRegistered = false;
-
+  //private listenersRegistered = false;
+  private listenersRegisteredForHub: any = null;
   constructor(
     private signalRService: SignalRService,
     private interruptionService: InterruptionService,
-    private descomprimirDatosService: DescomprimirDatosService
+    private descomprimirDatosService: DescomprimirDatosService,
   ) {
     this.registerListenersOnce();
   }
@@ -178,8 +178,13 @@ export class EstadoCuentaCommandsService {
   // ✅ Listeners (una sola vez)
   // =========================================================
   private registerListenersOnce(): void {
-    if (this.listenersRegistered) return;
-    this.listenersRegistered = true;
+    const hub = this.signalRService.hubConnection; // <- la conexión actual
+    if (!hub) return;
+    if (this.listenersRegisteredForHub === hub) return;
+
+    //if (this.listenersRegistered) return;
+    //this.listenersRegistered = true;
+    this.listenersRegisteredForHub = hub;
 
     // ErrorConexion (1 sola vez)
     this.signalRService.off('ErrorConexion');
@@ -187,10 +192,10 @@ export class EstadoCuentaCommandsService {
       'ErrorConexion',
       (clienteId: string, mensajeError: string) => {
         alert(
-          'Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId
+          'Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId,
         );
         this.interruptionService.interrupt();
-      }
+      },
     );
 
     // ----------------------------
@@ -222,7 +227,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaPrepararEstadoCuenta:', e);
         }
-      }
+      },
     );
 
     // ----------------------------
@@ -249,7 +254,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaCrearEstadoCuenta:', e);
         }
-      }
+      },
     );
 
     // ----------------------------
@@ -270,10 +275,10 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error(
             'Error procesando RespuestaPrepararEditarEstadoCuenta:',
-            e
+            e,
           );
         }
-      }
+      },
     );
 
     // ----------------------------
@@ -300,7 +305,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaEditarEstadoCuenta:', e);
         }
-      }
+      },
     );
 
     // ----------------------------
@@ -324,7 +329,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaBorrarEstadoCuenta:', e);
         }
-      }
+      },
     );
 
     // =====================================
@@ -354,10 +359,10 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error(
             'Error procesando RespuestaConsultarSugeridosAbono:',
-            e
+            e,
           );
         }
-      }
+      },
     );
 
     // =====================================
@@ -390,7 +395,7 @@ export class EstadoCuentaCommandsService {
             rules: this.mapAbonoRules(raw.rules ?? raw.Rules),
 
             doctoresRecibidoPor: this.mapDoctores(
-              raw.doctoresRecibidoPor ?? raw.DoctoresRecibidoPor
+              raw.doctoresRecibidoPor ?? raw.DoctoresRecibidoPor,
             ),
 
             idRecibidoPorPorDefecto:
@@ -401,7 +406,7 @@ export class EstadoCuentaCommandsService {
               raw.recibidoPorHabilitado ?? raw.RecibidoPorHabilitado ?? false,
 
             nombresRecibe: this.asStringArray(
-              raw.nombresRecibe ?? raw.NombresRecibe
+              raw.nombresRecibe ?? raw.NombresRecibe,
             ),
 
             nombreRecibePorDefecto:
@@ -409,7 +414,7 @@ export class EstadoCuentaCommandsService {
 
             motivos: this.mapMotivos(raw.motivos ?? raw.Motivos ?? []),
             codigosConcepto: this.asStringArray(
-              raw.codigosConcepto ?? raw.CodigosConcepto ?? []
+              raw.codigosConcepto ?? raw.CodigosConcepto ?? [],
             ),
 
             reciboSugerido: raw.reciboSugerido ?? raw.ReciboSugerido ?? null,
@@ -418,7 +423,7 @@ export class EstadoCuentaCommandsService {
               raw.idResolucionDian ?? raw.IdResolucionDian ?? null,
 
             valoresIvaPermitidos: this.asNumberArray(
-              raw.valoresIvaPermitidos ?? raw.ValoresIvaPermitidos
+              raw.valoresIvaPermitidos ?? raw.ValoresIvaPermitidos,
             ),
           };
           console.log('Mapped PrepararInsertarAbonoResponse:', mapped);
@@ -426,7 +431,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaPrepararInsertarAbono:', e);
         }
-      }
+      },
     );
 
     // =====================================
@@ -462,7 +467,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaInsertarAbono:', e);
         }
-      }
+      },
     );
 
     // =====================================
@@ -473,7 +478,7 @@ export class EstadoCuentaCommandsService {
       'RespuestaPrepararBorrarAbono',
       (_frontId: string, payload: string) => {
         console.count(
-          '3️⃣ EVENTO RespuestaPrepararBorrarAbono (llegó del worker)'
+          '3️⃣ EVENTO RespuestaPrepararBorrarAbono (llegó del worker)',
         );
         console.log('   payload length:', payload?.length);
         try {
@@ -507,7 +512,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaPrepararBorrarAbono:', e);
         }
-      }
+      },
     );
 
     // =====================================
@@ -536,7 +541,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaBorrarAbono:', e);
         }
-      }
+      },
     );
 
     // =====================================
@@ -567,7 +572,7 @@ export class EstadoCuentaCommandsService {
             rules: this.mapAbonoRules(raw.rules ?? raw.Rules),
 
             doctoresRecibidoPor: this.mapDoctores(
-              raw.doctoresRecibidoPor ?? raw.DoctoresRecibidoPor
+              raw.doctoresRecibidoPor ?? raw.DoctoresRecibidoPor,
             ),
 
             idRecibidoPorPorDefecto:
@@ -579,7 +584,7 @@ export class EstadoCuentaCommandsService {
               raw.recibidoPorHabilitado ?? raw.RecibidoPorHabilitado ?? false,
 
             nombresRecibe: this.asStringArray(
-              raw.nombresRecibe ?? raw.NombresRecibe
+              raw.nombresRecibe ?? raw.NombresRecibe,
             ),
             nombreRecibePorDefecto:
               raw.nombreRecibePorDefecto ?? raw.NombreRecibePorDefecto ?? null,
@@ -596,10 +601,10 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error(
             'Error procesando RespuestaPrepararInsertarAdicional:',
-            e
+            e,
           );
         }
-      }
+      },
     );
 
     // =====================================
@@ -615,7 +620,7 @@ export class EstadoCuentaCommandsService {
           const raw = JSON.parse(decompressed) as any;
 
           const itemsInsertados = Array.isArray(
-            raw.itemsInsertados ?? raw.ItemsInsertados
+            raw.itemsInsertados ?? raw.ItemsInsertados,
           )
             ? (raw.itemsInsertados ?? raw.ItemsInsertados).map((x: any) => ({
                 idRelacion: Number(x.idRelacion ?? x.IdRelacion ?? 0),
@@ -651,7 +656,7 @@ export class EstadoCuentaCommandsService {
         } catch (e) {
           console.error('Error procesando RespuestaInsertarAdicional:', e);
         }
-      }
+      },
     );
   }
 
@@ -661,9 +666,10 @@ export class EstadoCuentaCommandsService {
 
   async prepararEstadoCuenta(
     clienteIdDestino: string,
-    req: PrepararEstadoCuentaRequest
+    req: PrepararEstadoCuentaRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const payloadToWorker = {
       PacienteId: req.pacienteId,
@@ -673,15 +679,16 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'PrepararEstadoCuenta',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
   async crearEstadoCuenta(
     clienteIdDestino: string,
-    req: CrearEstadoCuentaRequest
+    req: CrearEstadoCuentaRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const payloadToWorker = {
       PacienteId: req.pacienteId,
@@ -715,15 +722,16 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'CrearEstadoCuenta',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
   async prepararEditarEstadoCuenta(
     clienteIdDestino: string,
-    req: PrepararEditarEstadoCuentaRequest
+    req: PrepararEditarEstadoCuentaRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const payloadToWorker = {
       PacienteId: req.pacienteId,
@@ -734,16 +742,16 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'PrepararEditarEstadoCuenta',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
   async editarEstadoCuenta(
     clienteIdDestino: string,
-    req: EditarEstadoCuentaRequest
+    req: EditarEstadoCuentaRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
-
+    this.registerListenersOnce();
     const payloadToWorker = {
       PacienteId: req.pacienteId,
       DoctorId: req.idDoctor,
@@ -776,16 +784,16 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'EditarEstadoCuenta',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
   async borrarEstadoCuenta(
     clienteIdDestino: string,
-    req: BorrarEstadoCuentaRequest
+    req: BorrarEstadoCuentaRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
-
+    this.registerListenersOnce();
     const payloadToWorker = {
       PacienteId: req.pacienteId,
       DoctorId: req.idDoctor,
@@ -795,7 +803,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'BorrarEstadoCuenta',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -804,10 +812,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async consultarSugeridosAbono(
     clienteIdDestino: string,
-    req: ConsultarSugeridosAbonoRequest
+    req: ConsultarSugeridosAbonoRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
-
+    this.registerListenersOnce();
     const payloadToWorker = {
       IdPaciente: req.idPaciente,
       Fase: req.fase,
@@ -818,7 +826,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'ConsultarSugeridosAbono',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -827,9 +835,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async prepararInsertarAbono(
     clienteIdDestino: string,
-    req: PrepararInsertarAbonoRequest
+    req: PrepararInsertarAbonoRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const payloadToWorker = {
       IdPaciente: req.idPaciente,
@@ -842,7 +851,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'PrepararInsertarAbono',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -851,10 +860,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async insertarAbono(
     clienteIdDestino: string,
-    req: InsertarAbonoRequest
+    req: InsertarAbonoRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
-
+    this.registerListenersOnce();
     const payloadToWorker = {
       IdPaciente: req.idPaciente,
       Fase: req.fase,
@@ -903,7 +912,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'InsertarAbono',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -912,9 +921,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async prepararBorrarAbono(
     clienteIdDestino: string,
-    req: PrepararBorrarAbonoRequest
+    req: PrepararBorrarAbonoRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const payloadToWorker = {
       IdPaciente: req.idPaciente,
@@ -931,7 +941,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'PrepararBorrarAbono',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -940,9 +950,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async borrarAbono(
     clienteIdDestino: string,
-    req: BorrarAbonoRequest
+    req: BorrarAbonoRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const payloadToWorker = {
       IdPaciente: req.idPaciente,
@@ -961,7 +972,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'BorrarAbono',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -970,10 +981,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async prepararInsertarAdicional(
     clienteIdDestino: string,
-    req: PrepararInsertarAdicionalRequest
+    req: PrepararInsertarAdicionalRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
-
+    this.registerListenersOnce();
     const payloadToWorker = {
       IdPaciente: req.idPaciente,
       Fase: req.fase,
@@ -985,7 +996,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'PrepararInsertarAdicional',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 
@@ -994,9 +1005,10 @@ export class EstadoCuentaCommandsService {
   // =====================================
   async insertarAdicional(
     clienteIdDestino: string,
-    req: InsertarAdicionalRequest
+    req: InsertarAdicionalRequest,
   ): Promise<void> {
     await this.signalRService.ensureConnection();
+    this.registerListenersOnce();
 
     const items = (req.items ?? []).map((it) => ({
       Descripcion: it.descripcion,
@@ -1036,7 +1048,7 @@ export class EstadoCuentaCommandsService {
     await this.signalRService.invoke(
       'InsertarAdicional',
       clienteIdDestino,
-      JSON.stringify(payloadToWorker)
+      JSON.stringify(payloadToWorker),
     );
   }
 }

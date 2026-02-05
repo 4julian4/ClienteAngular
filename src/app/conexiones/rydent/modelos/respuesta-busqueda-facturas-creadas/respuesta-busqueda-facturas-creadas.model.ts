@@ -12,25 +12,43 @@ export class RespuestaBusquedaFacturasCreadas {
   idRelacion!: number;
   tipoFactura!: number;
 
+  // ✅ NUEVO: cápsula NC al instante (viene del backend)
+  hasNc!: boolean;
+
   static fromJson(raw: any): RespuestaBusquedaFacturasCreadas {
     const r = new RespuestaBusquedaFacturasCreadas();
+
     r.idResolucion_Dian = Number(
-      raw?.idResolucion_Dian ?? raw?.idResolucion_dian ?? 0
+      raw?.idResolucion_Dian ?? raw?.idResolucion_dian ?? 0,
     );
+
     r.prestador = String(raw?.prestador ?? '');
+
     r.codigo_Prestador = String(
-      raw?.codigo_Prestador ?? raw?.codigo_prestador ?? ''
+      raw?.codigo_Prestador ?? raw?.codigo_prestador ?? '',
     );
+
     r.nombre_Paciente = String(
-      raw?.nombre_Paciente ?? raw?.nombre_paciente ?? ''
+      raw?.nombre_Paciente ?? raw?.nombre_paciente ?? '',
     );
+
     r.documento = String(raw?.documento ?? '');
+
     r.tipo_Documento = String(raw?.tipo_Documento ?? raw?.tipo_documento ?? '');
+
     r.factura = String(raw?.factura ?? '');
+
     r.valor_Total = Number(raw?.valor_Total ?? raw?.valor_total ?? 0);
+
     r.fecha = raw?.fecha ? new Date(raw.fecha) : new Date();
+
     r.idRelacion = Number(raw?.idRelacion ?? raw?.id_relacion ?? 0);
+
     r.tipoFactura = Number(raw?.tipoFactura ?? raw?.tipo_factura ?? 0);
+
+    // ✅ NUEVO (acepta también snake_case por si acaso)
+    r.hasNc = Boolean(raw?.hasNc ?? raw?.has_nc ?? false);
+
     return r;
   }
 

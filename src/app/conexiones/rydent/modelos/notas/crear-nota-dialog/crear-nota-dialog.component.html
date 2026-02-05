@@ -1,5 +1,5 @@
 <!-- ClienteAngular/src/app/conexiones/rydent/modelos/notas/crear-nota-dialog/crear-nota-dialog.component.html -->
-<!-- Título del diálogo -->
+
 <h2 mat-dialog-title class="title">
   Nueva Nota {{ notaTipoLabel }} para factura {{ facturaNumero }}
 </h2>
@@ -9,24 +9,31 @@
     <!-- ENCABEZADO COMPACTO -->
     <section class="section section--encabezado">
       <div class="header-grid">
-        <!-- Fecha de emisión -->
         <div class="field">
           <label class="field-label">Fecha de emisión*</label>
           <input type="date" class="field-input" formControlName="issueDate" />
         </div>
 
-        <!-- Razón -->
         <div class="field">
           <label class="field-label">Razón**</label>
           <select class="field-input" formControlName="reason">
             <option value="" disabled>Seleccione un motivo</option>
+            <!-- Solo ANULACION para NC -->
+            <option
+              *ngFor="let motivo of reasonsPorTipo"
+              [value]="motivo"
+              [hidden]="notaTipoLabel === 'NC' && motivo !== 'ANULACION'"
+            >
+              {{ motivo }}
+            </option>
+            <!--
             <option *ngFor="let motivo of reasonsPorTipo" [value]="motivo">
               {{ motivo }}
             </option>
+            -->
           </select>
         </div>
 
-        <!-- Tercero (como input readonly) -->
         <div class="field">
           <label class="field-label">Tercero</label>
           <input
@@ -37,7 +44,6 @@
           />
         </div>
 
-        <!-- Método de pago (como input readonly) -->
         <div class="field">
           <label class="field-label">Método de pago</label>
           <input
@@ -50,165 +56,168 @@
       </div>
     </section>
 
-    <!-- CUERPO SCROLLEABLE: ÍTEMS + TOTALES -->
+    <!-- CUERPO -->
     <div class="scroll-body">
-      <!-- ÍTEMS DE LA NOTA -->
+      <!-- ÍTEMS -->
       <section class="section section--items">
         <div class="items-table-wrapper" formArrayName="items">
-          <div class="items-table">
-            <!-- Encabezado -->
-            <div class="items-header-row">
-              <div class="th th--idx">#</div>
-              <div class="th">REF*</div>
-              <div class="th">DESCRIPCIÓN*</div>
-              <div class="th th--numeric">CANT</div>
-              <div class="th th--numeric">PRECIO</div>
-              <div class="th th--numeric">DESC %</div>
-              <div class="th th--numeric">RET. FTE</div>
-              <div class="th th--numeric">IMPUESTO</div>
-              <div class="th th--numeric">SUBTOTAL</div>
-              <div class="th th--numeric">TOTAL</div>
-              <div class="th th--acciones"></div>
-            </div>
-
-            <!-- Filas -->
-            <div
-              class="item-row"
-              *ngFor="
-                let itemCtrl of itemsFormArray.controls;
-                let i = index;
-                trackBy: trackByItemIndex
-              "
-              [formGroupName]="i"
-            >
-              <div class="td td--idx">{{ i + 1 }}</div>
-
-              <div class="td">
-                <input
-                  class="field-input field-input--sm"
-                  formControlName="sku"
-                  placeholder="REF"
-                  [readonly]="!!itemCtrl.get('sku')?.disabled"
-                />
+          <!-- ✅ Scroll SOLO para ítems (si crecen) -->
+          <div class="items-table-scroll">
+            <div class="items-table">
+              <!-- Encabezado -->
+              <div class="items-header-row">
+                <div class="th th--idx">#</div>
+                <div class="th">REF*</div>
+                <div class="th">DESCRIPCIÓN*</div>
+                <div class="th th--numeric">CANT</div>
+                <div class="th th--numeric">PRECIO</div>
+                <div class="th th--numeric">DESC %</div>
+                <div class="th th--numeric">RET. FTE</div>
+                <div class="th th--numeric">IMPUESTO</div>
+                <div class="th th--numeric">SUBTOTAL</div>
+                <div class="th th--numeric">TOTAL</div>
+                <div class="th th--acciones"></div>
               </div>
 
-              <div class="td">
-                <input
-                  class="field-input"
-                  formControlName="description"
-                  placeholder="Descripción"
-                  [readonly]="!!itemCtrl.get('description')?.disabled"
-                />
-              </div>
+              <!-- Filas -->
+              <div
+                class="item-row"
+                *ngFor="
+                  let itemCtrl of itemsFormArray.controls;
+                  let i = index;
+                  trackBy: trackByItemIndex
+                "
+                [formGroupName]="i"
+              >
+                <div class="td td--idx">{{ i + 1 }}</div>
 
-              <div class="td td--numeric">
-                <input
-                  class="field-input field-input--number"
-                  type="number"
-                  min="0"
-                  max="9999"
-                  formControlName="quantity"
-                  [readonly]="!!itemCtrl.get('quantity')?.disabled"
-                />
-                <!-- Mostrar errores de validación -->
-                <div
-                  *ngIf="itemCtrl.get('quantity')?.errors"
-                  class="error-message"
-                >
-                  <span
-                    *ngIf="itemCtrl.get('quantity')?.errors?.['maxQuantity']"
+                <div class="td">
+                  <input
+                    class="field-input field-input--sm"
+                    formControlName="sku"
+                    placeholder="REF"
+                    [readonly]="!!itemCtrl.get('sku')?.disabled"
+                  />
+                </div>
+
+                <div class="td">
+                  <input
+                    class="field-input"
+                    formControlName="description"
+                    placeholder="Descripción"
+                    [readonly]="!!itemCtrl.get('description')?.disabled"
+                  />
+                </div>
+
+                <div class="td td--numeric">
+                  <input
+                    class="field-input field-input--number"
+                    type="number"
+                    min="0"
+                    max="9999"
+                    formControlName="quantity"
+                    [readonly]="!!itemCtrl.get('quantity')?.disabled"
+                  />
+                  <div
+                    *ngIf="itemCtrl.get('quantity')?.errors"
+                    class="error-message"
                   >
-                    {{ itemCtrl.get('quantity')?.errors?.['maxQuantity'] }}
-                  </span>
-                  <span
-                    *ngIf="itemCtrl.get('quantity')?.errors?.['fixedQuantity']"
+                    <span
+                      *ngIf="itemCtrl.get('quantity')?.errors?.['maxQuantity']"
+                    >
+                      {{ itemCtrl.get("quantity")?.errors?.["maxQuantity"] }}
+                    </span>
+                    <span
+                      *ngIf="
+                        itemCtrl.get('quantity')?.errors?.['fixedQuantity']
+                      "
+                    >
+                      {{ itemCtrl.get("quantity")?.errors?.["fixedQuantity"] }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="td td--numeric">
+                  <input
+                    class="field-input field-input--number"
+                    type="number"
+                    min="0"
+                    max="999999"
+                    formControlName="price"
+                    [readonly]="!!itemCtrl.get('price')?.disabled"
+                  />
+                </div>
+
+                <div class="td td--numeric">
+                  <input
+                    class="field-input field-input--number"
+                    type="number"
+                    min="0"
+                    max="100"
+                    formControlName="discountRate"
+                    [readonly]="!!itemCtrl.get('discountRate')?.disabled"
+                  />
+                </div>
+
+                <div class="td td--numeric">
+                  <select
+                    class="field-input field-input--select"
+                    formControlName="retFuenteRate"
+                    [disabled]="!!itemCtrl.get('retFuenteRate')?.disabled"
                   >
-                    {{ itemCtrl.get('quantity')?.errors?.['fixedQuantity'] }}
+                    <option *ngFor="let r of retFuenteOptions" [ngValue]="r">
+                      {{ r }}%
+                    </option>
+                  </select>
+                </div>
+
+                <div class="td td--numeric">
+                  <select
+                    class="field-input field-input--select"
+                    formControlName="ivaRate"
+                    [disabled]="!!itemCtrl.get('ivaRate')?.disabled"
+                  >
+                    <option *ngFor="let iva of ivaOptions" [ngValue]="iva">
+                      IVA {{ iva }}%
+                    </option>
+                  </select>
+                </div>
+
+                <div class="td td--numeric">
+                  <span class="monto">
+                    {{
+                      calcularSubtotalFila(i)
+                        | currency: "COP" : "symbol" : "1.0-0"
+                    }}
                   </span>
                 </div>
-              </div>
 
-              <div class="td td--numeric">
-                <input
-                  class="field-input field-input--number"
-                  type="number"
-                  min="0"
-                  max="999999"
-                  formControlName="price"
-                  [readonly]="!!itemCtrl.get('price')?.disabled"
-                />
-              </div>
+                <div class="td td--numeric">
+                  <span class="monto">
+                    {{
+                      calcularTotalFila(i)
+                        | currency: "COP" : "symbol" : "1.0-0"
+                    }}
+                  </span>
+                </div>
 
-              <div class="td td--numeric">
-                <input
-                  class="field-input field-input--number"
-                  type="number"
-                  min="0"
-                  max="100"
-                  formControlName="discountRate"
-                  [readonly]="!!itemCtrl.get('discountRate')?.disabled"
-                />
-              </div>
-
-              <!-- ReteFuente por ítem -->
-              <div class="td td--numeric">
-                <select
-                  class="field-input field-input--select"
-                  formControlName="retFuenteRate"
-                  [disabled]="!!itemCtrl.get('retFuenteRate')?.disabled"
-                >
-                  <option *ngFor="let r of retFuenteOptions" [ngValue]="r">
-                    {{ r }}%
-                  </option>
-                </select>
-              </div>
-
-              <!-- IVA por ítem -->
-              <div class="td td--numeric">
-                <select
-                  class="field-input field-input--select"
-                  formControlName="ivaRate"
-                  [disabled]="!!itemCtrl.get('ivaRate')?.disabled"
-                >
-                  <option *ngFor="let iva of ivaOptions" [ngValue]="iva">
-                    IVA {{ iva }}%
-                  </option>
-                </select>
-              </div>
-
-              <div class="td td--numeric">
-                <span class="monto">
-                  {{
-                    calcularSubtotalFila(i)
-                      | currency : "COP" : "symbol" : "1.0-0"
-                  }}
-                </span>
-              </div>
-
-              <div class="td td--numeric">
-                <span class="monto">
-                  {{
-                    calcularTotalFila(i) | currency : "COP" : "symbol" : "1.0-0"
-                  }}
-                </span>
-              </div>
-
-              <div class="td td--acciones">
-                <button
-                  *ngIf="reasonConfig?.allowAddRemoveItems"
-                  type="button"
-                  class="icon-button"
-                  (click)="eliminarLinea(i)"
-                  aria-label="Eliminar línea"
-                >
-                  ✕
-                </button>
+                <div class="td td--acciones">
+                  <button
+                    *ngIf="reasonConfig?.allowAddRemoveItems"
+                    type="button"
+                    class="icon-button"
+                    (click)="eliminarLinea(i)"
+                    aria-label="Eliminar línea"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Footer de items: botón agregar línea + texto ayuda -->
+        <!-- Footer items -->
         <div class="items-footer-row">
           <button
             type="button"
@@ -226,15 +235,13 @@
         </div>
       </section>
 
-      <!-- NOTAS (izquierda) + TOTALES (derecha) -->
+      <!-- NOTAS + TOTALES -->
       <section class="section section--bottom">
         <div class="bottom-layout">
-          <!-- NOTAS -->
           <div class="bottom-left">
             <div class="section section--notas">
               <div class="notas-header">
                 <span class="section__subtitle">Notas</span>
-
                 <button
                   type="button"
                   class="icon-circle"
@@ -276,14 +283,13 @@
             </div>
           </div>
 
-          <!-- PANEL DE TOTALES -->
           <div class="bottom-right">
             <div class="totales-panel">
               <div class="totales-row totales-row--muted">
                 <span>Subtotal</span>
-                <span class="monto">
-                  {{ totales.subtotal | currency : "COP" : "symbol" : "1.0-0" }}
-                </span>
+                <span class="monto">{{
+                  totales.subtotal | currency: "COP" : "symbol" : "1.0-0"
+                }}</span>
               </div>
 
               <div class="totales-row totales-row--link">
@@ -299,34 +305,32 @@
 
               <div class="totales-row totales-row--muted">
                 <span>IVA ({{ totales.ivaPorcentaje }}%)</span>
-                <span class="monto">
-                  {{ totales.ivaValor | currency : "COP" : "symbol" : "1.0-0" }}
-                </span>
+                <span class="monto">{{
+                  totales.ivaValor | currency: "COP" : "symbol" : "1.0-0"
+                }}</span>
               </div>
 
               <div class="totales-row totales-row--muted">
                 <span>Ret. FUENTE</span>
-                <span class="monto">
-                  {{
-                    totales.retFuente | currency : "COP" : "symbol" : "1.0-0"
-                  }}
-                </span>
+                <span class="monto">{{
+                  totales.retFuente | currency: "COP" : "symbol" : "1.0-0"
+                }}</span>
               </div>
 
               <div class="totales-row totales-row--muted">
                 <span>Ret. ICA</span>
-                <span class="monto">
-                  {{ totales.retIca | currency : "COP" : "symbol" : "1.0-0" }}
-                </span>
+                <span class="monto">{{
+                  totales.retIca | currency: "COP" : "symbol" : "1.0-0"
+                }}</span>
               </div>
 
               <div class="totales-divider"></div>
 
               <div class="totales-row totales-row--total">
                 <span>Total</span>
-                <span class="monto">
-                  {{ totales.total | currency : "COP" : "symbol" : "1.0-0" }}
-                </span>
+                <span class="monto">{{
+                  totales.total | currency: "COP" : "symbol" : "1.0-0"
+                }}</span>
               </div>
             </div>
           </div>
@@ -334,12 +338,10 @@
       </section>
     </div>
 
-    <!-- Campos ocultos -->
     <div class="hidden-fields"></div>
   </form>
 </mat-dialog-content>
 
-<!-- BOTONES DEL DIÁLOGO -->
 <mat-dialog-actions class="acciones">
   <button mat-button type="button" (click)="cancelar()">Cancelar</button>
   <button

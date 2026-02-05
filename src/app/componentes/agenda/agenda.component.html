@@ -79,8 +79,8 @@
                 (click)="recordarCita()"
                 matTooltip="Recordar cita pacientes"
               >
-                <!--<mat-icon svgIcon="whatsapp"></mat-icon>-->
-                <mat-icon>message</mat-icon>
+                <!--<mat-icon>message</mat-icon>-->
+                <mat-icon svgIcon="whatsapp"></mat-icon>
               </button>
             </div>
           </div>
@@ -107,7 +107,7 @@
                 class="columnaIdAnamnesis"
                 matTooltip="Haz clic para ir a la cita"
               >
-                {{ datosCitaPaciente.FECHA_CITA | date : "dd-MM-yyyy" }}
+                {{ datosCitaPaciente.FECHA_CITA | date: "dd-MM-yyyy" }}
               </td>
             </ng-container>
             <ng-container matColumnDef="hora">

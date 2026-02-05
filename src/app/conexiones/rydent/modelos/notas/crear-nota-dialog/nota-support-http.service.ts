@@ -30,7 +30,7 @@ export class NotaSupportHttpService {
    */
   getNextNumber(
     tenantCode: string,
-    noteType: NotaTipo
+    noteType: NotaTipo,
   ): Observable<{
     number: string;
     prefix?: string | null;
@@ -61,7 +61,7 @@ export class NotaSupportHttpService {
     tenantCode: string,
     invoiceUuid: string,
     noteType: NotaTipo,
-    reason: string
+    reason: string,
   ): Observable<Partial<CrearNotaPayload>> {
     const params = new HttpParams()
       .set('tenantCode', tenantCode)
@@ -71,7 +71,40 @@ export class NotaSupportHttpService {
 
     return this.http.get<Partial<CrearNotaPayload>>(
       `${this.baseUrl}/notes/helper/from-invoice`,
-      { params }
+      { params },
     );
+  }
+  toIsoColombia(value: Date | string): string {
+    if (!value) return '';
+
+    // Si viene string tipo "2026-01-27"
+    let d: Date;
+    if (typeof value === 'string') {
+      const parts = value.split('-');
+      d = new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2]),
+        0,
+        0,
+        0,
+      );
+    } else {
+      d = value;
+    }
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    const ss = pad(d.getSeconds());
+
+    // Colombia UTC-5 (sin horario de verano)
+    const offset = '-05:00';
+
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}${offset}`;
   }
 }

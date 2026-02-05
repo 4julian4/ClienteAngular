@@ -29,23 +29,48 @@ export class NcHttpService {
 
   constructor(private http: HttpClient) {}
 
-  /** Header con X-Tenant-Code */
+  /** Header con X-Tenant-Code 
   private headers(tenantCode: string): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
         'X-Tenant-Code': tenantCode,
       }),
     };
+  }*/
+
+  private headers(
+    tenantCode: string,
+    sedeId?: number,
+  ): { headers: HttpHeaders } {
+    const h: any = { 'X-Tenant-Code': tenantCode };
+
+    if (sedeId && sedeId > 0) {
+      h['X-Sede-Id'] = String(sedeId);
+    }
+
+    return { headers: new HttpHeaders(h) };
   }
 
-  /** Crear/enviar NC */
+  /** Crear/enviar NC 
   create(tenantCode: string, body: CreditNoteDto): Observable<DataicoResponse> {
     // POST https://localhost:7226/api/nc/documents
 
     return this.http.post<DataicoResponse>(
       `${this.root}/documents`,
       body,
-      this.headers(tenantCode)
+      this.headers(tenantCode),
+    );
+  }*/
+
+  create(
+    tenantCode: string,
+    body: CreditNoteDto,
+    sedeId?: number,
+  ): Observable<DataicoResponse> {
+    return this.http.post<DataicoResponse>(
+      `${this.root}/documents`,
+      body,
+      this.headers(tenantCode, sedeId),
     );
   }
 
@@ -54,7 +79,7 @@ export class NcHttpService {
     // GET https://localhost:7226/api/nc/documents/{uuid}
     return this.http.get<DataicoResponse>(
       `${this.root}/documents/${encodeURIComponent(uuid)}`,
-      this.headers(tenantCode)
+      this.headers(tenantCode),
     );
   }
 
@@ -64,7 +89,7 @@ export class NcHttpService {
     const params = new URLSearchParams({ number });
     return this.http.get<DataicoResponse>(
       `${this.root}/documents/by-number?${params.toString()}`,
-      this.headers(tenantCode)
+      this.headers(tenantCode),
     );
   }
 
@@ -76,7 +101,7 @@ export class NcHttpService {
       {
         ...this.headers(tenantCode),
         responseType: 'blob' as const,
-      }
+      },
     );
   }
 
@@ -88,7 +113,7 @@ export class NcHttpService {
       {
         ...this.headers(tenantCode),
         responseType: 'blob' as const,
-      }
+      },
     );
   }
 
@@ -96,13 +121,13 @@ export class NcHttpService {
   resendEmail(
     tenantCode: string,
     uuid: string,
-    payload: CreditNoteDeliveryRequest
+    payload: CreditNoteDeliveryRequest,
   ): Observable<DataicoResponse> {
     // PUT https://localhost:7226/api/nc/documents/{uuid}/delivery
     return this.http.put<DataicoResponse>(
       `${this.root}/documents/${encodeURIComponent(uuid)}/delivery`,
       payload,
-      this.headers(tenantCode)
+      this.headers(tenantCode),
     );
   }
 }

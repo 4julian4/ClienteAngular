@@ -26,10 +26,10 @@ export interface DebitNoteDto {
   // Referencia a factura externa
   invoiceCufe?: string | null;
   invoiceNumber?: string | null;
-  invoiceIssueDate?: string | null;
+  invoiceIssueDate?: Date | null;
 
   // Datos ND
-  issueDate: string; // dd/MM/yyyy o dd/MM/yyyy HH:mm:ss
+  issueDate: Date; // dd/MM/yyyy o dd/MM/yyyy HH:mm:ss
   reason: string; // "CAMBIO_VALOR", "OTROS", etc.
   number: string; // consecutivo interno
   numbering: NumberingDto;

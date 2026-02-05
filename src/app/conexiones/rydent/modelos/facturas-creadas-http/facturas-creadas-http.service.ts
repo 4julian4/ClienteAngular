@@ -26,20 +26,22 @@ export class FacturasCreadasHttpService {
    */
   buscarFacturasCreadas(
     sedeOtenantCode: string,
-    numeroFactura?: string
+    numeroFactura?: string,
+    sedeId?: number,
   ): Observable<RespuestaBusquedaFacturasCreadas[]> {
     let params = new HttpParams().set('codigo', sedeOtenantCode);
 
     if (numeroFactura && numeroFactura.trim() !== '') {
       params = params.set('numeroFactura', numeroFactura.trim());
     }
+    params = params.set('sedeId', sedeId ? sedeId.toString() : '0');
 
     // Queda: GET {base}/facturas/creadas?codigo=...&numeroFactura=...
     // En dev, con el environment de arriba:
     // https://localhost:7226/api/facturas/creadas?codigo=...&numeroFactura=...
     return this.http.get<RespuestaBusquedaFacturasCreadas[]>(
       `${this.root}/creadas`,
-      { params }
+      { params },
     );
   }
 }

@@ -6,6 +6,7 @@ export const environment = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
   },
   apiUrl: '/api',
+  fesApiUrl2: 'https://rydentweb-001-site3.jtempurl.com/api',
   fesApiUrl: 'https://localhost:7226/api',
   signalRUrlJp: 'https://localhost:63363/Rydenthub',
   signalRUrl: 'https://localhost:7028/Rydenthub',

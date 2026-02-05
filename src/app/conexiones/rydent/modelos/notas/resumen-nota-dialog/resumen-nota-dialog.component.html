@@ -1,6 +1,15 @@
 <!-- src/app/conexiones/rydent/modelos/notas/resumen-nota-dialog/resumen-nota-dialog.component.html -->
 <h2 mat-dialog-title class="title">
-  Resumen {{ data.tipo }} #{{ data.numero }}
+  <span>Resumen {{ data.tipo }} #{{ data.numero }}</span>
+
+  <button
+    mat-icon-button
+    class="btn-close"
+    (click)="cerrar(false)"
+    aria-label="Cerrar"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
 </h2>
 
 <mat-dialog-content class="content">
@@ -15,10 +24,12 @@
         {{ data.response?.success ? "Éxito" : "Error" }}
       </div>
     </div>
+
     <div class="kpi">
       <div class="kpi__title">UUID</div>
       <div class="kpi__value mono">{{ data.response?.uuid || "-" }}</div>
     </div>
+
     <div class="kpi">
       <div class="kpi__title">CUFE</div>
       <div class="kpi__value mono">{{ data.response?.cufe || "-" }}</div>
@@ -35,14 +46,15 @@
     <div class="value">{{ data.response?.dianStatus }}</div>
   </div>
 
-  <div class="grid2">
-    <div>
+  <!-- (Opcional) si quieres ocultar PDF/XML cuando vienen vacíos -->
+  <div class="grid2" *ngIf="data.response?.pdfUrl || data.response?.xmlUrl">
+    <div *ngIf="data.response?.pdfUrl">
       <div class="label">PDF URL</div>
-      <div class="value wrap mono">{{ data.response?.pdfUrl || "-" }}</div>
+      <div class="value wrap mono">{{ data.response?.pdfUrl }}</div>
     </div>
-    <div>
+    <div *ngIf="data.response?.xmlUrl">
       <div class="label">XML URL</div>
-      <div class="value wrap mono">{{ data.response?.xmlUrl || "-" }}</div>
+      <div class="value wrap mono">{{ data.response?.xmlUrl }}</div>
     </div>
   </div>
 
@@ -58,19 +70,5 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="acciones">
-  <button
-    mat-stroked-button
-    (click)="descargarPdf()"
-    [disabled]="!data.response?.uuid || !data.onDescargarPdf"
-  >
-    Descargar PDF
-  </button>
-  <button
-    mat-stroked-button
-    (click)="descargarXml()"
-    [disabled]="!data.response?.uuid || !data.onDescargarXml"
-  >
-    Descargar XML
-  </button>
-  <button mat-flat-button color="primary" (click)="cerrar()">Cerrar</button>
+  <button mat-flat-button color="primary" (click)="ok()">OK</button>
 </mat-dialog-actions>

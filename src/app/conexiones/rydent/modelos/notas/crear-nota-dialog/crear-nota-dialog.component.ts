@@ -199,7 +199,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     public data: Partial<CrearNotaDialogData> = {},
     private datePipe: DatePipe,
-    private notaSupport: NotaSupportHttpService
+    private notaSupport: NotaSupportHttpService,
   ) {}
 
   ngOnInit(): void {
@@ -236,23 +236,11 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
     this.itemsFA.clear();
     (p.items ?? []).forEach((i) => this.addItem(i));
 
-    let issueDateControlValue = anyP.issueDate ?? '';
-    if (
-      typeof issueDateControlValue === 'string' &&
-      issueDateControlValue.includes('/')
-    ) {
-      const parts = issueDateControlValue.split(' ')[0]?.split('/') ?? [];
-      if (parts.length === 3) {
-        const [dd, mm, yyyy] = parts;
-        issueDateControlValue = `${yyyy}-${mm}-${dd}`;
-      }
-    }
-
     this.form.patchValue({
       tenantCode: p.tenantCode || this.data.tenantCode || '',
       tipo: p.tipo,
       modalidad: p.modalidad,
-      issueDate: issueDateControlValue,
+      issueDate: p.issueDate,
       terceroNombre: this.data.terceroNombre || '',
       reason: p.reason,
       number: p.number,
@@ -306,7 +294,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
         invoiceUuid: this.data?.invoiceUuid ?? '',
         invoiceNumber: this.data?.invoiceNumber ?? '',
       },
-      { emitEvent: false }
+      { emitEvent: false },
     );
 
     this.toggleValidators(tipoActual, 'INTERNA');
@@ -327,7 +315,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
       {
         prefix: tipoActual === 'ND' ? 'ND' : 'NC',
       },
-      { emitEvent: false }
+      { emitEvent: false },
     );
 
     const hoyIso = this.datePipe.transform(new Date(), 'yyyy-MM-dd') as string;
@@ -348,7 +336,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
 
     this.toggleValidators(
       this.form.value.tipo as NotaTipo,
-      this.form.value.modalidad as NotaModalidad
+      this.form.value.modalidad as NotaModalidad,
     );
   }
 
@@ -368,7 +356,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
           ) {
             this.form.patchValue(
               { modalidad: 'INTERNA' },
-              { emitEvent: false }
+              { emitEvent: false },
             );
           }
         }
@@ -376,7 +364,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
           {
             prefix: t === 'ND' ? 'ND' : 'NC',
           },
-          { emitEvent: false }
+          { emitEvent: false },
         );
         this.toggleValidators(t, this.form.value.modalidad as NotaModalidad);
 
@@ -770,7 +758,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
   private applyConfigToSingleItem(
     ctrl: FormGroup,
     cfg: ReasonConfig,
-    index: number
+    index: number,
   ): void {
     const controlsConfig = [
       {
@@ -1024,7 +1012,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
           : undefined;
 
       this.addItem(
-        lastItem ? { ...lastItem, sku: '', description: '' } : undefined
+        lastItem ? { ...lastItem, sku: '', description: '' } : undefined,
       );
     }
   }
@@ -1042,7 +1030,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
     const texto = prompt(
       'Ingrese un cargo (+) o descuento (-) global en COP\n' +
         'Ejemplos:\n  10000 = cargo\n  -5000 = descuento',
-      this.cargoDescuentoGlobal.toString()
+      this.cargoDescuentoGlobal.toString(),
     );
 
     if (texto === null) return;
@@ -1174,12 +1162,9 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
     const raw: any = this.form.getRawValue();
 
     // ==== Fecha de emisión en formato dd/MM/yyyy HH:mm:ss ====
-    let issueDateFormatted = raw['issueDate'] as string;
-
-    if (/^\d{4}-\d{2}-\d{2}$/.test(issueDateFormatted)) {
-      const [yyyy, mm, dd] = issueDateFormatted.split('-');
-      issueDateFormatted = `${dd}/${mm}/${yyyy} 00:00:00`;
-    }
+    let dissueDate = raw['issueDate'];
+    let issueDateFormatted = this.notaSupport.toIsoColombia(dissueDate);
+    console.log(dissueDate, issueDateFormatted);
 
     // ==== Ítems ====
     const items = ((raw['items'] as any[]) ?? []).map((i) => {
@@ -1201,13 +1186,14 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
         ivaRate,
         retFuenteRate,
       };
-
-      item.taxes = [
-        {
-          taxCategory: 'IVA',
-          taxRate: ivaRate,
-        },
-      ];
+      if (ivaRate > 0) {
+        item.taxes = [
+          {
+            taxCategory: 'IVA',
+            taxRate: ivaRate,
+          },
+        ];
+      }
 
       if (retFuenteRate > 0) {
         item.withholdings = [
@@ -1232,7 +1218,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
       'prefix:',
       prefix,
       'fullNumber:',
-      fullNumber
+      fullNumber,
     );
 
     const payload: CrearNotaPayload = {
@@ -1268,7 +1254,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
 
     console.log(
       'PAYLOAD NOTA ENVIADO A API INTERMEDIA (ya con number=NC001, etc):',
-      payload
+      payload,
     );
     this.ref.close({
       ok: true,
@@ -1288,10 +1274,10 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
     const invoiceIssueDate = this.form.get('invoiceIssueDate') as FormControl;
 
     const invoicePeriodStartDate = this.form.get(
-      'invoicePeriodStartDate'
+      'invoicePeriodStartDate',
     ) as FormControl;
     const invoicePeriodEndDate = this.form.get(
-      'invoicePeriodEndDate'
+      'invoicePeriodEndDate',
     ) as FormControl;
 
     const customer = this.form.get('customer') as FormGroup;
@@ -1397,7 +1383,7 @@ export class CrearNotaDialogComponent implements OnInit, OnDestroy {
             flexible: info.flexible ?? true,
             resolutionNumber: info.resolutionNumber ?? '',
           },
-          { emitEvent: false }
+          { emitEvent: false },
         );
       },
       error: (err) => {

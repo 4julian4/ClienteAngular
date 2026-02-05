@@ -1,8 +1,13 @@
 {
-    "/api": {
-        "target1": "https://localhost:63363",
-        "targetjuli": "https://localhost:7028",
-        "target": "https://rydentweb-001-site1.jtempurl.com",
-        "secure": false
-    }
+  "/apinube": {
+    "target1": "https://localhost:63363",
+    "targetjuli": "https://localhost:7028",
+    "target": "https://rydentweb-001-site1.jtempurl.com",
+    "secure": false
+  },
+  "/apifes": {
+    "target": "https://rydentweb-001-site3.jtempurl.com",
+    "secure": false,
+    "changeOrigin": true
+  }
 }

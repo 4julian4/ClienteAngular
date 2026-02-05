@@ -15,6 +15,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
+import { PresentarDianProgressView } from 'src/app/conexiones/rydent/modelos/presentar-dian/presentar-dian.model';
 
 import {
   RespuestaBusquedaFacturasPendientes,
@@ -92,6 +93,8 @@ export class FacturaComponent implements OnInit, OnDestroy {
 
   // Estado
   isLoading = false;
+  isPresentandoDian = false;
+  progresoActual: PresentarDianProgressView | null = null;
   private subs: Subscription[] = [];
 
   // Señal cloud
@@ -107,10 +110,25 @@ export class FacturaComponent implements OnInit, OnDestroy {
   notaPanelFactura: RowFactura | null = null;
   notasFacturaSeleccionada: NotaResumen[] = [];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  private _paginator?: MatPaginator;
+  private _sort?: MatSort;
+
+  @ViewChild(MatPaginator)
+  set paginator(p: MatPaginator) {
+    if (!p) return;
+    this._paginator = p;
+    this.dataSource.paginator = p;
+  }
+
+  @ViewChild(MatSort)
+  set sort(s: MatSort) {
+    if (!s) return;
+    this._sort = s;
+    this.dataSource.sort = s;
+  }
 
   listaDoctores: ListadoItem[] = [];
+  sedeIdSeleccionada = 0;
 
   constructor(
     private pendientesSvc: RespuestaBusquedaFacturasPendientesService,
@@ -128,7 +146,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
     private ncHttp: NcHttpService,
     private ndHttp: NdHttpService,
     private facturasCreadasHttp: FacturasCreadasHttpService,
-    private respuestaPinService: RespuestaPinService
+    private respuestaPinService: RespuestaPinService,
   ) {}
 
   ngOnInit(): void {
@@ -138,15 +156,22 @@ export class FacturaComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.subs.push(
+      this.respuestaPinService.sharedSedeSeleccionada.subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
+      }),
+    );
+    this.subs.push(this.progreso$.subscribe((p) => (this.progresoActual = p)));
+
     // Cuando cambie el doctor seleccionado, volvemos a aplicar filtros en la tabla
     this.subs.push(
-      this.filtroDoctor.valueChanges.subscribe(() => this.applyFilter())
+      this.filtroDoctor.valueChanges.subscribe(() => this.applyFilter()),
     );
     // Obtener clienteId/sede actual (para SignalR)
     this.subs.push(
       this.pinSvc.sharedSedeData.subscribe((data) => {
         if (data != null) this.idSedeActualSignalR = data;
-      })
+      }),
     );
 
     // Suscripción a listados de pendientes (SignalR)
@@ -157,8 +182,8 @@ export class FacturaComponent implements OnInit, OnDestroy {
           this.selection.clear();
           this.cerrarPanelNotas(); // por si estaba abierto
           this.pintarTabla(lista, 'pendientes');
-        }
-      )
+        },
+      ),
     );
 
     // Cambio de tipo de listado (pendientes/creadas)
@@ -180,57 +205,72 @@ export class FacturaComponent implements OnInit, OnDestroy {
         this.filtroFechaFin.setValue(null, { emitEvent: false });
 
         this.applyFilter();
-      })
+      }),
     );
 
     // Re-aplicar filtros
     this.subs.push(
-      this.filtroPrestador.valueChanges.subscribe(() => this.applyFilter())
+      this.filtroPrestador.valueChanges.subscribe(() => this.applyFilter()),
     );
     this.subs.push(
-      this.filtroTexto.valueChanges.subscribe(() => this.applyFilter())
+      this.filtroTexto.valueChanges.subscribe(() => this.applyFilter()),
     );
     this.subs.push(
-      this.filtroFechaIni.valueChanges.subscribe(() => this.applyFilter())
+      this.filtroFechaIni.valueChanges.subscribe(() => this.applyFilter()),
     );
     this.subs.push(
-      this.filtroFechaFin.valueChanges.subscribe(() => this.applyFilter())
+      this.filtroFechaFin.valueChanges.subscribe(() => this.applyFilter()),
     );
 
     // Resúmenes de presentación
     this.subs.push(
       this.presentarSvc.resumenOk.subscribe((summary) => {
+        this.stopPresentandoDian();
         this.snackBar.open(
           `Presentadas ${summary.ok}/${summary.total}.`,
           'OK',
           {
             duration: 3000,
-          }
+          },
         );
         this.consultar();
         this.selection.clear();
         this.abrirDialogResumenPresentacion(summary);
-      })
+      }),
     );
 
     this.subs.push(
       this.presentarSvc.resumenConError.subscribe((summary) => {
+        this.stopPresentandoDian();
         this.snackBar.open(
           `Exitosas: ${summary.ok} · Fallidas: ${summary.fail}`,
           'Ver',
-          { duration: 5000 }
+          { duration: 5000 },
         );
         this.consultar();
         this.selection.clear();
         this.abrirDialogResumenPresentacion(summary);
-      })
+      }),
     );
+
+    // ✅ DEFAULT al abrir: Pendientes + rango del mes + consultar automático
+    this.filtroTipoListado.setValue('pendientes', { emitEvent: false });
+    this.filtroDoctor.setValue('TODOS', { emitEvent: false });
+
+    // Rango: 1 del mes -> hoy
+    this.setRangoMesActualEnFiltros({ emitEvent: false });
+
+    // Aplica filtro en UI (opcional, pero bien)
+    this.applyFilter();
+
+    // Simula “click” en Consultar
+    this.consultar();
   }
 
-  ngAfterViewInit(): void {
+  /*ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-  }
+  }*/
 
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
@@ -245,6 +285,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
     this.cerrarPanelNotas();
 
     if (tipo === 'creadas') {
+      this.isLoading = false;
       const numero = (this.filtroNumeroFactura.value ?? '').trim();
 
       // 1) Ver qué hay seleccionado en el combo de doctores
@@ -255,7 +296,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         const tenantCode = doctorSeleccionado; // aquí va el CODIGO_PRESTADOR_PPAL
 
         this.facturasCreadasHttp
-          .buscarFacturasCreadas(tenantCode, numero)
+          .buscarFacturasCreadas(tenantCode, numero, this.sedeIdSeleccionada)
           .subscribe({
             next: (lista) => {
               this.isLoading = false;
@@ -268,7 +309,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
               this.snackBar.open(
                 'No fue posible obtener las facturas creadas desde la API intermedia.',
                 'OK',
-                { duration: 4000 }
+                { duration: 4000 },
               );
             },
           });
@@ -282,8 +323,8 @@ export class FacturaComponent implements OnInit, OnDestroy {
         new Set(
           this.listaDoctores
             .filter((d) => d.id && d.id !== 'TODOS')
-            .map((d) => d.id)
-        )
+            .map((d) => d.id),
+        ),
       );
 
       if (!tenants.length) {
@@ -291,7 +332,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'No hay doctores configurados para consultar facturas creadas.',
           'OK',
-          { duration: 4000 }
+          { duration: 4000 },
         );
         return;
       }
@@ -299,13 +340,17 @@ export class FacturaComponent implements OnInit, OnDestroy {
       // Hacemos una llamada por cada tenant (doctor/código prestador) y luego mezclamos todo
       forkJoin(
         tenants.map((t) =>
-          this.facturasCreadasHttp.buscarFacturasCreadas(t, numero)
-        )
+          this.facturasCreadasHttp.buscarFacturasCreadas(
+            t,
+            numero,
+            this.sedeIdSeleccionada,
+          ),
+        ),
       ).subscribe({
         next: (resultadosPorTenant) => {
           // resultadosPorTenant = [listaDoctor1, listaDoctor2, ...]
           const mezclado = ([] as RespuestaBusquedaFacturasCreadas[]).concat(
-            ...resultadosPorTenant
+            ...resultadosPorTenant,
           );
 
           this.isLoading = false;
@@ -315,13 +360,13 @@ export class FacturaComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error(
             'Error al obtener facturas creadas (todos los doctores):',
-            err
+            err,
           );
           this.isLoading = false;
           this.snackBar.open(
             'No fue posible obtener las facturas creadas para todos los doctores.',
             'OK',
-            { duration: 4000 }
+            { duration: 4000 },
           );
         },
       });
@@ -330,7 +375,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
     } else {
       // Pendientes siguen usando SignalR + worker
       this.pendientesSvc.startConnectionRespuestaBusquedaFacturasPendientes(
-        this.idSedeActualSignalR
+        this.idSedeActualSignalR,
       );
     }
   }
@@ -388,6 +433,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         'documentoPaciente',
         'valorTotal',
         'prestador',
+        'ncTag',
         'acciones',
       ];
     } else {
@@ -460,18 +506,22 @@ export class FacturaComponent implements OnInit, OnDestroy {
     }
 
     const seleccionadas = this.selection.selected.filter((r) =>
-      this.isPendiente(r)
+      this.isPendiente(r),
     ) as RespuestaBusquedaFacturasPendientes[];
 
     if (!seleccionadas.length) return;
+    this.progresoActual = null;
 
+    this.isPresentandoDian = true;
     try {
       await this.presentarSvc.presentarBatch(
         seleccionadas,
         this.idSedeActualSignalR,
-        'FES_REGISTRAR_EN_DIAN'
+        'FES_REGISTRAR_EN_DIAN',
+        this.sedeIdSeleccionada,
       );
     } catch (e) {
+      this.stopPresentandoDian();
       console.error('Error al invocar PresentarFacturasEnDian:', e);
       this.snackBar.open('No fue posible iniciar la presentación.', 'OK', {
         duration: 4000,
@@ -490,13 +540,18 @@ export class FacturaComponent implements OnInit, OnDestroy {
   /** Acción individual desde el menú de cada fila (pendientes) */
   async registrarEnDian(row: RowFactura) {
     if (!this.isPendiente(row)) return;
+    this.progresoActual = null;
+
+    this.isPresentandoDian = true;
     try {
       await this.presentarSvc.presentarIndividual(
         row as RespuestaBusquedaFacturasPendientes,
         this.idSedeActualSignalR,
-        row.tipoOperacion
+        row.tipoOperacion,
+        this.sedeIdSeleccionada,
       );
     } catch (e) {
+      this.stopPresentandoDian();
       console.error('Error al invocar presentarIndividual:', e);
       this.snackBar.open('No fue posible presentar la factura.', 'OK', {
         duration: 4000,
@@ -512,7 +567,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'El PDF solo existe cuando la factura ya está creada.',
         'OK',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }
@@ -587,6 +642,28 @@ export class FacturaComponent implements OnInit, OnDestroy {
     }
   }
 
+  //---------------Descarga JSON PENDIENTE-----------------//
+  async descargarJsonPendiente(row: RowFactura) {
+    if (!this.isPendiente(row)) return;
+
+    try {
+      await this.presentarSvc.descargarJsonPendiente(
+        row as RespuestaBusquedaFacturasPendientes,
+        this.idSedeActualSignalR,
+        this.sedeIdSeleccionada,
+      );
+
+      this.snackBar.open('JSON generado. Descargando...', 'OK', {
+        duration: 2500,
+      });
+    } catch (e) {
+      console.error('Error descargando JSON pendiente:', e);
+      this.snackBar.open('No fue posible descargar el JSON.', 'OK', {
+        duration: 4000,
+      });
+    }
+  }
+
   // ====== Crear Notas (NC/ND) solo para "creadas" ======
   abrirCrearNota(tipo: NotaTipo, row: RowFactura): void {
     // Solo permitimos notas sobre facturas YA CREADAS
@@ -594,7 +671,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'Las notas solo se generan sobre facturas ya creadas.',
         'OK',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }
@@ -619,8 +696,8 @@ export class FacturaComponent implements OnInit, OnDestroy {
     const dlgRef = this.dialog.open(CrearNotaDialogComponent, {
       width: '1200px',
       maxWidth: '98vw',
-      height: '88vh', // <- nueva altura más cómoda
-      maxHeight: '88vh',
+      height: '96vh',
+      maxHeight: '96vh',
       autoFocus: false,
       data: {
         tenantCode: tenant,
@@ -663,11 +740,11 @@ export class FacturaComponent implements OnInit, OnDestroy {
           if (tipoNota === 'NC') {
             console.log('Crear NC con payload va al serviio:', dto);
             respuesta = await firstValueFrom(
-              this.ncHttp.create(tenantCode, dto)
+              this.ncHttp.create(tenantCode, dto, this.sedeIdSeleccionada),
             );
           } else {
             respuesta = await firstValueFrom(
-              this.ndHttp.create(tenantCode, dto)
+              this.ncHttp.create(tenantCode, dto, this.sedeIdSeleccionada),
             );
           }
 
@@ -677,36 +754,36 @@ export class FacturaComponent implements OnInit, OnDestroy {
             '';
 
           // Abrimos el resumen de la nota, alineado con el componente
-          this.dialog.open(ResumenNotaDialogComponent, {
-            width: '1200px',
-            maxWidth: '98vw',
-            height: '88vh', // <- nueva altura más cómoda
-            maxHeight: '88vh',
+          const dlgRef = this.dialog.open(ResumenNotaDialogComponent, {
+            width: '780px',
+            maxWidth: '96vw',
+            maxHeight: '93vh',
             autoFocus: false,
+            panelClass: 'nota-resumen-dialog',
             data: {
               tipo: tipoNota,
-              //numero: numero ?? dto?.number ?? '',
               numero: noteNumber,
               tenantCode: tenantCode,
               response: respuesta,
-              onDescargarPdf: (uuidResp: string, tenantResp: string) => {
-                this.httpDescargas.descargarPdf({
-                  uuid: uuidResp,
-                  tenantCode: tenantResp,
-                  //filenameHint: numero ? `note-${numero}` : undefined,
-                  filenameHint: noteNumber ? `note-${noteNumber}` : undefined,
-                });
-              },
-              onDescargarXml: (uuidResp: string, tenantResp: string) => {
-                this.httpDescargas.descargarXml({
-                  uuid: uuidResp,
-                  tenantCode: tenantResp,
-                  //filenameHint: numero ? `note-${numero}` : undefined,
-                  filenameHint: noteNumber ? `note-${noteNumber}` : undefined,
-                });
-              },
             },
           });
+
+          // ✅ Un solo lugar para refrescar (cuando el usuario haga OK)
+          this.subs.push(
+            dlgRef.afterClosed().subscribe((r) => {
+              if (!r?.refresh) return;
+
+              // Si fue NC: marca la fila para cápsula NC (instantáneo)
+              if (tipoNota === 'NC') {
+                (row as any).hasNc = true;
+                // refresca tabla (sin reconsultar al backend)
+                this.dataSource.data = [...this.dataSource.data];
+              }
+
+              // Si prefieres reconsultar completo (más pesado pero siempre correcto):
+              // this.consultar();
+            }),
+          );
 
           this.snackBar.open('Nota enviada a la API intermedia.', 'OK', {
             duration: 3000,
@@ -722,7 +799,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
             duration: 4000,
           });
         }
-      })
+      }),
     );
   }
 
@@ -733,7 +810,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'Las notas solo aplican a facturas ya creadas.',
         'OK',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }
@@ -773,7 +850,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
           this.snackBar.open(
             'No fue posible cargar las notas de esta factura.',
             'OK',
-            { duration: 4000 }
+            { duration: 4000 },
           );
         },
       });
@@ -800,7 +877,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  descargarPdfNota(nota: NotaResumen, ev?: Event): void {
+  /*descargarPdfNota(nota: NotaResumen, ev?: Event): void {
     ev?.stopPropagation();
 
     // Si no hay URL, no hacemos nada (el botón ya estará deshabilitado)
@@ -826,6 +903,60 @@ export class FacturaComponent implements OnInit, OnDestroy {
     }
 
     window.open(nota.xmlUrl, '_blank');
+  }*/
+
+  // ✅ Arma URL de Dataico sin guardar pdfUrl/xmlUrl
+  private buildDataicoServeFileUrl(
+    nota: NotaResumen,
+    format: 'pdf' | 'xml',
+  ): string | null {
+    const id = nota.noteUuid;
+    if (!id) return null;
+
+    // NC => credit-note, ND => debit-note
+    const dt =
+      (nota.noteType || '').toUpperCase() === 'ND'
+        ? 'debit-note'
+        : 'credit-note';
+
+    const base = 'https://app.dataico.com/serve-file';
+    const params = new URLSearchParams({
+      'document-id': id,
+      'document-type': dt,
+    });
+
+    if (format === 'pdf') params.set('pdf-type', dt);
+    else params.set('xml-type', dt);
+
+    return `${base}?${params.toString()}`;
+  }
+
+  descargarPdfNota(nota: NotaResumen, ev?: Event): void {
+    ev?.stopPropagation();
+
+    const url = this.buildDataicoServeFileUrl(nota, 'pdf');
+    if (!url) {
+      this.snackBar.open('Esta nota aún no tiene UUID disponible.', 'OK', {
+        duration: 4000,
+      });
+      return;
+    }
+
+    window.open(url, '_blank');
+  }
+
+  descargarXmlNota(nota: NotaResumen, ev?: Event): void {
+    ev?.stopPropagation();
+
+    const url = this.buildDataicoServeFileUrl(nota, 'xml');
+    if (!url) {
+      this.snackBar.open('Esta nota aún no tiene UUID disponible.', 'OK', {
+        duration: 4000,
+      });
+      return;
+    }
+
+    window.open(url, '_blank');
   }
 
   editarNota(nota: NotaResumen, ev: Event): void {
@@ -836,7 +967,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No se puede editar una nota aceptada/enviada a la DIAN.',
         'OK',
-        { duration: 4000 }
+        { duration: 4000 },
       );
       return;
     }
@@ -847,7 +978,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No se pudo determinar la factura asociada a la nota.',
         'OK',
-        { duration: 4000 }
+        { duration: 4000 },
       );
       return;
     }
@@ -911,7 +1042,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
                   this.snackBar.open(
                     `Nota ${detalle.number} guardada como borrador.`,
                     'OK',
-                    { duration: 3000 }
+                    { duration: 3000 },
                   );
 
                   // Recargar notas de la factura para mantener panel sincronizado
@@ -932,7 +1063,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
                         error: (err2) => {
                           console.error(
                             'Error recargando notas tras editar:',
-                            err2
+                            err2,
                           );
                         },
                       });
@@ -946,14 +1077,14 @@ export class FacturaComponent implements OnInit, OnDestroy {
                   this.snackBar.open(message, 'OK', { duration: 5000 });
                 },
               });
-            })
+            }),
           );
         } catch (e) {
           console.error('Error parseando payloadJson de nota:', e);
           this.snackBar.open(
             'La nota tiene un JSON interno inválido y no se pudo cargar para edición.',
             'OK',
-            { duration: 5000 }
+            { duration: 5000 },
           );
         }
       },
@@ -962,7 +1093,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'No fue posible cargar los datos de la nota para edición.',
           'OK',
-          { duration: 5000 }
+          { duration: 5000 },
         );
       },
     });
@@ -976,14 +1107,14 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No se puede eliminar una nota aceptada/enviada a la DIAN.',
         'OK',
-        { duration: 4000 }
+        { duration: 4000 },
       );
       return;
     }
 
     // 2) Confirmación al usuario
     const ok = confirm(
-      `¿Seguro que deseas eliminar la nota ${nota.number || ''}?`
+      `¿Seguro que deseas eliminar la nota ${nota.number || ''}?`,
     );
     if (!ok) return;
 
@@ -993,7 +1124,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No se pudo determinar la factura asociada a la nota.',
         'OK',
-        { duration: 4000 }
+        { duration: 4000 },
       );
       return;
     }
@@ -1022,7 +1153,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           `Nota ${nota.number || ''} eliminada correctamente.`,
           'OK',
-          { duration: 3000 }
+          { duration: 3000 },
         );
 
         // 5) Volver a cargar las notas de la factura para mantener el panel sincronizado
@@ -1047,7 +1178,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
           // Si por alguna razón no tenemos número de factura,
           // al menos reflejamos el borrado en memoria
           this.notasFacturaSeleccionada = this.notasFacturaSeleccionada.filter(
-            (n) => n.id !== nota.id
+            (n) => n.id !== nota.id,
           );
         }
       },
@@ -1068,7 +1199,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
 
   /** Guard para diferenciar “pendiente” (FES sin crear todavía) */
   private isPendiente(
-    row: RowFactura
+    row: RowFactura,
   ): row is RespuestaBusquedaFacturasPendientes {
     return (row as any).NOMBRE_RESPONS !== undefined;
   }
@@ -1082,6 +1213,8 @@ export class FacturaComponent implements OnInit, OnDestroy {
   }
 
   private applyFilter() {
+    console.log(this.filtroDoctor);
+
     const ini = this.filtroFechaIni.value
       ? this.toYMD(this.filtroFechaIni.value)
       : null;
@@ -1107,12 +1240,11 @@ export class FacturaComponent implements OnInit, OnDestroy {
   trackByRow = (_i: number, row: RowFactura) => {
     return (row as any).idRelacion ?? (row as any).factura ?? row;
   };
-
   private abrirDialogResumenPresentacion(summary: any): void {
     this.dialog.open(ResumenPresentacionDialogComponent, {
       data: { summary },
-      width: '1200px',
-      maxWidth: '98vw',
+      width: '870px',
+      maxWidth: '96vw',
       height: '88vh', // <- nueva altura más cómoda
       maxHeight: '88vh',
       autoFocus: false,
@@ -1166,5 +1298,42 @@ export class FacturaComponent implements OnInit, OnDestroy {
     if (this.paginator) {
       this.paginator.firstPage();
     }
+  }
+
+  tieneNc(row: RowFactura): boolean {
+    return !this.isPendiente(row) && !!(row as any).hasNc;
+  }
+
+  get dianProgressPercent(): number {
+    const p = this.progresoActual;
+    if (!p || (p.total ?? 0) <= 0) return 0;
+    const pct = Math.round(((p.processed ?? 0) / (p.total ?? 1)) * 100);
+    return Math.max(0, Math.min(100, pct));
+  }
+
+  get dianProgressLabel(): string {
+    const p = this.progresoActual;
+    if (!p) return 'Procesando...';
+    const base =
+      (p.total ?? 0) > 0
+        ? `${p.processed ?? 0}/${p.total ?? 0} (${this.dianProgressPercent}%)`
+        : `${p.processed ?? 0} procesadas`;
+
+    const msg = (p.lastMessage ?? '').trim();
+    return msg ? `${msg} • ${base}` : base;
+  }
+
+  private stopPresentandoDian(): void {
+    this.isPresentandoDian = false;
+  }
+
+  private setRangoMesActualEnFiltros(opts?: { emitEvent?: boolean }): void {
+    const emit = opts?.emitEvent ?? false;
+
+    const hoy = new Date();
+    const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    this.filtroFechaIni.setValue(primerDiaMes, { emitEvent: emit });
+    this.filtroFechaFin.setValue(hoy, { emitEvent: emit });
   }
 }

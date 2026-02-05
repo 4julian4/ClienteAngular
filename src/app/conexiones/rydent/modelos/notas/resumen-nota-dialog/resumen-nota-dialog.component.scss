@@ -2,30 +2,51 @@
 
 :host {
   display: block;
-  width: min(90vw, 700px);
-  max-width: 90vw;
+  width: min(96vw, 760px);
+  max-width: 96vw;
+}
+
+/* ✅ Mata el scroll externo del contenedor del dialog */
+:host ::ng-deep .nota-resumen-dialog .mat-mdc-dialog-surface,
+:host ::ng-deep .nota-resumen-dialog .mdc-dialog__surface {
+  overflow: hidden !important;
 }
 
 .title {
-  margin: 0 0 8px 0;
+  margin: 0;
+  padding: 10px 14px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 650;
+  font-size: 16px;
+}
+
+.btn-close {
+  margin-right: -6px;
 }
 
 mat-dialog-content.content {
-  max-height: 65vh;
+  /* ✅ El content es el único que scrollea */
   overflow: auto;
+  padding: 10px 14px 12px;
+
+  /* 90vh es el maxHeight del diálogo; restamos header+footer aprox */
+  max-height: calc(90vh - 110px);
 }
 
 .kpis {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
 .kpi {
   background: #f8f9fb;
   border-radius: 10px;
-  padding: 12px;
+  padding: 10px;
   text-align: center;
 
   &.ok {
@@ -37,19 +58,20 @@ mat-dialog-content.content {
 }
 
 .kpi__title {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.7;
 }
+
 .kpi__value {
-  font-size: 16px;
-  font-weight: 700;
-  word-break: break-word;
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere; /* ✅ UUID/CUFE sin romper layout */
 }
 
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .msg,
@@ -58,7 +80,7 @@ mat-dialog-content.content {
 }
 
 .label {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.8;
   margin-bottom: 4px;
 }
@@ -70,16 +92,18 @@ mat-dialog-content.content {
 }
 
 .wrap {
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
+
 .mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 .acciones {
-  padding-top: 4px;
-  gap: 8px;
+  padding: 8px 14px 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 @media (max-width: 640px) {

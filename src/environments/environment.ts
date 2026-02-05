@@ -6,7 +6,7 @@ export const environment = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
   },
   apiUrl: 'https://rydentweb-001-site1.jtempurl.com/api',
-  fesApiUrl: 'https://localhost:7226/api',
+  fesApiUrl: 'https://rydentweb-001-site3.jtempurl.com/api',
   signalRUrlJp: 'https://localhost:63363/Rydenthub',
   signalRUrl: 'https://rydentweb-001-site1.jtempurl.com/Rydenthub',
   NombreAplicacion: 'Rydent Web Nube',

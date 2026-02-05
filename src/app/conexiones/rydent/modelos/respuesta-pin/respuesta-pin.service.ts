@@ -36,7 +36,7 @@ export class RespuestaPinService {
     this.nombrePacienteGuardadoData.asObservable();
 
   private anamnesisEvolucionarAgendaData = new BehaviorSubject<number | null>(
-    null
+    null,
   );
   sharedAnamnesisEvolucionarAgendaData =
     this.anamnesisEvolucionarAgendaData.asObservable();
@@ -91,6 +91,9 @@ export class RespuestaPinService {
   private numPacientesPorDoctor = new BehaviorSubject<number | null>(null);
   sharedNumPacientesPorDoctorData = this.numPacientesPorDoctor.asObservable();
 
+  private facturacionElectronica = new BehaviorSubject<boolean | null>(null);
+  sharedfacturacionElectronicaData = this.facturacionElectronica.asObservable();
+
   private notaImportante = new BehaviorSubject<string | null>(null);
   sharednotaImportante = this.notaImportante.asObservable();
 
@@ -136,7 +139,7 @@ export class RespuestaPinService {
   constructor(
     private signalRService: SignalRService,
     private interruptionService: InterruptionService,
-    private descomprimirDatosService: DescomprimirDatosService
+    private descomprimirDatosService: DescomprimirDatosService,
   ) {
     this.onDoctorSeleccionado = () => {};
   }
@@ -150,10 +153,10 @@ export class RespuestaPinService {
         'ErrorConexion',
         (clienteId: string, mensajeError: string) => {
           alert(
-            'Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId
+            'Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId,
           );
           this.interruptionService.interrupt();
-        }
+        },
       );
 
       this.signalRService.hubConnection.off('RespuestaObtenerPin');
@@ -163,13 +166,13 @@ export class RespuestaPinService {
           try {
             const decompressedData =
               this.descomprimirDatosService.decompressString(
-                objRespuestaObtenerDoctor
+                objRespuestaObtenerDoctor,
               );
             this.respuestaPinModel.emit(JSON.parse(decompressedData));
           } catch (error) {
             console.error('Error durante la descompresión o análisis: ', error);
           }
-        }
+        },
       );
     } catch (err) {
       console.error('Error al conectar con SignalR: ', err);
@@ -247,6 +250,7 @@ export class RespuestaPinService {
 
   updateSedeSeleccionada(data: number) {
     this.sedeSeleccionada.next(data);
+    console.log('****************************    SEDE::', data);
   }
 
   updatedatosRespuestaPin(data: RespuestaPin) {
@@ -286,6 +290,10 @@ export class RespuestaPinService {
 
   updateNumPacientesPorDoctor(data: number) {
     this.numPacientesPorDoctor.next(data);
+  }
+
+  updateFacturacionElectronica(data: boolean) {
+    this.facturacionElectronica.next(data);
   }
 
   updateNotaImportante(data: string) {

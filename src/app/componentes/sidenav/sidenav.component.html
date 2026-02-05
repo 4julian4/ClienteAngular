@@ -107,6 +107,7 @@
 
         <!-- Billing (un solo acceso al dashboard) -->
         <button
+          *ngIf="facturacionElectronica"
           mat-menu-item
           routerLink="/factura"
           (click)="setMostrarBuscarHistoriaClinica(false)"
@@ -116,6 +117,7 @@
         </button>
 
         <button
+          *ngIf="facturacionElectronica"
           mat-menu-item
           routerLink="/nomina"
           (click)="setMostrarBuscarHistoriaClinica(false)"

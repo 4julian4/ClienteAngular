@@ -1,100 +1,95 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ListadoItem, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
-import { ConsultasRipsModel, GenerarRipsModel, ProcedimientosRipsModel, ResultadosValidacionModel, ServiciosRipsModel, UsuariosRipsModel } from './generar-rips.model';
+import {
+  ListadoItem,
+  RespuestaPinService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import { GenerarRipsModel, ProgresoRipsModel } from './generar-rips.model';
 import { GenerarRipsService } from './generar-rips.service';
-import { MatTableDataSource } from '@angular/material/table';
+
+type AccionPendiente = 'GENERAR' | 'PRESENTAR' | null;
 
 @Component({
   selector: 'app-generar-rips',
   templateUrl: './generar-rips.component.html',
-  styleUrls: ['./generar-rips.component.scss']
+  styleUrls: ['./generar-rips.component.scss'],
 })
 export class GenerarRipsComponent implements OnInit {
-  tableData: any[] = [];  // Aquí almacenas los datos
-  jsonData: any[] = []; // Aquí guardaremos los datos dinámicos
-  tableDataRespuesta: any[] = [];  // Aquí almacenas los datos
-  jsonDataRespuesta: any[] = []; // Aquí guardaremos los datos dinámicos
-  mostrarFormulario: boolean = false; // Controla la visibilidad del formulario
-  mostrarTablaRipsGenerados: boolean = false; // Controla la visibilidad de la tabla de RIPS generados
-  mostrarTablaRespuestaRipsPresentados: boolean = false; // Controla la visibilidad de la tabla de RIPS presentados
-  //mostrarTabla: boolean = false; // Controla la visibilidad de la tabla
   listaDoctores: ListadoItem[] = [];
   listaInformacionReporte: ListadoItem[] = [];
-  idSedeActualSignalR: string = "";
-  usuario: UsuariosRipsModel[] = [];
-  consulta:ConsultasRipsModel[] = [];
-  procedimiento:ProcedimientosRipsModel[] = [];
-  isloading: boolean = false;
-  datosTabla: any[] = []; // Almacena los datos en la tabla
-  
-  
-  
-  
-  //ripsData = new MatTableDataSource<any>([]); // Fuente de datos para la tabla
+  idSedeActualSignalR: string = '';
 
+  isloading: boolean = false;
   ripsForm!: FormGroup;
+
+  // ✅ progreso para UI
+  progreso: ProgresoRipsModel | null = null;
+
+  // Guardamos lo último por si quieres re-descargar luego
+  private ultimoGenerado: any[] = [];
+  private ultimaRespuestaPresentacion: any[] = [];
+
+  private accionPendiente: AccionPendiente = null;
 
   constructor(
     private fb: FormBuilder,
     private respuestaPinService: RespuestaPinService,
-    private generarRipsService: GenerarRipsService
-  ) { }
+    private generarRipsService: GenerarRipsService,
+  ) {}
 
   ngOnInit(): void {
-       
-
     this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
       if (data) {
         this.listaDoctores = data.lstDoctores;
         this.listaInformacionReporte = data.lstInformacionReporte;
-        console.log('Datos de respuesta PIN:', data);
       }
     });
 
-    this.respuestaPinService.sharedSedeData.subscribe(data => {
-      if (data != null) {
-        this.idSedeActualSignalR = data;
-      }
+    this.respuestaPinService.sharedSedeData.subscribe((data) => {
+      if (data != null) this.idSedeActualSignalR = data;
     });
 
-    this.respuestaPinService.sharedisLoading.subscribe(data => {
+    this.respuestaPinService.sharedisLoading.subscribe((data) => {
       this.isloading = data || false;
+      // Cuando se apaga el loading, puedes dejar el último progreso visible o limpiarlo.
+      // Si quieres limpiarlo:
+      // if (!this.isloading) this.progreso = null;
     });
-
     this.respuestaPinService.updateisLoading(false);
 
-    this.generarRipsService.sharedmostrarFormulario.subscribe(data => {
-      this.mostrarFormulario = data || false;
+    // ✅ progreso en vivo
+    this.generarRipsService.sharedProgresoRips.subscribe((p) => {
+      this.progreso = p;
     });
 
-    this.generarRipsService.sharedmostrarTablaRespuestaRipsPresentados.subscribe(data => {
-      this.mostrarTablaRespuestaRipsPresentados = data || false;
-    });   
+    // Generar -> descarga automática
+    this.respuestaPinService.sharedrespuestaGenerarJsonRipsPresentado.subscribe(
+      (data: any[]) => {
+        if (!data || data.length === 0) return;
+        this.ultimoGenerado = data;
 
-    this.generarRipsService.sharedmostrarTablaRipsGenerados.subscribe(data => {
-      this.mostrarTablaRipsGenerados = data || false;
-    });
+        if (this.accionPendiente === 'GENERAR') {
+          this.accionPendiente = null;
+          this.downloadJson(data, this.makeFileName('RIPS_GENERADO_COMPLETO'));
+        }
+      },
+    );
 
-    this.respuestaPinService.sharedrespuestaGenerarJsonRipsPresentado.subscribe((data: any[]) => {
-      if (data && data.length > 0) {
-        console.log('Datos de respuesta Generar RIPS:', data);
-        this.jsonData = data;
-        this.processData(); // Llamada para procesar los datos
-      }
-    });
+    // Presentar -> descarga automática
+    this.respuestaPinService.sharedrespuestaDockerJsonRipsPresentado.subscribe(
+      (data: any[]) => {
+        if (!data || data.length === 0) return;
+        this.ultimaRespuestaPresentacion = data;
 
-    this.respuestaPinService.sharedrespuestaDockerJsonRipsPresentado.subscribe(data => {
-      if (data && data.length > 0) {
-        console.log('Datos de respuesta Presentar RIPS:', data);
-        this.jsonDataRespuesta = data;
-        this.processDataRespuesta(); // Llamada para procesar los datos
-        //this.jsonData = data;
-        //this.processData(); // Llamada para procesar los datos
-      }
-    });
-
-
+        if (this.accionPendiente === 'PRESENTAR') {
+          this.accionPendiente = null;
+          this.downloadJson(
+            data,
+            this.makeFileName('RIPS_PRESENTACION_RESPUESTA_COMPLETA'),
+          );
+        }
+      },
+    );
 
     this.ripsForm = this.fb.group({
       fechaInicio: ['', Validators.required],
@@ -106,137 +101,91 @@ export class GenerarRipsComponent implements OnInit {
     });
   }
 
-  processData() {
-    this.tableData = this.jsonData.map(item => {
-      return {
-        factura: item.rips.numFactura, // Cambiado para reflejar la estructura correcta
-        tipoNota: item.rips.tipoNota,
-        numNota: item.rips.numNota,
-        usuarios: Array.isArray(item.rips.usuarios) ? item.rips.usuarios.map((usuario: UsuariosRipsModel) => ({
-          tipoDocumentoIdentificacion: usuario.tipoDocumentoIdentificacion,
-          numDocumentoIdentificacion: usuario.numDocumentoIdentificacion,
-          servicios: usuario.servicios ? this.formatServicios(usuario.servicios) : []
-        })) : []
-      };
-    });
-    console.log('Datos de la tabla:', this.tableData);
+  // =========================
+  // ACCIONES
+  // =========================
+  async presentarRips(identificador: number) {
+    if (!this.ripsForm.valid || this.isloading) return;
+    this.accionPendiente = 'PRESENTAR';
+
+    const payload: GenerarRipsModel = this.buildPayload();
+    await this.generarRipsService.startConnectionPresentarRips(
+      this.idSedeActualSignalR,
+      identificador,
+      JSON.stringify(payload),
+    );
   }
 
+  async generarRips(identificador: number) {
+    if (!this.ripsForm.valid || this.isloading) return;
+    this.accionPendiente = 'GENERAR';
 
-  processDataRespuesta() {
-    this.tableDataRespuesta = this.jsonDataRespuesta.map(item => {
-      return {
-        Estado: item.resultState, // Cambiado para reflejar la estructura correcta
-        Factura: item.numFactura,
-        Codigo: item.codigoUnicoValidacion,
-        Resultados: Array.isArray(item.resultadosValidacion) ? item.resultadosValidacion.map((resultadoValidacion: ResultadosValidacionModel) => ({
-          Clase: resultadoValidacion.Clase,
-          Codigo: resultadoValidacion.Codigo,
-          Descripcion: resultadoValidacion.Descripcion,
-          Observaciones: resultadoValidacion.Observaciones
-          //PathFuente: resultadoValidacion.PathFuente,
-          //Fuente: resultadoValidacion.Fuente
-        })) : []
-      };
-    });
-    console.log('Datos de la tabla:', this.tableDataRespuesta);
-  }
-  
-
-  formatServicios(servicios: any) {
-    return {
-      consultas: Array.isArray(servicios.consultas) ? servicios.consultas.map((consulta: ConsultasRipsModel) => ({
-        fechaInicioAtencion: consulta.fechaInicioAtencion,
-        codConsulta: consulta.codConsulta,
-        conceptoRecaudo: consulta.conceptoRecaudo,
-        vrServicio: consulta.vrServicio
-      })) : [],
-  
-      procedimientos: Array.isArray(servicios.procedimientos) ? servicios.procedimientos.map((procedimiento: any) => ({
-        fechaInicioAtencion: procedimiento.fechaInicioAtencion,
-        codProcedimiento: procedimiento.codProcedimiento,
-        conceptoRecaudo: procedimiento.conceptoRecaudo,
-        vrServicio: procedimiento.vrServicio
-      })) : []
-    };
-  }
- 
-  aplicarFiltro(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    if (!inputElement) return;
-  
-    const filtroValor = inputElement.value.trim().toLowerCase();
-  
-    this.tableData = this.jsonData
-      .map(item => ({
-        factura: item.rips.numFactura, // Transformación acorde a `processData()`
-        tipoNota: item.rips.tipoNota,
-        numNota: item.rips.numNota,
-        usuarios: Array.isArray(item.rips.usuarios) ? 
-          item.rips.usuarios.map((usuario: UsuariosRipsModel) => ({ // 👈 Tipado corregido
-            tipoDocumentoIdentificacion: usuario.tipoDocumentoIdentificacion,
-            numDocumentoIdentificacion: usuario.numDocumentoIdentificacion,
-            servicios: usuario.servicios ? this.formatServicios(usuario.servicios) : []
-          })) 
-          : []
-      }))
-      .filter(item => item.factura.toLowerCase().includes(filtroValor)); // Filtrado por factura
-  }
-  
-  
-  
-  
-
-  mostrarTabla() {
-    this.generarRipsService.updatemostrarFormulario(true);
-    this.generarRipsService.updatemostrarTablaRipsGenerados(true);  
-    this.generarRipsService.updatemostrarTablaRespuestaRipsPresentados(false);
+    const payload: GenerarRipsModel = this.buildPayload();
+    await this.generarRipsService.startConnectionGenerarRips(
+      this.idSedeActualSignalR,
+      identificador,
+      JSON.stringify(payload),
+    );
   }
 
-  async presentarRips(identificador:number) {
-    if (this.ripsForm.valid) {
-      console.log('Presentar RIPS:', this.ripsForm.value);
-      let objPresentarRips: GenerarRipsModel = new GenerarRipsModel();
-      objPresentarRips.FECHAINI = this.ripsForm.value.fechaInicio;
-      objPresentarRips.FECHAFIN = this.ripsForm.value.fechaFin;
-      objPresentarRips.EPS = this.ripsForm.value.codigoEps;
-      objPresentarRips.FACTURA = this.ripsForm.value.factura;
-      objPresentarRips.IDDOCTOR = this.ripsForm.value.idDoctor;
-      objPresentarRips.IDREPORTE = this.ripsForm.value.idReporte;
-      objPresentarRips.lstDoctores = this.listaDoctores;
-      objPresentarRips.lstInformacionReporte = this.listaInformacionReporte;
-      //this.mostrarFormulario = false;
-      await this.generarRipsService.startConnectionPresentarRips(this.idSedeActualSignalR,identificador, JSON.stringify(objPresentarRips));
-    }
+  // =========================
+  // UI helpers
+  // =========================
+  get progressPercent(): number {
+    const t = this.progreso?.total ?? 0;
+    const p = this.progreso?.procesadas ?? 0;
+    if (t <= 0) return 0;
+    const pct = Math.round((p / t) * 100);
+    return Math.max(0, Math.min(100, pct));
   }
 
-  async limpiarFiltro() {}
-
-  async generarRips(identificador:number) {
-    if (this.ripsForm.valid) {
-      //this.respuestaPinService.updateisLoading(true);
-      console.log('Generar RIPS:', this.ripsForm.value);
-      let objGenerarRips: GenerarRipsModel = new GenerarRipsModel();
-      objGenerarRips.FECHAINI = this.ripsForm.value.fechaInicio;
-      objGenerarRips.FECHAFIN = this.ripsForm.value.fechaFin;
-      objGenerarRips.EPS = this.ripsForm.value.codigoEps;
-      objGenerarRips.FACTURA = this.ripsForm.value.factura;
-      objGenerarRips.IDDOCTOR = this.ripsForm.value.idDoctor;
-      objGenerarRips.IDREPORTE = this.ripsForm.value.idReporte;
-      objGenerarRips.lstDoctores = this.listaDoctores;
-      objGenerarRips.lstInformacionReporte = this.listaInformacionReporte;
-      await this.generarRipsService.startConnectionGenerarRips(this.idSedeActualSignalR,identificador, JSON.stringify(objGenerarRips));
-      //this.mostrarFormulario = false;
-    }
+  get progressLabel(): string {
+    if (!this.progreso) return 'Procesando...';
+    const t = this.progreso.total ?? 0;
+    const p = this.progreso.procesadas ?? 0;
+    const msg = (this.progreso.mensaje ?? '').trim();
+    const base =
+      t > 0 ? `${p}/${t} (${this.progressPercent}%)` : `${p} procesadas`;
+    return msg ? `${msg} • ${base}` : base;
   }
 
-  async cancelarGenerarRips() {
-    this.generarRipsService.updatemostrarFormulario(false);
-    this.generarRipsService.updatemostrarTablaRipsGenerados(false);
-    this.generarRipsService.updatemostrarTablaRespuestaRipsPresentados(false);
-    
-    //this.mostrarTabla = false;
+  // =========================
+  // HELPERS
+  // =========================
+  private buildPayload(): GenerarRipsModel {
+    const obj: GenerarRipsModel = new GenerarRipsModel();
+    obj.FECHAINI = this.ripsForm.value.fechaInicio;
+    obj.FECHAFIN = this.ripsForm.value.fechaFin;
+    obj.EPS = this.ripsForm.value.codigoEps;
+    obj.FACTURA = this.ripsForm.value.factura;
+    obj.IDDOCTOR = this.ripsForm.value.idDoctor;
+    obj.IDREPORTE = this.ripsForm.value.idReporte;
+    obj.lstDoctores = this.listaDoctores;
+    obj.lstInformacionReporte = this.listaInformacionReporte;
+    return obj;
+  }
+
+  private downloadJson(data: any, filename: string): void {
+    if (!data) return;
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.json`;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+  }
+
+  private makeFileName(prefix: string): string {
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const stamp =
+      `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_` +
+      `${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+    return `${prefix}_${stamp}`;
   }
 }
-
-
