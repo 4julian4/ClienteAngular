@@ -24,6 +24,7 @@ export interface ChargeDto {
 export interface RetentionDto {
   taxCategory: string;
   taxRate?: number | string | null;
+  taxBase?: number | null;
   baseAmount?: number | null;
   taxAmount?: number | null;
 }
@@ -78,7 +79,7 @@ export interface CreditNoteDto {
   // Referencia a factura externa
   invoiceCufe?: string | null;
   invoiceNumber?: string | null;
-  invoiceIssueDate?: string | null;
+  invoiceIssueDate?: Date | null;
 
   // Sin factura referenciada (períodos/servicios)
   sinFacturaReferenciada?: boolean;
@@ -86,7 +87,7 @@ export interface CreditNoteDto {
   invoicePeriodEndDate?: string | null; // dd/MM/yyyy
 
   // Datos NC
-  issueDate: string; // dd/MM/yyyy HH:mm:ss (acepta date-only en algunos casos)
+  issueDate: Date; // dd/MM/yyyy HH:mm:ss (acepta date-only en algunos casos)
   reason: string; // "DEVOLUCION" | "ANULACION" | "OTROS"...
   number: string; // consecutivo interno
   numbering: NumberingDto;

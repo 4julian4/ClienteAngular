@@ -137,7 +137,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     private respuestaPinService: RespuestaPinService,
     private router: Router,
     private mensajesUsuariosService: MensajesUsuariosService,
-    private sedesConectadasService: SedesConectadasService
+    private sedesConectadasService: SedesConectadasService,
   ) {}
 
   ngOnInit(): void {
@@ -194,7 +194,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         if (data != null) {
           this.nombrePaciente = data;
         }
-      }
+      },
     );
 
     this.inicializarFormulario();
@@ -207,13 +207,22 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         this.respuestaObtenerDoctorModel = respuestaObtenerDoctor;
         this.nombreDoctor = respuestaObtenerDoctor.doctor.NOMBRE;
         this.totalPacientes = respuestaObtenerDoctor.totalPacientes;
+        let facturaElectronica = respuestaObtenerDoctor.facturaElectronica;
         this.respuestaPinService.updateNumPacientesPorDoctor(
-          this.totalPacientes
+          this.totalPacientes,
+        );
+        console.log('Factura Electronica:', facturaElectronica);
+        this.respuestaPinService.updateFacturacionElectronica(
+          facturaElectronica,
+        );
+        console.log(
+          'Factura Electronica actualizada en el servicio.',
+          facturaElectronica,
         );
 
         this.lstDatosPacienteParaBuscar =
           this.listaDatosPacienteParaBuscar!.filter(
-            (item) => item.DOCTOR === this.nombreDoctor
+            (item) => item.DOCTOR === this.nombreDoctor,
           ).map((item) => ({
             idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
             datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
@@ -223,10 +232,10 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
           this.datoPacienteParaBuscarControl.valueChanges.pipe(
             startWith(''),
             map((value) =>
-              this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-            )
+              this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+            ),
           );
-      }
+      },
     );
 
     this.respuestaObtenerDoctorService.respuestaObtenerDoctorSiLoCambianModel.subscribe(
@@ -239,12 +248,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
           this.respuestaObtenerDoctorSiLoCambianModel.totalPacientes;
 
         this.respuestaPinService.updateNumPacientesPorDoctor(
-          this.totalPacientes
+          this.totalPacientes,
+        );
+        this.respuestaPinService.updateFacturacionElectronica(
+          this.respuestaObtenerDoctorSiLoCambianModel.facturaElectronica,
         );
 
         this.lstDatosPacienteParaBuscar =
           this.listaDatosPacienteParaBuscar!.filter(
-            (item) => item.DOCTOR === this.nombreDoctor
+            (item) => item.DOCTOR === this.nombreDoctor,
           ).map((item) => ({
             idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
             datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
@@ -254,38 +266,38 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
           this.datoPacienteParaBuscarControl.valueChanges.pipe(
             startWith(''),
             map((value) =>
-              this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-            )
+              this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+            ),
           );
-      }
+      },
     );
 
     this.respuestaBusquedaPacienteService.respuestaBuquedaPacienteModel.subscribe(
       async (respuestaBusquedaPaciente: RespuestaBusquedaPaciente[]) => {
         this.resultadosBusqueda = respuestaBusquedaPaciente;
-      }
+      },
     );
 
     this.antecedentesService.respuestaAntecedentesEmit.subscribe(
       async (respuestaBusquedaAntecedentes: Antecedentes) => {
         this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
-      }
+      },
     );
 
     this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(
       async (respuestaEvolucionPaciente: RespuestaEvolucionPaciente) => {
         this.resultadoBusquedaEvolucionPaciente = respuestaEvolucionPaciente;
-      }
+      },
     );
   }
 
   private _filterNombre(
     value: string,
-    list: { idAnamnesis: number; datoBuscar: string }[]
+    list: { idAnamnesis: number; datoBuscar: string }[],
   ): { idAnamnesis: number; datoBuscar: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
     return list.filter((option) =>
-      option.datoBuscar.toLowerCase().includes(filterValue)
+      option.datoBuscar.toLowerCase().includes(filterValue),
     );
   }
 
@@ -300,7 +312,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     if (this.nombreValorSeleccionado === 'NOMBRE') {
       this.lstDatosPacienteParaBuscar =
         this.listaDatosPacienteParaBuscar!.filter(
-          (item) => item.DOCTOR === this.nombreDoctor
+          (item) => item.DOCTOR === this.nombreDoctor,
         ).map((item) => ({
           idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
           datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
@@ -309,15 +321,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
           map((value) =>
-            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-          )
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+          ),
         );
     }
 
     if (this.nombreValorSeleccionado === 'CEDULA') {
       this.lstDatosPacienteParaBuscar =
         this.listaDatosPacienteParaBuscar!.filter(
-          (item) => item.DOCTOR === this.nombreDoctor
+          (item) => item.DOCTOR === this.nombreDoctor,
         ).map((item) => ({
           idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
           datoBuscar: item.CEDULA_NUMERO ? item.CEDULA_NUMERO : '',
@@ -326,15 +338,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
           map((value) =>
-            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-          )
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+          ),
         );
     }
 
     if (this.nombreValorSeleccionado === 'HISTORIA') {
       this.lstDatosPacienteParaBuscar =
         this.listaDatosPacienteParaBuscar!.filter(
-          (item) => item.DOCTOR === this.nombreDoctor
+          (item) => item.DOCTOR === this.nombreDoctor,
         ).map((item) => ({
           idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
           datoBuscar: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '',
@@ -343,15 +355,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
           map((value) =>
-            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-          )
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+          ),
         );
     }
 
     if (this.nombreValorSeleccionado === 'AFILIACION') {
       this.lstDatosPacienteParaBuscar =
         this.listaDatosPacienteParaBuscar!.filter(
-          (item) => item.DOCTOR === this.nombreDoctor
+          (item) => item.DOCTOR === this.nombreDoctor,
         ).map((item) => ({
           idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
           datoBuscar: item.NRO_AFILIACION ? item.NRO_AFILIACION : '',
@@ -360,15 +372,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
           map((value) =>
-            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-          )
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+          ),
         );
     }
 
     if (this.nombreValorSeleccionado === 'TELEFONO') {
       this.lstDatosPacienteParaBuscar =
         this.listaDatosPacienteParaBuscar!.filter(
-          (item) => item.DOCTOR === this.nombreDoctor
+          (item) => item.DOCTOR === this.nombreDoctor,
         ).map((item) => ({
           idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
           datoBuscar: item.TELF_P ? item.TELF_P : '',
@@ -377,8 +389,8 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
         this.datoPacienteParaBuscarControl.valueChanges.pipe(
           startWith(''),
           map((value) =>
-            this._filterNombre(value, this.lstDatosPacienteParaBuscar)
-          )
+            this._filterNombre(value, this.lstDatosPacienteParaBuscar),
+          ),
         );
     }
   }
@@ -483,7 +495,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(
         this.idSedeActualSignalR,
         this.opcionSeleccionada,
-        nombrePaciente
+        nombrePaciente,
       );
     }
   }
@@ -492,7 +504,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     if (this.idSedeActualSignalR != '') {
       await this.datosPersonalesService.startConnectionRespuestaDatosPersonales(
         this.idSedeActualSignalR,
-        idAnamnesis.toString()
+        idAnamnesis.toString(),
       );
     }
   }
@@ -501,7 +513,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     if (this.idSedeActualSignalR != '') {
       await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(
         this.idSedeActualSignalR,
-        idAnamnesis.toString()
+        idAnamnesis.toString(),
       );
     }
   }
@@ -510,7 +522,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     if (this.idSedeActualSignalR != '') {
       await this.respuestaEvolucionPacienteService.startConnectionRespuestaEvolucionPaciente(
         this.idSedeActualSignalR,
-        idAnamnesis.toString()
+        idAnamnesis.toString(),
       );
     }
   }
@@ -532,7 +544,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
 
       // Actualiza la anamnesis
       await this.respuestaPinService.updateAnamnesisData(
-        filaSeleccionada.IDANAMNESIS
+        filaSeleccionada.IDANAMNESIS,
       );
 
       // Actualiza el doctor
@@ -540,7 +552,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
 
       // (dejo esto por compatibilidad, no hace daño)
       this.respuestaPinService.updateNombrePacienteEscogidoData(
-        filaSeleccionada.NOMBRE_PACIENTE
+        filaSeleccionada.NOMBRE_PACIENTE,
       );
     } catch (error) {
       console.error('Error en onRowClicked:', error);
@@ -550,7 +562,7 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
   async actualizarDoctor(filaSeleccionada: RespuestaBusquedaPaciente) {
     if (filaSeleccionada.DOCTOR != this.nombreDoctor) {
       let idDoctor = this.listaDoctores.find(
-        (x) => x.nombre == filaSeleccionada.DOCTOR
+        (x) => x.nombre == filaSeleccionada.DOCTOR,
       )?.id;
       console.log('ID Doctor:', idDoctor);
       if (!idDoctor) {
@@ -559,14 +571,14 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
       this.nombreDoctor = filaSeleccionada.DOCTOR;
       await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSiLoCambian(
         this.idSedeActualSignalR,
-        parseInt(idDoctor)
+        parseInt(idDoctor),
       );
       console.log('Doctor cambiado:', filaSeleccionada.DOCTOR);
       this.respuestaPinService.updateCambiarDoctorSeleccionado(
-        filaSeleccionada.DOCTOR
+        filaSeleccionada.DOCTOR,
       );
       this.respuestaPinService.updateDoctorSeleccionado(
-        filaSeleccionada.DOCTOR
+        filaSeleccionada.DOCTOR,
       );
     } else {
       this.router.routeReuseStrategy.shouldReuseRoute = function () {
@@ -578,6 +590,38 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
     }
   }
 
+  /* async actualizarDoctor(filaSeleccionada: RespuestaBusquedaPaciente) {
+    // Si el paciente pertenece a otro doctor
+    if (filaSeleccionada.DOCTOR !== this.nombreDoctor) {
+      const idDoctor = this.listaDoctores.find(
+        (x) => x.nombre === filaSeleccionada.DOCTOR,
+      )?.id;
+
+      console.log('ID Doctor:', idDoctor);
+
+      if (!idDoctor) {
+        throw new Error('No se encontró el ID del doctor.');
+      }
+
+      // ✅ Solo actualiza nombre local (opcional)
+      this.nombreDoctor = filaSeleccionada.DOCTOR;
+
+      // ✅ IMPORTANTE: NO abras conexión aquí (eso lo hace el Sidenav)
+      this.respuestaPinService.updateCambiarDoctorSeleccionado(
+        filaSeleccionada.DOCTOR,
+      );
+
+      // opcional: si otros módulos escuchan esto, déjalo
+      this.respuestaPinService.updateDoctorSeleccionado(
+        filaSeleccionada.DOCTOR,
+      );
+    }
+
+    // ✅ SIEMPRE navega a datos-personales al elegir un paciente
+    // (así no dependes de timing del Sidenav)
+    this.router.navigate(['/datos-personales']);
+  }*/
+
   guardarDatosPersonales() {
     // Lógica para guardar los datos del formulario
   }
@@ -588,13 +632,15 @@ export class BuscarHitoriaClinicaComponent implements OnInit {
 
   async mostrarAntecedentes() {
     this.obtenerAntecedentesPaciente(
-      this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IDANAMNESIS
+      this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales
+        .IDANAMNESIS,
     );
   }
 
   async mostrarEvolucion() {
     this.obtenerEvolucionPaciente(
-      this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales.IDANAMNESIS
+      this.resultadoBusquedaDatosPersonalesCompletos.datosPersonales
+        .IDANAMNESIS,
     );
   }
 }

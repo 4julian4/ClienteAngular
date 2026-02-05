@@ -2,7 +2,7 @@ import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, startWith, takeUntil } from 'rxjs/operators';
 
 import {
   P_CONSULTAR_ESTACUENTA,
@@ -130,7 +130,7 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AbonoTratamientoDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AbonoTratamientoDialogData,
-    private estadoCuentaCommands: EstadoCuentaCommandsService
+    private estadoCuentaCommands: EstadoCuentaCommandsService,
   ) {
     // ====== listas ======
     this.opcionesIva = data?.valoresIvaPermitidos?.length
@@ -318,7 +318,11 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
     if (!ctrl) return;
 
     ctrl.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        startWith(ctrl.value), // ✅ dispara una vez al abrir
+        distinctUntilChanged(),
+        takeUntil(this.destroy$),
+      )
       .subscribe((value: string) => {
         const id = value ? Number(value) : 0;
 
@@ -411,7 +415,7 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
       const disponibles = this.formasPagoDisponibles;
       const formaPagoDefecto = disponibles.length > 0 ? disponibles[0] : '';
       const valorDefecto = this.formatearConPuntos(
-        this.saldoPendiente.toString()
+        this.saldoPendiente.toString(),
       );
 
       this.formaPagoActualGroup.patchValue({
@@ -435,7 +439,7 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
 
     this.estadoCuentaCommands.consultarSugeridosAbono(
       this.data.clienteIdDestino,
-      req
+      req,
     );
   }
 
@@ -443,7 +447,7 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
   // ✅ APLICAR sugeridos sin pisar al usuario
   // =====================================================
   private aplicarSugeridosDesdeWorker(
-    resp: ConsultarSugeridosAbonoResponse
+    resp: ConsultarSugeridosAbonoResponse,
   ): void {
     const reciboCtrl = this.formAbono.get('numeroRecibo');
     const facturaCtrl = this.formAbono.get('numeroFactura');
@@ -647,11 +651,11 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
   private calcularTotales(): void {
     this.totalConceptos = this.conceptosAgregados.reduce(
       (acc, c) => acc + c.total,
-      0
+      0,
     );
     this.totalPagos = this.formasPagoAgregadas.reduce(
       (acc, p) => acc + p.valor,
-      0
+      0,
     );
     this.saldoPendiente = Math.max(this.totalConceptos - this.totalPagos, 0);
 
@@ -726,13 +730,13 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
         descripcion: p.descripcion ?? null,
         numero: null,
         fechaTexto: null,
-      })
+      }),
     );
 
     const primerConcepto = this.conceptosAgregados[0];
     const ivaIncluido = this.conceptosAgregados.some((c) => c.ivaIncluido);
     const primerConIva = this.conceptosAgregados.find((c) => c.ivaIncluido);
-    const valorIva = ivaIncluido ? primerConIva?.porcentajeIva ?? 0 : null;
+    const valorIva = ivaIncluido ? (primerConIva?.porcentajeIva ?? 0) : null;
 
     const descripcionConceptos = this.conceptosAgregados
       .map((c) => `${c.codigo} ${c.descripcion} x${c.cantidad}`)

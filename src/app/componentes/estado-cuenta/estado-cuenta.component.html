@@ -21,19 +21,19 @@
         <span>
           Valor Tratamiento:
           <strong>{{
-            tratamientoSeleccionado.VALOR_TRATAMIENTO | number : "1.0-0"
+            tratamientoSeleccionado.VALOR_TRATAMIENTO | number: "1.0-0"
           }}</strong>
         </span>
         <span>
           Mora Actual:
           <strong>{{
-            tratamientoSeleccionado.MORA_ACTUAL | number : "1.0-0"
+            tratamientoSeleccionado.MORA_ACTUAL | number: "1.0-0"
           }}</strong>
         </span>
         <span>
           Mora Total:
           <strong>{{
-            tratamientoSeleccionado.MORATOTAL | number : "1.0-0"
+            tratamientoSeleccionado.MORATOTAL | number: "1.0-0"
           }}</strong>
         </span>
       </div>
@@ -48,7 +48,19 @@
         Volver al listado
       </button>
 
+      <!-- ✅ En DETALLE: mostrar ABONAR (y ocultar Agregar Estado Cuenta) -->
       <button
+        *ngIf="modoVista === 'detalle' && tratamientoSeleccionado"
+        mat-raised-button
+        class="BotonGuardar boton-abonar-estado"
+        (click)="onAbonarEstadoCuentaActual()"
+      >
+        Abonar Estado Cuenta
+      </button>
+
+      <!-- ✅ En LISTA: mostrar Agregar Estado Cuenta -->
+      <button
+        *ngIf="modoVista !== 'detalle'"
         mat-raised-button
         class="BotonGuardar boton-agregar-estado"
         (click)="onAgregarEstadoCuenta()"
@@ -89,7 +101,7 @@
             <ng-container matColumnDef="FECHA_INICIO">
               <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
               <td mat-cell *matCellDef="let elemento">
-                {{ elemento.FECHA_INICIO | date : "dd-MM-yyyy" }}
+                {{ elemento.FECHA_INICIO | date: "dd-MM-yyyy" }}
               </td>
             </ng-container>
 
@@ -104,7 +116,7 @@
                 Valor Trat
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.VALOR_TRATAMIENTO | number : "1.0-0" }}
+                {{ elemento.VALOR_TRATAMIENTO | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -119,7 +131,7 @@
                 Total Abonado
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.ABONO | number : "1.0-0" }}
+                {{ elemento.ABONO | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -134,7 +146,7 @@
                 Mora Actual
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.MORA_ACTUAL | number : "1.0-0" }}
+                {{ elemento.MORA_ACTUAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -149,7 +161,7 @@
                 Saldo Total
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.MORATOTAL | number : "1.0-0" }}
+                {{ elemento.MORATOTAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -251,7 +263,7 @@
                 Fecha
               </th>
               <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
-                {{ elemento.FECHA | date : "dd-MM-yyyy" }}
+                {{ elemento.FECHA | date: "dd-MM-yyyy" }}
               </td>
             </ng-container>
 
@@ -273,7 +285,7 @@
             <ng-container matColumnDef="ABONO">
               <th mat-header-cell *matHeaderCellDef class="col-num">Abono</th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.ABONO | number : "1.0-0" }}
+                {{ elemento.ABONO | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -283,7 +295,7 @@
                 Adicional
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.ADICIONAL | number : "1.0-0" }}
+                {{ elemento.ADICIONAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -298,7 +310,7 @@
                 NC
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.NOTACREDITO | number : "1.0-0" }}
+                {{ elemento.NOTACREDITO | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -320,7 +332,7 @@
             <ng-container matColumnDef="PARCIAL">
               <th mat-header-cell *matHeaderCellDef class="col-num">Parcial</th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.PARCIAL | number : "1.0-0" }}
+                {{ elemento.PARCIAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -328,7 +340,7 @@
             <ng-container matColumnDef="SALDO_PARCIAL">
               <th mat-header-cell *matHeaderCellDef class="col-num">Saldo</th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.SALDO_PARCIAL | number : "1.0-0" }}
+                {{ elemento.SALDO_PARCIAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -426,7 +438,7 @@
                 Fecha
               </th>
               <td mat-cell *matCellDef="let elemento" class="columna-FECHA">
-                {{ elemento.FECHA | date : "dd-MM-yyyy" }}
+                {{ elemento.FECHA | date: "dd-MM-yyyy" }}
               </td>
             </ng-container>
 
@@ -448,7 +460,7 @@
             <ng-container matColumnDef="ABONO">
               <th mat-header-cell *matHeaderCellDef class="col-num">Abono</th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.ABONO | number : "1.0-0" }}
+                {{ elemento.ABONO | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -458,7 +470,7 @@
                 Adicional
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.ADICIONAL | number : "1.0-0" }}
+                {{ elemento.ADICIONAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -473,7 +485,7 @@
                 NC
               </th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.NOTACREDITO | number : "1.0-0" }}
+                {{ elemento.NOTACREDITO | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -495,7 +507,7 @@
             <ng-container matColumnDef="PARCIAL">
               <th mat-header-cell *matHeaderCellDef class="col-num">Parcial</th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.PARCIAL | number : "1.0-0" }}
+                {{ elemento.PARCIAL | number: "1.0-0" }}
               </td>
             </ng-container>
 
@@ -503,7 +515,7 @@
             <ng-container matColumnDef="SALDO_PARCIAL">
               <th mat-header-cell *matHeaderCellDef class="col-num">Saldo</th>
               <td mat-cell *matCellDef="let elemento" class="col-num">
-                {{ elemento.SALDO_PARCIAL | number : "1.0-0" }}
+                {{ elemento.SALDO_PARCIAL | number: "1.0-0" }}
               </td>
             </ng-container>
 

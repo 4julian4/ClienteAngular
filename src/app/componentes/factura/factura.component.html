@@ -62,7 +62,7 @@
 
   <!-- Acciones de la toolbar + progreso -->
   <div class="toolbar__cta">
-    <!-- Chip de progreso (se muestra solo si total > 0) -->
+    <!-- Chip de progreso (se muestra solo si total > 0) 
     <ng-container *ngIf="progreso$ | async as p">
       <span
         *ngIf="p.total > 0"
@@ -71,9 +71,17 @@
       >
         {{ p.processed }}/{{ p.total }} · OK {{ p.ok }} · Fail {{ p.fail }}
       </span>
-    </ng-container>
+    </ng-container>-->
 
-    <button class="btn-primario" mat-raised-button (click)="consultar()">
+    <!--<button class="btn-primario" mat-raised-button (click)="consultar()">
+      Consultar
+    </button>-->
+    <button
+      class="btn-primario"
+      mat-raised-button
+      (click)="consultar()"
+      [disabled]="isPresentandoDian"
+    >
       Consultar
     </button>
     <!-- Botón masivo: solo en pendientes y si hay selección -->
@@ -83,8 +91,10 @@
       class="btn-primario"
       style="margin-left: 8px"
       (click)="presentarSeleccionadas()"
+      [disabled]="isPresentandoDian"
     >
-      Presentar ({{ selection.selected.length }})
+      Presentar
+      <!--({{ selection.selected.length }})-->
     </button>
   </div>
 </div>
@@ -129,7 +139,7 @@
       <ng-container matColumnDef="fecha">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
         <td mat-cell *matCellDef="let r">
-          {{ r.fecha | date : "dd/MM/yyyy" }}
+          {{ r.fecha | date: "dd/MM/yyyy" }}
         </td>
       </ng-container>
 
@@ -155,7 +165,7 @@
       <ng-container matColumnDef="valorTotal">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Valor</th>
         <td mat-cell *matCellDef="let r">
-          {{ r.valor_Total | number : "1.0-0" }}
+          {{ r.valor_Total | number: "1.0-0" }}
         </td>
       </ng-container>
 
@@ -189,6 +199,14 @@
         </td>
       </ng-container>
 
+      <!-- Cápsula NC (solo en creadas) -->
+      <ng-container matColumnDef="ncTag">
+        <th mat-header-cell *matHeaderCellDef class="col-notas">Notas</th>
+        <td mat-cell *matCellDef="let r" class="col-notas">
+          <span *ngIf="tieneNc(r)" class="pill pill--nc pill--mini">NC</span>
+        </td>
+      </ng-container>
+
       <!-- Acciones -->
       <ng-container matColumnDef="acciones">
         <th mat-header-cell *matHeaderCellDef class="col-acciones">Acciones</th>
@@ -204,13 +222,17 @@
           <mat-menu #menuAcciones="matMenu">
             <!-- Pendientes -->
             <ng-container *ngIf="filtroTipoListado.value === 'pendientes'">
-              <button mat-menu-item (click)="registrarEnDian(r)">
+              <button
+                mat-menu-item
+                (click)="registrarEnDian(r)"
+                [disabled]="isPresentandoDian"
+              >
                 <mat-icon>cloud_upload</mat-icon>
                 <span>Registrar en DIAN</span>
               </button>
-              <button mat-menu-item (click)="descargarXml(r)">
+              <button mat-menu-item (click)="descargarJsonPendiente(r)">
                 <mat-icon>download</mat-icon>
-                <span>Descargar XML</span>
+                <span>Descargar JSON</span>
               </button>
             </ng-container>
 
@@ -228,13 +250,27 @@
               <mat-divider></mat-divider>
 
               <!-- Crear Notas -->
+              <!--
               <button mat-menu-item (click)="abrirCrearNota('NC', r)">
                 <mat-icon>note_add</mat-icon>
                 <span>Crear Nota Crédito (NC)</span>
               </button>
+              -->
+              <!--
               <button mat-menu-item (click)="abrirCrearNota('ND', r)">
                 <mat-icon>note_add</mat-icon>
                 <span>Crear Nota Débito (ND)</span>
+              </button>
+              -->
+
+              <button
+                mat-menu-item
+                (click)="abrirCrearNota('NC', r)"
+                [disabled]="tieneNc(r)"
+                matTooltip="Esta factura ya tiene Nota Crédito. No se permiten más notas."
+              >
+                <mat-icon>note_add</mat-icon>
+                <span>Crear Nota Crédito (NC)</span>
               </button>
 
               <mat-divider></mat-divider>
@@ -306,7 +342,7 @@
                     <td>{{ n.number }}</td>
                     <td>{{ n.issueDate }}</td>
 
-                    <td>{{ n.totalAmount || 0 | number : "1.0-0" }}</td>
+                    <td>{{ n.totalAmount || 0 | number: "1.0-0" }}</td>
 
                     <td>
                       <span
@@ -423,3 +459,38 @@
     <mat-spinner></mat-spinner>
   </div>
 </ng-template>
+
+<!-- ✅ Overlay pro DIAN (igual a RIPS) -->
+<div class="overlay-loading" *ngIf="isPresentandoDian">
+  <div class="overlay-card">
+    <mat-spinner diameter="42"></mat-spinner>
+
+    <div class="overlay-title">Presentando en DIAN…</div>
+    <div class="overlay-subtitle">{{ dianProgressLabel }}</div>
+
+    <mat-progress-bar
+      class="overlay-bar"
+      mode="determinate"
+      [value]="dianProgressPercent"
+    ></mat-progress-bar>
+
+    <div class="overlay-stats" *ngIf="progresoActual as p">
+      <div><b>Total:</b> {{ p.total || 0 }}</div>
+      <div><b>Procesadas:</b> {{ p.processed || 0 }}</div>
+      <div><b>OK:</b> {{ p.ok || 0 }}</div>
+      <div><b>Fallidas:</b> {{ p.fail || 0 }}</div>
+
+      <div class="overlay-last" *ngIf="p.lastDocumento">
+        <b>Última:</b> {{ p.lastDocumento }}
+      </div>
+
+      <div class="overlay-last" *ngIf="p.lastExternalId">
+        <b>UUID:</b> {{ p.lastExternalId }}
+      </div>
+    </div>
+
+    <div class="overlay-hint">
+      No cierres esta ventana. Al finalizar verás el resumen.
+    </div>
+  </div>
+</div>

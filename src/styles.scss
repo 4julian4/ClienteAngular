@@ -1,16 +1,51 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 9999;
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+}
+
+/* ===== Dialog "Crear Nota" PRO: alto + footer fijo ===== */
+.dlg-nota-alta .mdc-dialog__surface {
+  height: 96vh !important;
+  max-height: 96vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* El content no debe tener scroll completo */
+.dlg-nota-alta .mat-mdc-dialog-content {
+  max-height: none !important;
+  overflow: hidden !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+/* Footer fijo profesional */
+.dlg-nota-alta .mat-mdc-dialog-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -10px 18px rgba(0, 0, 0, 0.06);
+  padding: 10px 16px !important;
+  flex: 0 0 auto !important;
+}

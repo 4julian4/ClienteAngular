@@ -160,7 +160,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     private respuestaPinService: RespuestaPinService,
     private respuestaConsultarEstadoCuentaService: RespuestaConsultarEstadoCuentaService,
     private estadoCuentaCommands: EstadoCuentaCommandsService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -194,7 +194,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
         this.doctorSeleccionado = data;
         const encontrado = this.lstDoctores.find(
-          (x) => x.nombre === this.doctorSeleccionado
+          (x) => x.nombre === this.doctorSeleccionado,
         );
         this.idDoctor = encontrado?.id ?? 0;
       });
@@ -206,7 +206,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(
         async (
-          respuestaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta
+          respuestaConsultarEstadoCuenta: RespuestaConsultarEstadoCuenta,
         ) => {
           this.resultadoConsultaEstadoCuenta = respuestaConsultarEstadoCuenta;
           this.mostrarMensajeSinEstadoCuenta = false;
@@ -223,7 +223,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
           }
 
           this.lstFases = this.resultadoConsultaEstadoCuenta.lstFases!.map(
-            (id) => ({ id: Number(id) })
+            (id) => ({ id: Number(id) }),
           );
 
           this.resultadosBusquedaEstadoCuentaSinFinanciar =
@@ -286,7 +286,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
             const encontrado =
               this.lstRespuestaEstadoCuentaPorPacientePorDoctor.find(
-                (x) => Number(x.FASE ?? 0) === faseActual
+                (x) => Number(x.FASE ?? 0) === faseActual,
               );
 
             // ✅ Si el seleccionado ya no existe, tomamos el más reciente (posición 0 porque ya ordenas desc)
@@ -300,7 +300,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
             this.tratamientoSeleccionado = null;
             this.selectedFase = 0;
           }
-        }
+        },
       );
 
     // =========================
@@ -340,7 +340,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
             await this.estadoCuentaCommands.crearEstadoCuenta(
               this.idSedeActualSignalR,
-              resultadoDialogo
+              resultadoDialogo,
             );
           });
       });
@@ -434,7 +434,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
             await this.estadoCuentaCommands.editarEstadoCuenta(
               this.idSedeActualSignalR,
-              reqEditar
+              reqEditar,
             );
           });
       });
@@ -506,8 +506,15 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
               fechaAbono: prep.fechaHoy,
               recibo: prep.reciboSugerido ?? '',
               factura: prep.facturaSugerida ?? ctx.pagoBase?.FACTURA ?? '',
+              //idRecibidoPor:
+              //prep.idRecibidoPorPorDefecto ?? this.idDoctor ?? null,
               idRecibidoPor:
-                prep.idRecibidoPorPorDefecto ?? this.idDoctor ?? null,
+                prep.idDoctorTratante ??
+                prep.idRecibidoPorPorDefecto ??
+                this.idDoctor ??
+                null,
+
+              //idRecibidoPor: Number(this.doctorSeleccionado) || null,
               nombreRecibe: prep.nombreRecibePorDefecto ?? '',
             },
           },
@@ -521,7 +528,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
             console.log('InsertarAbonoRequest:', req);
             await this.estadoCuentaCommands.insertarAbono(
               this.idSedeActualSignalR,
-              req
+              req,
             );
           });
       });
@@ -552,7 +559,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
         const ok = confirm(
           `¿Seguro que deseas BORRAR este REGISTRO COMPLETO?\n\n` +
             `${prep.resumenParaConfirmar}\n` +
-            `Relaciones a borrar: ${(prep.idRelaciones ?? []).length}`
+            `Relaciones a borrar: ${(prep.idRelaciones ?? []).length}`,
         );
         if (!ok) return;
 
@@ -579,7 +586,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
         await this.estadoCuentaCommands.borrarAbono(
           this.idSedeActualSignalR,
-          req
+          req,
         );
       });
 
@@ -638,7 +645,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
                 nombreRecibe: prep.nombreRecibePorDefecto ?? '',
               },
             },
-          }
+          },
         );
 
         dialogRef
@@ -679,7 +686,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
             await this.estadoCuentaCommands.insertarAdicional(
               this.idSedeActualSignalR,
-              req
+              req,
             );
           });
       });
@@ -716,7 +723,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
   seleccionarTratamiento(
     tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE,
-    irADetalle: boolean
+    irADetalle: boolean,
   ): void {
     this.tratamientoSeleccionado = tratamiento;
     this.selectedFase = tratamiento.FASE ?? 0;
@@ -744,13 +751,13 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararEstadoCuenta(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
   /** ✅ EDITAR EstadoCuenta */
   async onEditarEstadoCuenta(
-    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE
+    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE,
   ): Promise<void> {
     this.tratamientoPendienteEditar = tratamiento;
     this.tratamientoSeleccionado = tratamiento;
@@ -765,18 +772,18 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararEditarEstadoCuenta(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
   /** ✅ BORRAR EstadoCuenta */
   async onBorrarEstadoCuenta(
-    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE
+    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE,
   ): Promise<void> {
     const fase = tratamiento.FASE ?? 0;
 
     const ok = confirm(
-      `¿Seguro que deseas BORRAR el estado de cuenta?\n\nFase: ${fase}\nDoctor: ${this.doctorSeleccionado}`
+      `¿Seguro que deseas BORRAR el estado de cuenta?\n\nFase: ${fase}\nDoctor: ${this.doctorSeleccionado}`,
     );
     if (!ok) return;
 
@@ -788,7 +795,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.borrarEstadoCuenta(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
@@ -797,7 +804,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
   // =========================================================
 
   async onAbonarTratamiento(
-    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE
+    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE,
   ): Promise<void> {
     this.tratamientoSeleccionado = tratamiento;
 
@@ -816,7 +823,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararInsertarAbono(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
@@ -834,7 +841,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararInsertarAbono(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
@@ -857,7 +864,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararBorrarAbono(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
@@ -865,7 +872,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
   // otros dialogs (adicionales por ahora igual)
   // =========================
   async onAdicionalTratamiento(
-    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE
+    tratamiento: P_CONSULTAR_ESTACUENTAPACIENTE,
   ): Promise<void> {
     this.tratamientoSeleccionado = tratamiento;
 
@@ -882,7 +889,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararInsertarAdicional(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
@@ -900,7 +907,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.estadoCuentaCommands.prepararInsertarAdicional(
       this.idSedeActualSignalR,
-      req
+      req,
     );
   }
 
@@ -918,7 +925,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
 
     await this.respuestaConsultarEstadoCuentaService.startConnectionRespuestaConsultarEstadoCuenta(
       this.idSedeActualSignalR,
-      JSON.stringify(objDatosParaConsultarEstadoCuenta)
+      JSON.stringify(objDatosParaConsultarEstadoCuenta),
     );
   }
 
@@ -928,5 +935,12 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
     const dd = String(dt.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  async onAbonarEstadoCuentaActual(): Promise<void> {
+    if (!this.tratamientoSeleccionado) return;
+
+    // Reusa EXACTAMENTE el mismo flujo que ya funciona
+    await this.onAbonarTratamiento(this.tratamientoSeleccionado);
   }
 }

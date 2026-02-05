@@ -11,12 +11,12 @@ export interface NotaResumen {
   noteType: string; // "NC" | "ND" | "ELIMINACION" | "REEMPLAZO"... (de momento NC/ND)
   prefix: string;
   number: string;
-  issueDate: string; // el backend lo manda como ISO, aquí lo tratamos como string
+  issueDate: Date; // el backend lo manda como ISO, aquí lo tratamos como string
 
   referenceCune?: string | null;
   referencePrefix?: string | null;
   referenceNumber?: string | null;
-  referenceIssueDate?: string | null;
+  referenceIssueDate?: Date | null;
 
   internalStatus: string;
   dianStatus?: string | null;
@@ -60,12 +60,12 @@ export interface NoteCreateRequest {
   noteType: string; // NC / ND
   prefix: string;
   number: string;
-  issueDate: string; // ISO (ej: "2025-03-04T10:15:00Z")
+  issueDate: Date; // ISO (ej: "2025-03-04T10:15:00Z")
 
   referenceCune?: string | null;
   referencePrefix?: string | null;
   referenceNumber?: string | null;
-  referenceIssueDate?: string | null;
+  referenceIssueDate?: Date | null;
 
   payloadJson: string;
 
@@ -108,7 +108,7 @@ export class NotesHttpService {
    */
   listar(
     tenantCode: string,
-    filtro: NoteFilterPayload
+    filtro: NoteFilterPayload,
   ): Observable<NotaResumen[]> {
     const payload: any = {
       ...filtro,
@@ -121,7 +121,7 @@ export class NotesHttpService {
       payload,
       {
         headers: this.buildHeaders(tenantCode),
-      }
+      },
     );
   }
 
@@ -135,7 +135,7 @@ export class NotesHttpService {
     opciones?: {
       listType?: 'pendientes' | 'creadas' | 'todos';
       invoiceUuid?: string | null;
-    }
+    },
   ): Observable<NotaResumen[]> {
     const payload: NoteFilterPayload = {
       listType: opciones?.listType ?? 'todos',
@@ -162,7 +162,7 @@ export class NotesHttpService {
    */
   guardarBorrador(
     tenantCode: string,
-    dto: NoteCreateRequest
+    dto: NoteCreateRequest,
   ): Observable<NotaResumen> {
     return this.http.post<NotaResumen>(`${this.baseUrl}/notes/save`, dto, {
       headers: this.buildHeaders(tenantCode),

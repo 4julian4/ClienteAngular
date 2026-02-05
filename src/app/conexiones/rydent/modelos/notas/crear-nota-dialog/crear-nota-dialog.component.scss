@@ -1,123 +1,114 @@
 /* ClienteAngular/src/app/conexiones/rydent/modelos/notas/crear-nota-dialog/crear-nota-dialog.component.scss */
 
-/* Tamaño base del host */
 :host {
   display: block;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+
+  /* ===== ÍTEMS: mostrar 2 filas, el 3ro hace scroll ===== */
+  --items-header-h: 36px; /* antes 38 */
+  --items-row-h: 46px; /* antes 44 */
+  --items-borders: 18px; /* más realista para paddings/bordes */
 }
 
-/* Evita scroll horizontal del contenedor del diálogo */
+/* Evita scroll horizontal del contenedor */
 :host ::ng-deep .mdc-dialog__surface,
 :host ::ng-deep .mat-mdc-dialog-container {
   overflow: hidden !important;
   box-sizing: border-box;
 }
 
-/* Compactar los mat-form-field solo dentro de este diálogo */
-:host ::ng-deep .nota-form .mat-mdc-text-field-wrapper {
-  height: 36px;
-}
-
-:host ::ng-deep .nota-form .mat-mdc-form-field-infix {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-:host ::ng-deep .nota-form .mat-mdc-form-field-subscript-wrapper {
-  display: none;
-}
-
 /* Título */
 .title {
-  margin: 0 0 8px 0;
-  font-weight: 600;
+  margin: 0 0 4px 0; /* más compacto */
+  font-weight: 650;
+  font-size: 16px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-/* Contenido: SIN scroll aquí, el scroll lo maneja .scroll-body */
+/* El content NO scrollea completo */
 mat-dialog-content.content {
-  max-height: 78vh;
-  overflow: hidden;
-  padding: 12px 16px 10px;
+  padding: 8px 12px 8px; /* más compacto */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  max-height: none;
 }
 
-/* Form principal */
+/* Form */
 .nota-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* antes 10 */
   min-width: 0;
   flex: 1 1 auto;
   min-height: 0;
 }
 
-/* Contenedor que SÍ hace scroll vertical (items + totales) */
+/* Cuerpo general: scrollea aquí sin perder footer fijo */
 .scroll-body {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: auto; /* mejor que overflow:auto */
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* antes 10 */
+  padding-right: 6px;
 }
 
 /* Sección genérica */
 .section {
   background: #f7f7f9;
   border-radius: 10px;
-  padding: 10px 12px 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  padding: 7px 9px 7px; /* más compacto */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.035);
   box-sizing: border-box;
 }
 
-/* Sección encabezado */
+/* Encabezado */
 .section--encabezado {
-  margin-top: 4px;
+  margin-top: 0;
 }
 
-/* Grid de encabezado: 4 columnas en escritorio */
 .header-grid {
   display: grid;
   grid-template-columns:
-    minmax(0, 1.1fr)
-    minmax(0, 1.6fr)
-    minmax(0, 1.2fr)
-    minmax(0, 1.2fr);
-  column-gap: 16px;
-  row-gap: 8px;
+    minmax(0, 1.05fr)
+    minmax(0, 1.45fr)
+    minmax(0, 1.15fr)
+    minmax(0, 1.15fr);
+  column-gap: 10px; /* antes 12 */
+  row-gap: 5px; /* antes 6 */
   align-items: flex-start;
 }
 
-/* Campos de encabezado */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .field-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #777;
+  color: #7a7a7a;
 }
 
 .field-input {
   width: 100%;
+  height: 33px; /* un pelín más bajo */
   border-radius: 6px;
   border: 1px solid #d4d7dd;
   background: #fff;
-  padding: 6px 8px;
-  font-size: 13px;
+  padding: 5px 8px;
+  font-size: 12.5px;
   box-sizing: border-box;
 }
 
@@ -137,49 +128,59 @@ mat-dialog-content.content {
 }
 
 .field-input--select {
-  padding-right: 24px;
+  padding-right: 22px;
 }
 
-/* Sección de ítems */
+/* Ítems */
 .section--items {
-  padding: 10px 12px;
+  padding: 7px 9px; /* más compacto */
 }
 
-/* Tabla de ítems */
 .items-table-wrapper {
   width: 100%;
 }
 
-.items-table {
-  width: 100%;
+/* ✅ Scroll SOLO para la tabla de ítems:
+   - 2 filas visibles + header
+   - el 3ro ya hace scroll
+   - “colchón” para evitar scrollbar fantasma con 2 filas
+*/
+.items-table-scroll {
+  max-height: calc(
+    var(--items-header-h) + (2 * var(--items-row-h)) + var(--items-borders) +
+      6px
+  );
+  overflow-y: auto;
+  overflow-x: hidden;
+
   border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  max-height: none;
-  overflow: visible;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
 }
 
-/* Encabezado “pegado” arriba dentro del panel de ítems */
+/* Header tabla */
 .items-header-row {
+  min-height: var(--items-header-h);
+
   display: grid;
   grid-template-columns:
-    32px /* # */
-    100px /* REF */
-    minmax(220px, 1.6fr) /* DESCRIPCIÓN */
-    60px /* CANT */
-    105px /* PRECIO */
-    60px /* DESC % */
-    90px /* RET. FTE */
-    100px /* IMPUESTO */
-    110px /* SUBTOTAL */
-    110px /* TOTAL */
-    40px; /* acciones */
+    28px
+    92px
+    minmax(220px, 1.6fr)
+    56px
+    90px
+    56px
+    84px
+    90px
+    96px
+    96px
+    36px;
   column-gap: 6px;
-  padding: 4px 8px;
+  padding: 2px 8px; /* antes 6px */
   background: #f2f4f7;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 800;
   text-transform: uppercase;
   color: #666;
   position: sticky;
@@ -195,38 +196,45 @@ mat-dialog-content.content {
   &.th--idx {
     justify-content: center;
   }
-
   &.th--numeric {
     justify-content: flex-end;
   }
-
   &.th--acciones {
     justify-content: center;
   }
 }
 
-/* Fila de ítem */
+/* Fila item */
 .item-row {
+  min-height: var(--items-row-h);
+
   display: grid;
   grid-template-columns:
-    32px
-    100px
+    28px
+    92px
     minmax(220px, 1.6fr)
-    60px
-    105px
-    60px
+    56px
     90px
-    100px
-    110px
-    110px
-    40px;
+    56px
+    84px
+    90px
+    96px
+    96px
+    36px;
   column-gap: 6px;
-  padding: 4px 8px;
-  align-items: stretch;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  padding: 2px 8px; /* antes 6px */
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 
   &:last-child {
     border-bottom: none;
+  }
+
+  /* Inputs un poquito más compactos */
+  .field-input {
+    height: 30px;
+    font-size: 12px;
+    padding: 2px 8px;
   }
 }
 
@@ -250,83 +258,65 @@ mat-dialog-content.content {
 }
 
 .monto {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2f2f2f;
 }
 
+.icon-button {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* Footer de items */
 .items-footer-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 4px 2px;
-  font-size: 12px;
+  padding: 5px 2px 0; /* antes 6px */
+  font-size: 11.5px;
 }
 
-/* Panel de totales */
-.totales-panel {
-  background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Texto ayuda */
+.hint {
+  display: block;
+  font-size: 11.5px;
+  color: #666;
 }
 
-.totales-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-
-  .monto {
-    font-size: 13px;
-  }
+/* Bottom: notas + totales */
+.section--bottom {
+  padding: 7px 9px;
 }
 
-.totales-row--muted {
-  color: #777;
+.bottom-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1.1fr);
+  gap: 10px; /* antes 12 */
+  align-items: start;
 }
 
-.totales-row--total {
-  margin-top: 4px;
-  font-size: 15px;
-  font-weight: 700;
-
-  .monto {
-    font-size: 15px;
-  }
+/* Totales sticky */
+.bottom-right {
+  position: sticky;
+  top: 8px; /* un poco más compacto */
+  align-self: start;
 }
 
-.totales-row--link {
-  justify-content: flex-start;
-}
-
-.link-button {
-  border: none;
-  background: transparent;
-  color: #0a74da;
-  font-size: 13px;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.totales-divider {
-  margin: 6px 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-/* Sección notas */
+/* Notas */
 .section--notas {
   background: #ffffff;
   border-radius: 10px;
-  padding: 10px 12px 12px;
+  padding: 7px 9px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .notas-header {
@@ -337,14 +327,13 @@ mat-dialog-content.content {
 }
 
 .section__subtitle {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   color: #555;
 }
 
-/* Botón redondo con + */
 .icon-circle {
   width: 22px;
   height: 22px;
@@ -364,6 +353,9 @@ mat-dialog-content.content {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 150px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .nota-row {
@@ -375,11 +367,12 @@ mat-dialog-content.content {
 
 .nota-input {
   width: 100%;
+  height: 31px;
   border-radius: 6px;
   border: 1px solid #e3e5ea;
   background: #f5f7fb;
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .nota-input::placeholder {
@@ -400,49 +393,87 @@ mat-dialog-content.content {
 }
 
 .notas-empty {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #777;
   font-style: italic;
 }
 
-/* Layout inferior notas + totales */
-.section--bottom {
-  padding: 10px 12px 10px;
+/* Totales */
+.totales-panel {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 7px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px; /* antes 4 */
 }
 
-.bottom-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(260px, 1.2fr);
-  gap: 16px;
-  align-items: flex-start;
+.totales-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  line-height: 1.15;
+
+  .monto {
+    font-size: 12.5px;
+    font-weight: 700;
+  }
 }
 
-/* Footer del diálogo */
+.totales-row--muted {
+  color: #777;
+}
+
+.totales-row--total {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 900;
+
+  .monto {
+    font-size: 14px;
+    font-weight: 900;
+  }
+}
+
+.totales-row--link {
+  justify-content: flex-start;
+}
+
+.link-button {
+  border: none;
+  background: transparent;
+  color: #0a74da;
+  font-size: 12.5px;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.totales-divider {
+  margin: 6px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Footer del diálogo (tu estilo) */
 .acciones {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 6px 16px 8px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
   gap: 8px;
   box-sizing: border-box;
 
   button[mat-flat-button] {
     background-color: rgb(28, 197, 244);
     color: #fff;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2),
+    box-shadow:
+      0px 4px 8px rgba(0, 0, 0, 0.2),
       inset 0px 0px 10px rgba(0, 0, 0, 0.5);
   }
 }
 
-/* Texto de ayuda general */
-.hint {
-  display: block;
-  font-size: 12px;
-  color: #666;
-}
-
-/* Loading overlay simple */
+/* Loading overlay */
 .loading-overlay {
   display: inline-flex;
   align-items: center;
@@ -463,7 +494,6 @@ mat-dialog-content.content {
   }
 }
 
-/* Campos ocultos */
 .hidden-fields {
   display: none;
 }
@@ -480,23 +510,19 @@ mat-dialog-content.content {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .section {
-    padding: 8px 8px 6px;
-  }
-
   .items-header-row,
   .item-row {
     grid-template-columns:
       24px
-      90px
+      86px
       minmax(160px, 1.5fr)
-      56px
-      90px
-      56px
-      80px
-      90px
-      90px
-      90px
+      54px
+      86px
+      54px
+      78px
+      86px
+      86px
+      86px
       32px;
   }
 }
