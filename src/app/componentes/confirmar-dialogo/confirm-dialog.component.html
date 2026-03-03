@@ -1,0 +1,42 @@
+<div class="dlg">
+  <div class="hdr">
+    <div class="ico" [class.danger]="data.danger">
+      <mat-icon>{{ data.danger ? "warning" : "help" }}</mat-icon>
+    </div>
+
+    <div class="txt">
+      <div class="title">{{ data.title }}</div>
+      <div class="msg">{{ data.message }}</div>
+    </div>
+  </div>
+
+  <mat-form-field *ngIf="data.requireText" appearance="outline" class="full">
+    <mat-label>{{ data.inputLabel || "Clave" }}</mat-label>
+
+    <input
+      matInput
+      [type]="data.passwordInput ? 'password' : 'text'"
+      [formControl]="input"
+      autocomplete="off"
+    />
+
+    <mat-error *ngIf="input.invalid">Clave incorrecta.</mat-error>
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-stroked-button type="button" (click)="closeNo()">
+      {{ data.cancelText || "Cancelar" }}
+    </button>
+
+    <button
+      mat-raised-button
+      type="button"
+      (click)="closeYes()"
+      [disabled]="data.requireText && input.invalid"
+      [ngClass]="data.danger ? 'btn-danger' : 'btn-primary'"
+    >
+      <mat-icon>{{ data.danger ? "delete" : "check" }}</mat-icon>
+      {{ data.confirmText || "Aceptar" }}
+    </button>
+  </div>
+</div>

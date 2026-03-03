@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+/*import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, lastValueFrom, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -93,5 +93,144 @@ export class SedesConectadasService {
   public delete(idSedeConectada: string): Observable<void> {
     return this.httpClient.delete<void>(urlPage + '/' + idSedeConectada, environment.httpOptions);
   }
-}
+}*/
 
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, lastValueFrom } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { SedesConectadas } from './sedes-conectadas.model';
+import { SignalRService } from 'src/app/signalr.service';
+import { InterruptionService } from 'src/app/helpers/interruption';
+
+const urlPage = environment.apiUrl + '/sedesconectadas';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class SedesConectadasService {
+  _SedesConectadas?: SedesConectadas[];
+
+  // ✅ handler propio para NO tumbar el de otros módulos
+  private onErrorConexion?: (clienteId: string, mensajeError: string) => void;
+
+  // ✅ opcional: evita doble llamada simultánea
+  private requestInFlight = false;
+
+  constructor(
+    private httpClient: HttpClient,
+    private signalRService: SignalRService,
+    private interruptionService: InterruptionService,
+  ) {}
+
+  async startConnectionRespuestaObtenerActualizarSedesActivasPorCliente(
+    idCliente: number,
+  ): Promise<SedesConectadas[]> {
+    if (this.requestInFlight) return this._SedesConectadas ?? [];
+    this.requestInFlight = true;
+
+    try {
+      await this.signalRService.ensureConnection();
+
+      // ✅ ErrorConexion (sin tumbar a otros)
+      if (this.onErrorConexion) {
+        this.signalRService.off('ErrorConexion', this.onErrorConexion);
+      }
+
+      this.onErrorConexion = (_clienteId: string, mensajeError: string) => {
+        alert('Error de conexion: ' + mensajeError);
+        this.interruptionService.interrupt();
+      };
+
+      this.signalRService.on('ErrorConexion', this.onErrorConexion);
+
+      // ✅ INVOKE con resultado
+      const sedesConectadas = await this.signalRService.invokeResult<
+        SedesConectadas[]
+      >('ObtenerActualizarSedesActivasPorCliente', idCliente);
+
+      console.log('Sedes conectadas:', sedesConectadas);
+      this._SedesConectadas = sedesConectadas;
+      return sedesConectadas;
+    } catch (err) {
+      console.log(
+        'Error al invocar ObtenerActualizarSedesActivasPorCliente:',
+        err,
+      );
+      throw err;
+    } finally {
+      this.requestInFlight = false;
+    }
+  }
+
+  // =========================
+  // HTTP (igual que ya tenías)
+  // =========================
+
+  public Get(idSedeConectada: string): Observable<SedesConectadas> {
+    const url = urlPage + '/' + idSedeConectada;
+    return this.httpClient.get<SedesConectadas>(url, environment.httpOptions);
+  }
+
+  public GetAll(): Observable<SedesConectadas[]> {
+    return this.httpClient.get<SedesConectadas[]>(
+      urlPage,
+      environment.httpOptions,
+    );
+  }
+
+  public async ConsultarSedesConectadasActivasPorCliente(
+    idCliente: string,
+  ): Promise<SedesConectadas[]> {
+    const url =
+      urlPage + '/ConsultarSedesConectadasActivasPorCliente/' + idCliente;
+
+    try {
+      const obj = this.httpClient.get<SedesConectadas[]>(
+        url,
+        environment.httpOptions,
+      );
+      return await lastValueFrom(obj);
+    } catch (error) {
+      console.error('Error during HTTP request:', error);
+      throw error;
+    }
+  }
+
+  public async ConsultarSedePorId(idSede: number): Promise<SedesConectadas> {
+    const url = urlPage + '/ConsultarSedePorId/' + idSede;
+    const obj = this.httpClient.get<SedesConectadas>(
+      url,
+      environment.httpOptions,
+    );
+    return await lastValueFrom(obj);
+  }
+
+  public GetActivasConCliente(minutos: number = 10): Observable<any[]> {
+    const url = `${urlPage}/ActivasConCliente?minutos=${minutos}`;
+    return this.httpClient.get<any[]>(url, environment.httpOptions);
+  }
+
+  public Edit(_SedesConectadas: SedesConectadas): Observable<boolean> {
+    return this.httpClient.put<boolean>(
+      urlPage + '/' + _SedesConectadas.idSedeConectada,
+      _SedesConectadas,
+      environment.httpOptions,
+    );
+  }
+
+  public create(_SedesConectadas: SedesConectadas): Observable<number> {
+    return this.httpClient.post<number>(
+      urlPage,
+      _SedesConectadas,
+      environment.httpOptions,
+    );
+  }
+
+  public delete(idSedeConectada: string): Observable<void> {
+    return this.httpClient.delete<void>(
+      urlPage + '/' + idSedeConectada,
+      environment.httpOptions,
+    );
+  }
+}

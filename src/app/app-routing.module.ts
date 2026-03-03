@@ -16,7 +16,7 @@ import { LoginCallBackComponent } from './componentes/login-call-back';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
 import { AgregarDatosPersonalesComponent } from './componentes/agregar-datos-personales/agregar-datos-personales.component';
-import { AdmonClientesComponent } from './componentes/admon-clientes';
+import { AdmonClientesComponent } from './componentes/admon/admon-clientes';
 import { AgregarAntecedentesComponent } from './componentes/agregar-antecedentes/agregar-antecedentes.component';
 import { GenerarRipsComponent } from './componentes/generar-rips';
 import { SaludComponent } from './componentes/billing/salud/salud.component';
@@ -28,6 +28,12 @@ import { BillingDashboardComponent } from './componentes/billing/dashboard/dashb
 
 import { FacturaComponent } from './componentes/factura/factura.component';
 import { NominaElectronicaComponent } from './componentes/nomina-electronica';
+import { AdmonUsuariosComponent } from './componentes/admon/admon-usuarios/admon-usuarios.component';
+import { AdmonSedesComponent } from './componentes/admon/admon-sedes/admon-sedes.component';
+import { AdminDashboardComponent } from './componentes/admon/admin-dashboard/admin-dashboard.component';
+import { AdmonTenantsComponent } from './componentes/admon/admon-tenants/admon-tenants.component';
+import { AdmonResolucionesComponent } from './componentes/admon/admon-resoluciones/admon-resoluciones.component';
+import { AdminControlComponent } from './componentes/admon/admin-control/admin-control.component';
 
 const routes: Routes = [
   { path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -50,7 +56,16 @@ const routes: Routes = [
   { path: 'estado-cuenta', component: EstadoCuentaComponent },
   { path: 'rips', component: RipsComponent },
   { path: 'datos-administrativos', component: DatosAdministrativosComponent },
-  { path: 'admon-clientes', component: AdmonClientesComponent },
+  // ===== ADMIN (HUB con tarjetas) =====
+  { path: 'admin', component: AdminDashboardComponent },
+
+  // Admin secciones
+  { path: 'admin/clientes', component: AdmonClientesComponent },
+  { path: 'admin/usuarios', component: AdmonUsuariosComponent },
+  { path: 'admin/sedes', component: AdmonSedesComponent },
+  { path: 'admin/tenants', component: AdmonTenantsComponent },
+  { path: 'admin/resoluciones', component: AdmonResolucionesComponent },
+  { path: 'admin/control', component: AdminControlComponent },
   {
     path: 'agregar-datos-personales',
     component: AgregarDatosPersonalesComponent,

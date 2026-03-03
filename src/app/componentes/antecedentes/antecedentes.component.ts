@@ -1,56 +1,82 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 
-
-import { Antecedentes, AntecedentesService } from 'src/app/conexiones/rydent/modelos/antecedentes';
+import {
+  Antecedentes,
+  AntecedentesService,
+} from 'src/app/conexiones/rydent/modelos/antecedentes';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 
 @Component({
   selector: 'app-antecedentes',
   templateUrl: './antecedentes.component.html',
-  styleUrl: './antecedentes.component.scss'
+  styleUrl: './antecedentes.component.scss',
 })
-export class AntecedentesComponent implements OnInit {
+export class AntecedentesComponent implements OnInit, OnDestroy {
   @Input() respuestaAntecedentes: Antecedentes = new Antecedentes();
   formularioAntecedentes!: FormGroup;
   resultadoBusquedaAntecedentes: Antecedentes = new Antecedentes();
-  idSedeActualSignalR: string = "";
+  idSedeActualSignalR: string = '';
+  sedeIdSeleccionada = 0;
+  private destruir$ = new Subject<void>();
   idAnamnesisPacienteSeleccionado: number = 0;
   constructor(
     private formBuilder: FormBuilder,
     private antecedentesService: AntecedentesService,
     private respuestaPinService: RespuestaPinService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
-    this.respuestaPinService.sharedAnamnesisData.subscribe(data => {
-      if (data != null) {
-        this.idAnamnesisPacienteSeleccionado = data;
-      }
-    });
+    this.respuestaPinService.sharedAnamnesisData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idAnamnesisPacienteSeleccionado = data;
+        }
+      });
 
-    this.respuestaPinService.sharedSedeData.subscribe(data => {
-      if (data != null) {
-        this.idSedeActualSignalR = data;
-      }
-    });
-    await this.obtenerAntecedentesPaciente(this.idAnamnesisPacienteSeleccionado);
+    this.respuestaPinService.sharedSedeData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idSedeActualSignalR = data;
+        }
+      });
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
+      });
+    await this.obtenerAntecedentesPaciente(
+      this.idAnamnesisPacienteSeleccionado,
+    );
 
     //Antecedente
-    this.antecedentesService.respuestaAntecedentesEmit.subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
-      this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
-      this.formularioAntecedentes.patchValue(this.resultadoBusquedaAntecedentes);
-      //this.formularioAntecedentes.disable();
-    });
+    this.antecedentesService.respuestaAntecedentesEmit
+      .pipe(takeUntil(this.destruir$))
+      .subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
+        this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
+        this.formularioAntecedentes.patchValue(
+          this.resultadoBusquedaAntecedentes,
+        );
+        //this.formularioAntecedentes.disable();
+      });
+  }
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   async obtenerAntecedentesPaciente(idAnamnesis: number) {
-
     if (this.idSedeActualSignalR != '') {
-      await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(this.idSedeActualSignalR, idAnamnesis.toString());
+      await this.antecedentesService.startConnectionRespuestaBusquedaAntecedentes(
+        this.sedeIdSeleccionada,
+        idAnamnesis.toString(),
+      );
     }
   }
 
@@ -142,7 +168,7 @@ export class AntecedentesComponent implements OnInit {
       OVARIO_POLIQUISTICO: [''],
       OVARIO_POLIQUISTICO_SN: [''],
       CORONARIA: [''],
-      CORONARIA_SN: ['']
+      CORONARIA_SN: [''],
     });
 
     // Llena el formulario con los datos de resultadoBusquedaAntecedentesCompletos
@@ -150,8 +176,11 @@ export class AntecedentesComponent implements OnInit {
   }
 
   async editarAntecedentes() {
-    let antecedentesPaciente: Antecedentes = this.formularioAntecedentes.getRawValue();
-    await this.respuestaPinService.updateantecedentesPacienteParaEditar(antecedentesPaciente);
+    let antecedentesPaciente: Antecedentes =
+      this.formularioAntecedentes.getRawValue();
+    await this.respuestaPinService.updateantecedentesPacienteParaEditar(
+      antecedentesPaciente,
+    );
     this.router.navigate(['/agregar-antecedentes']);
     console.log('Datos del paciente para editar:', antecedentesPaciente);
   }
@@ -165,12 +194,10 @@ export class AntecedentesComponent implements OnInit {
   }
 
   async mostrarAntecedentes() {
-    //this.obtenerAntecedentesPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);  
+    //this.obtenerAntecedentesPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);
   }
 
   async mostrarEvolucion() {
     // this.obtenerEvolucionPaciente(this.resultadoBusquedaAntecedentesCompletos.IDANAMNESIS);
   }
-
 }
-

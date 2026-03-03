@@ -11,6 +11,8 @@ export class RespuestaBusquedaFacturasCreadas {
   fecha!: Date;
   idRelacion!: number;
   tipoFactura!: number;
+  dianStatus!: string; // "ACEPTADA" | "RECHAZADA" | "" (otros => lo tratamos como "-")
+  dianMessages!: string; // mensaje de DIAN (si existe)
 
   // ✅ NUEVO: cápsula NC al instante (viene del backend)
   hasNc!: boolean;
@@ -46,6 +48,10 @@ export class RespuestaBusquedaFacturasCreadas {
 
     r.tipoFactura = Number(raw?.tipoFactura ?? raw?.tipo_factura ?? 0);
 
+    r.dianStatus = String(raw?.dianStatus ?? raw?.dian_status ?? '');
+
+    r.dianMessages = String(raw?.dianMessages ?? raw?.dian_messages ?? '');
+
     // ✅ NUEVO (acepta también snake_case por si acaso)
     r.hasNc = Boolean(raw?.hasNc ?? raw?.has_nc ?? false);
 
@@ -56,4 +62,11 @@ export class RespuestaBusquedaFacturasCreadas {
     if (!Array.isArray(arr)) return [];
     return arr.map(RespuestaBusquedaFacturasCreadas.fromJson);
   }
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

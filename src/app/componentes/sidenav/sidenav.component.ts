@@ -77,6 +77,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   menuOpen = false;
   route = '';
   usuarioActual: Usuarios = new Usuarios();
+  ID_SEDE_ADMIN = 1;
 
   constructor(
     private renderer: Renderer2,
@@ -178,21 +179,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
         }
       });
 
-    /*this.respuestaPinService.sharedcambiarDoctorSeleccionadoData
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((nombre) => {
-        if (!nombre) return;
-
-        const found = this.lstDoctores.find((x) => x.nombre === nombre);
-        if (!found) return;
-
-        // ✅ esto actualiza el select visual
-        this.doctorSeleccionado = String(found.id);
-
-        // ✅ esto ejecuta la misma lógica real sin re-emitir
-        this.onDoctorSeleccionado(found.id, { silent: true });
-      });*/
-
     console.log('sidenav2');
     this.logeado = false;
     if (this.loginService.IsSingned()) {
@@ -253,6 +239,12 @@ export class SidenavComponent implements OnInit, OnDestroy {
       .map((word) => word[0])
       .join(' ');
   }
+
+  get mostrarMenuAdmin(): boolean {
+    const sedeActualId = Number(this.sedeConectadaActual?.idSede ?? 0);
+    return this.logeado && sedeActualId === Number(this.ID_SEDE_ADMIN);
+  }
+
   async pedirPinSedeSeleccionada(idSede: number) {
     let sedeSeleccionadaConectada = null;
     console.log(idSede);
@@ -260,10 +252,15 @@ export class SidenavComponent implements OnInit, OnDestroy {
     //limpia datos
     this.limpiarVariablesCambioSede();
 
-    sedeSeleccionadaConectada =
+    /*sedeSeleccionadaConectada =
       await this.sedesConectadasService.startConnectionRespuestaObtenerActualizarSedesActivasPorCliente(
         this.usuarioActual.idCliente,
+      );*/
+    sedeSeleccionadaConectada =
+      await this.sedesConectadasService.ConsultarSedesConectadasActivasPorCliente(
+        String(this.usuarioActual.idCliente),
       );
+
     this.sedesConectadas = sedeSeleccionadaConectada;
     console.log(sedeSeleccionadaConectada);
     //console.log(sedeSeleccionadaConectada.filter(x => x.idSede == idSede && x.activo == true));
@@ -347,7 +344,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   }
 
   async cerrarSession() {
-    await this.signalRService.stopConnection();
+    await this.signalRService.stopConnection({ clearHandlers: true });
     this.loginService.signOut();
   }
 
@@ -383,37 +380,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
       //this.router.navigate(['/buscar-hitoria-clinica']);
     }
   }
-
-  /*async onDoctorSeleccionado(idDoctor: number, opts?: { silent?: boolean }) {
-    if (this.sedeConectadaActual.idSede != undefined) {
-      await this.respuestaObtenerDoctorService.startConnectionRespuestaObtenerPacientesDoctorSeleccionado(
-        this.sedeConectadaActual.idActualSignalR,
-        idDoctor,
-      );
-
-      const found = this.lstDoctores.find((x) => x.id == idDoctor);
-      this.doctorEscogido = found?.nombre ?? '';
-
-      if (this.doctorEscogido) {
-        this.respuestaPinService.updateDoctorSeleccionado(this.doctorEscogido);
-        this.respuestaPinService.updateIdDoctorSeleccionado(idDoctor);
-      }
-
-      // ✅ solo emite si NO es silencioso
-      if (!opts?.silent) {
-        this.respuestaPinService.updateCambiarDoctorSeleccionado(
-          this.doctorEscogido,
-        );
-      }
-
-      this.mostrarBuscarHistoriaClinica = true;
-      this.mostrarCerrarSesion = false;
-
-      if (this.idPacienteSeleccionado) {
-        setTimeout(() => this.router.navigate(['/datos-personales']), 100);
-      }
-    }
-  }*/
 
   async buscarPacientesDoctorSeleccionado() {}
 }

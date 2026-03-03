@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+/*import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { InterruptionService } from 'src/app/helpers/interruption';
@@ -94,5 +94,59 @@ export class LoginCallBackService {
         reject(err); // Rechaza la promesa si hay error general
       }
     });
+  }
+}*/
+
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { lastValueFrom } from 'rxjs';
+import { environment } from 'src/environments/environment';
+
+const baseUrl = environment.apiUrl + '/auth';
+
+export interface PostLoginCallbackResponse {
+  autenticado: boolean;
+  respuesta: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class LoginCallBackService {
+  constructor(private httpClient: HttpClient) {}
+
+  // ✅ MSN/Azure
+  public async postMSN(
+    code: string,
+    state: string,
+  ): Promise<PostLoginCallbackResponse> {
+    const req$ = this.httpClient.post<PostLoginCallbackResponse>(
+      `${baseUrl}`, // /api/auth
+      { code, state },
+      environment.httpOptions,
+    );
+    return await lastValueFrom(req$);
+  }
+
+  // ✅ Google
+  public async postGoogle(
+    code: string,
+    state: string,
+  ): Promise<PostLoginCallbackResponse> {
+    const req$ = this.httpClient.post<PostLoginCallbackResponse>(
+      `${baseUrl}/authgoogle`, // /api/auth/authgoogle
+      { code, state },
+      environment.httpOptions,
+    );
+    return await lastValueFrom(req$);
+  }
+
+  // ✅ Unificado
+  public async postCallback(
+    provider: 'msn' | 'google',
+    code: string,
+    state: string,
+  ): Promise<PostLoginCallbackResponse> {
+    return provider === 'google'
+      ? await this.postGoogle(code, state)
+      : await this.postMSN(code, state);
   }
 }

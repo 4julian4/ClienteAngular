@@ -1,0 +1,51 @@
+@import "../admon-clientes/admon-clientes.component.scss";
+
+.tenant-bar {
+  display: grid;
+  gap: 12px;
+}
+
+.tenant-select {
+  width: min(520px, 100%);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ✅ colores crear/guardar */
+.btn-crear,
+.btn-guardar {
+  background-color: rgb(28, 197, 244) !important;
+  color: #fff !important;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  //border-radius: 999px !important;
+
+  box-shadow:
+    0px 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0px 0px 10px rgba(0, 0, 0, 0.25) !important;
+
+  transition:
+    transform 120ms ease,
+    filter 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.btn-crear:hover,
+.btn-guardar:hover {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+  box-shadow:
+    0px 8px 16px rgba(0, 0, 0, 0.22),
+    inset 0px 0px 12px rgba(0, 0, 0, 0.22) !important;
+}
+
+.btn-crear:active,
+.btn-guardar:active {
+  transform: translateY(0px);
+  filter: brightness(0.97);
+}

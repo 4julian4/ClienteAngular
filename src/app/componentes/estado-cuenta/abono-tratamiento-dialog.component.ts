@@ -1,4 +1,12 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject, Subscription } from 'rxjs';
@@ -8,6 +16,8 @@ import {
   P_CONSULTAR_ESTACUENTA,
   P_CONSULTAR_ESTACUENTAPACIENTE,
 } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-estado-cuenta';
+
+import { AfterViewInit } from '@angular/core';
 
 import {
   AbonoConceptoDetalleDto,
@@ -24,7 +34,7 @@ import { EstadoCuentaCommandsService } from 'src/app/conexiones/rydent/modelos/e
 
 /** Datos que recibe el diálogo de Abono */
 export interface AbonoTratamientoDialogData {
-  clienteIdDestino: string;
+  clienteIdDestino: number;
 
   idPaciente: number;
   fase: number;
@@ -78,6 +88,41 @@ interface FormaPagoAbono {
   styleUrls: ['./abono-tratamiento-dialog.component.scss'],
 })
 export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
+  @ViewChild('btnToggleConcepto')
+  btnToggleConcepto?: ElementRef<HTMLButtonElement>;
+  private _inputBusquedaConcepto?: ElementRef<HTMLInputElement>;
+  @ViewChild('inputBusquedaConcepto')
+  set inputBusquedaConceptoRef(el: ElementRef<HTMLInputElement> | undefined) {
+    this._inputBusquedaConcepto = el;
+    // si justo estamos abriendo el panel, aquí ya existe el input
+    if (this.mostrarEditorConcepto && el) this.focusEl(el);
+  }
+  @ViewChild('inputValorConcepto')
+  inputValorConcepto?: ElementRef<HTMLInputElement>;
+  @ViewChild('btnAgregarConcepto')
+  btnAgregarConcepto?: ElementRef<HTMLButtonElement>;
+
+  @ViewChild('btnTogglePago') btnTogglePago?: ElementRef<HTMLButtonElement>;
+  private _btnAgregarPago?: ElementRef<HTMLButtonElement>;
+  @ViewChild('btnAgregarPago')
+  set btnAgregarPagoRef(el: ElementRef<HTMLButtonElement> | undefined) {
+    this._btnAgregarPago = el;
+    // si justo abrimos pagos, aquí ya existe el botón
+    if (this.mostrarEditorFormaPago && el) this.focusEl(el);
+  }
+
+  @ViewChild('btnAceptar')
+  set btnAceptarRef(el: ElementRef<HTMLButtonElement> | undefined) {
+    this._btnAceptar = el;
+
+    // Si el botón acaba de "nacer" y lo estamos esperando, enfócalo ahora
+    if (this.pendienteFocusAceptar && el) {
+      this.pendienteFocusAceptar = false;
+      this.focusEl(el);
+    }
+  }
+  private _btnAceptar?: ElementRef<HTMLButtonElement>;
+  private pendienteFocusAceptar = false;
   formAbono: FormGroup;
 
   opcionesIva: number[] = [];
@@ -300,6 +345,26 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
     this.ultimaFacturaSugerida = (pre.factura ?? '').trim();
   }
 
+  @HostListener('document:keydown', ['$event'])
+  onDialogKeyDown(ev: KeyboardEvent): void {
+    // Si el usuario está escribiendo en un input/select NO intervenimos
+    if (this.isTypingTarget(ev.target)) return;
+
+    // SPACE abre Conceptos (solo si ambos están cerrados)
+    if (ev.code === 'Space') {
+      if (!this.mostrarEditorConcepto && !this.mostrarEditorFormaPago) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        this.mostrarEditorConcepto = true;
+        this.mostrarEditorFormaPago = false;
+        this.mensajeErrorConceptos = null;
+
+        this.focusEl(this._inputBusquedaConcepto);
+      }
+    }
+  }
+
   ngOnInit(): void {
     // =====================================
     // ✅ Escuchar respuesta del worker
@@ -401,7 +466,10 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
     this.mensajeErrorConceptos = null;
 
     // Si abro conceptos, cierro pagos para evitar confusión
-    if (this.mostrarEditorConcepto) this.mostrarEditorFormaPago = false;
+    if (this.mostrarEditorConcepto) {
+      this.mostrarEditorFormaPago = false;
+      this.focusEl(this._inputBusquedaConcepto);
+    }
   }
 
   toggleEditorFormaPago(): void {
@@ -423,6 +491,7 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
         descripcion: '',
         valor: valorDefecto,
       });
+      this.focusPagoAlAbrir();
     }
   }
 
@@ -535,6 +604,39 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
 
     // si abro conceptos, cierro pagos
     this.mostrarEditorFormaPago = false;
+    this.focusEl(this.inputValorConcepto);
+  }
+
+  onEnterValorConcepto(ev: Event): void {
+    const e = ev as KeyboardEvent;
+    e.preventDefault();
+    this.agregarConcepto();
+
+    if (!this.mensajeErrorConceptos) {
+      this.abrirPagosYEnfocar();
+    }
+  }
+
+  private abrirPagosYEnfocar(): void {
+    this.mostrarEditorConcepto = false;
+    this.mostrarEditorFormaPago = true;
+    this.mensajeErrorPagos = null;
+
+    // setea defaults igual que tu toggleEditorFormaPago()
+    const disponibles = this.formasPagoDisponibles;
+    const formaPagoDefecto = disponibles.length > 0 ? disponibles[0] : '';
+    const valorDefecto = this.formatearConPuntos(
+      this.saldoPendiente.toString(),
+    );
+
+    this.formaPagoActualGroup.patchValue({
+      formaPago: formaPagoDefecto,
+      descripcion: '',
+      valor: valorDefecto,
+    });
+
+    // ✅ foco en valor pago (o select si prefieres)
+    this.focusEl(this._btnAceptar);
   }
 
   agregarConcepto(): void {
@@ -639,6 +741,7 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
       valor: nuevoSaldo,
     });
 
+    this.pendienteFocusAceptar = true; // <- el setter del ViewChild lo enfocará
     this.mostrarEditorFormaPago = false;
   }
 
@@ -775,5 +878,25 @@ export class AbonoTratamientoDialogComponent implements OnInit, OnDestroy {
     };
 
     this.dialogRef.close(req);
+  }
+
+  private focusEl(el?: ElementRef<HTMLElement>): void {
+    setTimeout(() => el?.nativeElement?.focus(), 30);
+  }
+
+  private isTypingTarget(target: any): boolean {
+    const tag = (target?.tagName ?? '').toUpperCase();
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  }
+  private focusPagoAlAbrir(): void {
+    // Si ya está listo para aceptar (mismo total), enfocar aceptar
+    if (this.totalConceptos > 0 && this.totalPagos === this.totalConceptos) {
+      this.pendienteFocusAceptar = true; // ✅ NO focus directo
+      this.mostrarEditorFormaPago = false; // ✅ opcional: si quieres cerrar pagos y dejar listo aceptar
+      return;
+    }
+
+    // Si falta pagar, enfocar botón agregar pago
+    this.focusEl(this._btnAgregarPago);
   }
 }

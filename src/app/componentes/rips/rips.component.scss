@@ -1,186 +1,218 @@
 .formularioAgregarRips {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    width: 90%;
-    margin: 40px auto 0;
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-  
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  margin: 40px auto 0;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+
+  .divFormularioFila1,
+  .divFormularioFila2,
+  .divFormularioFila3,
+  .divFormularioFila4 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .campoFila1,
+    .campoFila2,
+    .campoFila3,
+    .campoFila4 {
+      flex: 1;
+      margin: 5px 0;
+
+      &:not(:last-child) {
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .divContenedorDeBotones {
+    text-align: right;
+    margin-top: 20px;
+
+    .BotonGuardar,
+    .BotonCancelar,
+    .BotonCargarFactura {
+      margin: 5px;
+      background-color: rgb(28, 197, 244);
+      color: white;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  @media (max-width: 768px) {
     .divFormularioFila1,
     .divFormularioFila2,
     .divFormularioFila3,
     .divFormularioFila4 {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-  
+      flex-direction: column;
       .campoFila1,
       .campoFila2,
       .campoFila3,
       .campoFila4 {
-        flex: 1;
+        flex: 1 1 100%;
         margin: 5px 0;
-  
-        &:not(:last-child) {
-          margin-right: 10px;
-        }
       }
     }
-  
+
     .divContenedorDeBotones {
-      text-align: right;
-      margin-top: 20px;
-  
+      text-align: center;
+
       .BotonGuardar,
-      .BotonCancelar,
-      .BotonCargarFactura {
-        margin: 5px;
-        background-color: rgb(28, 197, 244);
-        color: white;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-      }
-    }
-
-        
-  
-    @media (max-width: 768px) {
-      .divFormularioFila1,
-      .divFormularioFila2,
-      .divFormularioFila3,
-      .divFormularioFila4 {
-        flex-direction: column;
-        .campoFila1,
-        .campoFila2,
-        .campoFila3,
-        .campoFila4 {
-          flex: 1 1 100%;
-          margin: 5px 0;
-        }
-      }
-  
-      .divContenedorDeBotones {
-        text-align: center;
-  
-        .BotonGuardar,
-        .BotonCancelar {
-          width: 100%;
-          margin-top: 10px;
-        }
-      }
-    }
-  
-    @media (max-width: 480px) {
-      .divFormularioFila1,
-      .divFormularioFila2,
-      .divFormularioFila3,
-      .divFormularioFila4 {
-        .campoFila1,
-        .campoFila2,
-        .campoFila3,
-        .campoFila4 {
-          margin: 2px 0;
-        }
-      }
-  
-      .divContenedorDeBotones {
-        .BotonGuardar,
-        .BotonCancelar {
-          margin: 5px 0;
-        }
+      .BotonCancelar {
+        width: 100%;
+        margin-top: 10px;
       }
     }
   }
 
-  .ripsGenerado {
-    border: 1px solid #ccc;
+  @media (max-width: 480px) {
+    .divFormularioFila1,
+    .divFormularioFila2,
+    .divFormularioFila3,
+    .divFormularioFila4 {
+      .campoFila1,
+      .campoFila2,
+      .campoFila3,
+      .campoFila4 {
+        margin: 2px 0;
+      }
+    }
+
+    .divContenedorDeBotones {
+      .BotonGuardar,
+      .BotonCancelar {
+        margin: 5px 0;
+      }
+    }
+  }
+}
+
+.ripsGenerado {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  margin: 20px auto;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  background-color: #fff;
+  .acciones-facturas {
+    display: flex;
+    gap: 6px; // 👈 pocos pixeles entre botones
+    margin: 8px 0 12px;
+  }
+
+  .btn-accion {
+    flex: 1; // 👈 ambos ocupan 50/50
+    width: 50%;
+    padding: 10px;
+    background-color: rgb(28, 197, 244);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    transition: background 0.2s ease;
+
+    &:hover {
+      background-color: rgb(0, 150, 200);
+    }
+  }
+
+  .contenedor-calendarios {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px; // Espacio entre los calendarios
+    margin-bottom: 15px;
+
+    .calendario {
+      flex: 1;
+    }
+  }
+
+  button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(28, 197, 244);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background-color: rgb(0, 150, 200);
+    }
+  }
+
+  .scrollable-table-container {
+    border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 20px;
-    width: 90%;
-    margin: 20px auto;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
+    padding: 10px;
+    overflow-x: auto;
     background-color: #fff;
-  
-    .contenedor-calendarios {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px; // Espacio entre los calendarios
-      margin-bottom: 15px;
-  
-      .calendario {
-        flex: 1;
-      }
-    }
-  
-    button[type="submit"] {
-      display: block;
+    margin-top: 20px;
+
+    table {
       width: 100%;
-      padding: 10px;
-      background-color: rgb(28, 197, 244);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    
-      &:hover {
-        background-color: rgb(0, 150, 200);
+      border-collapse: collapse;
+
+      th {
+        //background-color: rgb(28, 197, 244);
+        //color: white;
+        //padding: 10px;
+        //border-radius: 5px;
+        text-align: left;
       }
-    }
-  
-    .scrollable-table-container {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      overflow-x: auto;
-      background-color: #fff;
-      margin-top: 20px;
-    
-      table {
-        width: 100%;
-        border-collapse: collapse;
-  
-        th {
-          //background-color: rgb(28, 197, 244);
-          //color: white;
-          //padding: 10px;
-          //border-radius: 5px;
-          text-align: left;
-        }
-  
-        td {
-          padding: 10px;
-          border-bottom: 1px solid #ddd;
-        }
-  
-        tr:hover {
-          background-color: rgba(28, 197, 244, 0.1);
-        }
+
+      td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
       }
-    }
-  
-    @media (max-width: 768px) {
-      width: 95%;
-    
-      .calendario {
-        width: 100%;
-      }
-    }
-  
-    @media (max-width: 480px) {
-      width: 100%;
-      padding: 15px;
-  
-      table {
-        th,
-        td {
-          font-size: 14px;
-          padding: 8px;
-        }
+
+      tr:hover {
+        background-color: rgba(28, 197, 244, 0.1);
       }
     }
   }
-  
+
+  @media (max-width: 768px) {
+    .acciones-facturas {
+      flex-direction: column; // en móvil se apilan
+      gap: 8px;
+    }
+
+    .btn-accion {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 95%;
+
+    .calendario {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 15px;
+
+    table {
+      th,
+      td {
+        font-size: 14px;
+        padding: 8px;
+      }
+    }
+  }
+}

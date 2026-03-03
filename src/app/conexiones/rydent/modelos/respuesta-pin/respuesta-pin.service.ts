@@ -18,6 +18,9 @@ import { PacienteHeaderInfo } from '../respuesta-busqueda-paciente';
 export class RespuestaPinService {
   datosDelFormulario: any;
 
+  // ✅ cache del último RespuestaPin (para mezclar updates sin perder campos)
+  private lastPinData: RespuestaPin = new RespuestaPin();
+
   private anamnesisData = new BehaviorSubject<number | null>(null);
   sharedAnamnesisData = this.anamnesisData.asObservable();
 
@@ -130,6 +133,13 @@ export class RespuestaPinService {
   sharedrespuestaDockerJsonRipsPresentado =
     this.respuestaDockerJsonRipsPresentado.asObservable();
 
+  // ✅ referencias para poder hacer off SOLO a nuestros handlers
+  private onErrorConexion?: (clienteId: string, mensajeError: string) => void;
+  private onRespuestaObtenerPin?: (clienteId: string, payload: string) => void;
+
+  // ✅ opcional: evita doble wiring
+  private wired = false;
+
   //-------------------------------------------------------------------------------//
   @Output() respuestaPinModel: EventEmitter<RespuestaPin> =
     new EventEmitter<RespuestaPin>();
@@ -144,38 +154,62 @@ export class RespuestaPinService {
     this.onDoctorSeleccionado = () => {};
   }
 
-  async startConnectionRespuestaObtenerPin() {
+  async startConnectionRespuestaObtenerPin(): Promise<void> {
     try {
       await this.signalRService.ensureConnection();
 
-      this.signalRService.hubConnection.off('ErrorConexion');
-      this.signalRService.hubConnection.on(
-        'ErrorConexion',
-        (clienteId: string, mensajeError: string) => {
-          alert(
-            'Error de conexión: ' + mensajeError + ' ClienteId: ' + clienteId,
-          );
-          this.interruptionService.interrupt();
-        },
-      );
+      // Evita cablear múltiples veces
+      if (this.wired) return;
+      this.wired = true;
 
-      this.signalRService.hubConnection.off('RespuestaObtenerPin');
-      this.signalRService.hubConnection.on(
-        'RespuestaObtenerPin',
-        (clienteId: string, objRespuestaObtenerDoctor: string) => {
-          try {
-            const decompressedData =
-              this.descomprimirDatosService.decompressString(
-                objRespuestaObtenerDoctor,
-              );
-            this.respuestaPinModel.emit(JSON.parse(decompressedData));
-          } catch (error) {
-            console.error('Error durante la descompresión o análisis: ', error);
-          }
-        },
-      );
+      const currentConnectionId =
+        this.signalRService.hubConnection?.connectionId;
+
+      console.log('PIN -> hubConnectionId actual:', currentConnectionId);
+
+      // ✅ Limpia SOLO nuestros handlers anteriores
+      if (this.onErrorConexion) {
+        this.signalRService.off('ErrorConexion', this.onErrorConexion);
+      }
+      if (this.onRespuestaObtenerPin) {
+        this.signalRService.off(
+          'RespuestaObtenerPin',
+          this.onRespuestaObtenerPin,
+        );
+      }
+
+      // ✅ ErrorConexion (filtrado por returnId real)
+      this.onErrorConexion = (returnId: string, mensajeError: string) => {
+        if (returnId !== currentConnectionId) return;
+
+        alert('Error de conexión: ' + mensajeError);
+        this.interruptionService.interrupt();
+      };
+
+      this.signalRService.on('ErrorConexion', this.onErrorConexion);
+
+      // ✅ RespuestaObtenerPin (filtrado por returnId real)
+      this.onRespuestaObtenerPin = (returnId: string, payload: string) => {
+        console.log('PIN RESPUESTA -> returnId:', returnId);
+        console.log('PIN RESPUESTA -> esperado:', currentConnectionId);
+
+        if (returnId !== currentConnectionId) return;
+
+        try {
+          const decompressedData =
+            this.descomprimirDatosService.decompressString(payload);
+
+          console.log('PIN RESPUESTA OK');
+
+          this.respuestaPinModel.emit(JSON.parse(decompressedData));
+        } catch (error) {
+          console.error('Error durante la descompresión o análisis:', error);
+        }
+      };
+
+      this.signalRService.on('RespuestaObtenerPin', this.onRespuestaObtenerPin);
     } catch (err) {
-      console.error('Error al conectar con SignalR: ', err);
+      console.error('Error al conectar con SignalR:', err);
     }
   }
 
@@ -254,7 +288,34 @@ export class RespuestaPinService {
   }
 
   updatedatosRespuestaPin(data: RespuestaPin) {
-    this.datosRespuestaPin.next(data);
+    // ✅ guardamos cache
+    this.lastPinData = data ?? new RespuestaPin();
+
+    // ✅ emitimos como siempre (NO rompe nada)
+    this.datosRespuestaPin.next(this.lastPinData);
+  }
+
+  /**
+   * ✅ Devuelve el último PIN en memoria (por si lo necesitas)
+   */
+  public getCurrentPinData(): RespuestaPin {
+    return this.lastPinData ?? new RespuestaPin();
+  }
+
+  /**
+   * ✅ Actualiza SOLO catálogos (EPS, Departamentos, Ciudades, Consultas, Procedimientos)
+   * sin tocar doctores, convenios, configuraciones, etc.
+   */
+  public updateCatalogos(parcial: Partial<RespuestaPin>): void {
+    const actual = this.getCurrentPinData();
+
+    const nuevo: RespuestaPin = {
+      ...actual,
+      ...parcial,
+    };
+
+    // ✅ reutiliza tu método existente
+    this.updatedatosRespuestaPin(nuevo);
   }
 
   async updateDoctorSeleccionado(data: string) {

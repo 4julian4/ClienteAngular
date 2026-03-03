@@ -1,0 +1,109 @@
+<div class="admin-page">
+  <div class="header">
+    <div>
+      <h2>Administración</h2>
+      <div class="subtitle">
+        Gestiona clientes, usuarios, sedes y facturación
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <mat-card class="card" (click)="go('/admin/clientes')">
+      <div class="icon">
+        <mat-icon>business</mat-icon>
+      </div>
+      <div class="title">Clientes</div>
+      <div class="desc">Planes, vencimientos, módulos y estado</div>
+      <button
+        mat-raised-button
+        class="btn-open"
+        (click)="go('/admin/clientes'); $event.stopPropagation()"
+      >
+        Abrir
+      </button>
+    </mat-card>
+
+    <mat-card class="card" (click)="go('/admin/usuarios')">
+      <div class="icon">
+        <mat-icon>group</mat-icon>
+      </div>
+      <div class="title">Usuarios</div>
+      <div class="desc">Cuentas, correos, estado, cliente asociado</div>
+      <button
+        mat-raised-button
+        class="btn-open"
+        (click)="go('/admin/usuarios'); $event.stopPropagation()"
+      >
+        Abrir
+      </button>
+    </mat-card>
+
+    <mat-card class="card" (click)="go('/admin/sedes')">
+      <div class="icon">
+        <mat-icon>location_on</mat-icon>
+      </div>
+      <div class="title">Sedes</div>
+      <div class="desc">
+        Identificador local, observaciones, cliente asociado
+      </div>
+      <button
+        mat-raised-button
+        class="btn-open"
+        (click)="go('/admin/sedes'); $event.stopPropagation()"
+      >
+        Abrir
+      </button>
+    </mat-card>
+
+    <mat-card class="card" (click)="go('/admin/tenants')">
+      <div class="icon">
+        <mat-icon>receipt_long</mat-icon>
+      </div>
+      <div class="title">Tenants</div>
+      <div class="desc">
+        Gestión de tenant (Dataico / facturación electrónica)
+      </div>
+      <button
+        mat-raised-button
+        class="btn-open"
+        (click)="go('/admin/tenants'); $event.stopPropagation()"
+      >
+        Abrir
+      </button>
+    </mat-card>
+
+    <mat-card class="card" (click)="go('/admin/resoluciones')">
+      <div class="icon">
+        <mat-icon>rule</mat-icon>
+      </div>
+      <div class="title">Resoluciones</div>
+      <div class="desc">Resoluciones DIAN por tenant</div>
+      <button
+        mat-raised-button
+        class="btn-open"
+        (click)="go('/admin/resoluciones'); $event.stopPropagation()"
+      >
+        Abrir
+      </button>
+    </mat-card>
+
+    <mat-card class="card" (click)="go('/admin/control')">
+      <div class="icon">
+        <mat-icon>monitor_heart</mat-icon>
+      </div>
+      <div class="title">Centro de Control</div>
+      <div class="desc">
+        Alertas: vencimientos, usos Dataico, resoluciones DIAN y sedes
+        conectadas
+      </div>
+      <button
+        mat-raised-button
+        class="btn-open"
+        (click)="go('/admin/control'); $event.stopPropagation()"
+      >
+        Abrir
+      </button>
+    </mat-card>
+  </div>
+</div>

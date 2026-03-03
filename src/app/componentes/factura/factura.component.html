@@ -98,8 +98,11 @@
     </button>
   </div>
 </div>
-
-<div class="tabla-wrapper" *ngIf="!isLoading; else cargandoTpl">
+<!-- ✅ Overlay de carga (sin destruir tabla/paginator) -->
+<div class="cargando-overlay-global" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+</div>
+<div class="tabla-wrapper">
   <div class="tabla-scroll">
     <table
       mat-table
@@ -199,6 +202,22 @@
         </td>
       </ng-container>
 
+      <!-- ✅ Estado DIAN (solo Creadas) -->
+      <ng-container matColumnDef="dianTag">
+        <th mat-header-cell *matHeaderCellDef class="col-dian">DIAN</th>
+
+        <td mat-cell *matCellDef="let r" class="col-dian">
+          <ng-container *ngIf="filtroTipoListado.value === 'creadas'">
+            <span
+              class="dian-dot"
+              [ngClass]="getDianDotClass(r)"
+              [matTooltip]="getDianTooltip(r)"
+              matTooltipPosition="above"
+            ></span>
+          </ng-container>
+        </td>
+      </ng-container>
+
       <!-- Cápsula NC (solo en creadas) -->
       <ng-container matColumnDef="ncTag">
         <th mat-header-cell *matHeaderCellDef class="col-notas">Notas</th>
@@ -248,20 +267,6 @@
               </button>
 
               <mat-divider></mat-divider>
-
-              <!-- Crear Notas -->
-              <!--
-              <button mat-menu-item (click)="abrirCrearNota('NC', r)">
-                <mat-icon>note_add</mat-icon>
-                <span>Crear Nota Crédito (NC)</span>
-              </button>
-              -->
-              <!--
-              <button mat-menu-item (click)="abrirCrearNota('ND', r)">
-                <mat-icon>note_add</mat-icon>
-                <span>Crear Nota Débito (ND)</span>
-              </button>
-              -->
 
               <button
                 mat-menu-item
@@ -370,7 +375,6 @@
                       </button>
 
                       <mat-menu #menuNota="matMenu">
-                        <!-- Descargar PDF (solo habilitado si hay pdfUrl) -->
                         <button
                           mat-menu-item
                           (click)="descargarPdfNota(n, $event)"
@@ -380,7 +384,6 @@
                           <span>Ver PDF</span>
                         </button>
 
-                        <!-- Descargar XML (solo habilitado si hay xmlUrl) -->
                         <button
                           mat-menu-item
                           (click)="descargarXmlNota(n, $event)"
@@ -392,7 +395,6 @@
 
                         <mat-divider></mat-divider>
 
-                        <!-- Editar -->
                         <button
                           mat-menu-item
                           (click)="editarNota(n, $event)"
@@ -402,7 +404,6 @@
                           <span>Editar</span>
                         </button>
 
-                        <!-- Eliminar -->
                         <button
                           mat-menu-item
                           (click)="borrarNota(n, $event)"
@@ -447,18 +448,15 @@
   </div>
 
   <mat-paginator
-    [pageSize]="10"
+    [length]="
+      filtroTipoListado.value === 'creadas'
+        ? totalCreadas
+        : dataSource.filteredData?.length || 0
+    "
     [pageSizeOptions]="[10, 25, 50]"
     showFirstLastButtons
-  >
-  </mat-paginator>
+  ></mat-paginator>
 </div>
-
-<ng-template #cargandoTpl>
-  <div class="cargando">
-    <mat-spinner></mat-spinner>
-  </div>
-</ng-template>
 
 <!-- ✅ Overlay pro DIAN (igual a RIPS) -->
 <div class="overlay-loading" *ngIf="isPresentandoDian">

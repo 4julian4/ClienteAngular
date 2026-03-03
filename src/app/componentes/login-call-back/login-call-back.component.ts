@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+/*import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoginCallBackService } from './login-call-back.service';
 import { LoginService } from '../login/login.service';
@@ -81,5 +81,95 @@ export class LoginCallBackComponent implements OnInit, OnDestroy {
 
     console.error(errorMessage); // Puedes loguear el error aquí también
     return throwError(() => new Error(errorMessage));
+  }
+}*/
+
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LoginCallBackService } from './login-call-back.service';
+import { LoginService } from '../login/login.service';
+import { Subject, takeUntil, TimeoutError, take } from 'rxjs';
+
+@Component({
+  selector: 'app-login-call-back',
+  standalone: true,
+  imports: [],
+  templateUrl: './login-call-back.component.html',
+  styleUrl: './login-call-back.component.scss',
+})
+export class LoginCallBackComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private alreadyProcessed = false;
+
+  constructor(
+    private route: ActivatedRoute,
+    private loginCallBackService: LoginCallBackService,
+    private loginService: LoginService,
+    public router: Router,
+  ) {}
+
+  ngOnInit() {
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params: any) => {
+        if (this.alreadyProcessed) return;
+        if (!params?.code) return;
+
+        this.alreadyProcessed = true;
+        this.processCallback(params.code, params.state ?? '');
+      });
+  }
+
+  private async processCallback(code: string, state: string) {
+    try {
+      const provider =
+        (localStorage.getItem('oauth_provider') as 'google' | 'msn') ?? 'msn';
+
+      // ✅ HTTP ONLY
+      const data = await this.loginCallBackService.postCallback(
+        provider,
+        code,
+        state,
+      );
+
+      if (data?.autenticado && data?.respuesta) {
+        this.loginService.saveToken(data.respuesta);
+
+        // ✅ limpiamos provider para que no quede pegado
+        localStorage.removeItem('oauth_provider');
+
+        if (this.loginService.IsSingned()) {
+          window.location.href = '/';
+          return;
+        }
+      }
+
+      // Si no autenticó
+      // this.router.navigate(['/login']);
+    } catch (err) {
+      this.handleError(err);
+      // this.router.navigate(['/login']);
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private handleError(error: any) {
+    let errorMessage = '';
+
+    if (error instanceof TimeoutError) {
+      errorMessage = 'La solicitud ha excedido el tiempo límite.';
+    } else if (error?.error instanceof ErrorEvent) {
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      const status = error?.status ?? 'sin código';
+      const message = error?.message ?? 'Error desconocido';
+      errorMessage = `Código de error: ${status}\nMensaje: ${message}`;
+    }
+
+    console.error(errorMessage);
   }
 }

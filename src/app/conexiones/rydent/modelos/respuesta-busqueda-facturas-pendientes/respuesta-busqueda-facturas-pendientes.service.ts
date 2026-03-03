@@ -1,8 +1,8 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
+/*import { EventEmitter, Injectable, Output } from '@angular/core';
 import { SignalRService } from 'src/app/signalr.service';
 import { InterruptionService } from 'src/app/helpers/interruption';
 import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
-import { RespuestaBusquedaFacturasPendientes } from './respuesta-busqueda-facturas-pendientes.model';
+import { RespuestaBusquedaFacturasPendientes } from './respuesta-busqueda-facturas-pendientes.model';*/
 
 /**
  * Servicio que:
@@ -15,7 +15,7 @@ import { RespuestaBusquedaFacturasPendientes } from './respuesta-busqueda-factur
  * local, y desde allá se retorna 'RespuestaObtenerFacturasPendientes' con el JSON final.
  * Aquí solo consumimos la respuesta final.
  */
-@Injectable({ providedIn: 'root' })
+/*@Injectable({ providedIn: 'root' })
 export class RespuestaBusquedaFacturasPendientesService {
   @Output() respuestaBusquedaFacturasPendientesEmit: EventEmitter<
     RespuestaBusquedaFacturasPendientes[]
@@ -31,7 +31,7 @@ export class RespuestaBusquedaFacturasPendientesService {
    * Inicia/asegura conexión, suscribe handlers y solicita las facturas pendientes.
    * @param clienteId ConnectionId del cliente angular (en la nube) al que el hub debe responder.
    */
-  async startConnectionRespuestaBusquedaFacturasPendientes(
+/* async startConnectionRespuestaBusquedaFacturasPendientes(
     clienteId: string
   ): Promise<void> {
     try {
@@ -88,11 +88,138 @@ export class RespuestaBusquedaFacturasPendientesService {
    * Intenta descomprimir si viene en formato comprimido/base64.
    * Si falla, retorna el string original asumiendo que ya es JSON plano.
    */
-  private tryDecompress(data: string): string {
+/* private tryDecompress(data: string): string {
     try {
       return this.descomprimirDatosService.decompressString(data);
     } catch {
       return data; // ya era JSON plano
+    }
+  }
+}*/
+
+import { EventEmitter, Injectable, Output } from '@angular/core';
+import { SignalRService } from 'src/app/signalr.service';
+import { InterruptionService } from 'src/app/helpers/interruption';
+import { DescomprimirDatosService } from 'src/app/helpers/descomprimir-datos/descomprimir-datos.service';
+import { RespuestaBusquedaFacturasPendientes } from './respuesta-busqueda-facturas-pendientes.model';
+
+@Injectable({ providedIn: 'root' })
+export class RespuestaBusquedaFacturasPendientesService {
+  @Output() respuestaBusquedaFacturasPendientesEmit: EventEmitter<
+    RespuestaBusquedaFacturasPendientes[]
+  > = new EventEmitter<RespuestaBusquedaFacturasPendientes[]>();
+
+  // ✅ refs para off SOLO a nuestros handlers
+  private onErrorConexion?: (returnId: string, mensajeError: string) => void;
+  private onRespuestaObtenerFacturasPendientes?: (
+    returnId: string,
+    payload: string,
+  ) => void;
+
+  // ✅ opcional: evita doble request simultánea
+  private requestInFlight = false;
+
+  constructor(
+    private signalRService: SignalRService,
+    private interruptionService: InterruptionService,
+    private descomprimirDatosService: DescomprimirDatosService,
+  ) {}
+
+  async startConnectionRespuestaBusquedaFacturasPendientes(
+    targetId: string, // ✅ antes clienteId: este es el TARGET (sede/worker)
+  ): Promise<void> {
+    if (this.requestInFlight) return;
+    this.requestInFlight = true;
+
+    try {
+      // 1) Asegurar conexión
+      await this.signalRService.ensureConnection();
+
+      // ✅ returnId del browser (para filtrar callbacks)
+      const returnId = this.signalRService.hubConnection?.connectionId ?? '';
+
+      // 2) ErrorConexion (sin tumbar a otros módulos)
+      if (this.onErrorConexion) {
+        this.signalRService.off('ErrorConexion', this.onErrorConexion);
+      }
+      this.onErrorConexion = (returnIdResp: string, mensajeError: string) => {
+        if (String(returnIdResp) !== String(returnId)) return;
+
+        alert(`Error de conexión: ${mensajeError} ReturnId: ${returnIdResp}`);
+        this.interruptionService.interrupt();
+      };
+      this.signalRService.on('ErrorConexion', this.onErrorConexion);
+
+      // 3) Respuesta final (sin tumbar a otros módulos)
+      if (this.onRespuestaObtenerFacturasPendientes) {
+        this.signalRService.off(
+          'RespuestaObtenerFacturasPendientes',
+          this.onRespuestaObtenerFacturasPendientes,
+        );
+      }
+
+      this.onRespuestaObtenerFacturasPendientes = async (
+        returnIdResp: string,
+        payload: string,
+      ) => {
+        if (String(returnIdResp) !== String(returnId)) return;
+
+        try {
+          const jsonString = this.tryDecompress(payload);
+
+          const rawList = JSON.parse(jsonString);
+          const typedList =
+            RespuestaBusquedaFacturasPendientes.listFromJson(rawList);
+
+          console.log(
+            'RespuestaObtenerFacturasPendientes recibida:',
+            typedList,
+          );
+
+          this.respuestaBusquedaFacturasPendientesEmit.emit(typedList);
+        } catch (error) {
+          console.error(
+            'Error al procesar RespuestaObtenerFacturasPendientes:',
+            error,
+          );
+        } finally {
+          // ✅ opcional: si NO quieres quedar escuchando
+          // if (this.onRespuestaObtenerFacturasPendientes) {
+          //   this.signalRService.off(
+          //     'RespuestaObtenerFacturasPendientes',
+          //     this.onRespuestaObtenerFacturasPendientes,
+          //   );
+          // }
+        }
+      };
+
+      this.signalRService.on(
+        'RespuestaObtenerFacturasPendientes',
+        this.onRespuestaObtenerFacturasPendientes,
+      );
+
+      // 4) Invocar
+      console.log('Invocando método ObtenerFacturasPendientes...');
+      console.log('FACTURAS PENDIENTES -> TARGET enviado:', targetId);
+      console.log('FACTURAS PENDIENTES -> returnId actual:', returnId);
+
+      await this.signalRService.invoke('ObtenerFacturasPendientes', targetId);
+    } catch (err) {
+      console.error('Error al conectar o invocar en SignalR:', err);
+    } finally {
+      this.requestInFlight = false;
+    }
+  }
+
+  /**
+   * Intenta descomprimir si viene comprimido/base64.
+   * Si falla, retorna el string original (JSON plano).
+   */
+  private tryDecompress(data: string): string {
+    try {
+      return this.descomprimirDatosService.decompressString(data);
+    } catch {
+      return data;
     }
   }
 }

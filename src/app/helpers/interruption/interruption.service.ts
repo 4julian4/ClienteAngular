@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+/*import { Injectable, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -21,6 +21,22 @@ export class InterruptionService implements OnInit {
 
   // Método para disparar la interrupción
   interrupt() {
+    this.interruptionSource.next();
+  }
+}*/
+
+import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class InterruptionService {
+  private readonly interruptionSource = new Subject<void>();
+
+  onInterrupt(): Observable<void> {
+    return this.interruptionSource.asObservable();
+  }
+
+  interrupt(): void {
     this.interruptionSource.next();
   }
 }

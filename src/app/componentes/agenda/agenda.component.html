@@ -76,10 +76,12 @@
               <button
                 mat-icon-button
                 *ngIf="esFechaValidaParaRecordatorio"
+                [disabled]="recordatorioEnProceso"
                 (click)="recordarCita()"
                 matTooltip="Recordar cita pacientes"
               >
                 <!--<mat-icon>message</mat-icon>-->
+
                 <mat-icon svgIcon="whatsapp"></mat-icon>
               </button>
             </div>

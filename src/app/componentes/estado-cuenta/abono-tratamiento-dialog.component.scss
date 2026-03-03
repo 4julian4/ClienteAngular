@@ -197,7 +197,10 @@ select.input-compacto {
 }
 
 /* ================= CONCEPTOS ================= */
-
+.boton-toggle-seccion:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
 .bloque-conceptos {
   border-radius: 8px;
   border: 1px solid #e0e0e0;

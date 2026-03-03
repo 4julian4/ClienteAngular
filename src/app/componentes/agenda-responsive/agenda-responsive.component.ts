@@ -1,26 +1,63 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostBinding, Input, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostBinding,
+  Input,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  Renderer2,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { format, set } from 'date-fns';
-import { map, Observable, startWith, Subject, Subscription, takeUntil } from 'rxjs';
+import {
+  map,
+  Observable,
+  startWith,
+  Subject,
+  Subscription,
+  takeUntil,
+} from 'rxjs';
 import { ConfirmacionesPedidas } from 'src/app/conexiones/rydent/modelos/confirmaciones-pedidas';
 import { RespuestaBusquedaCitasPaciente } from 'src/app/conexiones/rydent/modelos/respuesta-busqueda-citas-paciente';
-import { P_Agenda1Model, RespuestaConsultarPorDiaYPorUnidad, RespuestaConsultarPorDiaYPorUnidadService } from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
-import { RespuestaDatosPacientesParaLaAgenda, RespuestaPin, RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
-import { RespuestaRealizarAccionesEnCitaAgendada, RespuestaRealizarAccionesEnCitaAgendadaService } from 'src/app/conexiones/rydent/modelos/respuesta-realizar-acciones-en-cita-agendada';
+import {
+  P_Agenda1Model,
+  RespuestaConsultarPorDiaYPorUnidad,
+  RespuestaConsultarPorDiaYPorUnidadService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-consultar-por-dia-ypor-unidad';
+import {
+  RespuestaDatosPacientesParaLaAgenda,
+  RespuestaPin,
+  RespuestaPinService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-pin';
+import {
+  RespuestaRealizarAccionesEnCitaAgendada,
+  RespuestaRealizarAccionesEnCitaAgendadaService,
+} from 'src/app/conexiones/rydent/modelos/respuesta-realizar-acciones-en-cita-agendada';
 import { TDetalleCitas } from 'src/app/conexiones/rydent/tablas/tdetalle-citas';
 import { MensajesUsuariosService } from '../mensajes-usuarios';
 import { FechaHoraHelperService } from 'src/app/helpers/fecha-hora-helper/fecha-hora-helper.service';
 import { AgendaService } from '../agenda/agenda.service';
-import { SedesConectadas, SedesConectadasService } from 'src/app/conexiones/sedes-conectadas';
+import {
+  SedesConectadas,
+  SedesConectadasService,
+} from 'src/app/conexiones/sedes-conectadas';
 import { TConfiguracionesRydent } from 'src/app/conexiones/rydent/tablas/tconfiguraciones-rydent';
 import { TFestivos } from 'src/app/conexiones/rydent/tablas/tfestivos';
 import { THorariosAsuntos } from 'src/app/conexiones/rydent/tablas/thorarios-asuntos';
 import { THorariosAgenda } from 'src/app/conexiones/rydent/tablas/thorarios-agenda';
 import { MatAccordion, MatExpansionPanel } from '@angular/material/expansion';
-import { MatCalendar, MatDatepickerInputEvent } from '@angular/material/datepicker';
+import {
+  MatCalendar,
+  MatDatepickerInputEvent,
+} from '@angular/material/datepicker';
 import { MatTable } from '@angular/material/table';
 import { PedirPinComponent } from '../pedir-pin';
 import { Usuarios, UsuariosService } from 'src/app/conexiones/usuarios';
@@ -36,13 +73,11 @@ import { Sedes } from 'src/app/conexiones/sedes';
 @Component({
   selector: 'app-agenda-responsive',
   templateUrl: './agenda-responsive.component.html',
-  styleUrls: ['./agenda-responsive.component.scss']
+  styleUrls: ['./agenda-responsive.component.scss'],
 })
-
-
-
-
-export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
+export class AgendaResponsiveComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
   isloading: boolean = false;
   //contextMenuPosition = { x: '0px', y: '0px' };
   //@ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
@@ -89,8 +124,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   lstHorariosAgenda: THorariosAgenda[] = [];
   lstHorariosAsuntos: THorariosAsuntos[] = [];
   listaHorariosAsuntosPorSilla: THorariosAsuntos[] = [];
-  horaInicial: string = "";
-  horaFinal: string = "";
+  horaInicial: string = '';
+  horaFinal: string = '';
   intervalos: number[] = [];
   highlightedRows: any[] = [];
   intervalo: number = 0;
@@ -101,64 +136,101 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   formularioAgregarCita!: FormGroup;
   lstFestivos: TFestivos[] = [];
   lstConfiguracionesRydent: TConfiguracionesRydent[] = [];
-  lstDoctores: { id: number, nombre: string }[] = [];
-  lstDuracion: { id: string, nombre: string }[] = [];
+  lstDoctores: { id: number; nombre: string }[] = [];
+  lstDuracion: { id: string; nombre: string }[] = [];
   //lstDuracion: { id: number, intervalo: string }[] = [];
   duracion = new FormControl();
   invalidSelection = false;
   sedeSeleccionada: SedesConectadas = new SedesConectadas();
   idSede: number = 0;
-  doctorSeleccionado = "";
-  doctorProgramadoCronograma = "";
-  horaCitaSeleccionada = "";
+  doctorSeleccionado = '';
+  doctorProgramadoCronograma = '';
+  horaCitaSeleccionada = '';
   desactivarFiltro: boolean = false;
   evolucionoAgenda: string = '';
   resultadosBusquedaCitaPacienteAgenda: RespuestaBusquedaCitasPaciente[] = [];
 
   listaNombrePacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
-  lstNombrePacienteParaAgendar: { id: string, nombre: string }[] = [];
-  filteredNombrePacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  lstNombrePacienteParaAgendar: { id: string; nombre: string }[] = [];
+  filteredNombrePacienteParaAgendar?: Observable<
+    { id: string; nombre: string }[]
+  >;
   nombrePacienteParaAgendarControl = new FormControl();
 
-  listaDatosPacienteParaBuscarAgenda?: RespuestaDatosPacientesParaLaAgenda[] = [];
-  lstDatosPacienteParaBuscarAgenda: { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] = [];
-  filteredDatosPacienteParaBuscarAgenda?: Observable<{ idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[]>;
+  listaDatosPacienteParaBuscarAgenda?: RespuestaDatosPacientesParaLaAgenda[] =
+    [];
+  lstDatosPacienteParaBuscarAgenda: {
+    idAnamnesis: string;
+    idAnamenesisTexto: string;
+    nombre: string;
+    telefono: string;
+  }[] = [];
+  filteredDatosPacienteParaBuscarAgenda?: Observable<
+    {
+      idAnamnesis: string;
+      idAnamenesisTexto: string;
+      nombre: string;
+      telefono: string;
+    }[]
+  >;
   datosPacienteParaBuscarAgendaControl = new FormControl();
 
   listaDatosDoctorParaAgendar?: RespuestaPin = new RespuestaPin();
-  lstDatosDoctorParaAgendar: { id: string, nombre: string }[] = [];
-  filteredDoctorParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  lstDatosDoctorParaAgendar: { id: string; nombre: string }[] = [];
+  filteredDoctorParaAgendar?: Observable<{ id: string; nombre: string }[]>;
   doctorPacienteParaAgendarControl = new FormControl();
 
-
   listaTelefonoPacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
-  lstTelefonoPacienteParaAgendar: { id: string, nombre: string }[] = [];
-  filteredTelefonoPacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  lstTelefonoPacienteParaAgendar: { id: string; nombre: string }[] = [];
+  filteredTelefonoPacienteParaAgendar?: Observable<
+    { id: string; nombre: string }[]
+  >;
   telefonoPacienteParaAgendarControl = new FormControl();
 
   listaCelularPacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
-  lstCelularPacienteParaAgendar: { id: string, nombre: string }[] = [];
-  filteredCelularPacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  lstCelularPacienteParaAgendar: { id: string; nombre: string }[] = [];
+  filteredCelularPacienteParaAgendar?: Observable<
+    { id: string; nombre: string }[]
+  >;
   celularPacienteParaAgendarControl = new FormControl();
 
   listaHistoriaPacienteParaAgendar?: RespuestaDatosPacientesParaLaAgenda[] = [];
-  lstHistoriaPacienteParaAgendar: { id: string, nombre: string }[] = [];
-  filteredHistoriaPacienteParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  lstHistoriaPacienteParaAgendar: { id: string; nombre: string }[] = [];
+  filteredHistoriaPacienteParaAgendar?: Observable<
+    { id: string; nombre: string }[]
+  >;
   historiaPacienteParaAgendarControl = new FormControl();
+  sedeIdSeleccionada = 0;
 
-  lstDuracionParaAgendar: { id: string, nombre: string }[] = [];
-  filteredDuracionParaAgendar?: Observable<{ id: string, nombre: string }[]>;
+  lstDuracionParaAgendar: { id: string; nombre: string }[] = [];
+  filteredDuracionParaAgendar?: Observable<{ id: string; nombre: string }[]>;
   duracionParaAgendarControl = new FormControl();
 
   localizandoCita: boolean = false;
   panelBuscarCitaDeshabilitado: boolean = true;
   //resultadosBusquedaCita: boolean = false;
   refrescoAgenda: boolean = false;
+  private readonly destroy$ = new Subject<void>();
+  private nombreChangesSub?: Subscription;
+  private historiaChangesSub?: Subscription;
 
-  columnasMostradasCitasEncontradas = ['fecha', 'hora', 'nombre', 'telefono', 'numHistoria', 'cedula', 'doctor']; // Añade aquí los nombres de las columnas que quieres mostrar
+  columnasMostradasCitasEncontradas = [
+    'fecha',
+    'hora',
+    'nombre',
+    'telefono',
+    'numHistoria',
+    'cedula',
+    'doctor',
+  ]; // Añade aquí los nombres de las columnas que quieres mostrar
 
-  displayedColumns: string[] = ['OUT_HORA', 'OUT_NOMBRE', 'OUT_TELEFONO', 'ACCIONES'];//,'OUT_TELEFONO', 'OUT_DOCTOR', 'OUT_ASUNTO' ];
-
+  displayedColumns: string[] = [
+    'OUT_HORA',
+    'OUT_NOMBRE',
+    'OUT_TELEFONO',
+    'ACCIONES',
+  ]; //,'OUT_TELEFONO', 'OUT_DOCTOR', 'OUT_ASUNTO' ];
+  recordatorioEnProceso: boolean = false;
 
   constructor(
     private respuestaConsultarPorDiaYPorUnidadService: RespuestaConsultarPorDiaYPorUnidadService,
@@ -173,11 +245,8 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     private sedesConectadasService: SedesConectadasService,
     private respuestaRealizarAccionesEnCitaAgendadaService: RespuestaRealizarAccionesEnCitaAgendadaService,
     private renderer: Renderer2,
-    private router: Router
-
-  ) {
-
-  }
+    private router: Router,
+  ) {}
   stopAccordionToggle(event: KeyboardEvent) {
     if (event.key === ' ') {
       event.stopPropagation();
@@ -197,9 +266,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     // Aquí puedes poner el código que quieres que se ejecute después de que las vistas del componente y las vistas de sus hijos se hayan inicializado.
   }
 
-
-
   async ngOnInit() {
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
+      });
     let lstFecha = this.fechaSeleccionada.toLocaleDateString().split('/');
 
     let dia = parseInt(lstFecha[0]);
@@ -207,249 +279,447 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     let anio = parseInt(lstFecha[2]);
     this.fechaSeleccionada = new Date(anio, mes, dia);
 
-    this.agendaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
-      if (data) {
-        //alert('refrescar agendaService');
-        await this.cambiarFecha();
-      }
-    });
+    this.agendaService.refrescarAgendaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (data: boolean) => {
+        if (data) {
+          //alert('refrescar agendaService');
+          await this.cambiarFecha();
+        }
+      });
 
-    this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit.subscribe(async (data: boolean) => {
-      if (data) {
-        //alert('refrescar respuestaRealizarAccionesEnCitaAgendadaService');
-        await this.cambiarFecha();
-      }
-    });
+    this.respuestaRealizarAccionesEnCitaAgendadaService.refrescarAgendaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (data: boolean) => {
+        if (data) {
+          //alert('refrescar respuestaRealizarAccionesEnCitaAgendadaService');
+          this.recordatorioEnProceso = false;
+          await this.cambiarFecha();
+        }
+      });
 
-    this.respuestaPinService.sharedSedeData.subscribe(data => {
-      if (data != null) {
-        this.idSedeActualSignalR = data;
-      }
-    });
+    this.respuestaPinService.sharedSedeData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idSedeActualSignalR = data;
+        }
+      });
 
-    this.respuestaPinService.sharedDeDondeAgregaEvolucionData.subscribe(data => {
-      if (data != null) {
-        //alert('evolucionoAgenda'+ data);
-        this.evolucionoAgenda = data;
-      }
-    });
+    this.respuestaPinService.sharedDeDondeAgregaEvolucionData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          //alert('evolucionoAgenda'+ data);
+          this.evolucionoAgenda = data;
+        }
+      });
 
-    this.respuestaPinService.sharedSedeSeleccionada.subscribe(data => {
-      if (data != null) {
-        this.idSede = data;
-      }
-    });
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idSede = data;
+        }
+      });
 
-    this.respuestaPinService.sharedisLoading.subscribe(data => {
-      if (data != null) {
-        //alert('isloading'+ data);
-        this.isloading = data;
-      }
-    });
+    this.respuestaPinService.sharedisLoading
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          //alert('isloading'+ data);
+          this.isloading = data;
+        }
+      });
 
-    this.respuestaPinService.shareddoctorSeleccionadoData.subscribe(data => {
-      if (data != null) {
-        this.doctorSeleccionado = data;
-        //this.inicializarFormulario();
-      }
-    });
+    this.respuestaPinService.shareddoctorSeleccionadoData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.doctorSeleccionado = data;
+          //this.inicializarFormulario();
+        }
+      });
     this.inicializarFormulario();
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe(data => {
-      if (data != null) {
-        this.listaNombrePacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
-        this.lstNombrePacienteParaAgendar = this.listaNombrePacienteParaAgendar!.map(item => ({ id: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '' }));
-        this.filteredNombrePacienteParaAgendar = this.formularioAgregarCita.get('nombre')!.valueChanges
-          .pipe(
+
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (!data) return;
+
+        this.listaNombrePacienteParaAgendar =
+          data.lstAnamnesisParaAgendayBuscadores;
+
+        this.lstNombrePacienteParaAgendar =
+          this.listaNombrePacienteParaAgendar!.map((item) => ({
+            id: item.IDANAMNESIS?.toString()
+              ? item.IDANAMNESIS?.toString()
+              : '',
+            nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
+          }));
+
+        this.filteredNombrePacienteParaAgendar = this.formularioAgregarCita
+          .get('nombre')!
+          .valueChanges.pipe(
             startWith(''),
-            map(value => this.desactivarFiltro ? this.lstNombrePacienteParaAgendar : this._filterNombre(value, this.lstNombrePacienteParaAgendar))
+            map((value) =>
+              this.desactivarFiltro
+                ? this.lstNombrePacienteParaAgendar
+                : this._filterNombre(value, this.lstNombrePacienteParaAgendar),
+            ),
           );
 
+        this.listaDatosPacienteParaBuscarAgenda =
+          data.lstAnamnesisParaAgendayBuscadores;
 
-        this.listaDatosPacienteParaBuscarAgenda = data.lstAnamnesisParaAgendayBuscadores;
-        this.lstDatosPacienteParaBuscarAgenda = this.listaDatosPacienteParaBuscarAgenda!.map(item => ({ idAnamnesis: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', idAnamenesisTexto: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '', nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '', telefono: item.TELF_P ? item.TELF_P : '' }));
-        this.filteredDatosPacienteParaBuscarAgenda = this.datosPacienteParaBuscarAgendaControl.valueChanges
-          .pipe(
+        this.lstDatosPacienteParaBuscarAgenda =
+          this.listaDatosPacienteParaBuscarAgenda!.map((item) => ({
+            idAnamnesis: item.IDANAMNESIS?.toString()
+              ? item.IDANAMNESIS?.toString()
+              : '',
+            idAnamenesisTexto: item.IDANAMNESIS_TEXTO
+              ? item.IDANAMNESIS_TEXTO
+              : '',
+            nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
+            telefono: item.TELF_P ? item.TELF_P : '',
+          }));
+
+        this.filteredDatosPacienteParaBuscarAgenda =
+          this.datosPacienteParaBuscarAgendaControl.valueChanges.pipe(
             startWith(''),
-            map(value => typeof value === 'string' ? value : value.nombre),
-            map(nombre => nombre ? this._filterBuscarAgenda(nombre) : this.lstDatosPacienteParaBuscarAgenda.slice())
+            map((value) => (typeof value === 'string' ? value : value.nombre)),
+            map((nombre) =>
+              nombre
+                ? this._filterBuscarAgenda(nombre)
+                : this.lstDatosPacienteParaBuscarAgenda.slice(),
+            ),
           );
 
+        this.listaTelefonoPacienteParaAgendar =
+          data.lstAnamnesisParaAgendayBuscadores;
 
-        this.listaTelefonoPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
-        this.lstTelefonoPacienteParaAgendar = this.listaTelefonoPacienteParaAgendar!.map(item => ({ id: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', nombre: item.TELF_P ? item.TELF_P : '' }));
-        this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges
-          .pipe(
+        this.lstTelefonoPacienteParaAgendar =
+          this.listaTelefonoPacienteParaAgendar!.map((item) => ({
+            id: item.IDANAMNESIS?.toString()
+              ? item.IDANAMNESIS?.toString()
+              : '',
+            nombre: item.TELF_P ? item.TELF_P : '',
+          }));
+
+        this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita
+          .get('telefono')!
+          .valueChanges.pipe(
             startWith(''),
-            map(value => this.desactivarFiltro ? this.lstTelefonoPacienteParaAgendar : this._filterNombre(value, this.lstTelefonoPacienteParaAgendar))
+            map((value) =>
+              this.desactivarFiltro
+                ? this.lstTelefonoPacienteParaAgendar
+                : this._filterNombre(
+                    value,
+                    this.lstTelefonoPacienteParaAgendar,
+                  ),
+            ),
           );
 
-        // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
-        //   startWith(this.selectedRow.OUT_TELEFONO),
-        //   map(value => this._filter(value, this.lstTelefonoPacienteParaAgendar))
-        // );  
+        this.listaCelularPacienteParaAgendar =
+          data.lstAnamnesisParaAgendayBuscadores;
 
-        this.listaCelularPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
-        this.lstCelularPacienteParaAgendar = this.listaCelularPacienteParaAgendar!.map(item => ({ id: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', nombre: item.CELULAR_P ? item.CELULAR_P : '' }));
-        this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita.get('celular')!.valueChanges
-          .pipe(
+        this.lstCelularPacienteParaAgendar =
+          this.listaCelularPacienteParaAgendar!.map((item) => ({
+            id: item.IDANAMNESIS?.toString()
+              ? item.IDANAMNESIS?.toString()
+              : '',
+            nombre: item.CELULAR_P ? item.CELULAR_P : '',
+          }));
+
+        this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita
+          .get('celular')!
+          .valueChanges.pipe(
             startWith(''),
-            map(value => this.desactivarFiltro ? this.lstCelularPacienteParaAgendar : this._filterNombre(value, this.lstCelularPacienteParaAgendar))
+            map((value) =>
+              this.desactivarFiltro
+                ? this.lstCelularPacienteParaAgendar
+                : this._filterNombre(value, this.lstCelularPacienteParaAgendar),
+            ),
           );
 
-        this.listaHistoriaPacienteParaAgendar = data.lstAnamnesisParaAgendayBuscadores;
-        this.lstHistoriaPacienteParaAgendar = this.listaHistoriaPacienteParaAgendar!.map(item => ({ id: item.IDANAMNESIS?.toString() ? item.IDANAMNESIS?.toString() : '', nombre: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '' }));
-        this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita.get('numHistoria')!.valueChanges
-          .pipe(
+        this.listaHistoriaPacienteParaAgendar =
+          data.lstAnamnesisParaAgendayBuscadores;
+
+        this.lstHistoriaPacienteParaAgendar =
+          this.listaHistoriaPacienteParaAgendar!.map((item) => ({
+            id: item.IDANAMNESIS?.toString()
+              ? item.IDANAMNESIS?.toString()
+              : '',
+            nombre: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '',
+          }));
+
+        this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita
+          .get('numHistoria')!
+          .valueChanges.pipe(
             startWith(''),
-            map(value => this.desactivarFiltro ? this.lstHistoriaPacienteParaAgendar : this._filterNombre(value, this.lstHistoriaPacienteParaAgendar))
+            map((value) =>
+              this.desactivarFiltro
+                ? this.lstHistoriaPacienteParaAgendar
+                : this._filterNombre(
+                    value,
+                    this.lstHistoriaPacienteParaAgendar,
+                  ),
+            ),
           );
 
+        // ✅ MUY IMPORTANTE: evitar duplicar handlers si el data llega varias veces
+        this.nombreChangesSub?.unsubscribe();
+        this.historiaChangesSub?.unsubscribe();
 
-        //----------------suscribo para cambiar datos segun lo seleccionado-----------//
+        // ----------------suscribo para cambiar datos segun lo seleccionado-----------//
 
-        this.formularioAgregarCita.get('nombre')!.valueChanges.subscribe(value => {
-          if (this.suscrpcionActivaFiltros) {
-            const selectedPaciente = this.lstNombrePacienteParaAgendar.find(paciente => paciente.nombre === value);
-            if (selectedPaciente) {
-              const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
-              const correspondingCelular = this.lstCelularPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
-              const correspondingHistoria = this.lstHistoriaPacienteParaAgendar.find(item => item.id === selectedPaciente.id);
-              if (correspondingTelefono) {
-                this.formularioAgregarCita.get('telefono')!.setValue(correspondingTelefono.nombre, { emitEvent: false });
-              }
-              if (correspondingCelular) {
-                this.formularioAgregarCita.get('celular')!.setValue(correspondingCelular.nombre, { emitEvent: false });
-              }
-              if (correspondingHistoria) {
-                this.formularioAgregarCita.get('numHistoria')!.setValue(correspondingHistoria.nombre, { emitEvent: false });
-              }
-              let encontrarDoctor = data.lstAnamnesisParaAgendayBuscadores?.find(item => item.IDANAMNESIS?.toString() === selectedPaciente.id)?.DOCTOR;
-              if (encontrarDoctor) {
-                this.formularioAgregarCita.get('doctor')!.setValue(encontrarDoctor, { emitEvent: false });
-              }
+        this.nombreChangesSub = this.formularioAgregarCita
+          .get('nombre')!
+          .valueChanges.pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            if (!this.suscrpcionActivaFiltros) return;
+
+            const selectedPaciente = this.lstNombrePacienteParaAgendar.find(
+              (paciente) => paciente.nombre === value,
+            );
+            if (!selectedPaciente) return;
+
+            const correspondingTelefono =
+              this.lstTelefonoPacienteParaAgendar.find(
+                (item) => item.id === selectedPaciente.id,
+              );
+            const correspondingCelular =
+              this.lstCelularPacienteParaAgendar.find(
+                (item) => item.id === selectedPaciente.id,
+              );
+            const correspondingHistoria =
+              this.lstHistoriaPacienteParaAgendar.find(
+                (item) => item.id === selectedPaciente.id,
+              );
+
+            if (correspondingTelefono) {
+              this.formularioAgregarCita
+                .get('telefono')!
+                .setValue(correspondingTelefono.nombre, { emitEvent: false });
             }
-          }
-        });
-
-
-
-
-        this.formularioAgregarCita.get('numHistoria')!.valueChanges.subscribe(value => {
-          if (this.suscrpcionActivaFiltros) {
-            const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(historia => historia.nombre === value);
-            if (selectedHistoria) {
-              const correspondingNombre = this.lstNombrePacienteParaAgendar.find(item => item.id === selectedHistoria.id);
-              const correspondingTelefono = this.lstTelefonoPacienteParaAgendar.find(item => item.id === selectedHistoria.id);
-              const correspondingCelular = this.lstCelularPacienteParaAgendar.find(item => item.id === selectedHistoria.id);
-              if (correspondingNombre) {
-                this.formularioAgregarCita.get('nombre')!.setValue(correspondingNombre.nombre, { emitEvent: false });
-              }
-              if (correspondingTelefono) {
-                this.formularioAgregarCita.get('telefono')!.setValue(correspondingTelefono.nombre, { emitEvent: false });
-              }
-              if (correspondingCelular) {
-                this.formularioAgregarCita.get('celular')!.setValue(correspondingCelular.nombre, { emitEvent: false });
-              }
-              let encontrarDoctor = data.lstAnamnesisParaAgendayBuscadores?.find(item => item.IDANAMNESIS?.toString() === selectedHistoria.id)?.DOCTOR;
-              if (encontrarDoctor) {
-                this.formularioAgregarCita.get('doctor')!.setValue(encontrarDoctor, { emitEvent: false });
-              }
+            if (correspondingCelular) {
+              this.formularioAgregarCita
+                .get('celular')!
+                .setValue(correspondingCelular.nombre, { emitEvent: false });
             }
-          }
-        });
+            if (correspondingHistoria) {
+              this.formularioAgregarCita
+                .get('numHistoria')!
+                .setValue(correspondingHistoria.nombre, { emitEvent: false });
+            }
+
+            const encontrarDoctor =
+              data.lstAnamnesisParaAgendayBuscadores?.find(
+                (item) => item.IDANAMNESIS?.toString() === selectedPaciente.id,
+              )?.DOCTOR;
+
+            if (encontrarDoctor) {
+              this.formularioAgregarCita
+                .get('doctor')!
+                .setValue(encontrarDoctor, {
+                  emitEvent: false,
+                });
+            }
+          });
+
+        this.historiaChangesSub = this.formularioAgregarCita
+          .get('numHistoria')!
+          .valueChanges.pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            if (!this.suscrpcionActivaFiltros) return;
+
+            const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(
+              (historia) => historia.nombre === value,
+            );
+            if (!selectedHistoria) return;
+
+            const correspondingNombre = this.lstNombrePacienteParaAgendar.find(
+              (item) => item.id === selectedHistoria.id,
+            );
+            const correspondingTelefono =
+              this.lstTelefonoPacienteParaAgendar.find(
+                (item) => item.id === selectedHistoria.id,
+              );
+            const correspondingCelular =
+              this.lstCelularPacienteParaAgendar.find(
+                (item) => item.id === selectedHistoria.id,
+              );
+
+            if (correspondingNombre) {
+              this.formularioAgregarCita
+                .get('nombre')!
+                .setValue(correspondingNombre.nombre, { emitEvent: false });
+            }
+            if (correspondingTelefono) {
+              this.formularioAgregarCita
+                .get('telefono')!
+                .setValue(correspondingTelefono.nombre, { emitEvent: false });
+            }
+            if (correspondingCelular) {
+              this.formularioAgregarCita
+                .get('celular')!
+                .setValue(correspondingCelular.nombre, { emitEvent: false });
+            }
+
+            const encontrarDoctor =
+              data.lstAnamnesisParaAgendayBuscadores?.find(
+                (item) => item.IDANAMNESIS?.toString() === selectedHistoria.id,
+              )?.DOCTOR;
+
+            if (encontrarDoctor) {
+              this.formularioAgregarCita
+                .get('doctor')!
+                .setValue(encontrarDoctor, {
+                  emitEvent: false,
+                });
+            }
+          });
+
         //----------------------------------------------------------------------------//
         this.lstHorariosAsuntos = data.lstHorariosAsuntos;
 
-        this.lstHorariosAgenda = data.lstHorariosAgenda.sort((a, b) => a.SILLA - b.SILLA);
+        this.lstHorariosAgenda = data.lstHorariosAgenda.sort(
+          (a, b) => a.SILLA - b.SILLA,
+        );
+
         if (this.lstHorariosAgenda.length > 0) {
           this.sillaSeleccionada = this.lstHorariosAgenda[0].SILLA;
           this.horaInicial = this.lstHorariosAgenda[0].HORAINICIAL;
           this.horaFinal = this.lstHorariosAgenda[0].HORAFINAL;
-          this.intervaloDeTiempoSeleccionado = this.lstHorariosAgenda[0].INTERVALO;
-          this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(x => x.SILLAS == this.sillaSeleccionada.toString());
+          this.intervaloDeTiempoSeleccionado =
+            this.lstHorariosAgenda[0].INTERVALO;
+
+          this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(
+            (x) => x.SILLAS == this.sillaSeleccionada.toString(),
+          );
+
           this.lstFestivos = data.lstFestivos;
           this.lstConfiguracionesRydent = data.lstConfiguracionesRydent;
+
           this.listaDatosDoctorParaAgendar = data;
-          this.lstDatosDoctorParaAgendar = this.listaDatosDoctorParaAgendar.lstDoctores.map(item => ({ id: item.id.toString(), nombre: item.nombre }));
-          this.filteredDoctorParaAgendar = this.formularioAgregarCita.get('doctor')!.valueChanges
-            .pipe(
+          this.lstDatosDoctorParaAgendar =
+            this.listaDatosDoctorParaAgendar.lstDoctores.map((item) => ({
+              id: item.id.toString(),
+              nombre: item.nombre,
+            }));
+
+          this.filteredDoctorParaAgendar = this.formularioAgregarCita
+            .get('doctor')!
+            .valueChanges.pipe(
               startWith(''),
-              map(value => this.desactivarFiltro ? this.lstDatosDoctorParaAgendar : this._filterNombre(value, this.lstDatosDoctorParaAgendar))
+              map((value) =>
+                this.desactivarFiltro
+                  ? this.lstDatosDoctorParaAgendar
+                  : this._filterNombre(value, this.lstDatosDoctorParaAgendar),
+              ),
             );
 
-          //this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
           this.llenarIntervalos();
-
         }
-      }
-    });
+      });
 
-    this.respuestaConsultarPorDiaYPorUnidadService.respuestaConsultarPorDiaYPorUnidadModel.subscribe(async (respuestaConsultarPorDiaYPorUnidad: RespuestaConsultarPorDiaYPorUnidad) => {
-      this.refrescoAgenda = respuestaConsultarPorDiaYPorUnidad.terminoRefrescar;
-      //if (this.refrescoAgenda) {
-      this.resultadosBusquedaAgendaPorFecha = respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
-      this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
+    this.respuestaConsultarPorDiaYPorUnidadService.respuestaConsultarPorDiaYPorUnidadModel
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        async (
+          respuestaConsultarPorDiaYPorUnidad: RespuestaConsultarPorDiaYPorUnidad,
+        ) => {
+          this.refrescoAgenda =
+            respuestaConsultarPorDiaYPorUnidad.terminoRefrescar;
+          //if (this.refrescoAgenda) {
+          this.resultadosBusquedaAgendaPorFecha =
+            respuestaConsultarPorDiaYPorUnidad.lstP_AGENDA1;
+          this.esFestivo = respuestaConsultarPorDiaYPorUnidad.esFestivo;
 
-      // ojo aca estoy buscando si en algun momento la agenda de este dia ha sido recordadda a los pacientes
-      console.log('this.resultadosBusquedaAgendaPorFecha', this.resultadosBusquedaAgendaPorFecha);
-      var registroConNombre = this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_NOMBRE !== '');
-      this.noHayCitasAsignadas = !registroConNombre; // Será true si no se encuentra ningún registro
-      if (registroConNombre && registroConNombre.OUT_HORA_CITA) {
-        this.horaCitaRecordarAgenda = registroConNombre.OUT_HORA_CITA;
-      }
-
-      this.agendaRecordada = !!this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_CEDULA === 'SI');
-      console.log('this.agendaRecordada', this.agendaRecordada);
-      if (this.localizandoCita) {
-        let intervaloCita = this.resultadosBusquedaAgendaPorFecha.find(r =>
-          r.OUT_IDCONSECUTIVO === this.selectedRowBuscarCita.IDCONSECUTIVO
-        );
-
-        if (intervaloCita) {
-          const index = this.resultadosBusquedaAgendaPorFecha.indexOf(intervaloCita);
-          if (index >= 0 && index < this.rows.length) {
-            const element = this.rows.toArray()[index].nativeElement;
-
-            // Utiliza scrollIntoView para desplazar el elemento a la vista
-            element.scrollIntoView({ behavior: 'auto', block: 'center' });
-
-            // Luego de desplazar el elemento a la vista, llama a onRowClickedAgenda
-            //setTimeout(() => this.onRowClickedAgenda(intervaloCita), 500);
-            this.onRowClickedAgenda(intervaloCita);
-          } else {
+          // ojo aca estoy buscando si en algun momento la agenda de este dia ha sido recordadda a los pacientes
+          console.log(
+            'this.resultadosBusquedaAgendaPorFecha',
+            this.resultadosBusquedaAgendaPorFecha,
+          );
+          var registroConNombre = this.resultadosBusquedaAgendaPorFecha.find(
+            (r) => r.OUT_NOMBRE !== '',
+          );
+          this.noHayCitasAsignadas = !registroConNombre; // Será true si no se encuentra ningún registro
+          if (registroConNombre && registroConNombre.OUT_HORA_CITA) {
+            this.horaCitaRecordarAgenda = registroConNombre.OUT_HORA_CITA;
           }
-        } else {
-          console.log('No se encontró un intervalo que cumpla con las condiciones especificadas');
-        }
 
-        this.localizandoCita = false;
-        this.showSearch = true;
-        //}
-        // Emite el evento terminoRefrescarAgenda para indicar que la operación de refresco ha terminado
-        //this.terminoRefrescarAgenda.next();
-        this.agendaService.refrescarAgendaEmit.emit(true);
-        //this.isloading = false;
-      }
-    });
+          this.agendaRecordada = !!this.resultadosBusquedaAgendaPorFecha.find(
+            (r) => r.OUT_CEDULA === 'SI',
+          );
+          console.log('this.agendaRecordada', this.agendaRecordada);
+          // ✅ si ya quedó marcada como enviada, entonces ya no está "en proceso"
+          if (this.agendaRecordada) {
+            this.recordatorioEnProceso = false;
+          }
+          await this.validarFechaYAgenda(); // ✅ recalcula el botón con valores ya actualizados
 
+          if (this.localizandoCita) {
+            let intervaloCita = this.resultadosBusquedaAgendaPorFecha.find(
+              (r) =>
+                r.OUT_IDCONSECUTIVO ===
+                this.selectedRowBuscarCita.IDCONSECUTIVO,
+            );
+
+            if (intervaloCita) {
+              const index =
+                this.resultadosBusquedaAgendaPorFecha.indexOf(intervaloCita);
+              if (index >= 0 && index < this.rows.length) {
+                const element = this.rows.toArray()[index].nativeElement;
+
+                // Utiliza scrollIntoView para desplazar el elemento a la vista
+                element.scrollIntoView({ behavior: 'auto', block: 'center' });
+
+                // Luego de desplazar el elemento a la vista, llama a onRowClickedAgenda
+                //setTimeout(() => this.onRowClickedAgenda(intervaloCita), 500);
+                this.onRowClickedAgenda(intervaloCita);
+              } else {
+              }
+            } else {
+              console.log(
+                'No se encontró un intervalo que cumpla con las condiciones especificadas',
+              );
+            }
+
+            this.localizandoCita = false;
+            this.showSearch = true;
+            //}
+            // Emite el evento terminoRefrescarAgenda para indicar que la operación de refresco ha terminado
+            //this.terminoRefrescarAgenda.next();
+            //this.agendaService.refrescarAgendaEmit.emit(true); se quito el 16-02-2026
+            //this.isloading = false;
+          }
+        },
+      );
 
     if (this.evolucionoAgenda === 'AGENDA') {
-      this.respuestaPinService.sharedfechaEvolucionarAgendaData.subscribe(data => {
-        if (data != null) {
-          this.fechaSeleccionada = data;
-        }
-      });
+      this.respuestaPinService.sharedfechaEvolucionarAgendaData
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((data) => {
+          if (data != null) {
+            this.fechaSeleccionada = data;
+          }
+        });
 
-      this.respuestaPinService.sharedsillaEvolucionarAgendaData.subscribe(data => {
-        if (data != null) {
-          this.sillaSeleccionada = data;
-        }
-      });
-      this.respuestaPinService.sharedhoraEvolucionarAgendaData.subscribe(data => {
-        if (data != null) {
-          this.horaCitaSeleccionadaEvolucionada = data;
-        }
-      });
+      this.respuestaPinService.sharedsillaEvolucionarAgendaData
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((data) => {
+          if (data != null) {
+            this.sillaSeleccionada = data;
+          }
+        });
+      this.respuestaPinService.sharedhoraEvolucionarAgendaData
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((data) => {
+          if (data != null) {
+            this.horaCitaSeleccionadaEvolucionada = data;
+          }
+        });
       await this.cambiarFecha();
       this.miCalendario.activeDate = this.fechaSeleccionada;
       this.scrollToSelectedRow(this.horaCitaSeleccionadaEvolucionada);
@@ -460,18 +730,29 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
     this.recibirRespuestaAgendarCitaEmitida();
 
-    this.agendaService.respuestaBuscarCitasPacienteAgendaEmit.subscribe(async (respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[]) => {
-      this.resultadosBusquedaCitaPacienteAgenda = respuestaBuscarCitasPacienteAgenda;
-      if (this.resultadosBusquedaCitaPacienteAgenda.length > 0) {
-        //this.miPanelBucarCitas.disabled = false;
-        this.miPanelBucarCitas.open();
-        this.panelBuscarCitaDeshabilitado = false;
-      }
-
-    });
-
+    this.agendaService.respuestaBuscarCitasPacienteAgendaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        async (
+          respuestaBuscarCitasPacienteAgenda: RespuestaBusquedaCitasPaciente[],
+        ) => {
+          this.resultadosBusquedaCitaPacienteAgenda =
+            respuestaBuscarCitasPacienteAgenda;
+          if (this.resultadosBusquedaCitaPacienteAgenda.length > 0) {
+            //this.miPanelBucarCitas.disabled = false;
+            this.miPanelBucarCitas.open();
+            this.panelBuscarCitaDeshabilitado = false;
+          }
+        },
+      );
   }
 
+  ngOnDestroy(): void {
+    this.nombreChangesSub?.unsubscribe();
+    this.historiaChangesSub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   deshabilitarPanelBuscarCita() {
     this.panelBuscarCitaDeshabilitado = true;
@@ -491,81 +772,130 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     // Seleccionar la fila en el MatTable
     //this.myTable.select(index);
     // Obtener el elemento HTML de la fila seleccionada
-    const selectedRow = document.querySelector('.mat-row.mat-selected') as HTMLElement;
+    const selectedRow = document.querySelector(
+      '.mat-row.mat-selected',
+    ) as HTMLElement;
 
     // Asegurarse de que el elemento esté presente y visible en la pantalla
     if (selectedRow) {
-      selectedRow.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      selectedRow.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
     }
   }
 
-
-  private _filterBuscarAgenda(nombre: string): { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] {
+  private _filterBuscarAgenda(nombre: string): {
+    idAnamnesis: string;
+    idAnamenesisTexto: string;
+    nombre: string;
+    telefono: string;
+  }[] {
     const filterValues = nombre.toLowerCase().split(' ');
 
-    return this.lstDatosPacienteParaBuscarAgenda.filter(option => {
-      const optionText = (option.nombre + ' ' + option.idAnamnesis + ' ' + option.idAnamenesisTexto + ' ' + option.telefono).toLowerCase();
-      return filterValues.every(value => optionText.includes(value));
+    return this.lstDatosPacienteParaBuscarAgenda.filter((option) => {
+      const optionText = (
+        option.nombre +
+        ' ' +
+        option.idAnamnesis +
+        ' ' +
+        option.idAnamenesisTexto +
+        ' ' +
+        option.telefono
+      ).toLowerCase();
+      return filterValues.every((value) => optionText.includes(value));
     });
   }
 
-  private _filterNombre(value: string, list: { id: string, nombre: string }[]): { id: string, nombre: string }[] {
+  private _filterNombre(
+    value: string,
+    list: { id: string; nombre: string }[],
+  ): { id: string; nombre: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
 
-    return list.filter(option => option.nombre.toLowerCase().includes(filterValue));
+    return list.filter((option) =>
+      option.nombre.toLowerCase().includes(filterValue),
+    );
   }
 
   recibirRespuestaAgendarCitaEmitida() {
-
-    this.agendaService.respuestaAgendarCitaEmit.subscribe(async (respuestaAgendarCita: RespuestaConsultarPorDiaYPorUnidad) => {
-      //alert('Recibiendo respuesta de agendar cita');
-      if (respuestaAgendarCita.lstConfirmacionesPedidas) {
-        let lstRestrictivas = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => x.esMensajeRestrictivo);
-        if (lstRestrictivas.length > 0) {
-          for (let confirmacion of lstRestrictivas) {
-            await this.mensajesUsuariosService.mensajeInformativo(confirmacion.mensaje);
-          }
-          //this.formularioAgregarCita.reset();
-          return;
-        }
-        let lstPedirConfirmar = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => x.pedirConfirmar);
-        for (let confirmacion of lstPedirConfirmar) {
-          if (confirmacion.pedirConfirmar) {
-            let respuesta = await this.mensajesUsuariosService.mensajeConfirmarSiNo(confirmacion.mensaje);
-            if (!respuesta.resultado) {
+    this.agendaService.respuestaAgendarCitaEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        async (respuestaAgendarCita: RespuestaConsultarPorDiaYPorUnidad) => {
+          //alert('Recibiendo respuesta de agendar cita');
+          if (respuestaAgendarCita.lstConfirmacionesPedidas) {
+            let lstRestrictivas =
+              respuestaAgendarCita.lstConfirmacionesPedidas.filter(
+                (x) => x.esMensajeRestrictivo,
+              );
+            if (lstRestrictivas.length > 0) {
+              for (let confirmacion of lstRestrictivas) {
+                await this.mensajesUsuariosService.mensajeInformativo(
+                  confirmacion.mensaje,
+                );
+              }
               //this.formularioAgregarCita.reset();
               return;
             }
+            let lstPedirConfirmar =
+              respuestaAgendarCita.lstConfirmacionesPedidas.filter(
+                (x) => x.pedirConfirmar,
+              );
+            for (let confirmacion of lstPedirConfirmar) {
+              if (confirmacion.pedirConfirmar) {
+                let respuesta =
+                  await this.mensajesUsuariosService.mensajeConfirmarSiNo(
+                    confirmacion.mensaje,
+                  );
+                if (!respuesta.resultado) {
+                  //this.formularioAgregarCita.reset();
+                  return;
+                }
+              }
+            }
+            let lstMensajesInformativos =
+              respuestaAgendarCita.lstConfirmacionesPedidas.filter(
+                (x) => !x.esMensajeRestrictivo && !x.pedirConfirmar,
+              );
+            console.log(lstMensajesInformativos);
+            for (let confirmacion of lstMensajesInformativos) {
+              if (
+                confirmacion.mensaje != 'Cita guardada correctamente' &&
+                confirmacion.mensaje != 'Cita editada correctamente'
+              ) {
+                await this.mensajesUsuariosService.mensajeInformativo(
+                  confirmacion.mensaje,
+                );
+              }
+            }
+            //aca se valida si hay nuevams confiamciones, se vuelve hacer el proceso sino se termina el proceso y se manda refrescar
+            if (lstPedirConfirmar.length > 0) {
+              //alert('Pedir confirmar');
+              respuestaAgendarCita.lstConfirmacionesPedidas = [];
+              await this.agendaService.startConnectionRespuestaAgendarCita(
+                this.sedeIdSeleccionada,
+                JSON.stringify(respuestaAgendarCita),
+              );
+            } else {
+              this.formularioAgregarCita.reset();
+              //this.agendaService.refrescarAgendaEmit.emit(true);
+              //await this.cambiarFecha();
+            }
           }
-        }
-        let lstMensajesInformativos = respuestaAgendarCita.lstConfirmacionesPedidas.filter(x => !x.esMensajeRestrictivo && !x.pedirConfirmar);
-        console.log(lstMensajesInformativos);
-        for (let confirmacion of lstMensajesInformativos) {
-          if (confirmacion.mensaje != 'Cita guardada correctamente' && confirmacion.mensaje != 'Cita editada correctamente') {
-            await this.mensajesUsuariosService.mensajeInformativo(confirmacion.mensaje);
-          }
-        }
-        //aca se valida si hay nuevams confiamciones, se vuelve hacer el proceso sino se termina el proceso y se manda refrescar
-        if (lstPedirConfirmar.length > 0) {
-          //alert('Pedir confirmar');
-          respuestaAgendarCita.lstConfirmacionesPedidas = [];
-          await this.agendaService.startConnectionRespuestaAgendarCita(this.idSedeActualSignalR, JSON.stringify(respuestaAgendarCita));
-        }
-        else {
-          this.formularioAgregarCita.reset();
-          //this.agendaService.refrescarAgendaEmit.emit(true);
-          //await this.cambiarFecha();
-        }
-      }
-
-    });
+        },
+      );
   }
 
   async scrollToSelectedRow(identificador: Date) {
-    let citaEvolucionada = this.resultadosBusquedaAgendaPorFecha.find(r => r.OUT_HORA_CITA === identificador);
+    let citaEvolucionada = this.resultadosBusquedaAgendaPorFecha.find(
+      (r) => r.OUT_HORA_CITA === identificador,
+    );
 
     if (citaEvolucionada) {
-      const index = this.resultadosBusquedaAgendaPorFecha.indexOf(citaEvolucionada);
+      const index =
+        this.resultadosBusquedaAgendaPorFecha.indexOf(citaEvolucionada);
       if (index >= 0 && index < this.rows.length) {
         const element = this.rows.toArray()[index].nativeElement;
 
@@ -574,7 +904,9 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       } else {
       }
     } else {
-      console.log('No se encontró un intervalo que cumpla con las condiciones especificadas');
+      console.log(
+        'No se encontró un intervalo que cumpla con las condiciones especificadas',
+      );
     }
   }
 
@@ -616,12 +948,11 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       asunto: [''],
       doctor: [this.doctorSeleccionado],
       duracion: [''],
-      observaciones: ['']
+      observaciones: [''],
     });
   }
   // Llena el formulario con los datos de resultadoBusquedaDatosPersonalesCompletos
   //this.formularioDatosPersonales.patchValue(this.resultadoBusquedaDatosPersonalesCompletos);
-
 
   async limpiarDatos() {
     this.desactivarFiltro = true;
@@ -641,11 +972,11 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       asunto: '',
       doctor: this.doctorSeleccionado,
       duracion: '',
-      observaciones: ''
+      observaciones: '',
     });
     this.mostrarFormulario = false;
     this.mostrarBotonAgendar = true;
-    setTimeout(() => this.desactivarFiltro = false, 300);
+    setTimeout(() => (this.desactivarFiltro = false), 300);
     this.modoEdicion = false;
     await this.cambiarFecha();
   }
@@ -673,22 +1004,26 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         asunto: this.selectedRow.OUT_ASUNTO,
         doctor: this.selectedRow.OUT_DOCTOR,
         duracion: this.selectedRow.OUT_DURACION,
-        observaciones: this.selectedRow.OUT_ASUNTO
+        observaciones: this.selectedRow.OUT_ASUNTO,
       });
-      this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
-      this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
-      setTimeout(() => this.desactivarFiltro = false, 300);
-      setTimeout(() => this.suscrpcionActivaFiltros = true, 330);
+      this.formularioAgregarCita
+        .get('telefono')!
+        .setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
+      this.formularioAgregarCita
+        .get('celular')!
+        .setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+      setTimeout(() => (this.desactivarFiltro = false), 300);
+      setTimeout(() => (this.suscrpcionActivaFiltros = true), 330);
       this.formularioAgregarCita.disable();
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA PARA PODER EDITAR',
+      );
     }
   }
 
   async editarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
-
       if (this.selectedRow.OUT_NOMBRE) {
         this.mostrarFormulario = true;
         this.horaCitaSeleccionada = this.selectedRow.OUT_HORA_CITA;
@@ -710,12 +1045,18 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
           asunto: this.selectedRow.OUT_ASUNTO,
           doctor: this.selectedRow.OUT_DOCTOR,
           duracion: this.selectedRow.OUT_DURACION,
-          observaciones: this.selectedRow.OUT_ASUNTO
+          observaciones: this.selectedRow.OUT_ASUNTO,
         });
-        this.formularioAgregarCita.get('telefono')!.setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
-        this.formularioAgregarCita.get('celular')!.setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
+        this.formularioAgregarCita
+          .get('telefono')!
+          .setValue(this.selectedRow.OUT_TELEFONO, { emitEvent: true });
+        this.formularioAgregarCita
+          .get('celular')!
+          .setValue(this.selectedRow.OUT_CELULAR, { emitEvent: true });
 
-        for (let resultado of this.resultadosBusquedaAgendaPorFecha.filter(x => x.OUT_HORA_CITA?.toString() === this.horaCitaSeleccionada)) {
+        for (let resultado of this.resultadosBusquedaAgendaPorFecha.filter(
+          (x) => x.OUT_HORA_CITA?.toString() === this.horaCitaSeleccionada,
+        )) {
           resultado.OUT_NOMBRE = '';
           resultado.OUT_TELEFONO = '';
           resultado.OUT_CELULAR = '';
@@ -724,13 +1065,14 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
           resultado.OUT_DURACION = '';
           resultado.OUT_OBSERVACIONES = '';
         }
-        setTimeout(() => this.desactivarFiltro = false, 300);
-        setTimeout(() => this.suscrpcionActivaFiltros = true, 330);
+        setTimeout(() => (this.desactivarFiltro = false), 300);
+        setTimeout(() => (this.suscrpcionActivaFiltros = true), 330);
       }
       this.formularioAgregarCita.enable();
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER EDITAR');
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA PARA PODER EDITAR',
+      );
     }
   }
 
@@ -740,7 +1082,9 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   async agendarCita() {
     let lstConfirmacionesPedidas: ConfirmacionesPedidas[] = [];
     if (!this.selectedRow) {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA HORA PARA PODER DAR LA CITA');
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA HORA PARA PODER DAR LA CITA',
+      );
       return;
     }
 
@@ -753,10 +1097,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     }
     console.log(duracion);
     console.log(this.intervalos);
-    let duracionValida = this.intervalos.find(x => x === duracionNumero);
+    let duracionValida = this.intervalos.find((x) => x === duracionNumero);
     console.log(duracionValida);
     if (!duracionValida) {
-      await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'LA DURACION NO ES VALIDA',
+      );
       return;
     }
     console.log(duracion);
@@ -768,73 +1114,114 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     //var asistencia = this.formularioAgregarCita.value.asistencia;
     //var confirmar = this.formularioAgregarCita.value.confirmar;
     var numHistoria = this.formularioAgregarCita.value.numHistoria;
-    var confirmarFestivos = this.aplicarConfiguracion("VALIDAR_FESTIVOS");
-    var doctorCoincideCronograma = this.aplicarConfiguracion("DR_COINCIDE_CRONOGRAMA");
-    var variosDoctoresPorUnidad = this.aplicarConfiguracion("CAL_VARIOS_DOCTORES_POR_UNIDAD");
-    var doctorPorCita = this.aplicarConfiguracion("DOCTOR_POR_CITA");
-    var pacienteCitaRepetida = this.aplicarConfiguracion("CITA_REPETIDA");
-    var proximaCitaAsunto = this.aplicarConfiguracion("PROXIMA_CITA_ASUNTO");
-    var notaImportanteCitas = this.aplicarConfiguracion("NOTA_IMPORTANTE_CITAS");
-    var doctorCorrecto = this.listaDatosDoctorParaAgendar?.lstDoctores.find(x => x.nombre === doctor);
+    var confirmarFestivos = this.aplicarConfiguracion('VALIDAR_FESTIVOS');
+    var doctorCoincideCronograma = this.aplicarConfiguracion(
+      'DR_COINCIDE_CRONOGRAMA',
+    );
+    var variosDoctoresPorUnidad = this.aplicarConfiguracion(
+      'CAL_VARIOS_DOCTORES_POR_UNIDAD',
+    );
+    var doctorPorCita = this.aplicarConfiguracion('DOCTOR_POR_CITA');
+    var pacienteCitaRepetida = this.aplicarConfiguracion('CITA_REPETIDA');
+    var proximaCitaAsunto = this.aplicarConfiguracion('PROXIMA_CITA_ASUNTO');
+    var notaImportanteCitas = this.aplicarConfiguracion(
+      'NOTA_IMPORTANTE_CITAS',
+    );
+    var doctorCorrecto = this.listaDatosDoctorParaAgendar?.lstDoctores.find(
+      (x) => x.nombre === doctor,
+    );
     //var hayCronograma = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "HAY_CRONOGRAMA");
     //var confirmarDoctorenCita = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "CONFIRMAR_DOCTOR_EN_CITA");
 
     if (this.idSedeActualSignalR != '') {
-
       if (nombre && telefono && nombre != ' ') {
-
         if (doctorPorCita && !doctor) {
-          await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR');
+          await this.mensajesUsuariosService.mensajeInformativo(
+            'DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR',
+          );
           this.doctorInput.nativeElement.focus(); // Enfoca el campo de teléfono
           return;
         }
         if (!doctorCorrecto) {
-          await this.mensajesUsuariosService.mensajeInformativo('EL DOCTOR NO EXISTE EN LA LISTA');
+          await this.mensajesUsuariosService.mensajeInformativo(
+            'EL DOCTOR NO EXISTE EN LA LISTA',
+          );
           this.doctorInput.nativeElement.focus(); // Enfoca el campo de teléfono
           return;
         }
         if (this.esFestivo && confirmarFestivos) {
-          if (!await this.mensajesUsuariosService.mensajeConfirmarSiNo('El día es festivo, ¿aún así quieres dar la cita?')) {
+          if (
+            !(await this.mensajesUsuariosService.mensajeConfirmarSiNo(
+              'El día es festivo, ¿aún así quieres dar la cita?',
+            ))
+          ) {
             return;
           }
         }
         if (doctorCoincideCronograma && doctor) {
           if (variosDoctoresPorUnidad) {
-            var doctorCoincideCronograma = await this.buscarDoctorCoincidaCronograma(doctor, horaCita, horaFinal);
-            if (await this.buscarDoctorCoincidaCronograma(doctor, horaCita, horaFinal)) {
-              await this.mensajesUsuariosService.mensajeInformativo('El doctor no coincide con el cronograma');
+            var doctorCoincideCronograma =
+              await this.buscarDoctorCoincidaCronograma(
+                doctor,
+                horaCita,
+                horaFinal,
+              );
+            if (
+              await this.buscarDoctorCoincidaCronograma(
+                doctor,
+                horaCita,
+                horaFinal,
+              )
+            ) {
+              await this.mensajesUsuariosService.mensajeInformativo(
+                'El doctor no coincide con el cronograma',
+              );
               return;
             }
           }
         }
         if (variosDoctoresPorUnidad) {
           if (!doctor) {
-            await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR');
+            await this.mensajesUsuariosService.mensajeInformativo(
+              'DEBE SELECCIONAR UN DOCTOR PARA CONTINUAR',
+            );
             return;
           }
         }
         lstConfirmacionesPedidas.push({
           nombreConfirmacion: 'QBuscarEspacioAgenda',
-          mensaje: '', esMensajeRestrictivo: true, pedirConfirmar: false
+          mensaje: '',
+          esMensajeRestrictivo: true,
+          pedirConfirmar: false,
         });
 
         lstConfirmacionesPedidas.push({
           nombreConfirmacion: 'QDoctoresConCitaOtraUnidad',
-          mensaje: '', esMensajeRestrictivo: true, pedirConfirmar: false
+          mensaje: '',
+          esMensajeRestrictivo: true,
+          pedirConfirmar: false,
         });
 
         if (pacienteCitaRepetida) {
           lstConfirmacionesPedidas.push({
             nombreConfirmacion: 'CITA_REPETIDA',
-            mensaje: '', esMensajeRestrictivo: false, pedirConfirmar: true
+            mensaje: '',
+            esMensajeRestrictivo: false,
+            pedirConfirmar: true,
           });
         }
         if (!asunto && numHistoria) {
           if (proximaCitaAsunto) {
-            if (await this.mensajesUsuariosService.mensajeConfirmarSiNo('Desea consultar si en la evolucion hay un asunto para la proxima cita y asignarlo como asunto en la cita?')) {
+            if (
+              await this.mensajesUsuariosService.mensajeConfirmarSiNo(
+                'Desea consultar si en la evolucion hay un asunto para la proxima cita y asignarlo como asunto en la cita?',
+              )
+            ) {
               lstConfirmacionesPedidas.push({
                 nombreConfirmacion: 'PROXIMA_CITA_ASUNTO',
-                mensaje: '', esMensajeRestrictivo: false, pedirConfirmar: false
+                mensaje: '',
+                esMensajeRestrictivo: false,
+                pedirConfirmar: false,
               });
             }
           }
@@ -842,49 +1229,69 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
         if (notaImportanteCitas) {
           lstConfirmacionesPedidas.push({
             nombreConfirmacion: 'NOTA_IMPORTANTE_CITAS',
-            mensaje: '', esMensajeRestrictivo: false, pedirConfirmar: false
+            mensaje: '',
+            esMensajeRestrictivo: false,
+            pedirConfirmar: false,
           });
         }
 
         await this.guardarCita(lstConfirmacionesPedidas);
         this.mostrarFormulario = false;
-      }
-      else if (!nombre) {
-        await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UN NOMBRE PARA CONTINUAR');
+      } else if (!nombre) {
+        await this.mensajesUsuariosService.mensajeInformativo(
+          'DEBE SELECCIONAR UN NOMBRE PARA CONTINUAR',
+        );
         this.nombreInput.nativeElement.focus(); // Enfoca el campo de teléfono
         return;
-      }
-      else if (!telefono) {
-        await this.mensajesUsuariosService.mensajeInformativo('DEBE INGRESAR UN NUMERO TELEFONICO PARA CONTINUAR');
+      } else if (!telefono) {
+        await this.mensajesUsuariosService.mensajeInformativo(
+          'DEBE INGRESAR UN NUMERO TELEFONICO PARA CONTINUAR',
+        );
         // Enfocar el campo de teléfono después de mostrar el mensaje
         this.telefonoInput.nativeElement.focus(); // Enfoca el campo de teléfono
         return;
       }
-
     }
   }
   async agregarEvolucion() {
     console.log(this.selectedRow.OUT_ID);
     console.log(this.selectedRow.OUT_NOMBRE);
     console.log(this.listaHistoriaPacienteParaAgendar);
-    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.IDANAMNESIS?.toString() === this.selectedRow.OUT_ID);
+    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(
+      (x) => x.IDANAMNESIS?.toString() === this.selectedRow.OUT_ID,
+    );
     if (!pacienteEncontrado) {
-      await this.mensajesUsuariosService.mensajeInformativo('EL PACIENTE NO TIENE HISTORIA CLINICA PARA EVOLUCIONAR DEBE CREARLO');
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'EL PACIENTE NO TIENE HISTORIA CLINICA PARA EVOLUCIONAR DEBE CREARLO',
+      );
       return;
     }
-    await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(this.selectedRow.OUT_ID);
+    await this.respuestaPinService.updateAnamnesisEvolucionarAgendaData(
+      this.selectedRow.OUT_ID,
+    );
     await this.respuestaPinService.updateDeDondeAgregaEvolucionData('AGENDA');
-    await this.respuestaPinService.updateNombrePacienteEvolucionarAgendaData(this.selectedRow.OUT_NOMBRE);
-    await this.respuestaPinService.updatefechaEvolucionarAgendaData(this.fechaSeleccionada);
+    await this.respuestaPinService.updateNombrePacienteEvolucionarAgendaData(
+      this.selectedRow.OUT_NOMBRE,
+    );
+    await this.respuestaPinService.updatefechaEvolucionarAgendaData(
+      this.fechaSeleccionada,
+    );
     //await this.respuestaPinService.updateintervaloSeleccionadoAgendaData(this.selectedRow);
-    await this.respuestaPinService.updatesillaEvolucionarAgendaData(this.sillaSeleccionada);
-    await this.respuestaPinService.updatehoraEvolucionarAgendaData(this.selectedRow.OUT_HORA_CITA);
+    await this.respuestaPinService.updatesillaEvolucionarAgendaData(
+      this.sillaSeleccionada,
+    );
+    await this.respuestaPinService.updatehoraEvolucionarAgendaData(
+      this.selectedRow.OUT_HORA_CITA,
+    );
     this.router.navigate(['/agregar-evolucion-agenda']);
   }
 
   async recordarCita() {
     if (this.fechaSeleccionada && this.sillaSeleccionada) {
-      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Deseas enviar un recordatorio de las citas programadas para este día y esta silla a los pacientes?');
+      const confirmacion =
+        await this.mensajesUsuariosService.mensajeConfirmarSiNo(
+          '¿Deseas enviar un recordatorio de las citas programadas para este día y esta silla a los pacientes?',
+        );
 
       if (!confirmacion.resultado) {
         console.log('No envio mensaje recordando la cita');
@@ -897,25 +1304,47 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
       //}
       //this.removeFocus();
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.horaCitaRecordarAgenda;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.horaCitaRecordarAgenda;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'RECORDARCITA';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER ENVIAR MENSAJE RECORDANDO LA CITA');
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
+      this.recordatorioEnProceso = true;
+      this.esFechaValidaParaRecordatorio = false;
+      try {
+        await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+          this.sedeIdSeleccionada,
+          JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+        );
+      } catch (e) {
+        this.recordatorioEnProceso = false;
+        await this.validarFechaYAgenda(); // recalcula y puede volver a habilitar
+        await this.mensajesUsuariosService.mensajeInformativo(
+          'No se pudo enviar el recordatorio.',
+        );
+      }
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA PARA PODER ENVIAR MENSAJE RECORDANDO LA CITA',
+      );
     }
   }
 
   async borrarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      const confirmacion = await this.mensajesUsuariosService.mensajeConfirmarSiNo('¿Estás seguro de borrar esta cita?');
+      const confirmacion =
+        await this.mensajesUsuariosService.mensajeConfirmarSiNo(
+          '¿Estás seguro de borrar esta cita?',
+        );
 
       if (!confirmacion.resultado) {
         console.log('No se borró la cita');
@@ -923,58 +1352,85 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       }
       //this.isloading = true;
 
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.selectedRow.OUT_HORA_CITA;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'BORRAR';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA PARA PODER BORRARLA');
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+        this.sedeIdSeleccionada,
+        JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+      );
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA PARA PODER BORRARLA',
+      );
     }
   }
 
   async confirmar() {
     if (this.selectedRow.OUT_HORA_CITA) {
-
       //this.isloading = true;
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.selectedRow.OUT_HORA_CITA;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       //objDatosParaRealizarAccionesEnCitaAgendada.respuesta = '';
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'CONFIRMAR';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
 
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
       console.log(lstDatosParaRealizarAccionesEnCitaAgendada);
-      const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } = await this.mensajesUsuariosService.mensajeConfirmarSiNoAlarmaObservaciones('Desea Ingresar alguna observacion?', true, true);
+      const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } =
+        await this.mensajesUsuariosService.mensajeConfirmarSiNoAlarmaObservaciones(
+          'Desea Ingresar alguna observacion?',
+          true,
+          true,
+        );
       if (resultado) {
         this.removeFocus();
-        objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
-        let alarmar = opcionSeleccionadaMensaje == "SI";
+        objDatosParaRealizarAccionesEnCitaAgendada.respuesta =
+          mensajeParaGuardar;
+        let alarmar = opcionSeleccionadaMensaje == 'SI';
         if (alarmar) {
-          let objDatosParaRealizarAccionesEnCitaAgendadaObservacion: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
-          objDatosParaRealizarAccionesEnCitaAgendadaObservacion.tipoAccion = 'CONFIRMAR_ALARMA_AGENDA';
+          let objDatosParaRealizarAccionesEnCitaAgendadaObservacion: RespuestaRealizarAccionesEnCitaAgendada =
+            new RespuestaRealizarAccionesEnCitaAgendada();
+          objDatosParaRealizarAccionesEnCitaAgendadaObservacion.tipoAccion =
+            'CONFIRMAR_ALARMA_AGENDA';
           objDatosParaRealizarAccionesEnCitaAgendadaObservacion.aceptado = true;
-          objDatosParaRealizarAccionesEnCitaAgendadaObservacion.quienLoHace = 'SISTEMA';
-          lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendadaObservacion);
+          objDatosParaRealizarAccionesEnCitaAgendadaObservacion.quienLoHace =
+            'SISTEMA';
+          lstDatosParaRealizarAccionesEnCitaAgendada.push(
+            objDatosParaRealizarAccionesEnCitaAgendadaObservacion,
+          );
         }
-
       } else {
         // El usuario canceló la cita.
       }
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+        this.sedeIdSeleccionada,
+        JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+      );
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA',
+      );
     }
   }
 
@@ -986,118 +1442,178 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   async sinConfirmar() {
     if (this.selectedRow.OUT_HORA_CITA) {
       //this.isloading = true;
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.selectedRow.OUT_HORA_CITA;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'SINCONFIRMAR';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
 
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+        this.sedeIdSeleccionada,
+        JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+      );
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA',
+      );
     }
   }
 
   async asistenciaNo() {
     if (this.selectedRow.OUT_HORA_CITA) {
       //this.isloading = true;
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.selectedRow.OUT_HORA_CITA;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       //objDatosParaRealizarAccionesEnCitaAgendada.respuesta = '';
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'NOASISTIO';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
       const fechaFormateada = format(this.fechaSeleccionada, 'dd/MM/yyyy');
       const hora = this.selectedRow.OUT_HORA_CITA;
       const horaDate = new Date(`1970-01-01T${hora}`); // Se puede utilizar cualquier fecha aquí, solo necesitamos la hora
       const horaFormateada = format(horaDate, 'hh:mm a');
 
-      const { resultado, mensajeParaGuardar } = await this.mensajesUsuariosService.mensajeConfirmarSiNoIngresarEvolucion('Desea registrar la inasistencia en la evolucion del paciente?', 'El paciente no asistió a la cita del ' + fechaFormateada + ' a las ' + horaFormateada);
+      const { resultado, mensajeParaGuardar } =
+        await this.mensajesUsuariosService.mensajeConfirmarSiNoIngresarEvolucion(
+          'Desea registrar la inasistencia en la evolucion del paciente?',
+          'El paciente no asistió a la cita del ' +
+            fechaFormateada +
+            ' a las ' +
+            horaFormateada,
+        );
       if (resultado) {
         console.log(resultado);
-        objDatosParaRealizarAccionesEnCitaAgendada.respuesta = mensajeParaGuardar;
+        objDatosParaRealizarAccionesEnCitaAgendada.respuesta =
+          mensajeParaGuardar;
       }
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+        this.sedeIdSeleccionada,
+        JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+      );
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA',
+      );
     }
   }
 
   async asistenciaSi() {
     if (this.selectedRow.OUT_HORA_CITA) {
       //this.isloading = true;
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.selectedRow.OUT_HORA_CITA;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       //objDatosParaRealizarAccionesEnCitaAgendada.respuesta = '';
       objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'ASISTIO';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
       //alert('entro a poner asistencia');
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+        this.sedeIdSeleccionada,
+        JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+      );
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA',
+      );
     }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
-    }
-
   }
 
   async quitarAsistencia() {
     if (this.selectedRow.OUT_HORA_CITA) {
       //this.isloading = true;
-      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
+      let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+        [];
+      let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+        new RespuestaRealizarAccionesEnCitaAgendada();
       objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
       objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-      objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+      objDatosParaRealizarAccionesEnCitaAgendada.hora =
+        this.selectedRow.OUT_HORA_CITA;
       objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
       //objDatosParaRealizarAccionesEnCitaAgendada.respuesta = '';
-      objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'QUITARASISTENCIA';
+      objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion =
+        'QUITARASISTENCIA';
       objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
-      lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
+      lstDatosParaRealizarAccionesEnCitaAgendada.push(
+        objDatosParaRealizarAccionesEnCitaAgendada,
+      );
 
-      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
+      await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+        this.sedeIdSeleccionada,
+        JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+      );
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA',
+      );
     }
   }
 
   async cancelarCita() {
     if (this.selectedRow.OUT_HORA_CITA) {
-      const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } = await this.mensajesUsuariosService.mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace('Esta seguro de cancelar la cita?', this.fechaSeleccionada, this.selectedRow.OUT_HORA_CITA);
+      const { resultado, mensajeParaGuardar, opcionSeleccionadaMensaje } =
+        await this.mensajesUsuariosService.mensajeConfirmarSiNoCancelarCitaMotivoQuienloHace(
+          'Esta seguro de cancelar la cita?',
+          this.fechaSeleccionada,
+          this.selectedRow.OUT_HORA_CITA,
+        );
       if (resultado) {
         console.log(resultado);
         console.log(mensajeParaGuardar);
-        let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] = [];
-        let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada = new RespuestaRealizarAccionesEnCitaAgendada();
-        objDatosParaRealizarAccionesEnCitaAgendada.fecha = this.fechaSeleccionada;
-        objDatosParaRealizarAccionesEnCitaAgendada.silla = this.sillaSeleccionada;
-        objDatosParaRealizarAccionesEnCitaAgendada.hora = this.selectedRow.OUT_HORA_CITA;
+        let lstDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada[] =
+          [];
+        let objDatosParaRealizarAccionesEnCitaAgendada: RespuestaRealizarAccionesEnCitaAgendada =
+          new RespuestaRealizarAccionesEnCitaAgendada();
+        objDatosParaRealizarAccionesEnCitaAgendada.fecha =
+          this.fechaSeleccionada;
+        objDatosParaRealizarAccionesEnCitaAgendada.silla =
+          this.sillaSeleccionada;
+        objDatosParaRealizarAccionesEnCitaAgendada.hora =
+          this.selectedRow.OUT_HORA_CITA;
         objDatosParaRealizarAccionesEnCitaAgendada.aceptado = true;
         objDatosParaRealizarAccionesEnCitaAgendada.mensaje = mensajeParaGuardar;
         objDatosParaRealizarAccionesEnCitaAgendada.tipoAccion = 'CANCELARCITA';
         objDatosParaRealizarAccionesEnCitaAgendada.quienLoHace = 'SISTEMA';
         objDatosParaRealizarAccionesEnCitaAgendada.respuesta = 'CANCELARCITA';
-        lstDatosParaRealizarAccionesEnCitaAgendada.push(objDatosParaRealizarAccionesEnCitaAgendada);
-        await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(this.idSedeActualSignalR, JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada));
+        lstDatosParaRealizarAccionesEnCitaAgendada.push(
+          objDatosParaRealizarAccionesEnCitaAgendada,
+        );
+        await this.respuestaRealizarAccionesEnCitaAgendadaService.startConnectionRespuestaRealizarAccionesEnCitaAgendada(
+          this.sedeIdSeleccionada,
+          JSON.stringify(lstDatosParaRealizarAccionesEnCitaAgendada),
+        );
       }
-    }
-    else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE SELECCIONAR UNA CITA');
+    } else {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE SELECCIONAR UNA CITA',
+      );
     }
   }
 
@@ -1110,8 +1626,11 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     return horaFinal;
   }
 
-
-  async buscarDoctorCoincidaCronograma(doctor: string, horaInicialCita: string, horaFinalCita: string): Promise<boolean> {
+  async buscarDoctorCoincidaCronograma(
+    doctor: string,
+    horaInicialCita: string,
+    horaFinalCita: string,
+  ): Promise<boolean> {
     // Asegúrate de que this.resultadosBusquedaAgendaPorFecha esté definido
     if (!this.resultadosBusquedaAgendaPorFecha) {
       return false;
@@ -1122,14 +1641,19 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     var horaFinal = new Date(`1970-01-01T${horaFinalCita}:00`);
 
     // Filtra los resultados para obtener los que cumplen con los criterios de tiempo
-    var resultadosFiltrados = this.resultadosBusquedaAgendaPorFecha.filter(resultado => {
-      var horaResultado = new Date(`1970-01-01T${resultado.OUT_HORA}`);
-      return horaResultado >= horaInicial && horaResultado <= horaFinal;
-    });
+    var resultadosFiltrados = this.resultadosBusquedaAgendaPorFecha.filter(
+      (resultado) => {
+        var horaResultado = new Date(`1970-01-01T${resultado.OUT_HORA}`);
+        return horaResultado >= horaInicial && horaResultado <= horaFinal;
+      },
+    );
 
     // Comprueba si alguno de los resultados filtrados tiene un OUT_CRONOGRAMA diferente al doctor
     for (let resultado of resultadosFiltrados) {
-      if (resultado.OUT_CRONOGRAMA != doctor && resultado.OUT_CRONOGRAMA != '') {
+      if (
+        resultado.OUT_CRONOGRAMA != doctor &&
+        resultado.OUT_CRONOGRAMA != ''
+      ) {
         return true;
       }
     }
@@ -1142,7 +1666,9 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     if (!this.lstConfiguracionesRydent) {
       return false;
     }
-    var configuracion = this.lstConfiguracionesRydent.find(x => x.NOMBRE == nombre);
+    var configuracion = this.lstConfiguracionesRydent.find(
+      (x) => x.NOMBRE == nombre,
+    );
 
     if (configuracion) {
       if (configuracion.PERMISO == 0) {
@@ -1157,7 +1683,6 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     return false; // Añade esta línea
   }
 
-
   async guardarCita(lstConfirmacionesPedidas?: ConfirmacionesPedidas[]) {
     //this.isloading = true;
     this.modoEdicion = false;
@@ -1169,36 +1694,50 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       await this.mensajesUsuariosService.mensajeInformativo('LA DURACION NO ES VALIDA');
       return;
     }*/
-    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(x => x.NOMBRE_PACIENTE?.toString() === nombre);
+    let pacienteEncontrado = this.listaHistoriaPacienteParaAgendar?.find(
+      (x) => x.NOMBRE_PACIENTE?.toString() === nombre,
+    );
     let numHistoria = formulario.numHistoria;
     if (!pacienteEncontrado) {
-      numHistoria = "0";
+      numHistoria = '0';
     }
     var telefono = formulario.telefono;
-    let datosParaGurdarEnAgenda: RespuestaConsultarPorDiaYPorUnidad = new RespuestaConsultarPorDiaYPorUnidad();
+    let datosParaGurdarEnAgenda: RespuestaConsultarPorDiaYPorUnidad =
+      new RespuestaConsultarPorDiaYPorUnidad();
     let detalleCita: TDetalleCitas = new TDetalleCitas();
-    if (formulario.fechaEditar && formulario.sillaEditar && formulario.horaEditar && formulario.nombreEditar) {
+    if (
+      formulario.fechaEditar &&
+      formulario.sillaEditar &&
+      formulario.horaEditar &&
+      formulario.nombreEditar
+    ) {
       datosParaGurdarEnAgenda.detalleCitaEditar = new TDetalleCitas();
       datosParaGurdarEnAgenda.detalleCitaEditar.FECHA = formulario.fechaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.SILLA = formulario.sillaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.HORA = formulario.horaEditar;
-      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = formulario.nombreEditar.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE =
+        formulario.nombreEditar.toUpperCase();
       datosParaGurdarEnAgenda.detalleCitaEditar.ID = numHistoria;
       datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = formulario.duracion;
-      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto;//.toUpperCase();
-      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor;//.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto; //.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.DOCTOR = formulario.doctor; //.toUpperCase();
       //ojo aca deja editar el doctor
-      datosParaGurdarEnAgenda.detalleCitaEditar.ASISTENCIA = formulario.asistencia;
-      datosParaGurdarEnAgenda.detalleCitaEditar.CONFIRMAR = formulario.confirmar;
-
+      datosParaGurdarEnAgenda.detalleCitaEditar.ASISTENCIA =
+        formulario.asistencia;
+      datosParaGurdarEnAgenda.detalleCitaEditar.CONFIRMAR =
+        formulario.confirmar;
     }
     if (lstConfirmacionesPedidas && lstConfirmacionesPedidas.length > 0) {
-      datosParaGurdarEnAgenda.lstConfirmacionesPedidas = lstConfirmacionesPedidas;
+      datosParaGurdarEnAgenda.lstConfirmacionesPedidas =
+        lstConfirmacionesPedidas;
     }
     datosParaGurdarEnAgenda.citas.FECHA = this.fechaSeleccionada;
     datosParaGurdarEnAgenda.citas.SILLA = this.sillaSeleccionada;
-    datosParaGurdarEnAgenda.citas.FECHA_TEXTO = this.intervaloDeTiempoSeleccionado.toString();
-    let horaCita = this.fechaHoraHelperService.pasarHoraStrHoraDate(this.selectedRow.OUT_HORA);
+    datosParaGurdarEnAgenda.citas.FECHA_TEXTO =
+      this.intervaloDeTiempoSeleccionado.toString();
+    let horaCita = this.fechaHoraHelperService.pasarHoraStrHoraDate(
+      this.selectedRow.OUT_HORA,
+    );
     detalleCita.FECHA = this.fechaSeleccionada;
     detalleCita.SILLA = this.sillaSeleccionada;
     detalleCita.HORA = horaCita;
@@ -1232,12 +1771,14 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     console.log(datosParaGurdarEnAgenda);
     console.log(detalleCita);
     let respuesta = JSON.stringify(datosParaGurdarEnAgenda);
-    await this.agendaService.startConnectionRespuestaAgendarCita(this.idSedeActualSignalR, respuesta);
+    await this.agendaService.startConnectionRespuestaAgendarCita(
+      this.sedeIdSeleccionada,
+      respuesta,
+    );
 
-    let strPaciente = "";
-    let strDoctor = "";
+    let strPaciente = '';
+    let strDoctor = '';
   }
-
 
   log(value: any) {
     if (value === undefined || value === null) {
@@ -1247,9 +1788,6 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-
-
   getColor(row: any): string {
     // Si la fila está en highlightedRows, devuelve el color de resaltado
     if (this.highlightedRows.includes(row)) {
@@ -1257,22 +1795,36 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     }
 
     // Verifica si hay un valor en OUT_CONFIRMAR y asigna un color en consecuencia
-    if (row.OUT_NOMBRE && row.OUT_CONFIRMAR === 'SI' && row.OUT_ASISTENCIA === 'SI') {
+    if (
+      row.OUT_NOMBRE &&
+      row.OUT_CONFIRMAR === 'SI' &&
+      row.OUT_ASISTENCIA === 'SI'
+    ) {
       return '#ccffcc'; // Por ejemplo, verde si está confirmado
     }
 
-    if ((row.OUT_NOMBRE && row.OUT_CONFIRMAR === 'SI' && row.OUT_ASISTENCIA === 'NO') || (row.OUT_NOMBRE && row.OUT_CONFIRMAR != 'SI' && row.OUT_ASISTENCIA === 'NO')) {
+    if (
+      (row.OUT_NOMBRE &&
+        row.OUT_CONFIRMAR === 'SI' &&
+        row.OUT_ASISTENCIA === 'NO') ||
+      (row.OUT_NOMBRE &&
+        row.OUT_CONFIRMAR != 'SI' &&
+        row.OUT_ASISTENCIA === 'NO')
+    ) {
       return '#ffcccc'; // Por ejemplo, verde si está confirmado
     }
 
-    if (row.OUT_NOMBRE && row.OUT_CONFIRMAR != 'SI' && row.OUT_ASISTENCIA === 'SI') {
-      return '#ccffcc' // Por ejemplo, verde si está confirmado
+    if (
+      row.OUT_NOMBRE &&
+      row.OUT_CONFIRMAR != 'SI' &&
+      row.OUT_ASISTENCIA === 'SI'
+    ) {
+      return '#ccffcc'; // Por ejemplo, verde si está confirmado
     }
 
     if (row.OUT_NOMBRE && row.OUT_CONFIRMAR === 'SI') {
       return '#afe3fe'; // Por ejemplo, verde si está confirmado
     }
-
 
     // Verifica si hay un valor en OUT_NOMBRE y asigna un color en consecuencia
     if (row.OUT_NOMBRE) {
@@ -1293,7 +1845,7 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   //esto se hace para dar tiempo que se complete refrescar agenda
   private terminoRefrescarAgenda = new Subject<void>();
 
-  async onHoraClicked(event: MouseEvent, row: any) {
+  /*async onHoraClicked(event: MouseEvent, row: any) {
     if (!this.modoEdicion) {
       event.stopPropagation(); // Evita que el evento de clic en la fila se active
 
@@ -1306,28 +1858,42 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       });
       await this.cambiarFecha();
     } else {
-      await this.mensajesUsuariosService.mensajeInformativo('DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO');
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO',
+      );
       this.nombreInput.nativeElement.focus();
     }
+  }*/
+
+  async onHoraClicked(event: MouseEvent, row: any) {
+    if (this.modoEdicion) {
+      await this.mensajesUsuariosService.mensajeInformativo(
+        'DEBE AGENDAR O CANCELAR LA CITA QUE ESTA EDITANDO',
+      );
+      this.nombreInput.nativeElement.focus();
+      return;
+    }
+
+    event.stopPropagation();
+
+    await this.cambiarFecha();
+    await this.onRowClickedAgenda(row);
   }
 
   async onRowClickedAgenda(intervalo: any) {
-
     this.selectedRow = intervalo;
     //prueba para refrescar agenda
     console.log(intervalo);
 
     this.toggleFormVisibility();
     if (intervalo.OUT_HORA_CITA !== 0 && intervalo.OUT_HORA_CITA !== null) {
-      this.highlightedRows = this.resultadosBusquedaAgendaPorFecha.filter(r => r.OUT_HORA_CITA === intervalo.OUT_HORA_CITA);
+      this.highlightedRows = this.resultadosBusquedaAgendaPorFecha.filter(
+        (r) => r.OUT_HORA_CITA === intervalo.OUT_HORA_CITA,
+      );
     } else {
       this.highlightedRows = [intervalo];
     }
   }
-
-
-
-
 
   async onRowClickedBuscarAgenda(intervalo: any) {
     this.selectedRowBuscarCita = intervalo;
@@ -1354,44 +1920,46 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
   }
 
   onSillaChange(sillaSeleccionada: number) {
-    let silla = this.lstHorariosAgenda.find(s => Number(s.SILLA) === Number(sillaSeleccionada));
+    let silla = this.lstHorariosAgenda.find(
+      (s) => Number(s.SILLA) === Number(sillaSeleccionada),
+    );
     if (silla) {
       this.horaInicial = silla.HORAINICIAL;
       this.horaFinal = silla.HORAFINAL;
       this.intervaloDeTiempoSeleccionado = silla.INTERVALO;
       this.cambiarFecha();
-      this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(x => x.SILLAS == sillaSeleccionada.toString());
+      this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(
+        (x) => x.SILLAS == sillaSeleccionada.toString(),
+      );
       console.log(this.listaHorariosAsuntosPorSilla);
-
-
     }
   }
 
   toggleFormVisibility() {
-    this.showForm = this.showForm;
+    //this.showForm = this.showForm;
+    this.showForm = !this.showForm;
   }
 
   search() {
-    if (this.showSearch = false) {
+    if ((this.showSearch = false)) {
       this.showSearch = true;
-    }
-    else {
+    } else {
       this.showSearch = false;
     }
-
-
   }
-
 
   async cambiarFecha() {
     const fechaActual = new Date();
     fechaActual.setHours(0, 0, 0, 0); // Establece la hora a las 00:00
 
-
     if (this.idSedeActualSignalR != '') {
-      await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(this.idSedeActualSignalR, this.sillaSeleccionada.toString(), this.fechaSeleccionada);
+      await this.respuestaConsultarPorDiaYPorUnidadService.startConnectionRespuestaConsultarPorDiaYPorUnidad(
+        this.sedeIdSeleccionada,
+        this.sillaSeleccionada.toString(),
+        this.fechaSeleccionada,
+      );
       // Esperar medio segundo (500 ms)
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       // Llama a la función después de completar el await
       this.validarFechaYAgenda();
     }
@@ -1404,7 +1972,12 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     console.log('Fecha seleccionada:', this.fechaSeleccionada);
     console.log('Agenda recordada:', this.agendaRecordada);
 
-    if (this.fechaSeleccionada < fechaActual || this.agendaRecordada || this.noHayCitasAsignadas) {
+    if (
+      this.fechaSeleccionada < fechaActual ||
+      this.agendaRecordada ||
+      this.noHayCitasAsignadas ||
+      this.recordatorioEnProceso
+    ) {
       this.esFechaValidaParaRecordatorio = false;
       console.log('fecha invalida');
     } else {
@@ -1412,8 +1985,6 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
       console.log('fecha valida');
     }
   }
-
-
 
   agregarMinutosAHora(hora: string, minutos: string): string {
     // Convierte la hora y los minutos a números
@@ -1428,11 +1999,13 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
     fecha.setMinutes(fecha.getMinutes() + duracion);
 
     // Convierte la fecha de vuelta a una cadena de hora
-    var horaFinal = fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0');
+    var horaFinal =
+      fecha.getHours().toString().padStart(2, '0') +
+      ':' +
+      fecha.getMinutes().toString().padStart(2, '0');
 
     return horaFinal;
   }
-
 
   generarIntervalosDeTiempo() {
     //this.intervalosDeTiempo = this.resultadosBusquedaAgendaPorFecha; // Limpiar los intervalos de tiempo existentes
@@ -1456,22 +2029,30 @@ export class AgendaResponsiveComponent implements OnInit, AfterViewInit {
 
     horaFin.setHours(horaFinActual, minutosFinActual, 0);
 
-    for (let hora = horaInicio; hora <= horaFin; hora = new Date(hora.getTime() + this.intervaloDeTiempoSeleccionado * 60000)) {
+    for (
+      let hora = horaInicio;
+      hora <= horaFin;
+      hora = new Date(
+        hora.getTime() + this.intervaloDeTiempoSeleccionado * 60000,
+      )
+    ) {
       this.intervalosDeTiempo.push({
         hora: new Date(hora),
         nombre: '',
         telefono: '',
         celular: '',
         historia: '',
-        observaciones: ''
+        observaciones: '',
       });
     }
   }
 
   async buscarCitasPaciente(valorBuscarAgenda: string) {
     if (this.idSedeActualSignalR != '') {
-      await this.agendaService.startConnectionRespuestaBuscarCitasPacienteAgenda(this.idSedeActualSignalR, valorBuscarAgenda);
+      await this.agendaService.startConnectionRespuestaBuscarCitasPacienteAgenda(
+        this.sedeIdSeleccionada,
+        valorBuscarAgenda,
+      );
     }
   }
-
 }
