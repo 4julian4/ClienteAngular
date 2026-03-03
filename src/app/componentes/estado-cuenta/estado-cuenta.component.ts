@@ -74,6 +74,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
   tratamientoSeleccionado: P_CONSULTAR_ESTACUENTAPACIENTE | null = null;
 
   idSedeActualSignalR: string = '';
+  sedeIdSeleccionada = 0;
   idAnamnesisPacienteSeleccionado: number = 0;
 
   listaDoctores: RespuestaPin = new RespuestaPin();
@@ -168,6 +169,12 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         if (data != null) this.idSedeActualSignalR = data;
+      });
+
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
       });
 
     this.respuestaPinService.sharedAnamnesisData
@@ -339,7 +346,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
             if (!resultadoDialogo) return;
 
             await this.estadoCuentaCommands.crearEstadoCuenta(
-              this.idSedeActualSignalR,
+              this.sedeIdSeleccionada,
               resultadoDialogo,
             );
           });
@@ -433,7 +440,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
             } as any;
 
             await this.estadoCuentaCommands.editarEstadoCuenta(
-              this.idSedeActualSignalR,
+              this.sedeIdSeleccionada,
               reqEditar,
             );
           });
@@ -479,7 +486,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
           width: '900px',
           maxWidth: '95vw',
           data: {
-            clienteIdDestino: this.idSedeActualSignalR,
+            clienteIdDestino: this.sedeIdSeleccionada,
             // ✅ identidad real para el InsertarAbonoRequest
             idPaciente: prep.idPaciente,
             fase: prep.fase,
@@ -527,7 +534,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
             if (!req) return;
             console.log('InsertarAbonoRequest:', req);
             await this.estadoCuentaCommands.insertarAbono(
-              this.idSedeActualSignalR,
+              this.sedeIdSeleccionada,
               req,
             );
           });
@@ -585,7 +592,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
         };
 
         await this.estadoCuentaCommands.borrarAbono(
-          this.idSedeActualSignalR,
+          this.sedeIdSeleccionada,
           req,
         );
       });
@@ -685,7 +692,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
             };
 
             await this.estadoCuentaCommands.insertarAdicional(
-              this.idSedeActualSignalR,
+              this.sedeIdSeleccionada,
               req,
             );
           });
@@ -750,7 +757,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararEstadoCuenta(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -771,7 +778,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararEditarEstadoCuenta(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -794,7 +801,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     } as any;
 
     await this.estadoCuentaCommands.borrarEstadoCuenta(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -822,7 +829,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararInsertarAbono(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -840,7 +847,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararInsertarAbono(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -863,7 +870,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararBorrarAbono(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -888,7 +895,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararInsertarAdicional(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -906,7 +913,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     };
 
     await this.estadoCuentaCommands.prepararInsertarAdicional(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       req,
     );
   }
@@ -924,7 +931,7 @@ export class EstadoCuentaComponent implements OnInit, OnDestroy {
     objDatosParaConsultarEstadoCuenta.FASE = this.fase;
 
     await this.respuestaConsultarEstadoCuentaService.startConnectionRespuestaConsultarEstadoCuenta(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       JSON.stringify(objDatosParaConsultarEstadoCuenta),
     );
   }

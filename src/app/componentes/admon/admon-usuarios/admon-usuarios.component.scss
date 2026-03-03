@@ -1,0 +1,274 @@
+.page {
+  padding: 16px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.page-title h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* ✅ Acciones de header (derecha) */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-back {
+  //border-radius: 999px !important;
+}
+
+/* ✅ Botones con tu color (opción limpia) */
+.btn-crear,
+.btn-guardar {
+  background-color: rgb(28, 197, 244) !important;
+  color: #fff !important;
+
+  font-weight: 900;
+  letter-spacing: 0.2px;
+
+  //border-radius: 999px !important;
+
+  box-shadow:
+    0px 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0px 0px 10px rgba(0, 0, 0, 0.25) !important;
+
+  transition:
+    transform 120ms ease,
+    filter 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.btn-crear:hover,
+.btn-guardar:hover {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+  box-shadow:
+    0px 8px 16px rgba(0, 0, 0, 0.22),
+    inset 0px 0px 12px rgba(0, 0, 0, 0.22) !important;
+}
+
+.btn-crear:active,
+.btn-guardar:active {
+  transform: translateY(0px);
+  filter: brightness(0.97);
+}
+
+.table-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.search-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+  padding: 10px 14px;
+  width: min(540px, 100%);
+  background: #fff;
+
+  mat-icon {
+    opacity: 0.65;
+  }
+
+  input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    background: transparent;
+  }
+}
+
+.table-wrap {
+  overflow: auto;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 900;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+td.mat-cell,
+th.mat-header-cell {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+
+.cell-main {
+  font-weight: 800;
+}
+
+.cell-sub {
+  font-size: 12px;
+  opacity: 0.65;
+  margin-top: 2px;
+}
+
+.col-actions {
+  width: 90px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.danger mat-icon {
+  color: #d32f2f;
+}
+
+/* pills */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.pill-ok {
+  background: rgba(76, 175, 80, 0.18);
+}
+
+.pill-bad {
+  background: rgba(244, 67, 54, 0.18);
+}
+
+.pill-tag {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Form */
+.form-card {
+  border-radius: 16px;
+  width: 100%;
+  margin: 0;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.form-subtitle {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.form-actions-top {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+.switches {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.switch-title {
+  font-weight: 900;
+  opacity: 0.85;
+}
+
+/* ✅ Cliente readonly (editar) */
+.cliente-readonly {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.cliente-label {
+  font-weight: 900;
+  opacity: 0.85;
+}
+
+.cliente-value {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cliente-hint {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions-top {
+    justify-content: flex-end;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

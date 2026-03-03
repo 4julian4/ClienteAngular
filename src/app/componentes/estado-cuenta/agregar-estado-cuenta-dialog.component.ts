@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Subject, takeUntil } from 'rxjs';
 import {
   CrearEstadoCuentaRequest,
   TipoEstadoCuenta,
@@ -59,17 +60,19 @@ function mayorQueCero(): ValidatorFn {
   templateUrl: './agregar-estado-cuenta-dialog.component.html',
   styleUrls: ['./agregar-estado-cuenta-dialog.component.scss'],
 })
-export class AgregarEstadoCuentaDialogComponent implements OnInit {
+export class AgregarEstadoCuentaDialogComponent implements OnInit, OnDestroy {
   formEstado: FormGroup;
 
   // ✅ normalizado: {id, nombre}
   listaConvenios: { id: number; nombre: string }[] = [];
 
+  private destruir$ = new Subject<void>();
+
   constructor(
     private fb: FormBuilder,
     private respuestaPinService: RespuestaPinService,
     private dialogRef: MatDialogRef<AgregarEstadoCuentaDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AgregarEstadoCuentaDialogData
+    @Inject(MAT_DIALOG_DATA) public data: AgregarEstadoCuentaDialogData,
   ) {
     const hoy = new Date();
     const fechaLocal = `${hoy.getFullYear()}-${(hoy.getMonth() + 1)
@@ -103,59 +106,67 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
       compromisoCompraventa: [''],
     });
 
-    this.formEstado.get('tipoEstado')?.valueChanges.subscribe((tipo) => {
-      this.actualizarValidadores(tipo);
-    });
+    this.formEstado
+      .get('tipoEstado')
+      ?.valueChanges.pipe(takeUntil(this.destruir$))
+      .subscribe((tipo) => {
+        this.actualizarValidadores(tipo);
+      });
 
     this.formEstado
       .get('financiarCuotaInicial')
-      ?.valueChanges.subscribe((financiar) => {
+      ?.valueChanges.pipe(takeUntil(this.destruir$))
+      .subscribe((financiar) => {
         this.actualizarValidadoresCuotaInicial(financiar);
       });
 
-    this.formEstado.valueChanges.subscribe(() => {
-      if (this.esFinanciado) this.calcularValorCuota();
-    });
+    this.formEstado.valueChanges
+      .pipe(takeUntil(this.destruir$))
+      .subscribe(() => {
+        if (this.esFinanciado) this.calcularValorCuota();
+      });
   }
 
   ngOnInit(): void {
     // Convenios
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (!data) return;
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (!data) return;
 
-      const raw = data.lstConvenios ?? [];
-      this.listaConvenios = raw
-        .map((x: any) => ({
-          id: Number(x.id ?? x.ID ?? x.codigo ?? x.CODIGO),
-          nombre: String(
-            x.nombre ?? x.NOMBRE ?? x.descripcion ?? x.DESCRIPCION
-          ),
-        }))
-        .filter((x) => Number.isFinite(x.id) && x.id > 0);
+        const raw = data.lstConvenios ?? [];
+        this.listaConvenios = raw
+          .map((x: any) => ({
+            id: Number(x.id ?? x.ID ?? x.codigo ?? x.CODIGO),
+            nombre: String(
+              x.nombre ?? x.NOMBRE ?? x.descripcion ?? x.DESCRIPCION,
+            ),
+          }))
+          .filter((x) => Number.isFinite(x.id) && x.id > 0);
 
-      // sugerido
-      if (this.data.convenioSugeridoId != null) {
-        this.formEstado.patchValue(
-          { convenio: this.data.convenioSugeridoId },
-          { emitEvent: false }
-        );
-        return;
-      }
+        // sugerido
+        if (this.data.convenioSugeridoId != null) {
+          this.formEstado.patchValue(
+            { convenio: this.data.convenioSugeridoId },
+            { emitEvent: false },
+          );
+          return;
+        }
 
-      // default al primero si existe
-      if (this.listaConvenios.length > 0) {
-        this.formEstado.patchValue(
-          { convenio: this.listaConvenios[0].id },
-          { emitEvent: false }
-        );
-      }
-    });
+        // default al primero si existe
+        if (this.listaConvenios.length > 0) {
+          this.formEstado.patchValue(
+            { convenio: this.listaConvenios[0].id },
+            { emitEvent: false },
+          );
+        }
+      });
 
     // Documento sugerido (create) o precarga (edit)
     if (this.data.facturaSugerida != null) {
       this.formEstado.patchValue(
         { compromisoCompraventa: String(this.data.facturaSugerida ?? '') },
-        { emitEvent: false }
+        { emitEvent: false },
       );
     }
 
@@ -187,9 +198,14 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
 
           convenio: p.convenioId ?? this.formEstado.get('convenio')?.value,
         },
-        { emitEvent: true }
+        { emitEvent: true },
       );
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   get esFinanciado(): boolean {
@@ -265,7 +281,7 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
           numeroCuotas: 1,
           valorCuota: 0,
         },
-        { emitEvent: false }
+        { emitEvent: false },
       );
     }
 
@@ -284,7 +300,7 @@ export class AgregarEstadoCuentaDialogComponent implements OnInit {
       cuotasCuotaInicialCtrl?.clearValidators();
       this.formEstado.patchValue(
         { cuotasCuotaInicial: 1 },
-        { emitEvent: false }
+        { emitEvent: false },
       );
     }
 

@@ -1,0 +1,66 @@
+.dlg {
+  padding: 14px 16px 12px;
+  max-width: 520px;
+}
+
+.hdr {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.ico {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.06);
+
+  &.danger {
+    background: rgba(244, 67, 54, 0.15);
+  }
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    opacity: 0.9;
+  }
+}
+
+.title {
+  font-weight: 900;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.msg {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.75;
+  line-height: 1.35;
+}
+
+.full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-danger {
+  background: #d32f2f !important;
+  color: white !important;
+}
+
+.btn-primary {
+  /* usa el primary por defecto; no forzamos color */
+}

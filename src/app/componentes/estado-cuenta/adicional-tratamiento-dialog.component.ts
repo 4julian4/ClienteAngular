@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -15,6 +15,7 @@ import {
 
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { AdicionalItemDto } from 'src/app/conexiones/rydent/modelos/estado-cuenta/preparar-insertar-adicional.dto';
+import { Subject, takeUntil } from 'rxjs';
 
 export interface AdicionalTratamientoDialogData {
   idPaciente: number;
@@ -55,7 +56,7 @@ interface ItemAdicionalUi {
   templateUrl: './adicional-tratamiento-dialog.component.html',
   styleUrls: ['./adicional-tratamiento-dialog.component.scss'],
 })
-export class AdicionalTratamientoDialogComponent implements OnInit {
+export class AdicionalTratamientoDialogComponent implements OnInit, OnDestroy {
   formAdicionales: FormGroup;
 
   // {id, nombre}
@@ -74,6 +75,7 @@ export class AdicionalTratamientoDialogComponent implements OnInit {
   mensajeErrorOtro: string | null = null;
 
   textoBusquedaAdicional = '';
+  private destruir$ = new Subject<void>();
 
   // editor temporal
   adicionalTemporal: ItemAdicionalUi = {
@@ -96,7 +98,7 @@ export class AdicionalTratamientoDialogComponent implements OnInit {
     private fb: FormBuilder,
     private respuestaPinService: RespuestaPinService,
     private dialogRef: MatDialogRef<AdicionalTratamientoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AdicionalTratamientoDialogData
+    @Inject(MAT_DIALOG_DATA) public data: AdicionalTratamientoDialogData,
   ) {
     const d = data;
 
@@ -122,50 +124,52 @@ export class AdicionalTratamientoDialogComponent implements OnInit {
     // ✅ Motivos desde backend (si no llegan, no se revienta)
     this.motivosCatalogo = Array.isArray(this.data?.motivos)
       ? this.data.motivos.filter(
-          (m) => String(m?.nombre ?? '').trim().length > 0
+          (m) => String(m?.nombre ?? '').trim().length > 0,
         )
       : [];
 
     // 1) Convenios (como ya lo tenías)
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (!data) return;
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (!data) return;
 
-      const raw = data.lstConvenios ?? [];
-      this.listaConvenios = raw
-        .map((x: any) => ({
-          id: Number(x.id ?? x.ID ?? x.codigo ?? x.CODIGO),
-          nombre: String(
-            x.nombre ?? x.NOMBRE ?? x.descripcion ?? x.DESCRIPCION
-          ),
-        }))
-        .filter((x) => Number.isFinite(x.id) && x.id > 0);
+        const raw = data.lstConvenios ?? [];
+        this.listaConvenios = raw
+          .map((x: any) => ({
+            id: Number(x.id ?? x.ID ?? x.codigo ?? x.CODIGO),
+            nombre: String(
+              x.nombre ?? x.NOMBRE ?? x.descripcion ?? x.DESCRIPCION,
+            ),
+          }))
+          .filter((x) => Number.isFinite(x.id) && x.id > 0);
 
-      const sugerido = this.data?.convenioSugeridoId ?? null;
-      const prefill = this.data?.prefill?.convenioId ?? null;
+        const sugerido = this.data?.convenioSugeridoId ?? null;
+        const prefill = this.data?.prefill?.convenioId ?? null;
 
-      if (prefill != null) {
-        this.formAdicionales.patchValue(
-          { convenioId: prefill },
-          { emitEvent: false }
-        );
-        return;
-      }
+        if (prefill != null) {
+          this.formAdicionales.patchValue(
+            { convenioId: prefill },
+            { emitEvent: false },
+          );
+          return;
+        }
 
-      if (sugerido != null) {
-        this.formAdicionales.patchValue(
-          { convenioId: sugerido },
-          { emitEvent: false }
-        );
-        return;
-      }
+        if (sugerido != null) {
+          this.formAdicionales.patchValue(
+            { convenioId: sugerido },
+            { emitEvent: false },
+          );
+          return;
+        }
 
-      if (this.listaConvenios.length > 0) {
-        this.formAdicionales.patchValue(
-          { convenioId: this.listaConvenios[0].id },
-          { emitEvent: false }
-        );
-      }
-    });
+        if (this.listaConvenios.length > 0) {
+          this.formAdicionales.patchValue(
+            { convenioId: this.listaConvenios[0].id },
+            { emitEvent: false },
+          );
+        }
+      });
 
     // 2) RecibidoPor bloqueado por reglas
     const habilitado = this.data?.recibidoPorHabilitado ?? true;
@@ -174,6 +178,10 @@ export class AdicionalTratamientoDialogComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
+  }
   // =========================
   // helpers
   // =========================
@@ -383,13 +391,13 @@ export class AdicionalTratamientoDialogComponent implements OnInit {
   private construirValorTotal(items: AdicionalItemDto[]): number {
     return items.reduce(
       (acc, it) => acc + it.valorUnitario * (it.cantidad || 0),
-      0
+      0,
     );
   }
 
   private construirDescripcionResumen(
     items: AdicionalItemDto[],
-    maxLen = 200
+    maxLen = 200,
   ): string {
     const partes = items.map((it) => {
       const total = it.valorUnitario * (it.cantidad || 0);

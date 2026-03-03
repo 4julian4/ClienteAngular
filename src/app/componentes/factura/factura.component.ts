@@ -12,7 +12,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, Subject, Subscription, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 import { PresentarDianProgressView } from 'src/app/conexiones/rydent/modelos/presentar-dian/presentar-dian.model';
@@ -110,14 +110,19 @@ export class FacturaComponent implements OnInit, OnDestroy {
   notaPanelFactura: RowFactura | null = null;
   notasFacturaSeleccionada: NotaResumen[] = [];
 
+  totalCreadas = 0;
+  pageIndexCreadas = 0; // mat-paginator usa 0-based
+  pageSizeCreadas = 10;
+
   private _paginator?: MatPaginator;
   private _sort?: MatSort;
+  private destruir$ = new Subject<void>();
 
   @ViewChild(MatPaginator)
   set paginator(p: MatPaginator) {
     if (!p) return;
     this._paginator = p;
-    this.dataSource.paginator = p;
+    //this.dataSource.paginator = p;
   }
 
   @ViewChild(MatSort)
@@ -150,107 +155,149 @@ export class FacturaComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (data != null) {
-        this.listaDoctores = data.lstDoctoresConPrestador ?? [];
-      }
-    });
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.listaDoctores = data.lstDoctoresConPrestador ?? [];
+        }
+      });
 
     this.subs.push(
-      this.respuestaPinService.sharedSedeSeleccionada.subscribe((id) => {
-        this.sedeIdSeleccionada = id ?? 0;
-      }),
+      this.respuestaPinService.sharedSedeSeleccionada
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((id) => {
+          this.sedeIdSeleccionada = id ?? 0;
+        }),
     );
-    this.subs.push(this.progreso$.subscribe((p) => (this.progresoActual = p)));
+    this.subs.push(
+      this.progreso$
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((p) => (this.progresoActual = p)),
+    );
 
     // Cuando cambie el doctor seleccionado, volvemos a aplicar filtros en la tabla
     this.subs.push(
-      this.filtroDoctor.valueChanges.subscribe(() => this.applyFilter()),
+      this.filtroDoctor.valueChanges
+        .pipe(takeUntil(this.destruir$))
+        .subscribe(() => this.onFiltrosChanged()),
     );
     // Obtener clienteId/sede actual (para SignalR)
     this.subs.push(
-      this.pinSvc.sharedSedeData.subscribe((data) => {
-        if (data != null) this.idSedeActualSignalR = data;
-      }),
+      this.pinSvc.sharedSedeData
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((data) => {
+          if (data != null) this.idSedeActualSignalR = data;
+        }),
     );
 
     // Suscripción a listados de pendientes (SignalR)
     this.subs.push(
-      this.pendientesSvc.respuestaBusquedaFacturasPendientesEmit.subscribe(
-        (lista) => {
+      this.pendientesSvc.respuestaBusquedaFacturasPendientesEmit
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((lista) => {
           this.isLoading = false;
           this.selection.clear();
           this.cerrarPanelNotas(); // por si estaba abierto
           this.pintarTabla(lista, 'pendientes');
-        },
-      ),
+        }),
     );
 
     // Cambio de tipo de listado (pendientes/creadas)
     this.subs.push(
-      this.filtroTipoListado.valueChanges.subscribe((tipo) => {
-        const t = tipo ?? 'pendientes';
+      this.filtroTipoListado.valueChanges
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((tipo) => {
+          const t = tipo ?? 'pendientes';
 
-        // Limpiar tabla y selección
-        this.limpiarTabla();
-        this.cerrarPanelNotas();
+          // Limpiar tabla y selección
+          this.limpiarTabla();
+          this.cerrarPanelNotas();
 
-        // Reconfigurar columnas
-        this.configurarColumnas(t);
+          // Reconfigurar columnas
+          this.configurarColumnas(t);
 
-        // Resetear filtros
-        this.filtroNumeroFactura.setValue('', { emitEvent: false });
-        this.filtroTexto.setValue('', { emitEvent: false });
-        this.filtroFechaIni.setValue(null, { emitEvent: false });
-        this.filtroFechaFin.setValue(null, { emitEvent: false });
+          // Resetear filtros
+          this.filtroNumeroFactura.setValue('', { emitEvent: false });
+          this.filtroTexto.setValue('', { emitEvent: false });
 
-        this.applyFilter();
-      }),
+          // ✅ Para creadas: rango por defecto 1 del mes -> hoy
+          // ✅ Para pendientes: puedes dejar igual (si quieres también 1->hoy)
+          this.setRangoMesActualEnFiltros({ emitEvent: false });
+
+          //this.filtroFechaIni.setValue(null, { emitEvent: false });
+          //this.filtroFechaFin.setValue(null, { emitEvent: false });
+
+          // ✅ Reset paginación de creadas (por si venía en página 3, etc.)
+          this.pageIndexCreadas = 0;
+          this.totalCreadas = 0;
+          if (this.paginator) this.paginator.firstPage();
+
+          // ✅ CLAVE: si es creadas => consulta paginada
+          if (t === 'creadas') {
+            this.consultarCreadasPaginado(true);
+          } else {
+            // ✅ pendientes => filtro local como siempre
+            this.applyFilter();
+          }
+        }),
     );
 
     // Re-aplicar filtros
     this.subs.push(
-      this.filtroPrestador.valueChanges.subscribe(() => this.applyFilter()),
+      this.filtroPrestador.valueChanges
+        .pipe(takeUntil(this.destruir$))
+        .subscribe(() => this.onFiltrosChanged()),
     );
     this.subs.push(
-      this.filtroTexto.valueChanges.subscribe(() => this.applyFilter()),
+      this.filtroTexto.valueChanges
+        .pipe(takeUntil(this.destruir$))
+        .subscribe(() => this.onFiltrosChanged()),
     );
     this.subs.push(
-      this.filtroFechaIni.valueChanges.subscribe(() => this.applyFilter()),
+      this.filtroFechaIni.valueChanges
+        .pipe(takeUntil(this.destruir$))
+        .subscribe(() => this.onFiltrosChanged()),
     );
     this.subs.push(
-      this.filtroFechaFin.valueChanges.subscribe(() => this.applyFilter()),
+      this.filtroFechaFin.valueChanges
+        .pipe(takeUntil(this.destruir$))
+        .subscribe(() => this.onFiltrosChanged()),
     );
 
     // Resúmenes de presentación
     this.subs.push(
-      this.presentarSvc.resumenOk.subscribe((summary) => {
-        this.stopPresentandoDian();
-        this.snackBar.open(
-          `Presentadas ${summary.ok}/${summary.total}.`,
-          'OK',
-          {
-            duration: 3000,
-          },
-        );
-        this.consultar();
-        this.selection.clear();
-        this.abrirDialogResumenPresentacion(summary);
-      }),
+      this.presentarSvc.resumenOk
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((summary) => {
+          this.stopPresentandoDian();
+          this.snackBar.open(
+            `Presentadas ${summary.ok}/${summary.total}.`,
+            'OK',
+            {
+              duration: 3000,
+            },
+          );
+          this.consultar();
+          this.selection.clear();
+          this.abrirDialogResumenPresentacion(summary);
+        }),
     );
 
     this.subs.push(
-      this.presentarSvc.resumenConError.subscribe((summary) => {
-        this.stopPresentandoDian();
-        this.snackBar.open(
-          `Exitosas: ${summary.ok} · Fallidas: ${summary.fail}`,
-          'Ver',
-          { duration: 5000 },
-        );
-        this.consultar();
-        this.selection.clear();
-        this.abrirDialogResumenPresentacion(summary);
-      }),
+      this.presentarSvc.resumenConError
+        .pipe(takeUntil(this.destruir$))
+        .subscribe((summary) => {
+          this.stopPresentandoDian();
+          this.snackBar.open(
+            `Exitosas: ${summary.ok} · Fallidas: ${summary.fail}`,
+            'Ver',
+            { duration: 5000 },
+          );
+          this.consultar();
+          this.selection.clear();
+          this.abrirDialogResumenPresentacion(summary);
+        }),
     );
 
     // ✅ DEFAULT al abrir: Pendientes + rango del mes + consultar automático
@@ -267,58 +314,60 @@ export class FacturaComponent implements OnInit, OnDestroy {
     this.consultar();
   }
 
-  /*ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }*/
+  ngAfterViewInit(): void {
+    const p = this._paginator;
+    if (!p) return; // ✅ si aún no está, no te estrellas
+
+    // estado inicial
+    this.pageSizeCreadas = p.pageSize || this.pageSizeCreadas;
+    this.pageIndexCreadas = p.pageIndex || 0;
+
+    this.subs.push(
+      p.page.pipe(takeUntil(this.destruir$)).subscribe((ev) => {
+        if ((this.filtroTipoListado.value ?? 'pendientes') !== 'creadas')
+          return;
+
+        this.pageIndexCreadas = ev.pageIndex;
+        this.pageSizeCreadas = ev.pageSize;
+
+        this.consultarCreadasPaginado(false);
+      }),
+    );
+  }
 
   ngOnDestroy(): void {
     this.subs.forEach((s) => s.unsubscribe());
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   /** Llamada al backend según tipo seleccionado */
-  consultar(): void {
+
+  private consultarCreadasPaginado(resetPage = false): void {
+    if (resetPage) {
+      this.pageIndexCreadas = 0;
+      if (this.paginator) this.paginator.firstPage();
+    }
+
     this.isLoading = true;
-    const tipo = this.filtroTipoListado.value ?? 'pendientes';
 
-    // Cerrar panel de notas al recargar
-    this.cerrarPanelNotas();
+    const numero = (this.filtroNumeroFactura.value ?? '').trim();
+    const texto = (this.filtroTexto.value ?? '').trim();
+    const sedeId = this.sedeIdSeleccionada;
 
-    if (tipo === 'creadas') {
-      this.isLoading = false;
-      const numero = (this.filtroNumeroFactura.value ?? '').trim();
+    const fechaIni = this.filtroFechaIni.value;
+    const fechaFin = this.filtroFechaFin.value;
 
-      // 1) Ver qué hay seleccionado en el combo de doctores
-      const doctorSeleccionado = this.filtroDoctor.value; // id = CODIGO_PRESTADOR_PPAL o 'TODOS'
+    const doctorSeleccionado = this.filtroDoctor.value;
 
-      // 🔹 Caso A: un solo doctor seleccionado
-      if (doctorSeleccionado && doctorSeleccionado !== 'TODOS') {
-        const tenantCode = doctorSeleccionado; // aquí va el CODIGO_PRESTADOR_PPAL
+    // codigo:
+    // - si es un doctor => ese tenantCode
+    // - si es TODOS => mandamos "a,b,c" en codigo (sin romper backend)
+    let codigo = '';
 
-        this.facturasCreadasHttp
-          .buscarFacturasCreadas(tenantCode, numero, this.sedeIdSeleccionada)
-          .subscribe({
-            next: (lista) => {
-              this.isLoading = false;
-              this.selection.clear();
-              this.pintarTabla(lista, 'creadas');
-            },
-            error: (err) => {
-              console.error('Error al obtener facturas creadas (HTTP):', err);
-              this.isLoading = false;
-              this.snackBar.open(
-                'No fue posible obtener las facturas creadas desde la API intermedia.',
-                'OK',
-                { duration: 4000 },
-              );
-            },
-          });
-
-        return;
-      }
-
-      // 🔹 Caso B: "TODOS los doctores"
-      // Sacamos todos los CODIGO_PRESTADOR_PPAL de los doctores de ESTA sede
+    if (doctorSeleccionado && doctorSeleccionado !== 'TODOS') {
+      codigo = doctorSeleccionado;
+    } else {
       const tenants = Array.from(
         new Set(
           this.listaDoctores
@@ -326,58 +375,72 @@ export class FacturaComponent implements OnInit, OnDestroy {
             .map((d) => d.id),
         ),
       );
+      codigo = tenants.join(',');
+    }
 
-      if (!tenants.length) {
-        this.isLoading = false;
-        this.snackBar.open(
-          'No hay doctores configurados para consultar facturas creadas.',
-          'OK',
-          { duration: 4000 },
-        );
-        return;
-      }
+    if (!codigo) {
+      this.isLoading = false;
+      this.snackBar.open(
+        'No hay doctores configurados para consultar creadas.',
+        'OK',
+        { duration: 4000 },
+      );
+      return;
+    }
 
-      // Hacemos una llamada por cada tenant (doctor/código prestador) y luego mezclamos todo
-      forkJoin(
-        tenants.map((t) =>
-          this.facturasCreadasHttp.buscarFacturasCreadas(
-            t,
-            numero,
-            this.sedeIdSeleccionada,
-          ),
-        ),
-      ).subscribe({
-        next: (resultadosPorTenant) => {
-          // resultadosPorTenant = [listaDoctor1, listaDoctor2, ...]
-          const mezclado = ([] as RespuestaBusquedaFacturasCreadas[]).concat(
-            ...resultadosPorTenant,
-          );
-
+    this.facturasCreadasHttp
+      .buscarFacturasCreadasPaged(codigo, {
+        numeroFactura: numero || undefined,
+        sedeId,
+        texto: texto || undefined,
+        fechaIni,
+        fechaFin,
+        page: this.pageIndexCreadas + 1, // backend 1-based
+        pageSize: this.pageSizeCreadas,
+      })
+      .pipe(takeUntil(this.destruir$))
+      .subscribe({
+        next: (res) => {
           this.isLoading = false;
-          this.selection.clear();
-          this.pintarTabla(mezclado, 'creadas');
+          this.totalCreadas = res.total ?? 0;
+          console.log(
+            'TIPO=',
+            this.filtroTipoListado.value,
+            'totalCreadas=',
+            this.totalCreadas,
+            'items=',
+            res.items?.length,
+          );
+          // IMPORTANTE: ahora la tabla solo recibe la página actual
+          this.pintarTabla(res.items ?? [], 'creadas');
         },
         error: (err) => {
-          console.error(
-            'Error al obtener facturas creadas (todos los doctores):',
-            err,
-          );
+          console.error('Error creadas paginado:', err);
           this.isLoading = false;
           this.snackBar.open(
-            'No fue posible obtener las facturas creadas para todos los doctores.',
+            'No fue posible obtener facturas creadas paginadas.',
             'OK',
             { duration: 4000 },
           );
         },
       });
+  }
 
+  consultar(): void {
+    //this.isLoading = true;
+    const tipo = this.filtroTipoListado.value ?? 'pendientes';
+
+    this.cerrarPanelNotas();
+
+    if (tipo === 'creadas') {
+      this.consultarCreadasPaginado(true);
       return;
-    } else {
-      // Pendientes siguen usando SignalR + worker
-      this.pendientesSvc.startConnectionRespuestaBusquedaFacturasPendientes(
-        this.idSedeActualSignalR,
-      );
     }
+    this.isLoading = true;
+    // Pendientes siguen usando SignalR + worker
+    this.pendientesSvc.startConnectionRespuestaBusquedaFacturasPendientes(
+      this.idSedeActualSignalR,
+    );
   }
 
   /** Render / configuración según el tipo */
@@ -385,43 +448,57 @@ export class FacturaComponent implements OnInit, OnDestroy {
     this.configurarColumnas(tipo);
     this.dataSource.data = lista ?? [];
 
-    // Filtro combinado: fechas + doctor/tenant + texto libre
-    this.dataSource.filterPredicate = (row: RowFactura, filtroJson: string) => {
-      const filtro = JSON.parse(filtroJson) as {
-        doctorId: string; // CODIGO_PRESTADOR_PPAL o 'TODOS'
-        texto: string;
-        ini: string | null;
-        fin: string | null;
-        tipo: 'pendientes' | 'creadas';
+    if (tipo === 'creadas') {
+      // ✅ CREADAS: el backend ya trae filtrado + paginado
+      this.dataSource.filterPredicate = () => true;
+      this.dataSource.filter = '';
+
+      // ✅ NO resetees el paginator aquí, porque ya lo maneja mat-paginator
+      // (y si lo reseteas podrías saltar de página)
+    } else {
+      // ✅ PENDIENTES: filtro local como lo tenías
+      this.dataSource.filterPredicate = (
+        row: RowFactura,
+        filtroJson: string,
+      ) => {
+        const filtro = JSON.parse(filtroJson) as {
+          doctorId: string;
+          texto: string;
+          ini: string | null;
+          fin: string | null;
+          tipo: 'pendientes' | 'creadas';
+        };
+
+        const rowYmd = this.toYMD((row as any).fecha);
+        if (filtro.ini && rowYmd < filtro.ini) return false;
+        if (filtro.fin && rowYmd > filtro.fin) return false;
+
+        if (filtro.doctorId && filtro.doctorId !== 'TODOS') {
+          const rowTenant = this.getTenantCode(row) ?? '';
+          if (rowTenant !== filtro.doctorId) return false;
+        }
+
+        const blob =
+          `${(row as any).nombre_Paciente} ${(row as any).factura} ${(row as any).prestador}`.toLowerCase();
+        if (filtro.texto && !blob.includes((filtro.texto ?? '').toLowerCase()))
+          return false;
+
+        return true;
       };
 
-      // 1) Rango de fechas (yyyymmdd)
-      const rowYmd = this.toYMD((row as any).fecha);
-      if (filtro.ini && rowYmd < filtro.ini) return false;
-      if (filtro.fin && rowYmd > filtro.fin) return false;
+      this.applyFilter();
+    }
 
-      // 2) Doctor / código de prestador (tenant)
-      if (filtro.doctorId && filtro.doctorId !== 'TODOS') {
-        // tenant real de la fila (puede venir en distintas propiedades)
-        const rowTenant = this.getTenantCode(row) ?? '';
-        if (rowTenant !== filtro.doctorId) return false;
-      }
+    // ✅ Paginación:
+    // - Pendientes: client-side => SI usamos MatTableDataSource.paginator
+    // - Creadas: server-side => NO usamos MatTableDataSource.paginator
+    if (tipo === 'creadas') {
+      this.dataSource.paginator = null as any;
+    } else {
+      if (this._paginator) this.dataSource.paginator = this._paginator;
+    }
 
-      // 3) Texto libre (paciente, factura, prestador...)
-      const blob = `${(row as any).nombre_Paciente} ${(row as any).factura} ${
-        (row as any).prestador
-      }`.toLowerCase();
-      if (filtro.texto && !blob.includes(filtro.texto.toLowerCase())) {
-        return false;
-      }
-
-      return true;
-    };
-
-    this.applyFilter();
-
-    if (this.paginator) this.dataSource.paginator = this.paginator;
-    if (this.sort) this.dataSource.sort = this.sort;
+    if (this._sort) this.dataSource.sort = this._sort;
   }
 
   private configurarColumnas(tipo: 'pendientes' | 'creadas') {
@@ -433,6 +510,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         'documentoPaciente',
         'valorTotal',
         'prestador',
+        'dianTag', // ✅ NUEVO
         'ncTag',
         'acciones',
       ];
@@ -516,7 +594,6 @@ export class FacturaComponent implements OnInit, OnDestroy {
     try {
       await this.presentarSvc.presentarBatch(
         seleccionadas,
-        this.idSedeActualSignalR,
         'FES_REGISTRAR_EN_DIAN',
         this.sedeIdSeleccionada,
       );
@@ -546,7 +623,6 @@ export class FacturaComponent implements OnInit, OnDestroy {
     try {
       await this.presentarSvc.presentarIndividual(
         row as RespuestaBusquedaFacturasPendientes,
-        this.idSedeActualSignalR,
         row.tipoOperacion,
         this.sedeIdSeleccionada,
       );
@@ -647,9 +723,13 @@ export class FacturaComponent implements OnInit, OnDestroy {
     if (!this.isPendiente(row)) return;
 
     try {
-      await this.presentarSvc.descargarJsonPendiente(
+      /*await this.presentarSvc.descargarJsonPendiente(
         row as RespuestaBusquedaFacturasPendientes,
         this.idSedeActualSignalR,
+        this.sedeIdSeleccionada,
+      );*/
+      await this.presentarSvc.descargarJsonPendiente(
+        row as RespuestaBusquedaFacturasPendientes,
         this.sedeIdSeleccionada,
       );
 
@@ -830,7 +910,15 @@ export class FacturaComponent implements OnInit, OnDestroy {
     }
 
     const numero = numeroRaw;
-    const tenant = this.getTenantCode(row) || '050010341101';
+    const tenant = this.getTenantCode(row);
+    if (!tenant) {
+      this.snackBar.open(
+        'Esta factura no trae el prestador (tenant). El backend debe enviarlo por fila.',
+        'OK',
+        { duration: 4000 },
+      );
+      return;
+    }
     const invoiceUuid = this.getExternalId(row) ?? null;
 
     this.notaPanelFactura = row;
@@ -841,6 +929,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         listType: 'todos', // ver todas las notas (pendientes + creadas)
         invoiceUuid,
       })
+      .pipe(takeUntil(this.destruir$))
       .subscribe({
         next: (notas) => {
           this.notasFacturaSeleccionada = notas ?? [];
@@ -985,118 +1074,123 @@ export class FacturaComponent implements OnInit, OnDestroy {
 
     const tenant = this.getTenantCode(row) || '050010341101';
 
-    this.notesHttp.obtenerPorId(tenant, nota.id).subscribe({
-      next: (detalle) => {
-        try {
-          const rawJson = detalle.payloadJson || '{}';
-          const payload = JSON.parse(rawJson) as CrearNotaPayload;
-          const anyPayload = payload as any; // <- aquí usamos any para leer campos específicos
+    this.notesHttp
+      .obtenerPorId(tenant, nota.id)
+      .pipe(takeUntil(this.destruir$))
+      .subscribe({
+        next: (detalle) => {
+          try {
+            const rawJson = detalle.payloadJson || '{}';
+            const payload = JSON.parse(rawJson) as CrearNotaPayload;
+            const anyPayload = payload as any; // <- aquí usamos any para leer campos específicos
 
-          // Abrimos el diálogo en modo EDICIÓN
-          const dlgRef = this.dialog.open(CrearNotaDialogComponent, {
-            width: '1200px',
-            maxWidth: '98vw',
-            height: '88vh', // <- nueva altura más cómoda
-            maxHeight: '88vh',
-            autoFocus: false,
-            data: {
-              tenantCode: anyPayload.tenantCode || tenant,
-              tipo: payload.tipo,
-              modalidad: payload.modalidad,
-              presetItems: payload.items,
-              invoiceUuid:
-                anyPayload.invoiceUuid || detalle.invoiceUuid || undefined,
-              invoiceNumber:
-                anyPayload.invoiceNumber || detalle.invoiceNumber || undefined,
-              // Modo edición:
-              noteId: detalle.id,
-              initialPayload: payload,
-            },
-          });
+            // Abrimos el diálogo en modo EDICIÓN
+            const dlgRef = this.dialog.open(CrearNotaDialogComponent, {
+              width: '1200px',
+              maxWidth: '98vw',
+              height: '88vh', // <- nueva altura más cómoda
+              maxHeight: '88vh',
+              autoFocus: false,
+              data: {
+                tenantCode: anyPayload.tenantCode || tenant,
+                tipo: payload.tipo,
+                modalidad: payload.modalidad,
+                presetItems: payload.items,
+                invoiceUuid:
+                  anyPayload.invoiceUuid || detalle.invoiceUuid || undefined,
+                invoiceNumber:
+                  anyPayload.invoiceNumber ||
+                  detalle.invoiceNumber ||
+                  undefined,
+                // Modo edición:
+                noteId: detalle.id,
+                initialPayload: payload,
+              },
+            });
 
-          this.subs.push(
-            dlgRef.afterClosed().subscribe((res) => {
-              if (!res?.ok || !res.payload) return;
+            this.subs.push(
+              dlgRef.afterClosed().subscribe((res) => {
+                if (!res?.ok || !res.payload) return;
 
-              const updatedPayload = res.payload;
+                const updatedPayload = res.payload;
 
-              // Construimos el DTO para guardar el borrador en el backend
-              const dto: NoteCreateRequest = {
-                id: detalle.id,
-                noteType: detalle.noteType,
-                prefix: detalle.prefix,
-                number: detalle.number,
-                issueDate: detalle.issueDate,
-                payloadJson: JSON.stringify(updatedPayload),
-                internalStatus: detalle.internalStatus,
-                invoiceNumber: detalle.invoiceNumber ?? null,
-                invoiceUuid: detalle.invoiceUuid ?? null,
-                totalAmount: detalle.totalAmount ?? null,
-                noteUuid: detalle.noteUuid ?? null,
-                pdfUrl: detalle.pdfUrl ?? null,
-                xmlUrl: detalle.xmlUrl ?? null,
-              };
+                // Construimos el DTO para guardar el borrador en el backend
+                const dto: NoteCreateRequest = {
+                  id: detalle.id,
+                  noteType: detalle.noteType,
+                  prefix: detalle.prefix,
+                  number: detalle.number,
+                  issueDate: detalle.issueDate,
+                  payloadJson: JSON.stringify(updatedPayload),
+                  internalStatus: detalle.internalStatus,
+                  invoiceNumber: detalle.invoiceNumber ?? null,
+                  invoiceUuid: detalle.invoiceUuid ?? null,
+                  totalAmount: detalle.totalAmount ?? null,
+                  noteUuid: detalle.noteUuid ?? null,
+                  pdfUrl: detalle.pdfUrl ?? null,
+                  xmlUrl: detalle.xmlUrl ?? null,
+                };
 
-              this.notesHttp.guardarBorrador(tenant, dto).subscribe({
-                next: () => {
-                  this.snackBar.open(
-                    `Nota ${detalle.number} guardada como borrador.`,
-                    'OK',
-                    { duration: 3000 },
-                  );
+                this.notesHttp.guardarBorrador(tenant, dto).subscribe({
+                  next: () => {
+                    this.snackBar.open(
+                      `Nota ${detalle.number} guardada como borrador.`,
+                      'OK',
+                      { duration: 3000 },
+                    );
 
-                  // Recargar notas de la factura para mantener panel sincronizado
-                  const numeroFactura = (row as any).factura as
-                    | string
-                    | undefined;
-                  const invoiceUuidFactura = this.getExternalId(row) ?? null;
+                    // Recargar notas de la factura para mantener panel sincronizado
+                    const numeroFactura = (row as any).factura as
+                      | string
+                      | undefined;
+                    const invoiceUuidFactura = this.getExternalId(row) ?? null;
 
-                  if (numeroFactura) {
-                    this.notesHttp
-                      .listarPorFactura(tenant, numeroFactura, {
-                        listType: 'todos',
-                        invoiceUuid: invoiceUuidFactura,
-                      })
-                      .subscribe({
-                        next: (notas) =>
-                          (this.notasFacturaSeleccionada = notas ?? []),
-                        error: (err2) => {
-                          console.error(
-                            'Error recargando notas tras editar:',
-                            err2,
-                          );
-                        },
-                      });
-                  }
-                },
-                error: (err2) => {
-                  console.error('Error guardando borrador de nota:', err2);
-                  const message =
-                    err2?.error?.message ||
-                    'No fue posible guardar los cambios de la nota.';
-                  this.snackBar.open(message, 'OK', { duration: 5000 });
-                },
-              });
-            }),
-          );
-        } catch (e) {
-          console.error('Error parseando payloadJson de nota:', e);
+                    if (numeroFactura) {
+                      this.notesHttp
+                        .listarPorFactura(tenant, numeroFactura, {
+                          listType: 'todos',
+                          invoiceUuid: invoiceUuidFactura,
+                        })
+                        .subscribe({
+                          next: (notas) =>
+                            (this.notasFacturaSeleccionada = notas ?? []),
+                          error: (err2) => {
+                            console.error(
+                              'Error recargando notas tras editar:',
+                              err2,
+                            );
+                          },
+                        });
+                    }
+                  },
+                  error: (err2) => {
+                    console.error('Error guardando borrador de nota:', err2);
+                    const message =
+                      err2?.error?.message ||
+                      'No fue posible guardar los cambios de la nota.';
+                    this.snackBar.open(message, 'OK', { duration: 5000 });
+                  },
+                });
+              }),
+            );
+          } catch (e) {
+            console.error('Error parseando payloadJson de nota:', e);
+            this.snackBar.open(
+              'La nota tiene un JSON interno inválido y no se pudo cargar para edición.',
+              'OK',
+              { duration: 5000 },
+            );
+          }
+        },
+        error: (err) => {
+          console.error('Error al obtener detalle de nota:', err);
           this.snackBar.open(
-            'La nota tiene un JSON interno inválido y no se pudo cargar para edición.',
+            'No fue posible cargar los datos de la nota para edición.',
             'OK',
             { duration: 5000 },
           );
-        }
-      },
-      error: (err) => {
-        console.error('Error al obtener detalle de nota:', err);
-        this.snackBar.open(
-          'No fue posible cargar los datos de la nota para edición.',
-          'OK',
-          { duration: 5000 },
-        );
-      },
-    });
+        },
+      });
   }
 
   borrarNota(nota: NotaResumen, ev: Event): void {
@@ -1236,6 +1330,19 @@ export class FacturaComponent implements OnInit, OnDestroy {
     }
   }
 
+  private onFiltrosChanged(): void {
+    const tipo = this.filtroTipoListado.value ?? 'pendientes';
+
+    // Si estoy en CREADAS => backend manda paginado + filtrado
+    if (tipo === 'creadas') {
+      this.consultarCreadasPaginado(true); // reset a página 1
+      return;
+    }
+
+    // Si estoy en PENDIENTES => filtro local como hoy
+    this.applyFilter();
+  }
+
   /** trackBy para mejorar rendimiento en tablas grandes */
   trackByRow = (_i: number, row: RowFactura) => {
     return (row as any).idRelacion ?? (row as any).factura ?? row;
@@ -1335,5 +1442,29 @@ export class FacturaComponent implements OnInit, OnDestroy {
 
     this.filtroFechaIni.setValue(primerDiaMes, { emitEvent: emit });
     this.filtroFechaFin.setValue(hoy, { emitEvent: emit });
+  }
+
+  getDianDotClass(row: RowFactura): string {
+    if (this.isPendiente(row)) return 'dian-dot--na';
+
+    const s = ((row as any).dianStatus || '').toString().toUpperCase();
+
+    if (s.includes('ACEPT')) return 'dian-dot--ok';
+    if (s.includes('RECHAZ')) return 'dian-dot--bad';
+    return 'dian-dot--na';
+  }
+
+  getDianTooltip(row: RowFactura): string {
+    if (this.isPendiente(row)) return '';
+
+    const s = ((row as any).dianStatus || '').toString().toUpperCase();
+    const msg = ((row as any).dianMessages || '').toString().trim();
+
+    if (s.includes('RECHAZ')) {
+      return msg ? `DIAN RECHAZADA: ${msg}` : 'DIAN RECHAZADA (sin mensaje)';
+    }
+    if (s.includes('ACEPT')) return 'DIAN ACEPTADA';
+
+    return 'Sin estado DIAN';
   }
 }

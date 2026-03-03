@@ -45,7 +45,6 @@
           </mat-form-field>
           <mat-form-field appearance="fill" class="campoFila2">
             <mat-label>Fecha Ingreso</mat-label>
-            <!-- <input matInput  formControlName="FECHA_INGRESO" placeholder="Fecha Ingreso"> -->
             <input
               matInput
               [matDatepicker]="picker"
@@ -58,11 +57,6 @@
             ></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
-
-          <!--<mat-form-field appearance="fill" class="campoFila2">
-                        <mat-label>Hora Ingreso</mat-label>
-                        <input matInput  formControlName="HORA_INGRESO" placeholder="Hora Ingreo">
-                    </mat-form-field>-->
 
           <mat-form-field appearance="fill" class="campoFila2">
             <mat-label>Hora Ingreso</mat-label>
@@ -108,7 +102,6 @@
 
           <mat-form-field appearance="fill" class="campoFila3">
             <mat-label>Referido Por</mat-label>
-            <!-- <input matInput  formControlName="REFERIDO_POR" placeholder="Referido por">-->
             <mat-select formControlName="REFERIDO_POR">
               <mat-option value="FAMILIAR">FAMILIAR</mat-option>
               <mat-option value="AMIGO">AMIGO</mat-option>
@@ -120,12 +113,8 @@
           </mat-form-field>
         </div>
       </div>
-      <!-- <div class="divFotoFrontal" style="flex: 0 0 20%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                <img *ngIf="fotoFrontalBase64 != ''" src="{{fotoFrontalBase64}}" alt="Red dot" style="max-width: 100%; max-height: 100%; object-fit: cover;" />
-                <img *ngIf="fotoFrontalBase64 == ''" src="{{imagenPorDefecto}}" alt="Imagen por defecto" style="max-width: 100%; max-height: 100%; object-fit: cover;" />
-            </div> -->
+
       <div class="divFotoFrontal">
-        <!-- Imagen -->
         <img
           *ngIf="fotoFrontalBase64 != ''"
           [src]="fotoFrontalBase64"
@@ -139,7 +128,6 @@
           class="foto"
         />
 
-        <!-- Botones -->
         <div
           style="
             margin-top: 10px;
@@ -154,7 +142,6 @@
           <button mat-button (click)="inputFile.click()">Subir</button>
         </div>
 
-        <!-- Inputs ocultos -->
         <input
           type="file"
           accept="image/*"
@@ -171,17 +158,11 @@
           hidden
         />
       </div>
-
-      <!-- <div class="divFotoFrontal" style="flex: 0 0 20%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                <img *ngIf="fotoFrontalBase64 != ''"
-                    src="{{fotoFrontalBase64}}" alt="Red dot" style="max-width: 100%; max-height: 100%; object-fit: cover;" />
-            </div> -->
     </div>
 
     <div class="divFormularioFila4">
       <mat-form-field appearance="fill" class="campoFila4">
         <mat-label>Tipo Paciente</mat-label>
-        <!--<input matInput  formControlName="TIPO_PACIENTE" placeholder="Tipo paciente">-->
         <mat-select formControlName="TIPO_PACIENTE">
           <mat-option value="BENEFICIARIO">BENEFICIARIO</mat-option>
           <mat-option value="CONTRIBUTIVO">CONTRIBUTIVO</mat-option>
@@ -197,7 +178,6 @@
       </mat-form-field>
       <mat-form-field appearance="fill" class="campoFila4">
         <mat-label>Estado</mat-label>
-        <!-- <input matInput  formControlName="ESTADO_TRATAMIENTO" placeholder="Estado tratamiento"> -->
         <mat-select formControlName="ESTADO_TRATAMIENTO">
           <mat-option value="ACTIVO">ACTIVO</mat-option>
           <mat-option value="CONTROL">CONTROL</mat-option>
@@ -217,25 +197,25 @@
     <div class="divFormularioFila5">
       <mat-form-field appearance="fill" class="campoFila5">
         <mat-label>Aseguradora</mat-label>
-        <!-- <input matInput  formControlName="CODIGO_EPS_LISTADO" placeholder="Codigo EPS"> -->
+        <!-- ✅ FIX: guardamos CODIGO (6) en CODIGO_EPS_LISTADO -->
         <mat-select formControlName="CODIGO_EPS_LISTADO">
-          <mat-option *ngFor="let eps of listaEps" [value]="eps.NOMBRE">
+          <mat-option *ngFor="let eps of listaEps" [value]="eps.CODIGO">
             {{ eps.NOMBRE }}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila5">
         <mat-label>Codigo</mat-label>
-        <!-- <input matInput  formControlName="CODIGO_EPS" placeholder="Codigo EPS"> -->
         <mat-select formControlName="CODIGO_EPS">
           <mat-option *ngFor="let eps of listaEps" [value]="eps.CODIGO">
             {{ eps.CODIGO }}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila5">
         <mat-label>Tipo De Afiliacion</mat-label>
-        <!-- <input matInput  formControlName="PARENTESCO" placeholder="Parentesco"> -->
         <mat-select formControlName="PARENTESCO">
           <mat-option value="COTIZANTE">COTIZANTE</mat-option>
           <mat-option value="CONTRIBUTIVO">CONTRIBUTIVO</mat-option>
@@ -250,7 +230,6 @@
     <div class="divFormularioFila6">
       <mat-form-field appearance="fill" class="campoFila6">
         <mat-label>Fecha De Nacimiento Dia</mat-label>
-        <!-- <input matInput  formControlName="FECHAN_DIA" placeholder="Fecha dia"> -->
         <mat-select formControlName="FECHAN_DIA">
           <mat-option value="01">01</mat-option>
           <mat-option value="02">02</mat-option>
@@ -285,24 +264,25 @@
           <mat-option value="31">31</mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila6">
         <mat-label>Fecha De Nacimiento Mes</mat-label>
-        <!-- <input matInput  formControlName="FECHAN_MES" placeholder="Fecha mes"> -->
         <mat-select formControlName="FECHAN_MES">
-          <mat-option value="Ene">Ene</mat-option>
-          <mat-option value="Feb">Feb</mat-option>
-          <mat-option value="Mar">Mar</mat-option>
-          <mat-option value="Abr">Abr</mat-option>
-          <mat-option value="May">May</mat-option>
-          <mat-option value="Jun">Jun</mat-option>
-          <mat-option value="Jul">Jul</mat-option>
-          <mat-option value="Ago">Ago</mat-option>
-          <mat-option value="Sep">Sep</mat-option>
-          <mat-option value="Oct">Oct</mat-option>
-          <mat-option value="Nov">Nov</mat-option>
-          <mat-option value="Dic">Dic</mat-option>
+          <mat-option value="ENE">Ene</mat-option>
+          <mat-option value="FEB">Feb</mat-option>
+          <mat-option value="MAR">Mar</mat-option>
+          <mat-option value="ABR">Abr</mat-option>
+          <mat-option value="MAY">May</mat-option>
+          <mat-option value="JUN">Jun</mat-option>
+          <mat-option value="JUL">Jul</mat-option>
+          <mat-option value="AGO">Ago</mat-option>
+          <mat-option value="SEP">Sep</mat-option>
+          <mat-option value="OCT">Oct</mat-option>
+          <mat-option value="NOV">Nov</mat-option>
+          <mat-option value="DIC">Dic</mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila6">
         <mat-label>Fecha De Nacimiento Año</mat-label>
         <input
@@ -316,6 +296,7 @@
         <mat-label>Edad Años</mat-label>
         <input matInput formControlName="EDAD" placeholder="Edad Año" />
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila5">
         <mat-label>Edad Meses</mat-label>
         <input matInput formControlName="EDADMES" placeholder="Edad Meses" />
@@ -325,15 +306,14 @@
     <div class="divFormularioFila7">
       <mat-form-field appearance="fill" class="campoFila7">
         <mat-label>Sexo</mat-label>
-        <!-- <input matInput  formControlName="SEXO" placeholder="Sexo"> -->
         <mat-select formControlName="SEXO">
           <mat-option value="FEMENINO">FEMENINO</mat-option>
           <mat-option value="MASCULINO">MASCULINO</mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila7">
         <mat-label>Doc Identidad</mat-label>
-        <!-- <input matInput  formControlName="DOCUMENTO_IDENTIDAD" placeholder="Documento identidad"> -->
         <mat-select formControlName="DOCUMENTO_IDENTIDAD">
           <mat-option value="CC">CC</mat-option>
           <mat-option value="CE">CE</mat-option>
@@ -349,6 +329,7 @@
           <mat-option value="MS">MS</mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila7">
         <mat-label>Numero DI</mat-label>
         <input
@@ -357,9 +338,9 @@
           placeholder="Numero DI"
         />
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila7">
         <mat-label>Estado Civil</mat-label>
-        <!-- <input matInput  formControlName="ESTADOCIVIL" placeholder="Estado civil"> -->
         <mat-select formControlName="ESTADOCIVIL">
           <mat-option value="SOLTERO (A)">SOLTERO (A)</mat-option>
           <mat-option value="SEPARADO (A)">SEPARADO (A)</mat-option>
@@ -373,42 +354,50 @@
     <div class="divFormularioFila8">
       <mat-form-field appearance="fill" class="campoFila8">
         <mat-label>Departamento</mat-label>
-        <!-- <input matInput  formControlName="CODIGO_DEPARTAMENTO" placeholder="Codigo departamento"> -->
+        <!-- ✅ FIX: guardamos CODIGO_DEPARTAMENTO -->
         <mat-select formControlName="CODIGO_DEPARTAMENTO">
           <mat-option
             *ngFor="let departamento of listaDepartamentos"
-            [value]="departamento.NOMBRE"
+            [value]="departamento.CODIGO_DEPARTAMENTO"
           >
             {{ departamento.NOMBRE }}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila8">
         <mat-label>Ciudad</mat-label>
-        <!-- <input matInput  formControlName="CODIGO_CIUDAD" placeholder="Codigo ciudad"> -->
+        <!-- ✅ FIX: guardamos CODIGO_CIUDAD -->
         <mat-select formControlName="CODIGO_CIUDAD">
           <mat-option
-            *ngFor="let ciudad of listaCiudades"
-            [value]="ciudad.NOMBRE"
+            *ngFor="let ciudad of listaCiudadesFiltradas"
+            [value]="ciudad.CODIGO_CIUDAD"
           >
             {{ ciudad.NOMBRE }}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="campoFila8">
         <mat-label>Barrio</mat-label>
-        <!-- <input matInput  formControlName="BARRIO" placeholder="Barrio"> -->
-        <mat-select formControlName="BARRIO">
-          <mat-option value="Ene">Ene</mat-option>
-          <mat-option value="Feb">Feb</mat-option>
-          <mat-option value="Mar">Mar</mat-option>
-          <mat-option value="Abr">Abr</mat-option>
-        </mat-select>
+        <input
+          matInput
+          formControlName="BARRIO"
+          placeholder="Barrio"
+          maxlength="80"
+        />
+        <mat-hint align="end">
+          {{ formularioDatosPersonales.get("BARRIO")?.value?.length || 0 }}/80
+        </mat-hint>
+        <mat-error
+          *ngIf="formularioDatosPersonales.get('BARRIO')?.hasError('maxlength')"
+        >
+          Máximo 80 caracteres.
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="fill" class="campoFila8">
         <mat-label>Zona</mat-label>
-        <!-- <input matInput  formControlName="ZONA_RECIDENCIAL" placeholder="Zona residencial"> -->
         <mat-select formControlName="ZONA_RECIDENCIAL">
           <mat-option value="URBANA">URBANA</mat-option>
           <mat-option value="RURAL">RURAL</mat-option>
@@ -439,7 +428,6 @@
       </mat-form-field>
       <mat-form-field appearance="fill" class="campoFila9">
         <mat-label>Estrato</mat-label>
-        <!-- <input matInput  formControlName="ESTRATO" placeholder="Estrato"> -->
         <mat-select formControlName="ESTRATO">
           <mat-option value="N/A">N/A</mat-option>
           <mat-option value="1">1</mat-option>
@@ -455,7 +443,6 @@
     <div class="divFormularioFila10">
       <mat-form-field appearance="fill" class="campoFila10">
         <mat-label>Ocupacion</mat-label>
-        <!-- <input matInput  formControlName="NIVELESCOLAR" placeholder="Nivel escolar"> -->
         <mat-select formControlName="NIVELESCOLAR">
           <mat-option value="ADMINISTRACIÓN">ADMINISTRACIÓN</mat-option>
           <mat-option value="AMA DE CASA">AMA DE CASA</mat-option>
@@ -500,7 +487,6 @@
   </div>
 
   <br />
-  <!-- Botones para guardar y cancelar -->
   <div class="divContenedorDeBotones">
     <button
       class="BotonGuardar"

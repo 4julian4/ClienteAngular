@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   ListadoItem,
@@ -6,6 +6,7 @@ import {
 } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { GenerarRipsModel, ProgresoRipsModel } from './generar-rips.model';
 import { GenerarRipsService } from './generar-rips.service';
+import { Subject, takeUntil } from 'rxjs';
 
 type AccionPendiente = 'GENERAR' | 'PRESENTAR' | null;
 
@@ -14,13 +15,14 @@ type AccionPendiente = 'GENERAR' | 'PRESENTAR' | null;
   templateUrl: './generar-rips.component.html',
   styleUrls: ['./generar-rips.component.scss'],
 })
-export class GenerarRipsComponent implements OnInit {
+export class GenerarRipsComponent implements OnInit, OnDestroy {
   listaDoctores: ListadoItem[] = [];
   listaInformacionReporte: ListadoItem[] = [];
   idSedeActualSignalR: string = '';
 
   isloading: boolean = false;
   ripsForm!: FormGroup;
+  sedeIdSeleccionada = 0;
 
   // ✅ progreso para UI
   progreso: ProgresoRipsModel | null = null;
@@ -30,6 +32,7 @@ export class GenerarRipsComponent implements OnInit {
   private ultimaRespuestaPresentacion: any[] = [];
 
   private accionPendiente: AccionPendiente = null;
+  private destruir$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -38,33 +41,48 @@ export class GenerarRipsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (data) {
-        this.listaDoctores = data.lstDoctores;
-        this.listaInformacionReporte = data.lstInformacionReporte;
-      }
-    });
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
+      });
 
-    this.respuestaPinService.sharedSedeData.subscribe((data) => {
-      if (data != null) this.idSedeActualSignalR = data;
-    });
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data) {
+          this.listaDoctores = data.lstDoctores;
+          this.listaInformacionReporte = data.lstInformacionReporte;
+        }
+      });
 
-    this.respuestaPinService.sharedisLoading.subscribe((data) => {
-      this.isloading = data || false;
-      // Cuando se apaga el loading, puedes dejar el último progreso visible o limpiarlo.
-      // Si quieres limpiarlo:
-      // if (!this.isloading) this.progreso = null;
-    });
+    this.respuestaPinService.sharedSedeData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) this.idSedeActualSignalR = data;
+      });
+
+    this.respuestaPinService.sharedisLoading
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        this.isloading = data || false;
+        // Cuando se apaga el loading, puedes dejar el último progreso visible o limpiarlo.
+        // Si quieres limpiarlo:
+        // if (!this.isloading) this.progreso = null;
+      });
     this.respuestaPinService.updateisLoading(false);
 
     // ✅ progreso en vivo
-    this.generarRipsService.sharedProgresoRips.subscribe((p) => {
-      this.progreso = p;
-    });
+    this.generarRipsService.sharedProgresoRips
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((p) => {
+        this.progreso = p;
+      });
 
     // Generar -> descarga automática
-    this.respuestaPinService.sharedrespuestaGenerarJsonRipsPresentado.subscribe(
-      (data: any[]) => {
+    this.respuestaPinService.sharedrespuestaGenerarJsonRipsPresentado
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data: any[]) => {
         if (!data || data.length === 0) return;
         this.ultimoGenerado = data;
 
@@ -72,12 +90,12 @@ export class GenerarRipsComponent implements OnInit {
           this.accionPendiente = null;
           this.downloadJson(data, this.makeFileName('RIPS_GENERADO_COMPLETO'));
         }
-      },
-    );
+      });
 
     // Presentar -> descarga automática
-    this.respuestaPinService.sharedrespuestaDockerJsonRipsPresentado.subscribe(
-      (data: any[]) => {
+    this.respuestaPinService.sharedrespuestaDockerJsonRipsPresentado
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data: any[]) => {
         if (!data || data.length === 0) return;
         this.ultimaRespuestaPresentacion = data;
 
@@ -88,8 +106,7 @@ export class GenerarRipsComponent implements OnInit {
             this.makeFileName('RIPS_PRESENTACION_RESPUESTA_COMPLETA'),
           );
         }
-      },
-    );
+      });
 
     this.ripsForm = this.fb.group({
       fechaInicio: ['', Validators.required],
@@ -101,6 +118,11 @@ export class GenerarRipsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
+  }
+
   // =========================
   // ACCIONES
   // =========================
@@ -110,7 +132,7 @@ export class GenerarRipsComponent implements OnInit {
 
     const payload: GenerarRipsModel = this.buildPayload();
     await this.generarRipsService.startConnectionPresentarRips(
-      this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       identificador,
       JSON.stringify(payload),
     );
@@ -122,7 +144,8 @@ export class GenerarRipsComponent implements OnInit {
 
     const payload: GenerarRipsModel = this.buildPayload();
     await this.generarRipsService.startConnectionGenerarRips(
-      this.idSedeActualSignalR,
+      //this.idSedeActualSignalR,
+      this.sedeIdSeleccionada,
       identificador,
       JSON.stringify(payload),
     );

@@ -1,6 +1,15 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
-import { fromEvent, Observable, merge } from 'rxjs';
+import { fromEvent, Observable, merge, Subject } from 'rxjs';
 import { map, tap, switchMap, takeUntil, finalize } from 'rxjs/operators';
 import { RespuestaPinService } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { EvolucionService } from 'src/app/conexiones/rydent/tablas/evolucion';
@@ -8,21 +17,25 @@ import { EvolucionService } from 'src/app/conexiones/rydent/tablas/evolucion';
 @Component({
   selector: 'app-agregar-firmas',
   templateUrl: './agregar-firmas.component.html',
-  styleUrls: ['./agregar-firmas.component.scss']
+  styleUrls: ['./agregar-firmas.component.scss'],
 })
-export class AgregarFirmasComponent implements AfterViewInit, OnInit {
-
-  @Input() name: string = "";
-  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement> | undefined;
+export class AgregarFirmasComponent
+  implements AfterViewInit, OnInit, OnDestroy
+{
+  @Input() name: string = '';
+  @ViewChild('canvas', { static: true }) canvas:
+    | ElementRef<HTMLCanvasElement>
+    | undefined;
   ctx: CanvasRenderingContext2D | undefined;
-  deDondeSeAgregaLaEvoluion: string = "";
+  deDondeSeAgregaLaEvoluion: string = '';
+  private destruir$ = new Subject<void>();
 
   constructor(
     private elementRef: ElementRef,
     private evolucionService: EvolucionService,
     private router: Router,
-    private respuestaPinService: RespuestaPinService
-  ) { }
+    private respuestaPinService: RespuestaPinService,
+  ) {}
 
   ngAfterViewInit() {
     this.initializeCanvas();
@@ -30,11 +43,17 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    this.respuestaPinService.sharedDeDondeAgregaEvolucionData.subscribe(data => {
-      if (data != null) {
-        this.deDondeSeAgregaLaEvoluion = data;
-      }
-    });
+    this.respuestaPinService.sharedDeDondeAgregaEvolucionData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.deDondeSeAgregaLaEvoluion = data;
+        }
+      });
+  }
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   @HostListener('window:resize')
@@ -48,119 +67,148 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
       console.error('No se pudo inicializar el elemento canvas.');
       return;
     }
-  
+
     // Obtiene el elemento canvas y su elemento contenedor padre
     const canvasElement = this.canvas.nativeElement;
     const parentElement = canvasElement.parentElement as HTMLElement;
-  
+
     // Ajusta el tamaño del canvas al tamaño del contenedor padre
     canvasElement.width = parentElement.clientWidth;
     canvasElement.height = parentElement.clientHeight;
-  
+
     // Obtiene el contexto 2D del canvas para dibujar
     this.ctx = canvasElement.getContext('2d')!;
     if (!this.ctx) {
       console.error('No se pudo obtener el contexto 2D del canvas.');
     }
   }
-  
+
   setupCanvasDrawing() {
     // Verifica si el contexto 2D y el elemento canvas están inicializados
     if (!this.ctx || !this.canvas) {
       return;
     }
-  
+
     const canvasElement = this.canvas.nativeElement;
-  
+
     // Observables para eventos del ratón
-    const mouseDownStream: Observable<MouseEvent> = fromEvent<MouseEvent>(canvasElement, 'mousedown');
-    const mouseMoveStream: Observable<MouseEvent> = fromEvent<MouseEvent>(canvasElement, 'mousemove');
-    const mouseUpStream: Observable<MouseEvent> = fromEvent<MouseEvent>(window, 'mouseup');
-  
+    const mouseDownStream: Observable<MouseEvent> = fromEvent<MouseEvent>(
+      canvasElement,
+      'mousedown',
+    );
+    const mouseMoveStream: Observable<MouseEvent> = fromEvent<MouseEvent>(
+      canvasElement,
+      'mousemove',
+    );
+    const mouseUpStream: Observable<MouseEvent> = fromEvent<MouseEvent>(
+      window,
+      'mouseup',
+    );
+
     // Observables para eventos táctiles
-    const touchStartStream: Observable<TouchEvent> = fromEvent<TouchEvent>(canvasElement, 'touchstart');
-    const touchMoveStream: Observable<TouchEvent> = fromEvent<TouchEvent>(canvasElement, 'touchmove');
-    const touchEndStream: Observable<TouchEvent> = fromEvent<TouchEvent>(window, 'touchend');
-  
+    const touchStartStream: Observable<TouchEvent> = fromEvent<TouchEvent>(
+      canvasElement,
+      'touchstart',
+    );
+    const touchMoveStream: Observable<TouchEvent> = fromEvent<TouchEvent>(
+      canvasElement,
+      'touchmove',
+    );
+    const touchEndStream: Observable<TouchEvent> = fromEvent<TouchEvent>(
+      window,
+      'touchend',
+    );
+
     // Función para convertir eventos táctiles en eventos equivalentes de ratón
     const touchToMouse = (touchEvent: TouchEvent): MouseEvent => {
       const touch = touchEvent.touches[0] || touchEvent.changedTouches[0];
       return new MouseEvent('mousedown', {
         clientX: touch.clientX, // Coordenada X del evento táctil
-        clientY: touch.clientY  // Coordenada Y del evento táctil
+        clientY: touch.clientY, // Coordenada Y del evento táctil
       });
     };
-  
+
     // Función para ajustar las coordenadas del evento al canvas
-    const getCanvasAdjustedCoordinates = (event: MouseEvent): { offsetX: number, offsetY: number } => {
+    const getCanvasAdjustedCoordinates = (
+      event: MouseEvent,
+    ): { offsetX: number; offsetY: number } => {
       const rect = canvasElement.getBoundingClientRect(); // Obtiene las dimensiones y posición del canvas
       const scaleX = canvasElement.width / rect.width; // Escala horizontal del canvas
       const scaleY = canvasElement.height / rect.height; // Escala vertical del canvas
-  
+
       // Ajusta las coordenadas X e Y para el canvas
       const offsetX = (event.clientX - rect.left) * scaleX;
       const offsetY = (event.clientY - rect.top) * scaleY;
-  
+
       console.log(`Adjusted Coordinates: X=${offsetX}, Y=${offsetY}`);
       return { offsetX, offsetY };
     };
-  
+
     // Combina eventos de inicio (ratón y táctil)
     const startStream = merge(
       mouseDownStream,
-      touchStartStream.pipe(map(touchToMouse)) // Convierte eventos táctiles en eventos de ratón
+      touchStartStream.pipe(map(touchToMouse)), // Convierte eventos táctiles en eventos de ratón
     );
-  
+
     // Combina eventos de movimiento (ratón y táctil)
     const moveStream = merge(
       mouseMoveStream,
-      touchMoveStream.pipe(map(touchToMouse)) // Convierte eventos táctiles en eventos de ratón
+      touchMoveStream.pipe(map(touchToMouse)), // Convierte eventos táctiles en eventos de ratón
     );
-  
+
     // Combina eventos de finalización (ratón y táctil)
     const endStream = merge(
       mouseUpStream,
-      touchEndStream.pipe(map(touchToMouse)) // Convierte eventos táctiles en eventos de ratón
+      touchEndStream.pipe(map(touchToMouse)), // Convierte eventos táctiles en eventos de ratón
     );
-  
+
     // Suscripción al stream de inicio
-    startStream.pipe(
-      tap((event: MouseEvent) => {
-        if (this.ctx) {
-          this.ctx.beginPath(); // Inicia un nuevo trazado
-          this.ctx.strokeStyle = 'black'; // Color del trazo
-          this.ctx.lineWidth = 5; // Ancho de la línea
-          this.ctx.lineJoin = 'round'; // Tipo de unión de las líneas
-  
-          const { offsetX, offsetY } = getCanvasAdjustedCoordinates(event);
-          this.ctx.moveTo(offsetX, offsetY); // Mueve el lápiz a las coordenadas ajustadas
-        }
-      }),
-      switchMap(() => moveStream.pipe(
-        map((event: MouseEvent) => {
-          event.preventDefault(); // Evita el comportamiento predeterminado (como desplazarse)
-          return getCanvasAdjustedCoordinates(event); // Ajusta las coordenadas al canvas
-        }),
-        tap(({ offsetX, offsetY }) => {
+    startStream
+      .pipe(
+        tap((event: MouseEvent) => {
           if (this.ctx) {
-            this.ctx.lineTo(offsetX, offsetY); // Dibuja una línea hasta las nuevas coordenadas
-            this.ctx.stroke(); // Realiza el trazo
+            this.ctx.beginPath(); // Inicia un nuevo trazado
+            this.ctx.strokeStyle = 'black'; // Color del trazo
+            this.ctx.lineWidth = 5; // Ancho de la línea
+            this.ctx.lineJoin = 'round'; // Tipo de unión de las líneas
+
+            const { offsetX, offsetY } = getCanvasAdjustedCoordinates(event);
+            this.ctx.moveTo(offsetX, offsetY); // Mueve el lápiz a las coordenadas ajustadas
           }
         }),
-        takeUntil(endStream), // Finaliza el trazado al terminar el evento
-        finalize(() => {
-          if (this.ctx) {
-            this.ctx.closePath(); // Cierra el trazado
-          }
-        })
-      ))
-    ).subscribe(); // Inicia la suscripción para escuchar los eventos
+        switchMap(() =>
+          moveStream.pipe(
+            map((event: MouseEvent) => {
+              event.preventDefault(); // Evita el comportamiento predeterminado (como desplazarse)
+              return getCanvasAdjustedCoordinates(event); // Ajusta las coordenadas al canvas
+            }),
+            tap(({ offsetX, offsetY }) => {
+              if (this.ctx) {
+                this.ctx.lineTo(offsetX, offsetY); // Dibuja una línea hasta las nuevas coordenadas
+                this.ctx.stroke(); // Realiza el trazo
+              }
+            }),
+            takeUntil(endStream), // Finaliza el trazado al terminar el evento
+            finalize(() => {
+              if (this.ctx) {
+                this.ctx.closePath(); // Cierra el trazado
+              }
+            }),
+          ),
+        ),
+      )
+      .pipe(takeUntil(this.destruir$))
+      .subscribe(); // Inicia la suscripción para escuchar los eventos
   }
-  
 
   limpiarCanvas() {
     if (this.ctx && this.canvas && this.canvas.nativeElement) {
-      this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      this.ctx.clearRect(
+        0,
+        0,
+        this.canvas.nativeElement.width,
+        this.canvas.nativeElement.height,
+      );
     }
   }
 
@@ -177,7 +225,12 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
       const ctx = this.ctx;
 
       // Obtener los datos de la imagen del canvas
-      const imageData = ctx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        canvasElement.width,
+        canvasElement.height,
+      );
       const data = imageData.data;
 
       // Variables para los límites de la firma
@@ -215,7 +268,11 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
 
       if (tempCtx) {
         // Copiar la parte de la firma al nuevo canvas
-        tempCtx.putImageData(ctx.getImageData(minX, minY, tempCanvas.width, tempCanvas.height), 0, 0);
+        tempCtx.putImageData(
+          ctx.getImageData(minX, minY, tempCanvas.width, tempCanvas.height),
+          0,
+          0,
+        );
 
         // Crear un canvas para la firma escalada con tamaño fijo
         const fixedWidth = 300; // Ancho fijo
@@ -252,7 +309,12 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
       const ctx = this.ctx;
 
       // Obtener los datos de la imagen del canvas
-      const imageData = ctx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        canvasElement.width,
+        canvasElement.height,
+      );
       const data = imageData.data;
 
       // Variables para los límites de la firma
@@ -290,7 +352,11 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
 
       if (tempCtx) {
         // Copiar la parte de la firma al nuevo canvas
-        tempCtx.putImageData(ctx.getImageData(minX, minY, tempCanvas.width, tempCanvas.height), 0, 0);
+        tempCtx.putImageData(
+          ctx.getImageData(minX, minY, tempCanvas.width, tempCanvas.height),
+          0,
+          0,
+        );
 
         // Crear un canvas para la firma escalada con tamaño fijo
         const fixedWidth = 300; // Ancho fijo
@@ -330,7 +396,6 @@ export class AgregarFirmasComponent implements AfterViewInit, OnInit {
   }*/
 
   cancelarFirmar() {
-
     if (this.deDondeSeAgregaLaEvoluion == 'EVOLUCION') {
       this.router.navigate(['/agregar-evolucion']);
     }

@@ -2,7 +2,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { RespuestaBusquedaFacturasCreadas } from '../respuesta-busqueda-facturas-creadas';
+import {
+  PagedResult,
+  RespuestaBusquedaFacturasCreadas,
+} from '../respuesta-busqueda-facturas-creadas';
 import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -41,6 +44,40 @@ export class FacturasCreadasHttpService {
     // https://localhost:7226/api/facturas/creadas?codigo=...&numeroFactura=...
     return this.http.get<RespuestaBusquedaFacturasCreadas[]>(
       `${this.root}/creadas`,
+      { params },
+    );
+  }
+
+  buscarFacturasCreadasPaged(
+    codigo: string,
+    opts: {
+      numeroFactura?: string;
+      sedeId?: number;
+      texto?: string;
+      fechaIni?: Date | null;
+      fechaFin?: Date | null;
+      page: number;
+      pageSize: number;
+    },
+  ): Observable<PagedResult<RespuestaBusquedaFacturasCreadas>> {
+    let params = new HttpParams().set('codigo', codigo);
+
+    if (opts.numeroFactura?.trim())
+      params = params.set('numeroFactura', opts.numeroFactura.trim());
+    params = params.set('sedeId', (opts.sedeId ?? 0).toString());
+
+    if (opts.texto?.trim()) params = params.set('texto', opts.texto.trim());
+
+    if (opts.fechaIni)
+      params = params.set('fechaIni', opts.fechaIni.toISOString());
+    if (opts.fechaFin)
+      params = params.set('fechaFin', opts.fechaFin.toISOString());
+
+    params = params.set('page', opts.page.toString());
+    params = params.set('pageSize', opts.pageSize.toString());
+
+    return this.http.get<PagedResult<RespuestaBusquedaFacturasCreadas>>(
+      `${this.root}/creadas/paged`,
       { params },
     );
   }

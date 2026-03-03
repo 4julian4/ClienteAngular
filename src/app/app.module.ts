@@ -6,7 +6,7 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import {
   DateAdapter,
   MAT_DATE_FORMATS,
@@ -59,7 +59,7 @@ import {
 import { HideColumnDirective } from './directives/hide-column.directive';
 import { AgendaResponsiveComponent } from './componentes/agenda-responsive';
 import { AgregarEvolucionAgendaComponent } from './componentes/agregar-evolucion-agenda';
-import { AdmonClientesComponent } from './componentes/admon-clientes';
+import { AdmonClientesComponent } from './componentes/admon/admon-clientes';
 import { AgregarDatosPersonalesComponent } from './componentes/agregar-datos-personales/agregar-datos-personales.component';
 import { AgregarAntecedentesComponent } from './componentes/agregar-antecedentes/agregar-antecedentes.component';
 import { GenerarRipsComponent } from './componentes/generar-rips';
@@ -78,6 +78,22 @@ import { AbonoTratamientoDialogComponent } from './componentes/estado-cuenta/abo
 import { AdicionalTratamientoDialogComponent } from './componentes/estado-cuenta/adicional-tratamiento-dialog.component';
 import { AgregarEstadoCuentaDialogComponent } from './componentes/estado-cuenta/agregar-estado-cuenta-dialog.component';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { ConfirmDialogComponent } from './componentes/confirmar-dialogo/confirm-dialog.component';
+import { AdmonUsuariosComponent } from './componentes/admon/admon-usuarios/admon-usuarios.component';
+import { AdmonSedesComponent } from './componentes/admon/admon-sedes/admon-sedes.component';
+import { AdminDashboardComponent } from './componentes/admon/admin-dashboard/admin-dashboard.component';
+import { RouterModule } from '@angular/router';
+import { AdmonTenantsComponent } from './componentes/admon/admon-tenants/admon-tenants.component';
+import { AdmonResolucionesComponent } from './componentes/admon/admon-resoluciones/admon-resoluciones.component';
+import { AdminControlComponent } from './componentes/admon/admin-control/admin-control.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -131,6 +147,13 @@ export const MY_DATE_FORMATS = {
     NotasComponent,
     NominaComponent,
     CrearNominaDialogComponent,
+    ConfirmDialogComponent,
+    AdmonUsuariosComponent,
+    AdmonSedesComponent,
+    AdminDashboardComponent,
+    AdmonTenantsComponent,
+    AdmonResolucionesComponent,
+    AdminControlComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -158,6 +181,16 @@ export const MY_DATE_FORMATS = {
     MatDatepickerModule, // <-- nuevo
     MatNativeDateModule,
     NgxMatSelectSearchModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatChipsModule,
+    CommonModule,
+    RouterModule,
   ],
   providers: [
     DatePipe,
@@ -182,13 +215,13 @@ export const MY_DATE_FORMATS = {
 export class AppModule {
   constructor(
     private matIconRegistry: MatIconRegistry,
-    private domSanitizer: DomSanitizer
+    private domSanitizer: DomSanitizer,
   ) {
     this.matIconRegistry.addSvgIcon(
       'whatsapp',
       this.domSanitizer.bypassSecurityTrustResourceUrl(
-        'assets/icons/whatsapp.svg'
-      )
+        'assets/icons/whatsapp.svg',
+      ),
     );
   }
 }

@@ -11,17 +11,17 @@
       <div class="resumen-financiero-header">
         <div class="item-resumen-header item-total-concepto">
           <span class="label">Total Concepto</span>
-          <span class="valor">{{ totalConceptos | number : "1.0-0" }}</span>
+          <span class="valor">{{ totalConceptos | number: "1.0-0" }}</span>
         </div>
 
         <div class="item-resumen-header item-total-abono">
           <span class="label">Total Abono</span>
-          <span class="valor">{{ totalPagos | number : "1.0-0" }}</span>
+          <span class="valor">{{ totalPagos | number: "1.0-0" }}</span>
         </div>
 
         <div class="item-resumen-header item-saldo-header">
           <span class="label">Saldo</span>
-          <span class="valor">{{ saldoPendiente | number : "1.0-0" }}</span>
+          <span class="valor">{{ saldoPendiente | number: "1.0-0" }}</span>
         </div>
       </div>
     </div>
@@ -79,6 +79,8 @@
     <div class="header-conceptos">
       <span class="titulo-seccion">Conceptos</span>
       <button
+        #btnToggleConcepto
+        cdkFocusInitial
         class="boton-toggle-seccion"
         type="button"
         (click)="toggleEditorConcepto()"
@@ -91,6 +93,7 @@
       <div class="campo-input-wrapper">
         <label>Buscar por código o nombre</label>
         <input
+          #inputBusquedaConcepto
           type="text"
           class="input-compacto"
           placeholder="Ej: 232102 o RESINA"
@@ -145,9 +148,11 @@
           <div class="campo-input-wrapper campo-valor">
             <label>Valor</label>
             <input
+              #inputValorConcepto
               type="text"
               class="input-compacto"
               formControlName="valorUnitario"
+              (keydown.enter)="onEnterValorConcepto($event)"
             />
           </div>
 
@@ -173,6 +178,7 @@
           </div>
 
           <button
+            #btnAgregarConcepto
             class="boton-agregar"
             type="button"
             (click)="agregarConcepto()"
@@ -208,9 +214,9 @@
           <tr *ngFor="let c of conceptosAgregados; let i = index">
             <td>{{ c.codigo }}</td>
             <td>{{ c.descripcion }}</td>
-            <td>{{ c.valorUnitario | number : "1.0-0" }}</td>
+            <td>{{ c.valorUnitario | number: "1.0-0" }}</td>
             <td>{{ c.cantidad }}</td>
-            <td>{{ c.total | number : "1.0-0" }}</td>
+            <td>{{ c.total | number: "1.0-0" }}</td>
             <td>{{ c.ivaIncluido ? c.porcentajeIva : 0 }}</td>
             <td>
               <button
@@ -235,6 +241,7 @@
     <div class="header-formas-pago">
       <span class="titulo-seccion">Forma de Pago</span>
       <button
+        #btnTogglePago
         class="boton-toggle-seccion"
         type="button"
         (click)="toggleEditorFormaPago()"
@@ -270,6 +277,7 @@
         </div>
 
         <button
+          #btnAgregarPago
           class="boton-agregar"
           type="button"
           (click)="agregarFormaPago()"
@@ -298,7 +306,7 @@
           <tr *ngFor="let p of formasPagoAgregadas; let i = index">
             <td>{{ p.formaPago }}</td>
             <td>{{ p.descripcion }}</td>
-            <td>{{ p.valor | number : "1.0-0" }}</td>
+            <td>{{ p.valor | number: "1.0-0" }}</td>
             <td>
               <button
                 class="boton-icono-eliminar"
@@ -355,6 +363,8 @@
   <!-- ✅ Botones a la derecha -->
   <div class="botones-acciones">
     <button class="BotonCancelar" (click)="onCancelar()">Cancelar</button>
-    <button class="BotonGuardar" (click)="onGuardar()">Aceptar</button>
+    <button #btnAceptar class="BotonGuardar" (click)="onGuardar()">
+      Aceptar
+    </button>
   </div>
 </mat-dialog-actions>

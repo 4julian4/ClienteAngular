@@ -1,0 +1,237 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Administración de Usuarios</h2>
+      <div class="subtitle">Usuarios por cliente (login / correo)</div>
+    </div>
+
+    <div class="header-actions">
+      <!-- ✅ Volver al dashboard Administración (solo tabla) -->
+      <button
+        *ngIf="!showForm"
+        mat-stroked-button
+        class="btn-back"
+        type="button"
+        (click)="goAdminDashboard()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        Administración
+      </button>
+
+      <button
+        *ngIf="!showForm"
+        mat-raised-button
+        class="btn-crear"
+        type="button"
+        (click)="openCreate()"
+      >
+        <mat-icon>person_add</mat-icon>
+        Crear Usuario
+      </button>
+
+      <button
+        *ngIf="showForm"
+        mat-stroked-button
+        type="button"
+        (click)="cancelForm()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <mat-card class="table-card" *ngIf="!showForm">
+    <mat-card-content>
+      <div class="toolbar">
+        <div class="search-pill">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Buscar por nombre, correo, cliente, código externo..."
+            (keyup)="applyFilter($event)"
+          />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
+          <ng-container matColumnDef="nombreUsuario">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let u">
+              <div class="cell-main">{{ u.nombreUsuario }}</div>
+              <div class="cell-sub" *ngIf="u.codigoExternoUsuario">
+                Código externo: {{ u.codigoExternoUsuario }}
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- ✅ NUEVO: Cliente -->
+          <ng-container matColumnDef="cliente">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let u">
+              <span class="pill pill-tag">{{
+                getClienteNombreById(u.idCliente)
+              }}</span>
+              <!--  <div class="cell-sub" *ngIf="u.idCliente">
+                ID: {{ u.idCliente }}
+              </div>-->
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="correoUsuario">
+            <th mat-header-cell *matHeaderCellDef>Correo</th>
+            <td mat-cell *matCellDef="let u">{{ u.correoUsuario || "—" }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let u">
+              <span class="pill" [ngClass]="getEstadoPillClass(u)">
+                {{ getEstadoLabel(u) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="col-actions">
+              Acciones
+            </th>
+            <td mat-cell *matCellDef="let u" class="col-actions">
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menuAcciones"
+                (click)="setUsuarioAccion(u)"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        showFirstLastButtons
+      ></mat-paginator>
+
+      <mat-menu #menuAcciones="matMenu">
+        <button mat-menu-item (click)="openEdit(usuarioAccion)">
+          <mat-icon>edit</mat-icon>
+          <span>Editar</span>
+        </button>
+        <button
+          mat-menu-item
+          class="danger"
+          (click)="delete(usuarioAccion?.idUsuario)"
+        >
+          <mat-icon>delete</mat-icon>
+          <span>Borrar</span>
+        </button>
+      </mat-menu>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- FORM -->
+  <mat-card class="form-card" *ngIf="showForm">
+    <div class="form-header">
+      <div>
+        <div class="form-title">
+          {{ editing ? "Editar usuario" : "Crear usuario" }}
+        </div>
+        <div class="form-subtitle">
+          Correo debe ser válido (se usa para acceso)
+        </div>
+      </div>
+
+      <div class="form-actions-top">
+        <button mat-stroked-button type="button" (click)="cancelForm()">
+          Cancelar
+        </button>
+        <button
+          mat-raised-button
+          class="btn-guardar"
+          type="button"
+          (click)="save()"
+          [disabled]="usuarioForm.invalid"
+        >
+          <mat-icon>save</mat-icon>
+          Guardar
+        </button>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content>
+      <form [formGroup]="usuarioForm" (ngSubmit)="save()">
+        <div class="form-grid">
+          <!-- ✅ Cliente SOLO cuando se crea -->
+          <ng-container *ngIf="!editing; else clienteSoloLectura">
+            <mat-form-field appearance="outline" class="span-2">
+              <mat-label>Cliente</mat-label>
+              <mat-select formControlName="idCliente" required>
+                <mat-option [value]="null">— Seleccionar —</mat-option>
+                <mat-option *ngFor="let c of clientes" [value]="c.idCliente">
+                  {{ c.nombreCliente }}
+                </mat-option>
+              </mat-select>
+              <mat-hint>Selecciona el cliente al que quedará asociado</mat-hint>
+              <mat-error *ngIf="usuarioForm.get('idCliente')?.invalid">
+                Debes seleccionar un cliente
+              </mat-error>
+            </mat-form-field>
+          </ng-container>
+
+          <!-- ✅ Cliente BLOQUEADO al editar -->
+          <ng-template #clienteSoloLectura>
+            <div class="cliente-readonly span-2">
+              <div class="cliente-label">Cliente</div>
+              <div class="cliente-value">
+                <span class="pill pill-tag">
+                  {{
+                    getClienteNombreById(usuarioForm.get("idCliente")?.value)
+                  }}
+                </span>
+              </div>
+              <div class="cliente-hint">
+                El cliente no se puede cambiar al editar.
+              </div>
+            </div>
+          </ng-template>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombreUsuario" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput formControlName="correoUsuario" />
+            <mat-error *ngIf="usuarioForm.get('correoUsuario')?.invalid">
+              Correo inválido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Código externo</mat-label>
+            <input matInput formControlName="codigoExternoUsuario" />
+            <mat-hint>Opcional (si sincronizas con otro sistema)</mat-hint>
+          </mat-form-field>
+
+          <div class="switches">
+            <div class="switch-title">Estado</div>
+            <mat-slide-toggle formControlName="estado">
+              Usuario activo
+            </mat-slide-toggle>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

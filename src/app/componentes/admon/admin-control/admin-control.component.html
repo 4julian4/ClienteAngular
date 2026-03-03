@@ -1,0 +1,464 @@
+<div class="page">
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Centro de Control</h2>
+      <div class="subtitle">
+        Alertas de vencimientos, usos Dataico, resoluciones DIAN y sedes
+        conectadas
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- ✅ volver al dashboard -->
+      <button mat-stroked-button type="button" (click)="goAdminDashboard()">
+        <mat-icon>arrow_back</mat-icon>
+        Administración
+      </button>
+      <button mat-stroked-button (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- KPIs rápidos -->
+  <div class="kpis">
+    <mat-card class="kpi">
+      <div class="kpi-title">Clientes por vencer ({{ windowDays }} días)</div>
+      <div class="kpi-value">{{ kpiClientesPorVencer }}</div>
+      <div class="kpi-sub">RydentWeb: fecha activoHasta</div>
+    </mat-card>
+
+    <mat-card class="kpi">
+      <div class="kpi-title">Tenants con usos bajos</div>
+      <div class="kpi-value">{{ kpiTenantsBajoSaldo }}</div>
+      <div class="kpi-sub">Dataico: UsageBalance ≤ {{ lowUsageThreshold }}</div>
+    </mat-card>
+
+    <mat-card class="kpi">
+      <div class="kpi-title">
+        Resoluciones por vencer ({{ windowDays }} días)
+      </div>
+      <div class="kpi-value">{{ kpiResPorVencer }}</div>
+      <div class="kpi-sub">DIAN: validTo cercano</div>
+    </mat-card>
+
+    <mat-card class="kpi">
+      <div class="kpi-title">Resoluciones por agotar rango</div>
+      <div class="kpi-value">{{ kpiResPorAgotar }}</div>
+      <div class="kpi-sub">
+        ToNumber - LastNumberUsed ≤ {{ lowRangeRemainingThreshold }}
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- TABS -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <mat-tab-group>
+        <!-- ===================== -->
+        <!-- TAB 1: ALERTAS -->
+        <!-- ===================== -->
+        <mat-tab label="Alertas">
+          <div class="tab-pad">
+            <div class="table-toolbar">
+              <!-- Buscar -->
+              <div class="search-pill">
+                <mat-icon class="search-ico">search</mat-icon>
+                <input
+                  class="search-input"
+                  type="text"
+                  (keyup)="applySearch($event)"
+                  placeholder="Buscar por cliente, tenant, resolución..."
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="quick-filters">
+                <button
+                  mat-stroked-button
+                  class="pill-btn"
+                  [class.active]="windowDays === 7"
+                  (click)="setWindowDays(7)"
+                >
+                  7 días
+                </button>
+
+                <button
+                  mat-stroked-button
+                  class="pill-btn"
+                  [class.active]="windowDays === 30"
+                  (click)="setWindowDays(30)"
+                >
+                  30 días
+                </button>
+
+                <button
+                  mat-stroked-button
+                  class="pill-btn"
+                  [class.active]="onlyCritical === true"
+                  (click)="toggleOnlyCritical()"
+                >
+                  Solo críticas
+                </button>
+              </div>
+            </div>
+
+            <!-- ALERTS TABLE -->
+            <div class="table-wrap">
+              <table
+                mat-table
+                [dataSource]="alertsDataSource"
+                class="mat-elevation-z0"
+              >
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                  <td mat-cell *matCellDef="let a">
+                    <span class="pill pill-tag">{{ a.type }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="titulo">
+                  <th mat-header-cell *matHeaderCellDef>Detalle</th>
+                  <td mat-cell *matCellDef="let a">
+                    <div class="cell-main">{{ a.title }}</div>
+                    <div class="cell-sub">{{ a.subtitle }}</div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let a">
+                    <span class="pill" [ngClass]="a.pillClass">
+                      {{ a.pillLabel }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="accion">
+                  <th mat-header-cell *matHeaderCellDef class="col-actions">
+                    Ir
+                  </th>
+                  <td mat-cell *matCellDef="let a" class="col-actions">
+                    <button mat-icon-button (click)="goTo(a)">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="alertsColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: alertsColumns"></tr>
+              </table>
+            </div>
+
+            <div class="empty" *ngIf="alertsDataSource.data.length === 0">
+              No hay alertas con los filtros actuales.
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ===================== -->
+        <!-- TAB 2: CLIENTES -->
+        <!-- ===================== -->
+        <mat-tab label="Clientes">
+          <div class="tab-pad">
+            <div class="hint">
+              Solo se listan clientes que tengan <b>usaDataico = true</b> o que
+              tengan fecha de vencimiento relevante.
+            </div>
+
+            <div class="table-wrap">
+              <table
+                mat-table
+                [dataSource]="clientesDataSource"
+                class="mat-elevation-z0"
+              >
+                <ng-container matColumnDef="cliente">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let c">
+                    <div class="cell-main">{{ c.nombreCliente }}</div>
+                    <div class="cell-sub">
+                      {{
+                        (c.ciudad || "") +
+                          (c.ciudad && c.pais ? ", " : "") +
+                          (c.pais || "") || "—"
+                      }}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="telefonos">
+                  <th mat-header-cell *matHeaderCellDef>Teléfonos</th>
+                  <td mat-cell *matCellDef="let c">
+                    <div class="phones">
+                      <span class="pill pill-tag" *ngIf="c.telefono1">{{
+                        c.telefono1
+                      }}</span>
+                      <span class="pill pill-tag" *ngIf="c.telefono2">{{
+                        c.telefono2
+                      }}</span>
+                      <span *ngIf="!c.telefono1 && !c.telefono2">—</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="vencimiento">
+                  <th mat-header-cell *matHeaderCellDef>Vence</th>
+                  <td mat-cell *matCellDef="let c">
+                    <span
+                      class="pill pill-date"
+                      *ngIf="c.activoHasta; else sinFecha"
+                    >
+                      {{ c.activoHasta | date: "dd-MM-yyyy" }}
+                    </span>
+                    <ng-template #sinFecha>—</ng-template>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="dataico">
+                  <th mat-header-cell *matHeaderCellDef>Dataico</th>
+                  <td mat-cell *matCellDef="let c">
+                    <span class="pill pill-ok" *ngIf="c.usaDataico"
+                      >Activo</span
+                    >
+                    <span class="pill pill-muted" *ngIf="!c.usaDataico"
+                      >No</span
+                    >
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="billingTenantId">
+                  <th mat-header-cell *matHeaderCellDef>TenantId</th>
+                  <td mat-cell *matCellDef="let c">
+                    <span class="mono">{{ c.billingTenantId || "—" }}</span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="clientesColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: clientesColumns"></tr>
+              </table>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ===================== -->
+        <!-- TAB 3: DATAICO -->
+        <!-- ===================== -->
+        <mat-tab label="Dataico (Usos)">
+          <div class="tab-pad">
+            <div class="table-wrap">
+              <table
+                mat-table
+                [dataSource]="tenantsDataSource"
+                class="mat-elevation-z0"
+              >
+                <ng-container matColumnDef="tenant">
+                  <th mat-header-cell *matHeaderCellDef>Tenant</th>
+                  <td mat-cell *matCellDef="let t">
+                    <div class="cell-main">{{ t.name }}</div>
+                    <div class="cell-sub">
+                      {{ t.code }} · {{ t.env || "—" }}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="usage">
+                  <th mat-header-cell *matHeaderCellDef>Usos</th>
+                  <td mat-cell *matCellDef="let t">
+                    <span class="pill pill-tag">{{ t.usageBalance ?? 0 }}</span>
+                    <span class="pill" [ngClass]="getUsagePillClass(t)">
+                      {{ getUsagePillLabel(t) }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let t">
+                    <span
+                      class="pill"
+                      [ngClass]="t.isActive ? 'pill-ok' : 'pill-muted'"
+                    >
+                      {{ t.isActive ? "Activo" : "Inactivo" }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef class="col-actions">
+                    Ir
+                  </th>
+                  <td mat-cell *matCellDef="let t" class="col-actions">
+                    <button mat-icon-button (click)="goTenant(t.id)">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="tenantsColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: tenantsColumns"></tr>
+              </table>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ===================== -->
+        <!-- TAB 4: RESOLUCIONES -->
+        <!-- ===================== -->
+        <mat-tab label="Resoluciones DIAN">
+          <div class="tab-pad">
+            <div class="hint">
+              Se consultan resoluciones por cada tenant activo. (Si tienes
+              muchos tenants, luego optimizamos con un endpoint agregado.)
+            </div>
+
+            <div class="table-wrap">
+              <table
+                mat-table
+                [dataSource]="resDataSource"
+                class="mat-elevation-z0"
+              >
+                <ng-container matColumnDef="tenant">
+                  <th mat-header-cell *matHeaderCellDef>Tenant</th>
+                  <td mat-cell *matCellDef="let r">
+                    <div class="cell-main">{{ r.tenantName }}</div>
+                    <div class="cell-sub">{{ r.tenantCode }}</div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="doc">
+                  <th mat-header-cell *matHeaderCellDef>Doc</th>
+                  <td mat-cell *matCellDef="let r">
+                    <span class="pill pill-tag">{{ r.documentType }}</span>
+                    <span class="pill pill-tag">{{ r.prefix }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="vigencia">
+                  <th mat-header-cell *matHeaderCellDef>Válida hasta</th>
+                  <td mat-cell *matCellDef="let r">
+                    <span class="pill pill-date">
+                      {{ r.validTo | date: "dd-MM-yyyy" }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let r">
+                    <span class="pill" [ngClass]="r.pillClass">{{
+                      r.pillLabel
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef class="col-actions">
+                    Ir
+                  </th>
+                  <td mat-cell *matCellDef="let r" class="col-actions">
+                    <button mat-icon-button (click)="goResolutions(r.tenantId)">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="resColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: resColumns"></tr>
+              </table>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ===================== -->
+        <!-- TAB 5: SEDES -->
+        <!-- ===================== -->
+        <mat-tab label="Sedes conectadas">
+          <div class="tab-pad">
+            <div class="hint">
+              Activas recientes (último acceso en los últimos 10 minutos).
+              Total: <b>{{ kpiSedesActivas }}</b>
+            </div>
+
+            <div class="table-wrap">
+              <table
+                mat-table
+                [dataSource]="sedesDataSource"
+                class="mat-elevation-z0"
+              >
+                <ng-container matColumnDef="cliente">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let s">
+                    <div class="cell-main">{{ s.nombreCliente || "—" }}</div>
+                    <div class="cell-sub">
+                      idCliente: {{ s.idCliente || "—" }}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="sede">
+                  <th mat-header-cell *matHeaderCellDef>Sede</th>
+                  <td mat-cell *matCellDef="let s">
+                    <span class="mono">{{ s.idSede || "—" }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let s">
+                    <span class="pill" [ngClass]="s.estadoClass">{{
+                      s.estadoLabel
+                    }}</span>
+                    <span class="pill pill-tag" *ngIf="s.lastSeenMin !== null">
+                      {{ s.lastSeenMin }} min
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="ultimo">
+                  <th mat-header-cell *matHeaderCellDef>Último acceso</th>
+                  <td mat-cell *matCellDef="let s">
+                    {{
+                      s.fechaUltimoAcceso
+                        ? (s.fechaUltimoAcceso | date: "dd-MM-yyyy HH:mm")
+                        : "—"
+                    }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="conn">
+                  <th mat-header-cell *matHeaderCellDef>ConnId</th>
+                  <td mat-cell *matCellDef="let s">
+                    <span class="mono">{{ s.idActualSignalR || "—" }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef class="col-actions">
+                    Acción
+                  </th>
+                  <td mat-cell *matCellDef="let s" class="col-actions">
+                    <button
+                      mat-icon-button
+                      (click)="copyConnId(s.idActualSignalR)"
+                    >
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="sedesColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: sedesColumns"></tr>
+              </table>
+            </div>
+
+            <div class="empty" *ngIf="sedesDataSource.data.length === 0">
+              No hay sedes activas recientes.
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

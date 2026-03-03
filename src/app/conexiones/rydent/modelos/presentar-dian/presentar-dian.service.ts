@@ -1,5 +1,5 @@
 // src/app/conexiones/rydent/modelos/presentar-dian/presentar-dian.service.ts
-import { EventEmitter, Injectable, Output } from '@angular/core';
+/*import { EventEmitter, Injectable, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SignalRService } from 'src/app/signalr.service';
 
@@ -243,7 +243,7 @@ export class PresentarDianService {
   /**
    * ✅ Convierte “nuevo” o “viejo” a un ProgressView estándar
    */
-  private toProgressView(obj: any): PresentarDianProgressView | null {
+/*private toProgressView(obj: any): PresentarDianProgressView | null {
     // Nuevo (pro)
     const looksNew =
       obj?.procesadas !== undefined && obj?.exitosas !== undefined;
@@ -262,6 +262,417 @@ export class PresentarDianService {
 
     // Viejo (batch)
     const looksOld = obj?.processed !== undefined;
+    if (looksOld) {
+      const b = obj as PresentarDianProgressBatch;
+      const curr = this._progreso.value;
+
+      const looksAccumulated =
+        (b.total ?? curr.total) > 0 && (b.processed ?? 0) >= curr.processed;
+
+      const processed = looksAccumulated
+        ? Math.max(curr.processed, b.processed ?? curr.processed)
+        : curr.processed + (b.processed ?? 0);
+
+      const ok = curr.ok + (b.batchOk ?? 0);
+      const fail = curr.fail + (b.batchFail ?? 0);
+
+      return {
+        processed,
+        ok,
+        fail,
+        total: b.total ?? curr.total,
+        lastMessage: b.lastMessage ?? curr.lastMessage,
+        lastExternalId: b.lastExternalId ?? curr.lastExternalId,
+      };
+    }
+
+    return null;
+  }
+}*/
+
+// src/app/conexiones/rydent/modelos/presentar-dian/presentar-dian.service.ts
+import { EventEmitter, Injectable, Output } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { SignalRService } from 'src/app/signalr.service';
+
+import {
+  OperationLiteral,
+  PresentarDianBatchRequest,
+  PresentarDianItem,
+  PresentarDianItemResult,
+  PresentarDianSummary,
+  PresentarDianProgressBatch,
+  PresentarDianProgressDto,
+  PresentarDianProgressView,
+} from './presentar-dian.model';
+
+import { RespuestaBusquedaFacturasPendientes } from '../respuesta-busqueda-facturas-pendientes';
+
+@Injectable({ providedIn: 'root' })
+export class PresentarDianService {
+  @Output() resumenOk = new EventEmitter<PresentarDianSummary>();
+  @Output() resumenConError = new EventEmitter<PresentarDianSummary>();
+
+  private _progreso = new BehaviorSubject<PresentarDianProgressView>({
+    processed: 0,
+    ok: 0,
+    fail: 0,
+    total: 0,
+  });
+  progreso$ = this._progreso.asObservable();
+
+  // ✅ returnId actual del browser (para filtrar callbacks)
+  private currentReturnId: string = '';
+
+  // ✅ refs para hacer off SOLO a nuestros handlers
+  private onErrorConexion?: (returnId: string, mensajeError: string) => void;
+
+  private onProgresoPresentacionFactura?: (
+    returnId: string,
+    payload: unknown,
+  ) => void;
+
+  private onRespuestaPresentarFacturasEnDian?: (
+    returnId: string,
+    payload: unknown,
+  ) => void;
+
+  private onRespuestaDescargarJsonFacturaPendiente?: (
+    returnId: string,
+    payload: unknown,
+  ) => void;
+
+  constructor(private signalR: SignalRService) {}
+
+  resetProgreso(total: number): void {
+    this._progreso.next({ processed: 0, ok: 0, fail: 0, total });
+  }
+
+  async presentarIndividual(
+    row: RespuestaBusquedaFacturasPendientes,
+    //targetId: string, // ✅ antes clienteId: este es el TARGET (sede/worker)
+    operation: OperationLiteral,
+    sedeId?: number,
+  ): Promise<void> {
+    const item = this.mapRowToItem(row, operation);
+    //await this.presentarBatch([item], targetId, operation, sedeId);
+    await this.presentarBatch([item], operation, sedeId);
+  }
+
+  async presentarBatch(
+    itemsOrRows: (PresentarDianItem | RespuestaBusquedaFacturasPendientes)[],
+    //targetId: string, // ✅ TARGET
+    operation: OperationLiteral,
+    sedeId?: number,
+  ): Promise<void> {
+    await this.signalR.ensureConnection();
+
+    // ✅ returnId del browser
+    this.currentReturnId = this.signalR.hubConnection?.connectionId ?? '';
+
+    const items: PresentarDianItem[] = itemsOrRows.map((r: any) =>
+      'codigo_Prestador' in r
+        ? this.mapRowToItem(r as RespuestaBusquedaFacturasPendientes, operation)
+        : { ...(r as PresentarDianItem), operation },
+    );
+
+    const total = items.length;
+    this.resetProgreso(total);
+
+    const request: PresentarDianBatchRequest = { items, operation, sedeId };
+
+    // =========================
+    // ✅ CLEANUP handlers previos (solo los nuestros)
+    // =========================
+    this.detachHandlers();
+
+    // =========================
+    // ✅ ErrorConexion (filtrado por returnId)
+    // =========================
+    this.onErrorConexion = (returnIdResp: string, mensajeError: string) => {
+      if (String(returnIdResp) !== String(this.currentReturnId)) return;
+
+      alert(`Error de conexión: ${mensajeError} ReturnId: ${returnIdResp}`);
+    };
+    this.signalR.on('ErrorConexion', this.onErrorConexion);
+
+    // =========================
+    // ✅ PROGRESO (filtrado por returnId)
+    // =========================
+    this.onProgresoPresentacionFactura = (
+      returnIdResp: string,
+      payload: unknown,
+    ) => {
+      if (String(returnIdResp) !== String(this.currentReturnId)) return;
+
+      const obj = this.safeParse(payload);
+      if (!obj) return;
+
+      const view = this.toProgressView(obj);
+      if (!view) return;
+
+      const curr = this._progreso.value;
+      this._progreso.next({
+        ...curr,
+        ...view,
+        total: view.total ?? curr.total,
+      });
+    };
+
+    this.signalR.on(
+      'ProgresoPresentacionFactura',
+      this.onProgresoPresentacionFactura,
+    );
+
+    // =========================
+    // ✅ RESUMEN FINAL (filtrado por returnId)
+    // =========================
+    this.onRespuestaPresentarFacturasEnDian = (
+      returnIdResp: string,
+      payload: unknown,
+    ) => {
+      if (String(returnIdResp) !== String(this.currentReturnId)) return;
+
+      const summary = this.parseSummary(payload);
+
+      // fuerza progreso completo al final
+      this._progreso.next({
+        processed: summary.total,
+        ok: summary.ok,
+        fail: summary.fail,
+        total: summary.total,
+        lastMessage: this._progreso.value.lastMessage,
+        lastExternalId: this._progreso.value.lastExternalId,
+        lastDocumento: this._progreso.value.lastDocumento,
+      });
+
+      if (summary.fail > 0) this.resumenConError.emit(summary);
+      else this.resumenOk.emit(summary);
+    };
+
+    this.signalR.on(
+      'RespuestaPresentarFacturasEnDian',
+      this.onRespuestaPresentarFacturasEnDian,
+    );
+
+    // =========================
+    // ✅ INVOKE (TARGET)
+    // =========================
+    console.log('DIAN -> TARGET enviado:', sedeId);
+    console.log('DIAN -> returnId actual:', this.currentReturnId);
+
+    await this.signalR.invoke(
+      'PresentarFacturasEnDian',
+      sedeId,
+      JSON.stringify(request),
+    );
+  }
+
+  // =============== Descarga JSON Pendiente (1 factura) ===============
+
+  async descargarJsonPendiente(
+    row: RespuestaBusquedaFacturasPendientes,
+    //targetId: string, // ✅ TARGET
+    sedeId?: number,
+  ): Promise<void> {
+    await this.signalR.ensureConnection();
+
+    // ✅ returnId del browser
+    this.currentReturnId = this.signalR.hubConnection?.connectionId ?? '';
+
+    // payload mínimo, igual al que ya armaste
+    const item = this.mapRowToItem(row, row.tipoOperacion as any);
+
+    const request = {
+      sedeId: sedeId,
+      items: [
+        {
+          idRelacion: item.idRelacion,
+          factura: item.numeroFactura,
+          codigoPrestadorPPAL: item.codigoPrestadorPpal,
+          tipoFactura: item.tipoFactura ?? 1,
+          operation: item.operation ?? 'SS_SIN_APORTE',
+        },
+      ],
+    };
+
+    // =========================
+    // ✅ CLEANUP handlers previos (solo los nuestros)
+    // =========================
+    this.detachHandlers();
+
+    // =========================
+    // ✅ ErrorConexion (filtrado por returnId)
+    // =========================
+    this.onErrorConexion = (returnIdResp: string, mensajeError: string) => {
+      if (String(returnIdResp) !== String(this.currentReturnId)) return;
+
+      alert(`Error de conexión: ${mensajeError} ReturnId: ${returnIdResp}`);
+    };
+    this.signalR.on('ErrorConexion', this.onErrorConexion);
+
+    // =========================
+    // ✅ RESPUESTA DESCARGA (filtrado por returnId)
+    // =========================
+    this.onRespuestaDescargarJsonFacturaPendiente = (
+      returnIdResp: string,
+      payload: unknown,
+    ) => {
+      if (String(returnIdResp) !== String(this.currentReturnId)) return;
+
+      const jsonText =
+        typeof payload === 'string'
+          ? payload
+          : JSON.stringify(payload, null, 2);
+
+      // si vino un objeto con error (según lo programaste en worker)
+      try {
+        const asObj = JSON.parse(jsonText);
+        if (asObj?.error) {
+          console.error('Error JSON pendiente:', asObj);
+          return;
+        }
+      } catch {
+        // si no es JSON parseable, igual dejamos descargar
+      }
+
+      // descargar archivo
+      const blob = new Blob([jsonText], {
+        type: 'application/json;charset=utf-8',
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      a.download = `health-invoice-pendiente-${
+        row.factura || row.idRelacion
+      }-${stamp}.json`;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    };
+
+    this.signalR.on(
+      'RespuestaDescargarJsonFacturaPendiente',
+      this.onRespuestaDescargarJsonFacturaPendiente,
+    );
+
+    // =========================
+    // ✅ INVOKE (TARGET)
+    // =========================
+    console.log('DESCARGAR JSON -> TARGET enviado:', sedeId);
+    console.log('DESCARGAR JSON -> returnId actual:', this.currentReturnId);
+
+    await this.signalR.invoke(
+      'DescargarJsonFacturaPendiente',
+      sedeId,
+      JSON.stringify(request),
+    );
+  }
+
+  // ================= Helpers =================
+
+  private detachHandlers(): void {
+    if (this.onErrorConexion) {
+      this.signalR.off('ErrorConexion', this.onErrorConexion);
+      this.onErrorConexion = undefined;
+    }
+    if (this.onProgresoPresentacionFactura) {
+      this.signalR.off(
+        'ProgresoPresentacionFactura',
+        this.onProgresoPresentacionFactura,
+      );
+      this.onProgresoPresentacionFactura = undefined;
+    }
+    if (this.onRespuestaPresentarFacturasEnDian) {
+      this.signalR.off(
+        'RespuestaPresentarFacturasEnDian',
+        this.onRespuestaPresentarFacturasEnDian,
+      );
+      this.onRespuestaPresentarFacturasEnDian = undefined;
+    }
+    if (this.onRespuestaDescargarJsonFacturaPendiente) {
+      this.signalR.off(
+        'RespuestaDescargarJsonFacturaPendiente',
+        this.onRespuestaDescargarJsonFacturaPendiente,
+      );
+      this.onRespuestaDescargarJsonFacturaPendiente = undefined;
+    }
+  }
+
+  private mapRowToItem(
+    row: RespuestaBusquedaFacturasPendientes,
+    operation: OperationLiteral,
+  ): PresentarDianItem {
+    return {
+      idRelacion: row.idRelacion,
+      codigoPrestadorPpal: row.codigo_Prestador_Ppal,
+      codigoPrestador: row.codigo_Prestador,
+      numeroFactura: row.factura,
+      tipoFactura: row.tipoFactura ?? 1,
+      operation: row.tipoOperacion || operation,
+    };
+  }
+
+  private parseSummary(payload: unknown): PresentarDianSummary {
+    const asObj =
+      typeof payload === 'string' ? JSON.parse(payload) : (payload as any);
+
+    const rawResults = asObj?.results ?? asObj?.resultados ?? [];
+
+    const results: PresentarDianItemResult[] = (rawResults as any[]).map(
+      (r) => ({
+        ...r,
+        mensaje: r?.mensaje ?? r?.message ?? '',
+        message: r?.message ?? r?.mensaje ?? '',
+        ok: !!r?.ok,
+      }),
+    );
+
+    const total = asObj?.total ?? results.length;
+    const ok = asObj?.ok ?? results.filter((r) => r.ok).length;
+    const fail = asObj?.fail ?? total - ok;
+
+    return { total, ok, fail, results };
+  }
+
+  private safeParse(payload: unknown): any | null {
+    try {
+      return typeof payload === 'string' ? JSON.parse(payload) : payload;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * ✅ Convierte “nuevo” o “viejo” a un ProgressView estándar
+   */
+  private toProgressView(obj: any): PresentarDianProgressView | null {
+    // Nuevo (pro)
+    const looksNew =
+      obj?.procesadas !== undefined && obj?.exitosas !== undefined;
+
+    if (looksNew) {
+      const dto = obj as PresentarDianProgressDto;
+      return {
+        processed: Number(dto.procesadas ?? 0),
+        ok: Number(dto.exitosas ?? 0),
+        fail: Number(dto.fallidas ?? 0),
+        total: Number(dto.total ?? 0),
+        lastMessage: dto.mensaje ?? '',
+        lastExternalId: dto.lastExternalId ?? undefined,
+        lastDocumento: dto.ultimoDocumento ?? undefined,
+      };
+    }
+
+    // Viejo (batch)
+    const looksOld = obj?.processed !== undefined;
+
     if (looksOld) {
       const b = obj as PresentarDianProgressBatch;
       const curr = this._progreso.value;

@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   AfterViewInit,
+  OnDestroy,
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -26,6 +27,7 @@ import { ImagenHelperService } from 'src/app/helpers/imagen-helper/imagen-helper
 import { FechaHoraHelperService } from 'src/app/helpers/fecha-hora-helper/fecha-hora-helper.service';
 import { FrasesXEvolucion } from 'src/app/conexiones/rydent/tablas/frases-xevolucion';
 import { MensajesUsuariosService } from '../mensajes-usuarios';
+import { Subject, takeUntil } from 'rxjs';
 
 declare var webkitSpeechRecognition: any;
 
@@ -34,7 +36,7 @@ declare var webkitSpeechRecognition: any;
   templateUrl: './agregar-evolucion.component.html',
   styleUrl: './agregar-evolucion.component.scss',
 })
-export class AgregarEvolucionComponent implements OnInit {
+export class AgregarEvolucionComponent implements OnInit, OnDestroy {
   @ViewChild('tratamiento') tratamiento!: ElementRef;
   recognizing: boolean = false; // Agrega esta línea
 
@@ -43,11 +45,13 @@ export class AgregarEvolucionComponent implements OnInit {
   idSedeActualSignalR: string = '';
   idAnamnesisPacienteSeleccionado: number = 0;
   doctorSeleccionado = '';
+  sedeIdSeleccionada = 0;
   listaDoctores: RespuestaPin = new RespuestaPin();
   lstDoctores: { id: number; nombre: string }[] = [];
   listaFrasesXEvolucion: FrasesXEvolucion[] = [];
   resultadoGuardarEvolucion: Evolucion = new Evolucion();
   fraseSeleccionada: FrasesXEvolucion = new FrasesXEvolucion();
+  private destruir$ = new Subject<void>();
   evolucionPaciente = {
     imgFirmaPaciente: '',
     imgFirmaDoctor: '',
@@ -60,70 +64,89 @@ export class AgregarEvolucionComponent implements OnInit {
     private respuestaEvolucionPacienteService: RespuestaEvolucionPacienteService,
     private imagenHelperService: ImagenHelperService,
     private fechaHoraHelperService: FechaHoraHelperService,
-    private mensajesUsuariosService: MensajesUsuariosService
+    private mensajesUsuariosService: MensajesUsuariosService,
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.inicializarFormulario();
 
-    this.respuestaPinService.sharedAnamnesisData.subscribe((data) => {
-      if (data != null) {
-        this.idAnamnesisPacienteSeleccionado = data;
-      }
-    });
+    this.respuestaPinService.sharedAnamnesisData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idAnamnesisPacienteSeleccionado = data;
+        }
+      });
 
-    this.respuestaPinService.sharedSedeData.subscribe((data) => {
-      if (data != null) {
-        this.idSedeActualSignalR = data;
-      }
-    });
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
+      });
 
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (data != null) {
-        this.listaDoctores = data;
-        this.lstDoctores = this.listaDoctores.lstDoctores.map((item) => ({
-          id: Number(item.id),
-          nombre: item.nombre,
-        }));
-        this.listaFrasesXEvolucion = data.lstFrasesXEvolucion.filter(
-          (frase) => frase.TIPO === 1
-        );
-      }
-    });
+    this.respuestaPinService.sharedSedeData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idSedeActualSignalR = data;
+        }
+      });
 
-    this.respuestaPinService.shareddoctorSeleccionadoData.subscribe((data) => {
-      if (data != null) {
-        this.doctorSeleccionado = data;
-      }
-    });
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.listaDoctores = data;
+          this.lstDoctores = this.listaDoctores.lstDoctores.map((item) => ({
+            id: Number(item.id),
+            nombre: item.nombre,
+          }));
+          this.listaFrasesXEvolucion = data.lstFrasesXEvolucion.filter(
+            (frase) => frase.TIPO === 1,
+          );
+        }
+      });
+
+    this.respuestaPinService.shareddoctorSeleccionadoData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.doctorSeleccionado = data;
+        }
+      });
     this.inicializarFormulario();
     if (this.respuestaPinService.datosDelFormulario) {
       this.formularioAgregarEvolucion.setValue(
-        this.respuestaPinService.datosDelFormulario
+        this.respuestaPinService.datosDelFormulario,
       );
     }
 
-    this.evolucionService.firmaPacienteActual.subscribe(
-      (firma) => (this.evolucionPaciente.imgFirmaPaciente = firma)
-    );
-    this.evolucionService.firmaDoctorActual.subscribe(
-      (firma) => (this.evolucionPaciente.imgFirmaDoctor = firma)
-    );
+    this.evolucionService.firmaPacienteActual
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((firma) => (this.evolucionPaciente.imgFirmaPaciente = firma));
+    this.evolucionService.firmaDoctorActual
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((firma) => (this.evolucionPaciente.imgFirmaDoctor = firma));
 
-    this.evolucionService.respuestaGuardarDatosEvolucionEmit.subscribe(
-      async (evolucion: Evolucion) => {
+    this.evolucionService.respuestaGuardarDatosEvolucionEmit
+      .pipe(takeUntil(this.destruir$))
+      .subscribe(async (evolucion: Evolucion) => {
         this.resultadoGuardarEvolucion = evolucion;
         if (this.resultadoGuardarEvolucion! || 0) {
           this.respuestaPinService.datosDelFormulario = null;
           this.router.navigate(['/evolucion']);
         }
         // this.formularioEvolucion.patchValue(this.resultadoBusquedaEvolucion);
-      }
-    );
+      });
     //await this.guardarEvolucion();
     setTimeout(() => {
       this.tratamiento.nativeElement.focus(); // Pone el foco en el elemento
     }, 300);
+  }
+
+  ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
   }
 
   ngAfterViewInit(): void {
@@ -158,7 +181,7 @@ export class AgregarEvolucionComponent implements OnInit {
     const fechaActual = new Date();
     const horaActual = fechaActual.getHours() + ':' + fechaActual.getMinutes();
     const fechaMenosQuinceMinutos = new Date(
-      fechaActual.getTime() - 15 * 60000
+      fechaActual.getTime() - 15 * 60000,
     );
     const horaMenosQuinceMinutos =
       fechaMenosQuinceMinutos.getHours() +
@@ -196,17 +219,17 @@ export class AgregarEvolucionComponent implements OnInit {
     let strDoctor = '';
     let contenidoEvolucion = this.formularioAgregarEvolucion.value.EVOLUCION;
     const imgFirmaPaciente = document.getElementById(
-      'firmaPaciente'
+      'firmaPaciente',
     ) as HTMLImageElement;
     const imgFirmaDoctor = document.getElementById(
-      'firmaDoctor'
+      'firmaDoctor',
     ) as HTMLImageElement;
 
     if (contenidoEvolucion) {
       if (imgFirmaPaciente) {
         strPaciente = imgFirmaPaciente.src.replace(
           'data:image/png;base64,',
-          ''
+          '',
         );
         //if (this.imagenHelperService.imagenTieneColorDistintoABlanco(imgFirmaPaciente)) {
         //  const imagenRecortadaPaciente = await this.imagenHelperService.recortarImagen(imgFirmaPaciente);
@@ -236,7 +259,7 @@ export class AgregarEvolucionComponent implements OnInit {
           this.formularioAgregarEvolucion.value.FECHA;
         datosParaGuradarEnEvolucion.evolucion.HORA =
           this.fechaHoraHelperService.formatTimeForCSharp(
-            this.formularioAgregarEvolucion.value.HORA
+            this.formularioAgregarEvolucion.value.HORA,
           );
         datosParaGuradarEnEvolucion.evolucion.DOCTOR =
           this.formularioAgregarEvolucion.value.DOCTOR;
@@ -244,7 +267,7 @@ export class AgregarEvolucionComponent implements OnInit {
         //datosParaGuradarEnEvolucion.evolucion.COMPLICACION = this.formularioAgregarEvolucion.value.COMPLICACION;
         datosParaGuradarEnEvolucion.evolucion.HORA_FIN =
           this.fechaHoraHelperService.formatTimeForCSharp(
-            this.formularioAgregarEvolucion.value.HORA_FIN
+            this.formularioAgregarEvolucion.value.HORA_FIN,
           );
         //datosParaGuradarEnEvolucion.evolucion.COLOR = this.formularioAgregarEvolucion.value.COLOR;
         datosParaGuradarEnEvolucion.evolucion.NOTA =
@@ -257,13 +280,13 @@ export class AgregarEvolucionComponent implements OnInit {
         datosParaGuradarEnEvolucion.imgFirmaDoctor = strDoctor;
         //evolucion.IDEVOLUCION
         await this.evolucionService.startConnectionGuardarDatosEvolucion(
-          this.idSedeActualSignalR,
-          JSON.stringify(datosParaGuradarEnEvolucion)
+          this.sedeIdSeleccionada,
+          JSON.stringify(datosParaGuradarEnEvolucion),
         );
       }
     } else {
       await this.mensajesUsuariosService.mensajeInformativo(
-        'NO HAY EVOCUCION PARA GUARDAR'
+        'NO HAY EVOCUCION PARA GUARDAR',
       );
     }
 

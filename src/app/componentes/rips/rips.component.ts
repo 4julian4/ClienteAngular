@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { DatosGuardarRips } from 'src/app/conexiones/rydent/modelos/datos-guardar-rips';
 import {
@@ -7,7 +7,15 @@ import {
 } from 'src/app/conexiones/rydent/modelos/respuesta-pin';
 import { TConfiguracionesRydent } from 'src/app/conexiones/rydent/tablas/tconfiguraciones-rydent';
 import { RipsService } from './rips.service';
-import { Observable, debounceTime, map, startWith, take } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  debounceTime,
+  map,
+  startWith,
+  take,
+  takeUntil,
+} from 'rxjs';
 import {
   MatAutocomplete,
   MatAutocompleteSelectedEvent,
@@ -22,7 +30,7 @@ import { MatTableDataSource } from '@angular/material/table';
   templateUrl: './rips.component.html',
   styleUrl: './rips.component.scss',
 })
-export class RipsComponent implements OnInit {
+export class RipsComponent implements OnInit, OnDestroy {
   formularioAgregarRips!: FormGroup;
   idSedeActualSignalR: string = '';
   doctorSeleccionado: string = '';
@@ -72,251 +80,298 @@ export class RipsComponent implements OnInit {
   fechaFin!: Date;
   isloading: boolean = false;
 
+  sedeIdSeleccionada = 0;
+  private destroy$ = new Subject<void>();
+
   constructor(
     private respuestaPinService: RespuestaPinService,
     private ripsService: RipsService,
     private formBuilder: FormBuilder,
     private router: Router,
-    private mensajesUsuariosService: MensajesUsuariosService
+    private mensajesUsuariosService: MensajesUsuariosService,
   ) {}
 
   ngOnInit(): void {
     //suscripcion para poner el valor en formato de moneda
-    this.valorTotalRips.valueChanges.subscribe((value) => {
-      if (value) {
-        const newValue = value
-          .replace(/\D/g, '')
-          .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        this.valorTotalRips.setValue(newValue, { emitEvent: false });
-      }
-    });
-
-    this.respuestaPinService.sharedSedeData.subscribe((data) => {
-      if (data != null) {
-        this.idSedeActualSignalR = data;
-      }
-    });
-    this.respuestaPinService.shareddoctorSeleccionadoData.subscribe((data) => {
-      if (data != null) {
-        this.doctorSeleccionado = data;
-      }
-    });
-    this.respuestaPinService.sharedAnamnesisData.subscribe((data) => {
-      if (data != null) {
-        this.idAnamnesisPacienteSeleccionado = data;
-      }
-    });
-
-    this.respuestaPinService.sharedisLoading.subscribe((data) => {
-      this.isloading = data || false;
-    });
-
-    this.respuestaPinService.shareddatosRespuestaPinData.subscribe((data) => {
-      if (data != null) {
-        this.lstConfiguracionesRydent = data.lstConfiguracionesRydent;
-        this.listaDoctores = data;
-        this.lstDoctores = this.listaDoctores.lstDoctores.map((item) => ({
-          id: Number(item.id),
-          nombre: item.nombre,
-        }));
-        this.listaEps = data;
-        //obtenemos las entidades para aplicar Rips
-        this.lstEps = this.listaEps.lstEps
-          .filter((item) => item.RIPS === 'SI')
-          .map((item) => ({ id: item.CODIGO, nombre: item.NOMBRE }));
-        //this.autoEntidad.options.first.select();
-
-        this.filteredEntidad = this.entidadControl.valueChanges.pipe(
-          startWith(''),
-          map((value) => this._filterNombre(value, this.lstEps))
-        );
-
-        if (this.lstEps && this.lstEps.length > 0) {
-          this.entidadControl.setValue(this.lstEps[0].nombre);
+    this.valorTotalRips.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        if (value) {
+          const newValue = value
+            .replace(/\D/g, '')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+          this.valorTotalRips.setValue(newValue, { emitEvent: false });
         }
+      });
 
-        //obtenemos los tipos de consultas para aplicar Rips que se sacan de la tabla procedimientos
-        this.listaProcedimientos = data;
-        this.lstTiposDeConsultas = this.listaProcedimientos.lstProcedimientos
-          .filter((item) => item.TIPO_RIPS === 'CONSULTAS')
-          .map((item) => ({
-            id: item.CODIGO ? item.CODIGO : '',
-            nombre: item.NOMBRE ? item.NOMBRE : '',
+    this.respuestaPinService.sharedSedeData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idSedeActualSignalR = data;
+        }
+      });
+    this.respuestaPinService.sharedSedeSeleccionada
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((id) => {
+        this.sedeIdSeleccionada = id ?? 0;
+      });
+    this.respuestaPinService.shareddoctorSeleccionadoData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.doctorSeleccionado = data;
+        }
+      });
+    this.respuestaPinService.sharedAnamnesisData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.idAnamnesisPacienteSeleccionado = data;
+        }
+      });
+
+    this.respuestaPinService.sharedisLoading
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.isloading = data || false;
+      });
+
+    this.respuestaPinService.shareddatosRespuestaPinData
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data != null) {
+          this.lstConfiguracionesRydent = data.lstConfiguracionesRydent;
+          this.listaDoctores = data;
+          this.lstDoctores = this.listaDoctores.lstDoctores.map((item) => ({
+            id: Number(item.id),
+            nombre: item.nombre,
           }));
+          this.listaEps = data;
+          //obtenemos las entidades para aplicar Rips
+          this.lstEps = this.listaEps.lstEps
+            .filter((item) => item.RIPS === 'SI')
+            .map((item) => ({ id: item.CODIGO, nombre: item.NOMBRE }));
+          //this.autoEntidad.options.first.select();
 
-        this.filteredTiposDeConsultas =
-          this.tipoConsultaControl.valueChanges.pipe(
+          this.filteredEntidad = this.entidadControl.valueChanges.pipe(
             startWith(''),
-            map((value) => this._filterNombre(value, this.lstTiposDeConsultas))
+            map((value) => this._filterNombre(value, this.lstEps)),
           );
 
-        this.filteredCodigosTiposDeConsultas =
-          this.codigoConsultaControl.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterCodigo(value, this.lstTiposDeConsultas))
-          );
-
-        this.tipoConsultaControl.valueChanges.subscribe((value) => {
-          const correspondingCode = this.lstTiposDeConsultas.find(
-            (tipoConsulta) => tipoConsulta.nombre === value
-          );
-          if (correspondingCode) {
-            this.codigoConsultaControl.setValue(correspondingCode.id, {
-              emitEvent: false,
-            });
+          if (this.lstEps && this.lstEps.length > 0) {
+            this.entidadControl.setValue(this.lstEps[0].nombre);
           }
-        });
 
-        // Cuando cambia el código, actualiza el tipo de consulta
-        this.codigoConsultaControl.valueChanges.subscribe((value) => {
-          const correspondingTipoConsulta = this.lstTiposDeConsultas.find(
-            (tipoConsulta) => tipoConsulta.id === value
-          );
-          if (correspondingTipoConsulta) {
-            this.tipoConsultaControl.setValue(
-              correspondingTipoConsulta.nombre,
-              { emitEvent: false }
+          //obtenemos los tipos de consultas para aplicar Rips que se sacan de la tabla procedimientos
+          this.listaProcedimientos = data;
+          console.log('listaProcedimientos', this.listaProcedimientos);
+          this.lstTiposDeConsultas = this.listaProcedimientos.lstProcedimientos
+            .filter((item) => item.TIPO_RIPS === 'CONSULTAS')
+            .map((item) => ({
+              id: item.CODIGO ? item.CODIGO : '',
+              nombre: item.NOMBRE ? item.NOMBRE : '',
+            }));
+
+          this.filteredTiposDeConsultas =
+            this.tipoConsultaControl.valueChanges.pipe(
+              startWith(''),
+              map((value) =>
+                this._filterNombre(value, this.lstTiposDeConsultas),
+              ),
             );
-          }
-        });
 
-        //obtenemos diagnpsticos principales para aplicar Rips
-        this.listaConsultas = data;
-        this.lstConsultas = this.listaConsultas.lstConsultas.map((item) => ({
-          id: item.CODIGO ? item.CODIGO : '',
-          nombre: item.NOMBRE ? item.NOMBRE : '',
-        }));
-
-        this.filteredDiagnosticoPrincipal =
-          this.diagnosticoPrincipalControl.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterNombre(value, this.lstConsultas))
-          );
-
-        this.filteredCodigosDiagnosticoPrincipal =
-          this.codigoDiagnosticoPrincipalControl.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterCodigo(value, this.lstConsultas))
-          );
-
-        this.diagnosticoPrincipalControl.valueChanges.subscribe((value) => {
-          const correspondingCode = this.lstConsultas.find(
-            (Consulta) => Consulta.nombre === value
-          );
-          if (correspondingCode) {
-            this.codigoDiagnosticoPrincipalControl.setValue(
-              correspondingCode.id,
-              { emitEvent: false }
+          this.filteredCodigosTiposDeConsultas =
+            this.codigoConsultaControl.valueChanges.pipe(
+              startWith(''),
+              map((value) =>
+                this._filterCodigo(value, this.lstTiposDeConsultas),
+              ),
             );
-          }
-        });
 
-        // Cuando cambia el código, actualiza el tipo de consulta
-        this.codigoDiagnosticoPrincipalControl.valueChanges.subscribe(
-          (value) => {
-            const correspondingConsulta = this.lstConsultas.find(
-              (Consulta) => Consulta.id === value
-            );
-            if (correspondingConsulta) {
-              this.diagnosticoPrincipalControl.setValue(
-                correspondingConsulta.nombre,
-                { emitEvent: false }
+          this.tipoConsultaControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value) => {
+              const correspondingCode = this.lstTiposDeConsultas.find(
+                (tipoConsulta) => tipoConsulta.nombre === value,
               );
-            }
-          }
-        );
+              if (correspondingCode) {
+                this.codigoConsultaControl.setValue(correspondingCode.id, {
+                  emitEvent: false,
+                });
+              }
+            });
 
-        //obtenemos los procedimientos que aplican para el rips
-        this.lstProcedimientos = this.listaProcedimientos.lstProcedimientos
-          .filter(
-            (item) =>
-              item.CATEGORIA === 'CUPS' && item.TIPO_RIPS !== 'CONSULTAS'
-          )
-          .map((item) => ({
+          // Cuando cambia el código, actualiza el tipo de consulta
+          this.codigoConsultaControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value) => {
+              const correspondingTipoConsulta = this.lstTiposDeConsultas.find(
+                (tipoConsulta) => tipoConsulta.id === value,
+              );
+              if (correspondingTipoConsulta) {
+                this.tipoConsultaControl.setValue(
+                  correspondingTipoConsulta.nombre,
+                  { emitEvent: false },
+                );
+              }
+            });
+
+          //obtenemos diagnpsticos principales para aplicar Rips
+          this.listaConsultas = data;
+          this.lstConsultas = this.listaConsultas.lstConsultas.map((item) => ({
             id: item.CODIGO ? item.CODIGO : '',
             nombre: item.NOMBRE ? item.NOMBRE : '',
           }));
 
-        this.filteredProcedimientos =
-          this.procedimientoControl.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterNombre(value, this.lstProcedimientos))
-          );
-
-        this.filteredCodigosProcedimientos =
-          this.codigoProcedimientoControl.valueChanges.pipe(
-            startWith(''),
-            map((value) => this._filterCodigo(value, this.lstProcedimientos))
-          );
-
-        this.procedimientoControl.valueChanges.subscribe((value) => {
-          const correspondingCode = this.lstProcedimientos.find(
-            (procedimiento) => procedimiento.nombre === value
-          );
-          if (correspondingCode) {
-            this.codigoProcedimientoControl.setValue(correspondingCode.id, {
-              emitEvent: false,
-            });
-          }
-        });
-
-        // Cuando cambia el código, actualiza el tipo de consulta
-        this.codigoProcedimientoControl.valueChanges.subscribe((value) => {
-          const correspondingProcedimiento = this.lstProcedimientos.find(
-            (procedimiento) => procedimiento.id === value
-          );
-          if (correspondingProcedimiento) {
-            this.procedimientoControl.setValue(
-              correspondingProcedimiento.nombre,
-              { emitEvent: false }
+          this.filteredDiagnosticoPrincipal =
+            this.diagnosticoPrincipalControl.valueChanges.pipe(
+              startWith(''),
+              map((value) => this._filterNombre(value, this.lstConsultas)),
             );
-          }
-        });
-      }
-    });
 
-    this.ripsService.respuestaDatosGuardarRipsEmit.subscribe(
-      async (respuestaGuardarRips: boolean) => {
+          this.filteredCodigosDiagnosticoPrincipal =
+            this.codigoDiagnosticoPrincipalControl.valueChanges.pipe(
+              startWith(''),
+              map((value) => this._filterCodigo(value, this.lstConsultas)),
+            );
+
+          this.diagnosticoPrincipalControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value) => {
+              const correspondingCode = this.lstConsultas.find(
+                (Consulta) => Consulta.nombre === value,
+              );
+              if (correspondingCode) {
+                this.codigoDiagnosticoPrincipalControl.setValue(
+                  correspondingCode.id,
+                  { emitEvent: false },
+                );
+              }
+            });
+
+          // Cuando cambia el código, actualiza el tipo de consulta
+          this.codigoDiagnosticoPrincipalControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value) => {
+              const correspondingConsulta = this.lstConsultas.find(
+                (Consulta) => Consulta.id === value,
+              );
+              if (correspondingConsulta) {
+                this.diagnosticoPrincipalControl.setValue(
+                  correspondingConsulta.nombre,
+                  { emitEvent: false },
+                );
+              }
+            });
+
+          //obtenemos los procedimientos que aplican para el rips
+          this.lstProcedimientos = this.listaProcedimientos.lstProcedimientos
+            .filter(
+              (item) =>
+                item.CATEGORIA === 'CUPS' && item.TIPO_RIPS !== 'CONSULTAS',
+            )
+            .map((item) => ({
+              id: item.CODIGO ? item.CODIGO : '',
+              nombre: item.NOMBRE ? item.NOMBRE : '',
+            }));
+
+          this.filteredProcedimientos =
+            this.procedimientoControl.valueChanges.pipe(
+              startWith(''),
+              map((value) => this._filterNombre(value, this.lstProcedimientos)),
+            );
+
+          this.filteredCodigosProcedimientos =
+            this.codigoProcedimientoControl.valueChanges.pipe(
+              startWith(''),
+              map((value) => this._filterCodigo(value, this.lstProcedimientos)),
+            );
+
+          this.procedimientoControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value) => {
+              const correspondingCode = this.lstProcedimientos.find(
+                (procedimiento) => procedimiento.nombre === value,
+              );
+              if (correspondingCode) {
+                this.codigoProcedimientoControl.setValue(correspondingCode.id, {
+                  emitEvent: false,
+                });
+              }
+            });
+
+          // Cuando cambia el código, actualiza el tipo de consulta
+          this.codigoProcedimientoControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value) => {
+              const correspondingProcedimiento = this.lstProcedimientos.find(
+                (procedimiento) => procedimiento.id === value,
+              );
+              if (correspondingProcedimiento) {
+                this.procedimientoControl.setValue(
+                  correspondingProcedimiento.nombre,
+                  { emitEvent: false },
+                );
+              }
+            });
+        }
+      });
+
+    this.ripsService.respuestaDatosGuardarRipsEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (respuestaGuardarRips: boolean) => {
         this.resultadoGuardarRips = respuestaGuardarRips;
-      }
-    );
+      });
 
-    this.ripsService.respuestaObtenerFacturasPorIdEntreFechasEmit.subscribe(
-      async (
-        respuestaConsultarFacturasPorIdEntreFechas: RespuestaConsultarFacturasEntreFechas[]
-      ) => {
-        console.log(
-          'respuestaConsultarFacturasEntreFechas',
-          respuestaConsultarFacturasPorIdEntreFechas
-        );
-        // Asignar datos correctamente
-        this.dataSourceFacturas.data =
-          respuestaConsultarFacturasPorIdEntreFechas;
-        console.log('dataSourceFacturas', this.dataSourceFacturas.data);
-      }
-    );
+    this.ripsService.respuestaObtenerFacturasPorIdEntreFechasEmit
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        async (
+          respuestaConsultarFacturasPorIdEntreFechas: RespuestaConsultarFacturasEntreFechas[],
+        ) => {
+          console.log(
+            'respuestaConsultarFacturasEntreFechas',
+            respuestaConsultarFacturasPorIdEntreFechas,
+          );
+          // Asignar datos correctamente
+          this.dataSourceFacturas.data =
+            respuestaConsultarFacturasPorIdEntreFechas;
+          console.log('dataSourceFacturas', this.dataSourceFacturas.data);
+        },
+      );
     this.inicializarFormulario();
+  }
+  destruir$(
+    destruir$: any,
+  ): import('rxjs').OperatorFunction<number | null, number | null> {
+    throw new Error('Method not implemented.');
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private _filterNombre(
     value: string,
-    list: { id: string; nombre: string }[]
+    list: { id: string; nombre: string }[],
   ): { id: string; nombre: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
 
     return list.filter((option) =>
-      option.nombre.toLowerCase().includes(filterValue)
+      option.nombre.toLowerCase().includes(filterValue),
     );
   }
 
   private _filterCodigo(
     value: string,
-    list: { id: string; nombre: string }[]
+    list: { id: string; nombre: string }[],
   ): { id: string; nombre: string }[] {
     const filterValue = value ? value.toLowerCase() : '';
 
     return list.filter((option) =>
-      option.id.toLowerCase().includes(filterValue)
+      option.id.toLowerCase().includes(filterValue),
     );
   }
 
@@ -324,7 +379,7 @@ export class RipsComponent implements OnInit {
     const fechaActual = new Date();
     let facturaRips: string;
     let auditarRips = this.lstConfiguracionesRydent.find(
-      (x) => x.NOMBRE === 'AUDITAR_RIPS'
+      (x) => x.NOMBRE === 'AUDITAR_RIPS',
     );
     if (auditarRips) {
       if (auditarRips.PERMISO == 0) {
@@ -354,75 +409,89 @@ export class RipsComponent implements OnInit {
       const tipoConsultaControl =
         this.formularioAgregarRips.get('TIPO_CONSULTA');
       const codigoTipoConsultaControl = this.formularioAgregarRips.get(
-        'CODIGO_TIPO_CONSULTA'
+        'CODIGO_TIPO_CONSULTA',
       );
       const diagnosticoPrincipalControl = this.formularioAgregarRips.get(
-        'DIAGNOSTICO_PRINCIPAL'
+        'DIAGNOSTICO_PRINCIPAL',
       );
       const codigoDiagnosticoPrincipalControl = this.formularioAgregarRips.get(
-        'CODIGO_DIAGNOSTICO_PRINCIPAL'
+        'CODIGO_DIAGNOSTICO_PRINCIPAL',
       );
       const procedimientoControl =
         this.formularioAgregarRips.get('PROCEDIMIENTO');
       const codigoProcedimientoControl = this.formularioAgregarRips.get(
-        'CODIGO_PROCEDIMIENTO'
+        'CODIGO_PROCEDIMIENTO',
       );
       if (tipoConsultaControl && codigoTipoConsultaControl) {
-        tipoConsultaControl.valueChanges.subscribe((value) => {
-          const selected = this.lstTiposDeConsultas.find(
-            (item) => item.nombre === value
-          );
-          codigoTipoConsultaControl.setValue(selected ? selected.id : '', {
-            emitEvent: false,
+        tipoConsultaControl.valueChanges
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            const selected = this.lstTiposDeConsultas.find(
+              (item) => item.nombre === value,
+            );
+            codigoTipoConsultaControl.setValue(selected ? selected.id : '', {
+              emitEvent: false,
+            });
           });
-        });
 
-        codigoTipoConsultaControl.valueChanges.subscribe((value) => {
-          const selected = this.lstTiposDeConsultas.find(
-            (item) => item.id === value
-          );
-          tipoConsultaControl.setValue(selected ? selected.nombre : '', {
-            emitEvent: false,
+        codigoTipoConsultaControl.valueChanges
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            const selected = this.lstTiposDeConsultas.find(
+              (item) => item.id === value,
+            );
+            tipoConsultaControl.setValue(selected ? selected.nombre : '', {
+              emitEvent: false,
+            });
           });
-        });
       }
       if (diagnosticoPrincipalControl && codigoDiagnosticoPrincipalControl) {
-        diagnosticoPrincipalControl.valueChanges.subscribe((value) => {
-          const selected = this.lstConsultas.find(
-            (item) => item.nombre === value
-          );
-          codigoDiagnosticoPrincipalControl.setValue(
-            selected ? selected.id : '',
-            { emitEvent: false }
-          );
-        });
+        diagnosticoPrincipalControl.valueChanges
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            const selected = this.lstConsultas.find(
+              (item) => item.nombre === value,
+            );
+            codigoDiagnosticoPrincipalControl.setValue(
+              selected ? selected.id : '',
+              { emitEvent: false },
+            );
+          });
 
-        codigoDiagnosticoPrincipalControl.valueChanges.subscribe((value) => {
-          const selected = this.lstConsultas.find((item) => item.id === value);
-          diagnosticoPrincipalControl.setValue(
-            selected ? selected.nombre : '',
-            { emitEvent: false }
-          );
-        });
+        codigoDiagnosticoPrincipalControl.valueChanges
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            const selected = this.lstConsultas.find(
+              (item) => item.id === value,
+            );
+            diagnosticoPrincipalControl.setValue(
+              selected ? selected.nombre : '',
+              { emitEvent: false },
+            );
+          });
       }
       if (procedimientoControl && codigoProcedimientoControl) {
-        procedimientoControl.valueChanges.subscribe((value) => {
-          const selected = this.lstProcedimientos.find(
-            (item) => item.nombre === value
-          );
-          codigoProcedimientoControl.setValue(selected ? selected.id : '', {
-            emitEvent: false,
+        procedimientoControl.valueChanges
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            const selected = this.lstProcedimientos.find(
+              (item) => item.nombre === value,
+            );
+            codigoProcedimientoControl.setValue(selected ? selected.id : '', {
+              emitEvent: false,
+            });
           });
-        });
 
-        codigoProcedimientoControl.valueChanges.subscribe((value) => {
-          const selected = this.lstProcedimientos.find(
-            (item) => item.id === value
-          );
-          procedimientoControl.setValue(selected ? selected.nombre : '', {
-            emitEvent: false,
+        codigoProcedimientoControl.valueChanges
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((value) => {
+            const selected = this.lstProcedimientos.find(
+              (item) => item.id === value,
+            );
+            procedimientoControl.setValue(selected ? selected.nombre : '', {
+              emitEvent: false,
+            });
           });
-        });
       }
     }
   }
@@ -437,13 +506,13 @@ export class RipsComponent implements OnInit {
 
   validateAndClearIfInvalid(
     control: FormControl,
-    list: { id: string; nombre: string }[]
+    list: { id: string; nombre: string }[],
   ) {
     console.log('control', control);
     console.log('list', list);
     const value = control.value;
     const isValid = list.some(
-      (option) => option.nombre === value || option.id === value
+      (option) => option.nombre === value || option.id === value,
     );
     console.log('isValid', isValid);
     console.log('value', value);
@@ -461,7 +530,7 @@ export class RipsComponent implements OnInit {
   onTipoConsultaSelected(event: any): void {
     //const selectedValue = event.option.value;
     this.formularioAgregarRips.controls['CODIGO_TIPO_CONSULTA'].setValue(
-      event.option.value
+      event.option.value,
     );
     //this.codigoConsultaControl.setValue(event.option.value);
     //event.option.value = this.tipoConsultaControl.value;
@@ -471,13 +540,22 @@ export class RipsComponent implements OnInit {
   onCodigoTipoConsultaSelected(event: any) {
     //event.option.value = this.codigoConsultaControl.value;event.option.value
     this.formularioAgregarRips.controls['TIPO_CONSULTA'].setValue(
-      event.option.value
+      event.option.value,
     );
     //this.tipoConsultaControl.setValue(event.option.value);
   }
 
   cancelarGuardarRips() {
     this.router.navigate(['/evolucion']);
+  }
+
+  volverARips() {
+    this.mostrarTablaFacturas = false;
+    this.mostrarFormulario = true;
+
+    // opcional: limpiar resultados / selección
+    // this.dataSourceFacturas.data = [];
+    // this.facturaSeleccionada = new RespuestaConsultarFacturasEntreFechas();
   }
 
   async seleccionarFactura(factura: RespuestaConsultarFacturasEntreFechas) {
@@ -498,8 +576,8 @@ export class RipsComponent implements OnInit {
     this.modeloDatosParaConsultarFacturasEntreFechas.IDANAMNESIS =
       this.idAnamnesisPacienteSeleccionado;
     await this.ripsService.startConnectionConsultarFacturasPorIdPorEntreFechas(
-      this.idSedeActualSignalR,
-      JSON.stringify(this.modeloDatosParaConsultarFacturasEntreFechas)
+      this.sedeIdSeleccionada,
+      JSON.stringify(this.modeloDatosParaConsultarFacturasEntreFechas),
     );
   }
 
@@ -525,7 +603,7 @@ export class RipsComponent implements OnInit {
         let datosParaGurdarRips: DatosGuardarRips = new DatosGuardarRips();
         datosParaGurdarRips.IDANAMNESIS = this.idAnamnesisPacienteSeleccionado;
         let doctor = this.lstDoctores.find(
-          (x) => x.nombre === this.doctorSeleccionado
+          (x) => x.nombre === this.doctorSeleccionado,
         );
         if (doctor) {
           datosParaGurdarRips.IDDOCTOR = doctor.id;
@@ -534,12 +612,12 @@ export class RipsComponent implements OnInit {
         datosParaGurdarRips.FECHACONSULTA =
           this.formularioAgregarRips.value.FECHA;
         let codigoEntidadSeleccionada = this.lstEps.find(
-          (x) => x.nombre === this.entidadControl.value
+          (x) => x.nombre === this.entidadControl.value,
         )?.id;
         if (!codigoEntidadSeleccionada) {
           console.error(
             'Entidad no encontrada:',
-            this.formularioAgregarRips.value.ENTIDAD
+            this.formularioAgregarRips.value.ENTIDAD,
           );
           return; // Salir de la función si no se encuentra la entidad
         }
@@ -555,7 +633,7 @@ export class RipsComponent implements OnInit {
         datosParaGurdarRips.VALORCONSULTA = 1;
         datosParaGurdarRips.VALORCUOTAMODERADORA = 0;
         datosParaGurdarRips.VALORNETO = parseFloat(
-          (this.valorTotalRips.value ?? '1').replace(/\./g, '')
+          (this.valorTotalRips.value ?? '1').replace(/\./g, ''),
         );
         datosParaGurdarRips.CODIGOPROCEDIMIENTO =
           this.codigoProcedimientoControl.value; //this.formularioAgregarRips.value.CODIGO_PROCEDIMIENTO;
@@ -568,7 +646,7 @@ export class RipsComponent implements OnInit {
         datosParaGurdarRips.COMPLICACION = '';
         datosParaGurdarRips.FORMAREALIZACIONACTOQUIR = '';
         datosParaGurdarRips.VALORPROCEDIMIENTO = parseFloat(
-          (this.valorTotalRips.value ?? '0').replace(/\./g, '')
+          (this.valorTotalRips.value ?? '0').replace(/\./g, ''),
         ); // this.formularioAgregarRips.value.VALOR_TOTAL;
         datosParaGurdarRips.EXTRANJERO = '';
         datosParaGurdarRips.PAIS = '';
@@ -576,13 +654,13 @@ export class RipsComponent implements OnInit {
         console.log('Datos para guardar Rips: ', datosParaGurdarRips);
         // //evolucion.IDEVOLUCION
         await this.ripsService.startConnectionGuardarDatosRips(
-          this.idSedeActualSignalR,
-          JSON.stringify(datosParaGurdarRips)
+          this.sedeIdSeleccionada,
+          JSON.stringify(datosParaGurdarRips),
         );
       }
     } else {
       await this.mensajesUsuariosService.mensajeInformativo(
-        'DEBE SELECCIONAR UN DIAGNOSTICO PRINCIPAL Y UN PROCEDIMIENTO O CONSULTA PARA GUARDAR EL RIPS'
+        'DEBE SELECCIONAR UN DIAGNOSTICO PRINCIPAL Y UN PROCEDIMIENTO O CONSULTA PARA GUARDAR EL RIPS',
       );
     }
   }
