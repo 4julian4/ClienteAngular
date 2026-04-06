@@ -57,13 +57,10 @@
   <mat-card class="table-card">
     <mat-card-content>
       <mat-tab-group>
-        <!-- ===================== -->
         <!-- TAB 1: ALERTAS -->
-        <!-- ===================== -->
         <mat-tab label="Alertas">
           <div class="tab-pad">
             <div class="table-toolbar">
-              <!-- Buscar -->
               <div class="search-pill">
                 <mat-icon class="search-ico">search</mat-icon>
                 <input
@@ -105,7 +102,6 @@
               </div>
             </div>
 
-            <!-- ALERTS TABLE -->
             <div class="table-wrap">
               <table
                 mat-table
@@ -130,9 +126,9 @@
                 <ng-container matColumnDef="estado">
                   <th mat-header-cell *matHeaderCellDef>Estado</th>
                   <td mat-cell *matCellDef="let a">
-                    <span class="pill" [ngClass]="a.pillClass">
-                      {{ a.pillLabel }}
-                    </span>
+                    <span class="pill" [ngClass]="a.pillClass">{{
+                      a.pillLabel
+                    }}</span>
                   </td>
                 </ng-container>
 
@@ -158,9 +154,7 @@
           </div>
         </mat-tab>
 
-        <!-- ===================== -->
         <!-- TAB 2: CLIENTES -->
-        <!-- ===================== -->
         <mat-tab label="Clientes">
           <div class="tab-pad">
             <div class="hint">
@@ -242,9 +236,7 @@
           </div>
         </mat-tab>
 
-        <!-- ===================== -->
         <!-- TAB 3: DATAICO -->
-        <!-- ===================== -->
         <mat-tab label="Dataico (Usos)">
           <div class="tab-pad">
             <div class="table-wrap">
@@ -267,9 +259,9 @@
                   <th mat-header-cell *matHeaderCellDef>Usos</th>
                   <td mat-cell *matCellDef="let t">
                     <span class="pill pill-tag">{{ t.usageBalance ?? 0 }}</span>
-                    <span class="pill" [ngClass]="getUsagePillClass(t)">
-                      {{ getUsagePillLabel(t) }}
-                    </span>
+                    <span class="pill" [ngClass]="getUsagePillClass(t)">{{
+                      getUsagePillLabel(t)
+                    }}</span>
                   </td>
                 </ng-container>
 
@@ -303,9 +295,7 @@
           </div>
         </mat-tab>
 
-        <!-- ===================== -->
         <!-- TAB 4: RESOLUCIONES -->
-        <!-- ===================== -->
         <mat-tab label="Resoluciones DIAN">
           <div class="tab-pad">
             <div class="hint">
@@ -338,9 +328,9 @@
                 <ng-container matColumnDef="vigencia">
                   <th mat-header-cell *matHeaderCellDef>Válida hasta</th>
                   <td mat-cell *matCellDef="let r">
-                    <span class="pill pill-date">
-                      {{ r.validTo | date: "dd-MM-yyyy" }}
-                    </span>
+                    <span class="pill pill-date">{{
+                      r.validTo | date: "dd-MM-yyyy"
+                    }}</span>
                   </td>
                 </ng-container>
 
@@ -371,9 +361,7 @@
           </div>
         </mat-tab>
 
-        <!-- ===================== -->
         <!-- TAB 5: SEDES -->
-        <!-- ===================== -->
         <mat-tab label="Sedes conectadas">
           <div class="tab-pad">
             <div class="hint">
@@ -410,9 +398,9 @@
                     <span class="pill" [ngClass]="s.estadoClass">{{
                       s.estadoLabel
                     }}</span>
-                    <span class="pill pill-tag" *ngIf="s.lastSeenMin !== null">
-                      {{ s.lastSeenMin }} min
-                    </span>
+                    <span class="pill pill-tag" *ngIf="s.lastSeenMin !== null"
+                      >{{ s.lastSeenMin }} min</span
+                    >
                   </td>
                 </ng-container>
 
@@ -455,6 +443,208 @@
 
             <div class="empty" *ngIf="sedesDataSource.data.length === 0">
               No hay sedes activas recientes.
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ✅ TAB 6: CRECIMIENTO -->
+        <mat-tab label="Crecimiento">
+          <div class="tab-pad">
+            <div class="hint">
+              Simulador: presupuesto → leads → demos → clientes. Ajusta valores
+              según tu realidad.
+            </div>
+
+            <div class="growth-grid">
+              <!-- Inputs -->
+              <mat-card class="growth-card">
+                <div class="growth-title">
+                  Presupuesto mensual
+                  <span class="growth-badge">{{ fmtCOP(growthBudget) }}</span>
+                </div>
+
+                <mat-slider
+                  [min]="growthBudgetMin"
+                  [max]="growthBudgetMax"
+                  [step]="growthBudgetStep"
+                >
+                  <input
+                    matSliderThumb
+                    [(ngModel)]="growthBudget"
+                    (ngModelChange)="recalcGrowth()"
+                  />
+                </mat-slider>
+
+                <div class="growth-presets">
+                  <button mat-stroked-button (click)="setGrowthPreset('BAJO')">
+                    Bajo
+                  </button>
+                  <button mat-stroked-button (click)="setGrowthPreset('MEDIO')">
+                    Medio
+                  </button>
+                  <button mat-stroked-button (click)="setGrowthPreset('ALTO')">
+                    Alto
+                  </button>
+                </div>
+
+                <div class="growth-form">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Costo por lead (CPL)</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="growthCpl"
+                      (ngModelChange)="recalcGrowth()"
+                      min="1"
+                    />
+                    <mat-hint>{{ fmtCOP(growthCpl) }}</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>% Lead → Demo</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="growthLeadToDemoPct"
+                      (ngModelChange)="recalcGrowth()"
+                      min="0"
+                      max="100"
+                    />
+                    <mat-hint>{{ growthLeadToDemoPct }}%</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>% Demo → Cliente</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="growthDemoToClientPct"
+                      (ngModelChange)="recalcGrowth()"
+                      min="0"
+                      max="100"
+                    />
+                    <mat-hint>{{ growthDemoToClientPct }}%</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Meses a proyectar</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="growthMonths"
+                      (ngModelChange)="recalcGrowth()"
+                      min="1"
+                      max="60"
+                    />
+                    <mat-hint>{{ growthMonths }} mes(es)</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Meta de clientes</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="growthGoalClients"
+                      (ngModelChange)="recalcGrowth()"
+                      min="1"
+                    />
+                    <mat-hint>{{ growthGoalClients }} clientes</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Precio mensual promedio</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="growthMonthlyPrice"
+                      (ngModelChange)="recalcGrowth()"
+                      min="0"
+                    />
+                    <mat-hint>{{ fmtCOP(growthMonthlyPrice) }} / mes</mat-hint>
+                  </mat-form-field>
+                </div>
+              </mat-card>
+
+              <!-- Resultados -->
+              <mat-card class="growth-card">
+                <div class="growth-title">Resultados</div>
+
+                <div class="growth-kpis">
+                  <div class="gkpi">
+                    <div class="gkpi-l">Leads / mes</div>
+                    <div class="gkpi-v">{{ growthLeadsPerMonth }}</div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">Demos / mes</div>
+                    <div class="gkpi-v">{{ growthDemosPerMonth }}</div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">Clientes / mes</div>
+                    <div class="gkpi-v">{{ growthClientsPerMonth }}</div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">CAC estimado</div>
+                    <div class="gkpi-v">
+                      {{ growthCac ? fmtCOP(growthCac) : "—" }}
+                    </div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">
+                      Clientes en {{ growthMonths }} meses
+                    </div>
+                    <div class="gkpi-v">{{ growthClientsTotal }}</div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">Inversión total</div>
+                    <div class="gkpi-v">{{ fmtCOP(growthBudgetTotal) }}</div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">MRR nuevo (mensual)</div>
+                    <div class="gkpi-v">{{ fmtCOP(growthNewMrr) }}</div>
+                  </div>
+
+                  <div class="gkpi">
+                    <div class="gkpi-l">Payback simple</div>
+                    <div class="gkpi-v">
+                      {{ growthPaybackMonths ? growthPaybackMonths : "—" }}
+                      <span class="gkpi-sub">mes(es)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="growth-progress">
+                  <div class="growth-progress-title">
+                    Progreso estimado vs meta: <b>{{ growthProgressPct() }}%</b>
+                  </div>
+
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="
+                      growthProgressPct() > 100 ? 100 : growthProgressPct()
+                    "
+                  ></mat-progress-bar>
+
+                  <div class="growth-eta">
+                    <ng-container
+                      *ngIf="growthEtaMonthsToGoal() as eta; else noeta"
+                    >
+                      Con estos números, llegarías a
+                      <b>{{ growthGoalClients }}</b> en aprox.
+                      <b>{{ eta }}</b> mes(es).
+                    </ng-container>
+                    <ng-template #noeta>
+                      Con estos parámetros, el sistema no genera clientes
+                      (revisa CPL o conversiones).
+                    </ng-template>
+                  </div>
+                </div>
+              </mat-card>
             </div>
           </div>
         </mat-tab>

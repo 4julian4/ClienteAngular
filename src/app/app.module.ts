@@ -83,6 +83,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSortModule } from '@angular/material/sort';
+import { MatSliderModule } from '@angular/material/slider';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
@@ -94,6 +95,8 @@ import { RouterModule } from '@angular/router';
 import { AdmonTenantsComponent } from './componentes/admon/admon-tenants/admon-tenants.component';
 import { AdmonResolucionesComponent } from './componentes/admon/admon-resoluciones/admon-resoluciones.component';
 import { AdminControlComponent } from './componentes/admon/admin-control/admin-control.component';
+import { InteroperabilidadRdaComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda.component';
+import { InteroperabilidadRdaDetalleComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda-detalle.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -154,6 +157,8 @@ export const MY_DATE_FORMATS = {
     AdmonTenantsComponent,
     AdmonResolucionesComponent,
     AdminControlComponent,
+    InteroperabilidadRdaComponent,
+    InteroperabilidadRdaDetalleComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -191,6 +196,7 @@ export const MY_DATE_FORMATS = {
     MatChipsModule,
     CommonModule,
     RouterModule,
+    MatSliderModule,
   ],
   providers: [
     DatePipe,

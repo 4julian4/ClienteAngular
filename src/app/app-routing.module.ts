@@ -34,6 +34,8 @@ import { AdminDashboardComponent } from './componentes/admon/admin-dashboard/adm
 import { AdmonTenantsComponent } from './componentes/admon/admon-tenants/admon-tenants.component';
 import { AdmonResolucionesComponent } from './componentes/admon/admon-resoluciones/admon-resoluciones.component';
 import { AdminControlComponent } from './componentes/admon/admin-control/admin-control.component';
+import { InteroperabilidadRdaComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda.component';
+import { InteroperabilidadRdaDetalleComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda-detalle.component';
 
 const routes: Routes = [
   { path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -82,6 +84,14 @@ const routes: Routes = [
   { path: 'billing/notas', component: NotasComponent },
   { path: 'billing/nomina', component: NominaComponent },
   { path: 'billing/historial', component: HistorialComponent },
+  {
+    path: 'interoperabilidad-rda',
+    component: InteroperabilidadRdaComponent,
+  },
+  {
+    path: 'interoperabilidad-rda/:id',
+    component: InteroperabilidadRdaDetalleComponent,
+  },
 ];
 
 @NgModule({

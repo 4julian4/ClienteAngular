@@ -75,7 +75,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
     'documentoPaciente',
     'valorTotal',
     'prestador',
-    'doctor',
+    //'doctor',
     'acciones',
   ];
 
@@ -524,7 +524,7 @@ export class FacturaComponent implements OnInit, OnDestroy {
         'documentoPaciente',
         'valorTotal',
         'prestador',
-        'doctor',
+        //'doctor',
         'acciones',
       ];
     }

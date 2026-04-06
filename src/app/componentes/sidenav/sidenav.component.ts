@@ -193,6 +193,12 @@ export class SidenavComponent implements OnInit, OnDestroy {
         }
       }
     }
+
+    const loginWarning = localStorage.getItem('RYDENT_LOGIN_WARNING');
+    if (loginWarning) {
+      localStorage.removeItem('RYDENT_LOGIN_WARNING');
+      await this.mensajesUsuariosService.mensajeInformativo(loginWarning);
+    }
     console.log('sidenav3');
   }
 
