@@ -1,0 +1,278 @@
+.detalle-rda-container {
+  width: 95%;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0 0 6px 0;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.75;
+  }
+}
+
+.acciones-top {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.info-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8f9fb;
+  border: 1px solid #ececec;
+
+  .label {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 6px;
+  }
+
+  .valor {
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.bloque-error {
+  margin-bottom: 18px;
+
+  pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+  }
+}
+
+.json-panel {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  margin-top: 14px;
+  background: #101418;
+  color: #e9eef3;
+  overflow: hidden;
+}
+
+.json-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  background: #1b232c;
+}
+
+.json-panel pre {
+  margin: 0;
+  padding: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.estado-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.estado-generado {
+  background: #2196f3;
+}
+
+.estado-enviando {
+  background: #ff9800;
+}
+
+.estado-enviado {
+  background: #4caf50;
+}
+
+.estado-error {
+  background: #f44336;
+}
+
+.estado-no-reintentar {
+  background: #616161;
+}
+
+.estado-default {
+  background: #9e9e9e;
+}
+
+.overlay-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+}
+.acciones-clinicas {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.bloque-resumen-clinico {
+  margin-bottom: 18px;
+}
+
+.resumen-clinico-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.resumen-item {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8f9fb;
+  border: 1px solid #ececec;
+}
+
+.resumen-item-full {
+  grid-column: span 2;
+}
+
+.resumen-label {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.resumen-value {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bloque-historial-operativo {
+  margin-bottom: 18px;
+}
+
+.historial-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historial-item {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fafbfd;
+}
+
+.historial-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.historial-tipo {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.historial-info {
+  background: #607d8b;
+}
+
+.historial-error {
+  background: #f44336;
+}
+
+.historial-envio {
+  background: #ff9800;
+}
+
+.historial-fhir {
+  background: #3f51b5;
+}
+
+.historial-persistencia {
+  background: #4caf50;
+}
+
+.historial-contexto {
+  background: #009688;
+}
+
+.historial-fecha {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.historial-usuario {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.historial-descripcion {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.historial-vacio {
+  opacity: 0.7;
+  padding: 10px 0;
+}
+
+@media (max-width: 900px) {
+  .resumen-clinico-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-item-full {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    flex-direction: column;
+  }
+
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+}

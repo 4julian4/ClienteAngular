@@ -1,0 +1,278 @@
+<div class="detalle-rda-container" *ngIf="detalle">
+  <div class="topbar">
+    <div>
+      <h2>Detalle RDA #{{ detalle?.ID }}</h2>
+      <p>
+        {{ detalle?.NOMBRE_PACIENTE }} · {{ detalle?.DOCUMENTO_PACIENTE }} ·
+        Historia {{ detalle?.NUMERO_HISTORIA }}
+      </p>
+    </div>
+
+    <div class="acciones-top">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="reenviar()"
+        [disabled]="!puedeReenviarDetalle()"
+      >
+        Reenviar
+      </button>
+
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="regenerar()"
+        [disabled]="!puedeRegenerarDetalle()"
+      >
+        Regenerar
+      </button>
+
+      <button mat-raised-button (click)="volver()">Volver</button>
+    </div>
+  </div>
+
+  <div class="resumen-grid">
+    <div class="info-card">
+      <div class="label">Estado</div>
+      <div class="valor">
+        <span class="estado-badge" [ngClass]="getEstadoClase(detalle?.ESTADO)">
+          {{ detalle?.ESTADO }}
+        </span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Intentos</div>
+      <div class="valor">{{ detalle?.INTENTOS }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">HTTP</div>
+      <div class="valor">{{ detalle?.CODIGO_HTTP }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Fecha generación</div>
+      <div class="valor">{{ detalle?.FECHA_GENERACION }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Fecha envío</div>
+      <div class="valor">{{ detalle?.FECHA_ENVIO }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Fecha atención</div>
+      <div class="valor">{{ detalle?.FECHA_ATENCION }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Doctor</div>
+      <div class="valor">{{ detalle?.DOCTOR }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Factura</div>
+      <div class="valor">{{ detalle?.FACTURA }}</div>
+    </div>
+
+    <div class="info-card">
+      <div class="label">Tipo documento</div>
+      <div class="valor">{{ detalle?.TIPO_DOCUMENTO }}</div>
+    </div>
+  </div>
+
+  <div class="acciones-clinicas">
+    <button mat-raised-button color="primary" (click)="irADatosPersonales()">
+      Datos personales
+    </button>
+
+    <button mat-raised-button color="accent" (click)="irAAntecedentes()">
+      Antecedentes
+    </button>
+
+    <button mat-raised-button color="warn" (click)="irAEvolucion()">
+      Evolución
+    </button>
+  </div>
+
+  <mat-card class="bloque-resumen-clinico">
+    <mat-card-title>Resumen clínico amigable</mat-card-title>
+    <mat-card-content>
+      <div class="resumen-clinico-grid">
+        <div class="resumen-item">
+          <div class="resumen-label">Paciente</div>
+          <div class="resumen-value">{{ resumenClinico.paciente || "-" }}</div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-label">Documento</div>
+          <div class="resumen-value">{{ resumenClinico.documento || "-" }}</div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-label">Historia</div>
+          <div class="resumen-value">{{ resumenClinico.historia || "-" }}</div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-label">Fecha atención</div>
+          <div class="resumen-value">
+            {{ resumenClinico.fechaAtencion || "-" }}
+          </div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-label">Doctor</div>
+          <div class="resumen-value">{{ resumenClinico.doctor || "-" }}</div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-label">Prestador</div>
+          <div class="resumen-value">{{ resumenClinico.prestador || "-" }}</div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-label">Factura</div>
+          <div class="resumen-value">{{ resumenClinico.factura || "-" }}</div>
+        </div>
+
+        <div class="resumen-item resumen-item-full">
+          <div class="resumen-label">Motivo de consulta</div>
+          <div class="resumen-value">
+            {{ resumenClinico.motivoConsulta || "-" }}
+          </div>
+        </div>
+
+        <div class="resumen-item resumen-item-full">
+          <div class="resumen-label">Enfermedad actual</div>
+          <div class="resumen-value">
+            {{ resumenClinico.enfermedadActual || "-" }}
+          </div>
+        </div>
+
+        <div class="resumen-item resumen-item-full">
+          <div class="resumen-label">Alergias</div>
+          <div class="resumen-value">{{ resumenClinico.alergias || "-" }}</div>
+        </div>
+
+        <div class="resumen-item resumen-item-full">
+          <div class="resumen-label">Diagnóstico principal</div>
+          <div class="resumen-value">
+            {{ resumenClinico.diagnosticoPrincipal || "-" }}
+          </div>
+        </div>
+
+        <div class="resumen-item resumen-item-full">
+          <div class="resumen-label">Procedimiento principal</div>
+          <div class="resumen-value">
+            {{ resumenClinico.procedimientoPrincipal || "-" }}
+          </div>
+        </div>
+
+        <div class="resumen-item resumen-item-full">
+          <div class="resumen-label">Nota de evolución</div>
+          <div class="resumen-value">
+            {{ resumenClinico.notaEvolucion || "-" }}
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="bloque-historial-operativo">
+    <mat-card-title>Historial operativo</mat-card-title>
+    <mat-card-content>
+      <div
+        class="historial-lista"
+        *ngIf="historialItems?.length; else sinHistorial"
+      >
+        <div class="historial-item" *ngFor="let item of historialItems">
+          <div class="historial-item-top">
+            <span
+              class="historial-tipo"
+              [ngClass]="getTipoHistorialClase(item?.Tipo)"
+            >
+              {{ item?.Tipo || "INFO" }}
+            </span>
+
+            <span class="historial-fecha">
+              {{ item?.Fecha }} {{ item?.Hora }}
+            </span>
+          </div>
+
+          <div class="historial-usuario" *ngIf="item?.Usuario">
+            Usuario: {{ item?.Usuario }}
+          </div>
+
+          <div class="historial-descripcion">
+            {{ item?.Descripcion }}
+          </div>
+        </div>
+      </div>
+
+      <ng-template #sinHistorial>
+        <div class="historial-vacio">
+          No hay historial operativo disponible para este documento.
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="bloque-error" *ngIf="detalle?.MENSAJE_ERROR">
+    <mat-card-title>Error / Mensaje operativo</mat-card-title>
+    <mat-card-content>
+      <pre>{{ detalle?.MENSAJE_ERROR }}</pre>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-tab-group>
+    <mat-tab label="FHIR generado">
+      <div class="json-panel">
+        <div class="json-toolbar">
+          <button mat-button (click)="copiarTexto(detalle?.JSON_RDA)">
+            Copiar
+          </button>
+        </div>
+        <pre>{{ detalle?.JSON_RDA }}</pre>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Snapshot interno">
+      <div class="json-panel">
+        <div class="json-toolbar">
+          <button mat-button (click)="copiarTexto(detalle?.JSON_SNAPSHOT)">
+            Copiar
+          </button>
+        </div>
+        <pre>{{ detalle?.JSON_SNAPSHOT }}</pre>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Request API">
+      <div class="json-panel">
+        <div class="json-toolbar">
+          <button mat-button (click)="copiarTexto(detalle?.REQUEST_API)">
+            Copiar
+          </button>
+        </div>
+        <pre>{{ detalle?.REQUEST_API }}</pre>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Respuesta API">
+      <div class="json-panel">
+        <div class="json-toolbar">
+          <button mat-button (click)="copiarTexto(detalle?.RESPUESTA_API)">
+            Copiar
+          </button>
+        </div>
+        <pre>{{ detalle?.RESPUESTA_API }}</pre>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <div class="overlay-loading" *ngIf="isloading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>

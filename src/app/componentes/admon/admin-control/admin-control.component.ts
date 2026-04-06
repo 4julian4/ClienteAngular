@@ -100,7 +100,6 @@ export class AdminControlComponent implements OnInit {
   private rawClientes: Clientes[] = [];
   private rawTenants: AdminTenant[] = [];
   private rawRes: ResolutionRowView[] = [];
-
   private searchText = '';
 
   // ======= KPIs
@@ -108,6 +107,33 @@ export class AdminControlComponent implements OnInit {
   kpiTenantsBajoSaldo = 0;
   kpiResPorVencer = 0;
   kpiResPorAgotar = 0;
+
+  // =========================
+  // ✅ TAB: CRECIMIENTO (Simulador)
+  // =========================
+  growthBudgetMin = 1_000_000;
+  growthBudgetMax = 20_000_000;
+  growthBudgetStep = 250_000;
+
+  growthBudget = 1_000_000; // presupuesto mensual
+  growthCpl = 22_000; // costo por lead (COP)
+  growthLeadToDemoPct = 40; // % lead -> demo
+  growthDemoToClientPct = 25; // % demo -> cliente
+  growthMonthlyPrice = 150_000; // MRR promedio por cliente
+  growthGoalClients = 1000; // meta
+  growthMonths = 9; // meses proyección
+
+  // resultados
+  growthLeadsPerMonth = 0;
+  growthDemosPerMonth = 0;
+  growthClientsPerMonth = 0;
+
+  growthClientsTotal = 0;
+  growthBudgetTotal = 0;
+
+  growthCac = 0; // costo adquisición cliente
+  growthNewMrr = 0; // MRR nuevo mensual
+  growthPaybackMonths = 0; // payback simple
 
   constructor(
     private router: Router,
@@ -119,6 +145,7 @@ export class AdminControlComponent implements OnInit {
 
   ngOnInit(): void {
     this.refresh();
+    this.recalcGrowth(); // ✅
   }
 
   refresh() {
@@ -131,7 +158,7 @@ export class AdminControlComponent implements OnInit {
         .getAll(undefined, true)
         .pipe(catchError(() => of([] as AdminTenant[]))),
 
-      // ✅ NUEVO: sedes conectadas (activas recientes + nombre cliente desde backend)
+      // ✅ sedes conectadas (activas recientes + nombre cliente desde backend)
       sedes: this.sedesConectadasService
         .GetActivasConCliente(10)
         .pipe(catchError(() => of([] as any[]))),
@@ -146,7 +173,7 @@ export class AdminControlComponent implements OnInit {
       this.buildTenantsTable();
 
       // =========================
-      // ✅ NUEVO: SEDES TAB
+      // ✅ SEDES TAB
       // =========================
       try {
         const sedesView = this.mapSedesToView(sedes ?? []);
@@ -159,7 +186,7 @@ export class AdminControlComponent implements OnInit {
       }
 
       // =========================
-      // ✅ RESOLUCIONES (como lo tenías)
+      // ✅ RESOLUCIONES
       // =========================
       const activeTenants = (this.rawTenants ?? []).filter(
         (t) => t?.isActive === true,
@@ -228,14 +255,10 @@ export class AdminControlComponent implements OnInit {
 
   // ============ Construcción de tablas secundarias
   private buildClientesTable() {
-    // idea: mostrar solo los relevantes:
-    // - usaDataico = true (para relacionarlo con billingTenantId)
-    // - o tiene activoHasta (vencimiento)
     const relevant = (this.rawClientes ?? []).filter(
       (c) => c?.usaDataico === true || !!c?.activoHasta,
     );
 
-    // orden: por activoHasta asc (los más urgentes arriba)
     relevant.sort((a: any, b: any) => {
       const da = this.parseDateSafe(a.activoHasta)?.getTime() ?? 9999999999999;
       const db = this.parseDateSafe(b.activoHasta)?.getTime() ?? 9999999999999;
@@ -248,7 +271,6 @@ export class AdminControlComponent implements OnInit {
   private buildTenantsTable() {
     const list = (this.rawTenants ?? []).slice();
 
-    // orden: activos primero, usos asc
     list.sort((a, b) => {
       const wa = a.isActive ? 0 : 1;
       const wb = b.isActive ? 0 : 1;
@@ -266,8 +288,7 @@ export class AdminControlComponent implements OnInit {
     const limit = new Date();
     limit.setDate(limit.getDate() + this.windowDays);
 
-    // ---- 1) Clientes por vencer (RydentWeb)
-    // condición: estado=true y activoHasta dentro ventana
+    // ---- 1) Clientes por vencer
     const clientesPorVencer = (this.rawClientes ?? []).filter((c: any) => {
       if (c?.estado !== true) return false;
       const d = this.parseDateSafe(c.activoHasta);
@@ -322,7 +343,7 @@ export class AdminControlComponent implements OnInit {
       });
     }
 
-    // ---- 3) Resoluciones por vencer (validTo)
+    // ---- 3) Resoluciones por vencer
     const resPorVencer = (this.rawRes ?? []).filter((r) => {
       if (r.isActive !== true) return false;
       const d = this.parseDateSafe(r.validTo);
@@ -333,7 +354,7 @@ export class AdminControlComponent implements OnInit {
     for (const r of resPorVencer) {
       const d = this.parseDateSafe(r.validTo)!;
       const days = this.daysDiff(now, d);
-      const critical = days <= 7; // resoluciones: crítico si <= 7
+      const critical = days <= 7;
       if (this.onlyCritical && !critical) continue;
 
       const blob =
@@ -351,7 +372,7 @@ export class AdminControlComponent implements OnInit {
       });
     }
 
-    // ---- 4) Resoluciones por agotar rango (ToNumber - LastNumberUsed)
+    // ---- 4) Resoluciones por agotar rango
     const resPorAgotar = (this.rawRes ?? []).filter((r) => {
       if (r.isActive !== true) return false;
       const last = r.lastNumberUsed ?? null;
@@ -381,7 +402,7 @@ export class AdminControlComponent implements OnInit {
       });
     }
 
-    // ordenar alertas: Crítico arriba, luego warn
+    // ordenar alertas
     const weight = (a: ControlAlert) =>
       a.pillClass === 'pill-bad' ? 0 : a.pillClass === 'pill-warn' ? 1 : 2;
     alerts.sort((a, b) => weight(a) - weight(b));
@@ -450,7 +471,6 @@ export class AdminControlComponent implements OnInit {
 
   // ============ navegación
   goTo(a: ControlAlert) {
-    // si viene tenantId y el módulo lo usa, igual vamos a la pantalla (luego puedes pasar query params)
     this.router.navigateByUrl(a.route);
   }
 
@@ -495,7 +515,7 @@ export class AdminControlComponent implements OnInit {
     return `${dd}-${mm}-${yyyy}`;
   }
 
-  // ✅ nuevo: volver a dashboard
+  // ✅ volver a dashboard
   goAdminDashboard(): void {
     this.router.navigate(['/admin']);
   }
@@ -511,7 +531,6 @@ export class AdminControlComponent implements OnInit {
         ? Math.max(0, Math.ceil((now - last) / (1000 * 60)))
         : null;
 
-      // ✅ semáforo simple
       let estadoLabel = 'Desconocido';
       let estadoClass = 'pill-muted';
 
@@ -547,5 +566,95 @@ export class AdminControlComponent implements OnInit {
   copyConnId(connId?: string | null) {
     if (!connId) return;
     navigator.clipboard?.writeText(connId);
+  }
+
+  // =========================
+  // ✅ CRECIMIENTO: lógica
+  // =========================
+  recalcGrowth() {
+    const budget = this.clampNumber(
+      this.growthBudget,
+      this.growthBudgetMin,
+      this.growthBudgetMax,
+    );
+    const cpl = Math.max(1, Number(this.growthCpl) || 1);
+    const l2d = this.clampNumber(Number(this.growthLeadToDemoPct) || 0, 0, 100);
+    const d2c = this.clampNumber(
+      Number(this.growthDemoToClientPct) || 0,
+      0,
+      100,
+    );
+    const months = Math.max(1, Math.floor(Number(this.growthMonths) || 1));
+    const mrrPrice = Math.max(0, Number(this.growthMonthlyPrice) || 0);
+    const goal = Math.max(1, Math.floor(Number(this.growthGoalClients) || 1));
+
+    this.growthBudget = budget;
+    this.growthCpl = cpl;
+    this.growthLeadToDemoPct = l2d;
+    this.growthDemoToClientPct = d2c;
+    this.growthMonths = months;
+    this.growthMonthlyPrice = mrrPrice;
+    this.growthGoalClients = goal;
+
+    const leads = Math.floor(budget / cpl);
+    const demos = Math.floor(leads * (l2d / 100));
+    const clients = Math.floor(demos * (d2c / 100));
+
+    this.growthLeadsPerMonth = leads;
+    this.growthDemosPerMonth = demos;
+    this.growthClientsPerMonth = clients;
+
+    this.growthClientsTotal = clients * months;
+    this.growthBudgetTotal = budget * months;
+
+    this.growthCac = clients > 0 ? Math.round(budget / clients) : 0;
+    this.growthNewMrr = clients * mrrPrice;
+    this.growthPaybackMonths =
+      this.growthNewMrr > 0
+        ? Math.max(0, Math.round((budget / this.growthNewMrr) * 10) / 10)
+        : 0;
+  }
+
+  growthEtaMonthsToGoal(): number | null {
+    const perMonth = this.growthClientsPerMonth;
+    if (!perMonth || perMonth <= 0) return null;
+    return Math.ceil(this.growthGoalClients / perMonth);
+  }
+
+  growthProgressPct(): number {
+    const total = this.growthClientsTotal || 0;
+    const goal = this.growthGoalClients || 1;
+    return this.clampNumber(Math.round((total / goal) * 100), 0, 999);
+  }
+
+  fmtCOP(value: number): string {
+    const v = Number(value) || 0;
+    return '$' + v.toLocaleString('es-CO');
+  }
+
+  private clampNumber(v: number, min: number, max: number): number {
+    const n = Number(v);
+    if (isNaN(n)) return min;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  setGrowthPreset(level: 'BAJO' | 'MEDIO' | 'ALTO') {
+    if (level === 'BAJO') {
+      this.growthBudget = 1_000_000;
+      this.growthCpl = 25_000;
+      this.growthLeadToDemoPct = 35;
+      this.growthDemoToClientPct = 20;
+    } else if (level === 'MEDIO') {
+      this.growthBudget = 8_000_000;
+      this.growthCpl = 22_000;
+      this.growthLeadToDemoPct = 40;
+      this.growthDemoToClientPct = 25;
+    } else {
+      this.growthBudget = 20_000_000;
+      this.growthCpl = 20_000;
+      this.growthLeadToDemoPct = 45;
+      this.growthDemoToClientPct = 28;
+    }
+    this.recalcGrowth();
   }
 }

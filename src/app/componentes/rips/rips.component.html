@@ -1,226 +1,1075 @@
 <form
   *ngIf="mostrarFormulario"
-  class="formularioAgregarRips"
+  class="formularioAgregarRips formulario-rips-shell"
+  [class.modo-solo-lectura]="esModoSoloLectura()"
   [formGroup]="formularioAgregarRips"
 >
-  <div class="divFormularioFila1">
-    <mat-form-field appearance="fill" class="campoFila1">
-      <mat-label>Fecha</mat-label>
-      <input
-        matInput
-        readonly
-        [matDatepicker]="picker"
-        formControlName="FECHA"
-        placeholder="Fecha"
-      />
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
+  <div class="rips-scroll-body">
+    <div class="rips-sticky-header">
+      <div class="titulo-bloque titulo-bloque-sticky">
+        {{
+          modoRips === "VER"
+            ? "Ver RIPS"
+            : modoRips === "EDITAR"
+              ? "Editar RIPS"
+              : "Nuevo RIPS"
+        }}
+      </div>
+    </div>
 
-    <mat-form-field appearance="fill" class="campoFila1">
-      <mat-label>Entidad</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="entidadControl"
-        [matAutocomplete]="autoEntidad"
-        (blur)="validateAndClearIfInvalid(entidadControl, lstEps)"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete #autoEntidad="matAutocomplete">
-        <mat-option
-          *ngFor="let eps of filteredEntidad | async"
-          [value]="eps.nombre"
+    <div class="grid-rips-top">
+      <mat-form-field appearance="fill" class="col-fecha">
+        <mat-label>Fecha</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="FECHA"
+          placeholder="Fecha"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="col-entidad">
+        <mat-label>Entidad</mat-label>
+        <input
+          type="text"
+          matInput
+          [formControl]="entidadControl"
+          [matAutocomplete]="autoEntidad"
+          (blur)="
+            validarAutocompleteConDelay(entidadControl, null, lstEps, 'nombre')
+          "
+          style="text-transform: uppercase"
+        />
+        <mat-autocomplete
+          #autoEntidad="matAutocomplete"
+          (optionSelected)="
+            seleccionarItemPorNombre(
+              $event.option.value,
+              entidadControl,
+              null,
+              lstEps
+            )
+          "
         >
-          {{ eps.nombre }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+          <mat-option
+            *ngFor="let eps of filteredEntidad | async"
+            [value]="eps.nombre"
+          >
+            {{ eps.nombre }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
 
-    <mat-form-field appearance="fill" class="campoFila1">
-      <mat-label>N° Factura</mat-label>
-      <input matInput formControlName="NFACTURA" placeholder="N° Factura" />
-    </mat-form-field>
+      <mat-form-field appearance="fill" class="col-factura">
+        <mat-label>N° Factura</mat-label>
+        <input matInput formControlName="NFACTURA" />
+      </mat-form-field>
 
-    <mat-form-field appearance="fill" class="campoFila1">
-      <mat-label>Valor total</mat-label>
-      <!-- <input matInput formControlName="VALOR_TOTAL" placeholder="Valor total"> -->
-      <input
-        matInput
-        [formControl]="valorTotalRips"
-        placeholder="Valor total"
-      />
-      <!-- <input matInput formControlName="VALOR_TOTAL | number:'1.0-0'" placeholder="Valor total"> -->
-    </mat-form-field>
-  </div>
+      <mat-form-field appearance="fill" class="col-autorizacion">
+        <mat-label>N° Autorización</mat-label>
+        <input matInput formControlName="NUMERO_AUTORIZACION" />
+      </mat-form-field>
 
-  <div class="divFormularioFila2">
-    <mat-form-field appearance="fill" class="campoFila2">
-      <mat-label>Tipo Consulta</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="tipoConsultaControl"
-        [matAutocomplete]="autoTipoConsulta"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete
-        #autoTipoConsulta="matAutocomplete"
-        (optionSelected)="onCodigoTipoConsultaSelected($event)"
+      <mat-form-field appearance="fill" class="col-extranjero">
+        <mat-label>Extranjero</mat-label>
+        <mat-select formControlName="EXTRANJERO">
+          <mat-option *ngFor="let item of lstSiNo" [value]="item.id">
+            {{ item.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="col-pais">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="PAIS">
+          <mat-option *ngFor="let item of lstPaises" [value]="item.id">
+            {{ item.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="acciones-cabecera acciones-cabecera-top">
+        <button
+          *ngIf="!esModoSoloLectura()"
+          class="BotonCargarFactura boton-misma-altura"
+          mat-raised-button
+          type="button"
+          (click)="buscarFactura()"
+        >
+          Factura
+        </button>
+      </div>
+    </div>
+
+    <div class="separador"></div>
+
+    <div class="seccion-header">
+      <div class="subtitulo-bloque">Consulta</div>
+
+      <button
+        *ngIf="!mostrarConsultaCard && !esModoSoloLectura()"
+        mat-raised-button
+        type="button"
+        class="BotonGuardar"
+        (click)="agregarConsulta()"
       >
-        <mat-option
-          *ngFor="let tipoConsulta of filteredTiposDeConsultas | async"
-          [value]="tipoConsulta.nombre"
-        >
-          {{ tipoConsulta.nombre }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+        + Agregar
+      </button>
+    </div>
 
-    <mat-form-field appearance="fill" class="campoFila2">
-      <mat-label>Codigo</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="codigoConsultaControl"
-        [matAutocomplete]="autoCodigoTipoConsulta"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete
-        #autoCodigoTipoConsulta="matAutocomplete"
-        (optionSelected)="onTipoConsultaSelected($event)"
+    <div class="consulta-card" *ngIf="mostrarConsultaCard">
+      <div class="consulta-card-header">
+        <div class="consulta-card-title">Consulta</div>
+
+        <button
+          *ngIf="!esModoSoloLectura()"
+          mat-raised-button
+          type="button"
+          class="BotonCancelar"
+          (click)="eliminarConsulta()"
+        >
+          Eliminar
+        </button>
+      </div>
+
+      <div class="consulta-card-body">
+        <div class="grid-consulta-linea">
+          <mat-form-field appearance="fill" class="col-codigo-consulta">
+            <mat-label>Código consulta</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="codigoConsultaControl"
+              [matAutocomplete]="autoCodigoTipoConsulta"
+              (blur)="
+                validarAutocompleteConDelay(
+                  codigoConsultaControl,
+                  tipoConsultaControl,
+                  lstTiposDeConsultas,
+                  'codigo'
+                )
+              "
+              style="text-transform: uppercase"
+            />
+            <mat-autocomplete
+              #autoCodigoTipoConsulta="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorCodigo(
+                  $event.option.value,
+                  codigoConsultaControl,
+                  tipoConsultaControl,
+                  lstTiposDeConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="
+                  let codigoConsulta of filteredCodigosTiposDeConsultas | async
+                "
+                [value]="codigoConsulta.id"
+              >
+                {{ codigoConsulta.id }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="col-tipo-consulta">
+            <mat-label>Consulta</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="tipoConsultaControl"
+              [matAutocomplete]="autoTipoConsulta"
+              (blur)="
+                validarAutocompleteConDelay(
+                  tipoConsultaControl,
+                  codigoConsultaControl,
+                  lstTiposDeConsultas,
+                  'nombre'
+                )
+              "
+              style="text-transform: uppercase"
+            />
+            <mat-autocomplete
+              #autoTipoConsulta="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorNombre(
+                  $event.option.value,
+                  tipoConsultaControl,
+                  codigoConsultaControl,
+                  lstTiposDeConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let tipoConsulta of filteredTiposDeConsultas | async"
+                [value]="tipoConsulta.nombre"
+              >
+                {{ tipoConsulta.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="col-valor-consulta">
+            <mat-label>Valor consulta</mat-label>
+            <input matInput [formControl]="valorConsultaControl" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="col-moderadora">
+            <mat-label>Moderadora</mat-label>
+            <input matInput [formControl]="valorCuotaModeradoraControl" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="col-valor-total">
+            <mat-label>Valor total</mat-label>
+            <input matInput [formControl]="valorTotalRips" />
+          </mat-form-field>
+        </div>
+
+        <div class="grid-dx-ordenado">
+          <mat-form-field appearance="fill" class="dx-codigo">
+            <mat-label>Código Dx principal</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="codigoDiagnosticoPrincipalControl"
+              [matAutocomplete]="autoDx1Code"
+              (blur)="
+                validarAutocompleteConDelay(
+                  codigoDiagnosticoPrincipalControl,
+                  diagnosticoPrincipalControl,
+                  lstConsultas,
+                  'codigo'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx1Code="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorCodigo(
+                  $event.option.value,
+                  codigoDiagnosticoPrincipalControl,
+                  diagnosticoPrincipalControl,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredCodigosDiagnosticoPrincipal | async"
+                [value]="item.id"
+              >
+                {{ item.id }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="dx-nombre">
+            <mat-label>Dx principal</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="diagnosticoPrincipalControl"
+              [matAutocomplete]="autoDx1"
+              (blur)="
+                validarAutocompleteConDelay(
+                  diagnosticoPrincipalControl,
+                  codigoDiagnosticoPrincipalControl,
+                  lstConsultas,
+                  'nombre'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx1="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorNombre(
+                  $event.option.value,
+                  diagnosticoPrincipalControl,
+                  codigoDiagnosticoPrincipalControl,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredDiagnosticoPrincipal | async"
+                [value]="item.nombre"
+              >
+                {{ item.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="dx-codigo">
+            <mat-label>Código Dx secundario</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="codigoDiagnostico2Control"
+              [matAutocomplete]="autoDx2Code"
+              (blur)="
+                validarAutocompleteConDelay(
+                  codigoDiagnostico2Control,
+                  diagnostico2Control,
+                  lstConsultas,
+                  'codigo'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx2Code="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorCodigo(
+                  $event.option.value,
+                  codigoDiagnostico2Control,
+                  diagnostico2Control,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredCodigoDiagnostico2 | async"
+                [value]="item.id"
+              >
+                {{ item.id }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="dx-nombre">
+            <mat-label>Dx secundario</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="diagnostico2Control"
+              [matAutocomplete]="autoDx2"
+              (blur)="
+                validarAutocompleteConDelay(
+                  diagnostico2Control,
+                  codigoDiagnostico2Control,
+                  lstConsultas,
+                  'nombre'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx2="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorNombre(
+                  $event.option.value,
+                  diagnostico2Control,
+                  codigoDiagnostico2Control,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredDiagnostico2 | async"
+                [value]="item.nombre"
+              >
+                {{ item.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+
+        <div class="grid-dx-ordenado">
+          <mat-form-field appearance="fill" class="dx-codigo">
+            <mat-label>Código Dx tercero</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="codigoDiagnostico3Control"
+              [matAutocomplete]="autoDx3Code"
+              (blur)="
+                validarAutocompleteConDelay(
+                  codigoDiagnostico3Control,
+                  diagnostico3Control,
+                  lstConsultas,
+                  'codigo'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx3Code="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorCodigo(
+                  $event.option.value,
+                  codigoDiagnostico3Control,
+                  diagnostico3Control,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredCodigoDiagnostico3 | async"
+                [value]="item.id"
+              >
+                {{ item.id }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="dx-nombre">
+            <mat-label>Dx tercero</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="diagnostico3Control"
+              [matAutocomplete]="autoDx3"
+              (blur)="
+                validarAutocompleteConDelay(
+                  diagnostico3Control,
+                  codigoDiagnostico3Control,
+                  lstConsultas,
+                  'nombre'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx3="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorNombre(
+                  $event.option.value,
+                  diagnostico3Control,
+                  codigoDiagnostico3Control,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredDiagnostico3 | async"
+                [value]="item.nombre"
+              >
+                {{ item.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="dx-codigo">
+            <mat-label>Código Dx cuarto</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="codigoDiagnostico4Control"
+              [matAutocomplete]="autoDx4Code"
+              (blur)="
+                validarAutocompleteConDelay(
+                  codigoDiagnostico4Control,
+                  diagnostico4Control,
+                  lstConsultas,
+                  'codigo'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx4Code="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorCodigo(
+                  $event.option.value,
+                  codigoDiagnostico4Control,
+                  diagnostico4Control,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredCodigoDiagnostico4 | async"
+                [value]="item.id"
+              >
+                {{ item.id }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="dx-nombre">
+            <mat-label>Dx cuarto</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="diagnostico4Control"
+              [matAutocomplete]="autoDx4"
+              (blur)="
+                validarAutocompleteConDelay(
+                  diagnostico4Control,
+                  codigoDiagnostico4Control,
+                  lstConsultas,
+                  'nombre'
+                )
+              "
+            />
+            <mat-autocomplete
+              #autoDx4="matAutocomplete"
+              (optionSelected)="
+                seleccionarItemPorNombre(
+                  $event.option.value,
+                  diagnostico4Control,
+                  codigoDiagnostico4Control,
+                  lstConsultas
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let item of filteredDiagnostico4 | async"
+                [value]="item.nombre"
+              >
+                {{ item.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+
+        <div class="grid-3-consulta">
+          <mat-form-field appearance="fill">
+            <mat-label>Tipo diagnóstico</mat-label>
+            <mat-select formControlName="TIPO_DIAGNOSTICO">
+              <mat-option
+                *ngFor="let item of lstTiposDiagnostico"
+                [value]="item.id"
+              >
+                {{ item.id }} - {{ item.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Finalidad tecnológica</mat-label>
+            <mat-select formControlName="FINALIDAD_CONSULTA">
+              <mat-option
+                *ngFor="let item of lstFinalidadesConsulta"
+                [value]="item.id"
+              >
+                {{ item.id }} - {{ item.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Causa atención</mat-label>
+            <mat-select formControlName="CAUSA_ATENCION">
+              <mat-option
+                *ngFor="let item of lstCausasAtencion"
+                [value]="item.id"
+              >
+                {{ item.id }} - {{ item.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="separador"></div>
+
+    <div class="seccion-header">
+      <div class="subtitulo-bloque">Procedimientos</div>
+
+      <button
+        *ngIf="!esModoSoloLectura()"
+        mat-raised-button
+        type="button"
+        class="BotonGuardar"
+        (click)="agregarProcedimiento()"
       >
-        <mat-option
-          *ngFor="let codigoConsulta of filteredCodigosTiposDeConsultas | async"
-          [value]="codigoConsulta.id"
-        >
-          {{ codigoConsulta.id }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+        + Agregar
+      </button>
+    </div>
+
+    <div formArrayName="PROCEDIMIENTOS" class="procedimientos-lista">
+      <div
+        class="procedimiento-card procedimiento-acordeon"
+        *ngFor="
+          let procedimiento of procedimientosFormArray.controls;
+          let i = index
+        "
+        [formGroupName]="i"
+      >
+        <div class="procedimiento-header-bar">
+          <div
+            class="procedimiento-header-left"
+            (click)="toggleProcedimiento(i)"
+          >
+            <div class="procedimiento-indice">Procedimiento {{ i + 1 }}</div>
+            <div class="procedimiento-resumen">
+              {{ getProcedimientoResumen(i) }}
+            </div>
+          </div>
+
+          <div class="procedimiento-header-right">
+            <button
+              *ngIf="!esModoSoloLectura()"
+              mat-raised-button
+              type="button"
+              class="BotonCancelar btn-quitar-procedimiento"
+              (click)="eliminarProcedimiento(i)"
+            >
+              Eliminar
+            </button>
+
+            <button
+              mat-icon-button
+              type="button"
+              class="btn-toggle-procedimiento"
+              (click)="toggleProcedimiento(i)"
+            >
+              <mat-icon class="procedimiento-toggle-icon">
+                {{ expandedProcedimientos[i] ? "expand_less" : "expand_more" }}
+              </mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="procedimiento-body" *ngIf="expandedProcedimientos[i]">
+          <div class="grid-proc-fila-1">
+            <mat-form-field appearance="fill">
+              <mat-label>Código procedimiento</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="CODIGOPROCEDIMIENTO"
+                [matAutocomplete]="autoProcCodigo"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'CODIGOPROCEDIMIENTO'),
+                    obtenerControlProcedimiento(i, 'NOMBREPROCEDIMIENTO'),
+                    lstProcedimientos,
+                    'codigo'
+                  )
+                "
+              />
+              <mat-autocomplete
+                #autoProcCodigo="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorCodigo(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'CODIGOPROCEDIMIENTO'),
+                    obtenerControlProcedimiento(i, 'NOMBREPROCEDIMIENTO'),
+                    lstProcedimientos
+                  )
+                "
+              >
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorCodigo(
+                      obtenerValorProcedimiento(i, 'CODIGOPROCEDIMIENTO'),
+                      lstProcedimientos
+                    )
+                  "
+                  [value]="item.id"
+                >
+                  {{ item.id }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Procedimiento</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="NOMBREPROCEDIMIENTO"
+                [matAutocomplete]="autoProcNombre"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'NOMBREPROCEDIMIENTO'),
+                    obtenerControlProcedimiento(i, 'CODIGOPROCEDIMIENTO'),
+                    lstProcedimientos,
+                    'nombre'
+                  )
+                "
+                style="text-transform: uppercase"
+              />
+              <mat-autocomplete
+                #autoProcNombre="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorNombre(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'NOMBREPROCEDIMIENTO'),
+                    obtenerControlProcedimiento(i, 'CODIGOPROCEDIMIENTO'),
+                    lstProcedimientos
+                  )
+                "
+              >
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorNombre(
+                      obtenerValorProcedimiento(i, 'NOMBREPROCEDIMIENTO'),
+                      lstProcedimientos
+                    )
+                  "
+                  [value]="item.nombre"
+                >
+                  {{ item.nombre }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Código Dx principal</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="CODIGODXPRINCIPAL"
+                [matAutocomplete]="autoProcDxPrincipalCode"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'CODIGODXPRINCIPAL'),
+                    obtenerControlProcedimiento(i, 'NOMBREDXPRINCIPAL'),
+                    lstConsultas,
+                    'codigo'
+                  )
+                "
+              />
+              <mat-autocomplete
+                #autoProcDxPrincipalCode="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorCodigo(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'CODIGODXPRINCIPAL'),
+                    obtenerControlProcedimiento(i, 'NOMBREDXPRINCIPAL'),
+                    lstConsultas
+                  )
+                "
+              >
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorCodigo(
+                      obtenerValorProcedimiento(i, 'CODIGODXPRINCIPAL'),
+                      lstConsultas
+                    )
+                  "
+                  [value]="item.id"
+                >
+                  {{ item.id }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Dx principal</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="NOMBREDXPRINCIPAL"
+                [matAutocomplete]="autoProcDxPrincipalNombre"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'NOMBREDXPRINCIPAL'),
+                    obtenerControlProcedimiento(i, 'CODIGODXPRINCIPAL'),
+                    lstConsultas,
+                    'nombre'
+                  )
+                "
+                style="text-transform: uppercase"
+              />
+              <mat-autocomplete
+                #autoProcDxPrincipalNombre="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorNombre(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'NOMBREDXPRINCIPAL'),
+                    obtenerControlProcedimiento(i, 'CODIGODXPRINCIPAL'),
+                    lstConsultas
+                  )
+                "
+              >
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorNombre(
+                      obtenerValorProcedimiento(i, 'NOMBREDXPRINCIPAL'),
+                      lstConsultas
+                    )
+                  "
+                  [value]="item.nombre"
+                >
+                  {{ item.nombre }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <div class="grid-proc-fila-2">
+            <mat-form-field appearance="fill">
+              <mat-label>Ámbito</mat-label>
+              <mat-select formControlName="AMBITOREALIZACION">
+                <mat-option
+                  *ngFor="let item of lstAmbitosRealizacion"
+                  [value]="item.id"
+                >
+                  {{ item.id }} - {{ item.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Finalidad proced.</mat-label>
+              <mat-select formControlName="FINALIDADPROCEDIMIENTI">
+                <mat-option
+                  *ngFor="let item of lstFinalidadesProcedimiento"
+                  [value]="item.id"
+                >
+                  {{ item.id }} - {{ item.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Personal que atiende</mat-label>
+              <mat-select formControlName="PERSONALQUEATIENDE">
+                <mat-option
+                  *ngFor="let item of lstPersonalQueAtiende"
+                  [value]="item.id"
+                >
+                  {{ item.id }} - {{ item.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Valor</mat-label>
+              <input matInput formControlName="VALORPROCEDIMIENTO" />
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>¿Acto quirúrgico?</mat-label>
+              <mat-select formControlName="ESQUIRURGICO">
+                <mat-option *ngFor="let item of lstSiNo" [value]="item.id">
+                  {{ item.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="grid-proc-fila-3" *ngIf="esProcedimientoQuirurgico(i)">
+            <mat-form-field appearance="fill">
+              <mat-label>Código Dx relacionado</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="CODIGODXRELACIONADO"
+                [matAutocomplete]="autoProcDxRelCode"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'CODIGODXRELACIONADO'),
+                    obtenerControlProcedimiento(i, 'NOMBREDXRELACIONADO'),
+                    lstConsultas,
+                    'codigo'
+                  )
+                "
+              />
+              <mat-autocomplete
+                #autoProcDxRelCode="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorCodigo(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'CODIGODXRELACIONADO'),
+                    obtenerControlProcedimiento(i, 'NOMBREDXRELACIONADO'),
+                    lstConsultas
+                  )
+                "
+              >
+                <mat-option [value]="''">NINGUNO</mat-option>
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorCodigo(
+                      obtenerValorProcedimiento(i, 'CODIGODXRELACIONADO'),
+                      lstConsultas
+                    )
+                  "
+                  [value]="item.id"
+                >
+                  {{ item.id }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Dx relacionado</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="NOMBREDXRELACIONADO"
+                [matAutocomplete]="autoProcDxRelNombre"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'NOMBREDXRELACIONADO'),
+                    obtenerControlProcedimiento(i, 'CODIGODXRELACIONADO'),
+                    lstConsultas,
+                    'nombre'
+                  )
+                "
+                style="text-transform: uppercase"
+              />
+              <mat-autocomplete
+                #autoProcDxRelNombre="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorNombre(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'NOMBREDXRELACIONADO'),
+                    obtenerControlProcedimiento(i, 'CODIGODXRELACIONADO'),
+                    lstConsultas
+                  )
+                "
+              >
+                <mat-option [value]="''">NINGUNO</mat-option>
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorNombre(
+                      obtenerValorProcedimiento(i, 'NOMBREDXRELACIONADO'),
+                      lstConsultas
+                    )
+                  "
+                  [value]="item.nombre"
+                >
+                  {{ item.nombre }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Código complicación</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="CODIGOCOMPLICACION"
+                [matAutocomplete]="autoCompCode"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'CODIGOCOMPLICACION'),
+                    obtenerControlProcedimiento(i, 'NOMBRECOMPLICACION'),
+                    lstConsultas,
+                    'codigo'
+                  )
+                "
+              />
+              <mat-autocomplete
+                #autoCompCode="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorCodigo(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'CODIGOCOMPLICACION'),
+                    obtenerControlProcedimiento(i, 'NOMBRECOMPLICACION'),
+                    lstConsultas
+                  )
+                "
+              >
+                <mat-option [value]="''">NINGUNA</mat-option>
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorCodigo(
+                      obtenerValorProcedimiento(i, 'CODIGOCOMPLICACION'),
+                      lstConsultas
+                    )
+                  "
+                  [value]="item.id"
+                >
+                  {{ item.id }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Complicación</mat-label>
+              <input
+                type="text"
+                matInput
+                formControlName="NOMBRECOMPLICACION"
+                [matAutocomplete]="autoCompNombre"
+                (blur)="
+                  validarAutocompleteConDelay(
+                    obtenerControlProcedimiento(i, 'NOMBRECOMPLICACION'),
+                    obtenerControlProcedimiento(i, 'CODIGOCOMPLICACION'),
+                    lstConsultas,
+                    'nombre'
+                  )
+                "
+                style="text-transform: uppercase"
+              />
+              <mat-autocomplete
+                #autoCompNombre="matAutocomplete"
+                (optionSelected)="
+                  seleccionarItemPorNombre(
+                    $event.option.value,
+                    obtenerControlProcedimiento(i, 'NOMBRECOMPLICACION'),
+                    obtenerControlProcedimiento(i, 'CODIGOCOMPLICACION'),
+                    lstConsultas
+                  )
+                "
+              >
+                <mat-option [value]="''">NINGUNA</mat-option>
+                <mat-option
+                  *ngFor="
+                    let item of filtrarPorNombre(
+                      obtenerValorProcedimiento(i, 'NOMBRECOMPLICACION'),
+                      lstConsultas
+                    )
+                  "
+                  [value]="item.nombre"
+                >
+                  {{ item.nombre }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Forma realización acto quir.</mat-label>
+              <mat-select formControlName="FORMAREALIZACIONACTOQUIR">
+                <mat-option [value]="''">SELECCIONAR</mat-option>
+                <mat-option
+                  *ngFor="let item of lstFormaRealizacionActoQuir"
+                  [value]="item.id"
+                >
+                  {{ item.id }} - {{ item.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="divFormularioFila3">
-    <mat-form-field appearance="fill" class="campoFila3">
-      <mat-label>D. Principal</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="diagnosticoPrincipalControl"
-        [matAutocomplete]="autoDiagnosticoPrincipal"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete #autoDiagnosticoPrincipal="matAutocomplete">
-        <mat-option
-          *ngFor="
-            let diagnosticoPrincipal of filteredDiagnosticoPrincipal | async
-          "
-          [value]="diagnosticoPrincipal.nombre"
-        >
-          {{ diagnosticoPrincipal.nombre }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-
-    <mat-form-field appearance="fill" class="campoFila3">
-      <mat-label>Codigo</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="codigoDiagnosticoPrincipalControl"
-        [matAutocomplete]="autoCodigoDiagnosticoPrincipal"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete #autoCodigoDiagnosticoPrincipal="matAutocomplete">
-        <mat-option
-          *ngFor="
-            let codigoDiagnosticoP of filteredCodigosDiagnosticoPrincipal
-              | async
-          "
-          [value]="codigoDiagnosticoP.id"
-        >
-          {{ codigoDiagnosticoP.id }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-  </div>
-
-  <div class="divFormularioFila4">
-    <mat-form-field appearance="fill" class="campoFila4">
-      <mat-label>Procedimiento</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="procedimientoControl"
-        [matAutocomplete]="autoProcedimiento"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete #autoProcedimiento="matAutocomplete">
-        <mat-option
-          *ngFor="let procedimiento of filteredProcedimientos | async"
-          [value]="procedimiento.nombre"
-        >
-          {{ procedimiento.nombre }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-
-    <mat-form-field appearance="fill" class="campoFila4">
-      <mat-label>Codigo</mat-label>
-      <input
-        type="text"
-        matInput
-        [formControl]="codigoProcedimientoControl"
-        [matAutocomplete]="autoCodigoProcedimiento"
-        style="text-transform: uppercase"
-      />
-      <mat-autocomplete #autoCodigoProcedimiento="matAutocomplete">
-        <mat-option
-          *ngFor="
-            let codigoProcedimiento of filteredCodigosProcedimientos | async
-          "
-          [value]="codigoProcedimiento.id"
-        >
-          {{ codigoProcedimiento.id }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-  </div>
-  <div class="divContenedorDeBotones">
+  <div class="rips-footer-fijo">
     <button
       class="BotonCargarFactura"
       mat-raised-button
-      (click)="buscarFactura()"
+      type="button"
+      (click)="verListadoRips()"
     >
-      Factura
+      Volver al listado
     </button>
-    <button class="BotonGuardar" mat-raised-button (click)="guardarRips()">
-      Guardar
+
+    <button
+      *ngIf="!esModoSoloLectura()"
+      class="BotonGuardar"
+      mat-raised-button
+      type="button"
+      (click)="guardarRips()"
+    >
+      {{ modoRips === "EDITAR" ? "Actualizar" : "Guardar" }}
     </button>
+
     <button
       class="BotonCancelar"
       mat-raised-button
+      type="button"
       (click)="cancelarGuardarRips()"
     >
-      Cancelar
+      {{ esModoSoloLectura() ? "Cerrar" : "Cancelar" }}
     </button>
   </div>
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-    "
-    *ngIf="isloading"
-  >
+
+  <div class="overlay-loading" *ngIf="isloading">
     <mat-spinner></mat-spinner>
   </div>
 </form>
 
 <div *ngIf="mostrarTablaFacturas" class="ripsGenerado">
+  <div class="bloque-header">
+    <div class="titulo-bloque">Buscar factura</div>
+  </div>
+
   <div class="contenedor-calendarios">
     <mat-form-field class="calendario" appearance="fill">
       <mat-label>Fecha inicial</mat-label>
@@ -254,7 +1103,7 @@
       type="button"
       (click)="volverARips()"
     >
-      Cancelar
+      Volver al formulario
     </button>
 
     <button
@@ -266,6 +1115,7 @@
       Consultar
     </button>
   </div>
+
   <div class="scrollable-table-container">
     <table mat-table [dataSource]="dataSourceFacturas" class="mat-elevation-z8">
       <ng-container matColumnDef="FECHA">
@@ -284,7 +1134,7 @@
 
       <ng-container matColumnDef="DESCRIPCION">
         <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">
-          Descripcion
+          Descripción
         </th>
         <td mat-cell *matCellDef="let element">{{ element.DESCRIPCION }}</td>
       </ng-container>
@@ -292,19 +1142,161 @@
       <ng-container matColumnDef="ACCIONES">
         <th mat-header-cell *matHeaderCellDef>Acciones</th>
         <td mat-cell *matCellDef="let factura">
-          <button mat-icon-button [matMenuTriggerFor]="menu">
+          <button mat-icon-button [matMenuTriggerFor]="menuFactura">
             <mat-icon>more_vert</mat-icon>
           </button>
-          <mat-menu #menu="matMenu">
+          <mat-menu #menuFactura="matMenu">
             <button mat-menu-item (click)="seleccionarFactura(factura)">
-              <mat-icon>block</mat-icon>
+              <mat-icon>check_circle</mat-icon>
               <span>Seleccionar</span>
             </button>
           </mat-menu>
         </td>
       </ng-container>
+
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
+  </div>
+
+  <div class="overlay-loading" *ngIf="isloading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>
+
+<div *ngIf="mostrarListadoRips" class="ripsGenerado">
+  <div class="bloque-header">
+    <div class="titulo-bloque">RIPS guardados</div>
+    <div class="bloque-header-acciones">
+      <button
+        class="BotonGuardar"
+        mat-raised-button
+        type="button"
+        (click)="abrirNuevoRips()"
+      >
+        Nuevo RIPS
+      </button>
+
+      <button
+        class="BotonCancelar"
+        mat-raised-button
+        type="button"
+        (click)="volverDesdeListadoRips()"
+      >
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <div class="contenedor-calendarios">
+    <mat-form-field class="calendario" appearance="fill">
+      <mat-label>Fecha inicial</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker3"
+        [(ngModel)]="fechaInicio"
+        name="fechaInicioRips"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
+      <mat-datepicker #picker3></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field class="calendario" appearance="fill">
+      <mat-label>Fecha final</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker4"
+        [(ngModel)]="fechaFin"
+        name="fechaFinRips"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker4"></mat-datepicker-toggle>
+      <mat-datepicker #picker4></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div class="acciones-facturas">
+    <button
+      mat-raised-button
+      class="btn-accion"
+      type="button"
+      (click)="consultarRipsExistentes()"
+    >
+      Consultar
+    </button>
+  </div>
+
+  <div class="scrollable-table-container">
+    <table
+      mat-table
+      [dataSource]="dataSourceRipsExistentes"
+      class="mat-elevation-z8"
+    >
+      <ng-container matColumnDef="FECHA">
+        <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">
+          Fecha
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.FECHA | date: "yyyy-MM-dd" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="HORA">
+        <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">
+          Hora
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ normalizarHoraListado(element.HORA) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="FACTURA">
+        <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">
+          Factura
+        </th>
+        <td mat-cell *matCellDef="let element">{{ element.FACTURA }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="DESCRIPCION">
+        <th mat-header-cell *matHeaderCellDef class="encabezadoPrincipal">
+          Descripción
+        </th>
+        <td mat-cell *matCellDef="let element">{{ element.DESCRIPCION }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ACCIONES">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button [matMenuTriggerFor]="menuRips">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menuRips="matMenu">
+            <button mat-menu-item (click)="verRips(item)">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver</span>
+            </button>
+
+            <button mat-menu-item (click)="editarRips(item)">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+
+            <button mat-menu-item (click)="eliminarRips(item)">
+              <mat-icon>delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsRipsExistentes"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumnsRipsExistentes"
+      ></tr>
+    </table>
+  </div>
+
+  <div class="overlay-loading" *ngIf="isloading">
+    <mat-spinner></mat-spinner>
   </div>
 </div>

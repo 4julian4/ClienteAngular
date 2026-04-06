@@ -106,10 +106,109 @@
   }
 }
 
+/* ✅ TAB CRECIMIENTO */
+.growth-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.growth-card {
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.growth-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.growth-badge {
+  margin-left: auto;
+  font-size: 12px;
+  opacity: 0.85;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.growth-presets {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 12px 0;
+  flex-wrap: wrap;
+}
+
+.growth-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.growth-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gkpi {
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.gkpi-l {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 700;
+}
+
+.gkpi-v {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.gkpi-sub {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-left: 6px;
+  font-weight: 700;
+}
+
+.growth-progress {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.growth-progress-title {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.growth-eta {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
 /* responsive KPIs */
 @media (max-width: 1100px) {
   .kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .growth-grid {
+    grid-template-columns: 1fr;
+  }
+  .growth-form {
+    grid-template-columns: 1fr;
+  }
+  .growth-kpis {
+    grid-template-columns: 1fr;
   }
 }
 

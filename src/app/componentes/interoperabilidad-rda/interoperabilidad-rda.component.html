@@ -1,0 +1,390 @@
+<div class="rda-control-container">
+  <div class="titulo-bloque">
+    <h2>Centro de Control RDA</h2>
+    <p>Gestión operativa de interoperabilidad</p>
+  </div>
+
+  <div class="metricas-cards">
+    <div class="metrica-card">
+      <div class="metrica-label">Visibles</div>
+      <div class="metrica-valor">{{ metricas.totalVisibles }}</div>
+    </div>
+
+    <div class="metrica-card ok">
+      <div class="metrica-label">Enviados</div>
+      <div class="metrica-valor">{{ metricas.totalExito }}</div>
+    </div>
+
+    <div class="metrica-card error">
+      <div class="metrica-label">Con error</div>
+      <div class="metrica-valor">{{ metricas.totalConError }}</div>
+    </div>
+
+    <div class="metrica-card no-reintentar">
+      <div class="metrica-label">No reintentar</div>
+      <div class="metrica-valor">{{ metricas.totalNoReintentar }}</div>
+    </div>
+
+    <div class="metrica-card info">
+      <div class="metrica-label">% éxito</div>
+      <div class="metrica-valor">{{ metricas.porcentajeExito }}%</div>
+    </div>
+  </div>
+
+  <div class="resumen-cards">
+    <div class="card-resumen generado">
+      <div class="label">Generados</div>
+      <div class="valor">{{ totalGenerados }}</div>
+    </div>
+
+    <div class="card-resumen enviando">
+      <div class="label">Enviando</div>
+      <div class="valor">{{ totalEnviando }}</div>
+    </div>
+
+    <div class="card-resumen enviado">
+      <div class="label">Enviados</div>
+      <div class="valor">{{ totalEnviados }}</div>
+    </div>
+
+    <div class="card-resumen error">
+      <div class="label">Error envío</div>
+      <div class="valor">{{ totalErrorEnvio }}</div>
+    </div>
+
+    <div class="card-resumen noreintentar">
+      <div class="label">No reintentar</div>
+      <div class="valor">{{ totalNoReintentar }}</div>
+    </div>
+  </div>
+
+  <mat-card
+    class="progreso-panel"
+    *ngIf="progress.total > 0 && (procesandoMasivo || progress.enCurso)"
+  >
+    <mat-card-title>Progreso del proceso masivo</mat-card-title>
+    <mat-card-content>
+      <div class="progreso-top">
+        <div><strong>Acción:</strong> {{ progress.accion }}</div>
+        <div><strong>Mensaje:</strong> {{ progress.mensaje }}</div>
+      </div>
+
+      <mat-progress-bar
+        mode="determinate"
+        [value]="getPorcentajeProgreso()"
+      ></mat-progress-bar>
+
+      <div class="progreso-bottom">
+        <span>Total: {{ progress.total }}</span>
+        <span>Procesadas: {{ progress.procesadas }}</span>
+        <span>Exitosas: {{ progress.exitosas }}</span>
+        <span>Fallidas: {{ progress.fallidas }}</span>
+        <span *ngIf="progress.ultimoDocumento"
+          >Último ID: {{ progress.ultimoDocumento }}</span
+        >
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="filtros-rapidos">
+    <button
+      mat-stroked-button
+      [class.filtro-activo]="esFiltroRapidoActivo('TODOS')"
+      (click)="aplicarFiltroRapido('TODOS')"
+    >
+      Todos
+    </button>
+
+    <button
+      mat-stroked-button
+      [class.filtro-activo]="esFiltroRapidoActivo('PENDIENTES')"
+      (click)="aplicarFiltroRapido('PENDIENTES')"
+    >
+      Solo pendientes
+    </button>
+
+    <button
+      mat-stroked-button
+      [class.filtro-activo]="esFiltroRapidoActivo('ERRORES')"
+      (click)="aplicarFiltroRapido('ERRORES')"
+    >
+      Solo errores
+    </button>
+
+    <button
+      mat-stroked-button
+      [class.filtro-activo]="esFiltroRapidoActivo('NO_REINTENTAR')"
+      (click)="aplicarFiltroRapido('NO_REINTENTAR')"
+    >
+      Solo no reintentar
+    </button>
+  </div>
+
+  <form [formGroup]="formularioFiltro" class="filtros-panel">
+    <mat-form-field appearance="fill">
+      <mat-label>Fecha desde</mat-label>
+      <input
+        matInput
+        [matDatepicker]="pickerDesde"
+        formControlName="fechaDesde"
+      />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="pickerDesde"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #pickerDesde></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Fecha hasta</mat-label>
+      <input
+        matInput
+        [matDatepicker]="pickerHasta"
+        formControlName="fechaHasta"
+      />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="pickerHasta"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #pickerHasta></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="estado">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="GENERADO">GENERADO</mat-option>
+        <mat-option value="ENVIANDO">ENVIANDO</mat-option>
+        <mat-option value="ENVIADO">ENVIADO</mat-option>
+        <mat-option value="ERROR_ENVIO">ERROR_ENVIO</mat-option>
+        <mat-option value="NO_REINTENTAR">NO_REINTENTAR</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="campo-texto">
+      <mat-label>Buscar</mat-label>
+      <input
+        matInput
+        formControlName="texto"
+        placeholder="Paciente, documento, factura, historia, doctor..."
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Máx registros</mat-label>
+      <input matInput type="number" formControlName="maxRegistros" />
+    </mat-form-field>
+  </form>
+
+  <div class="acciones-superiores">
+    <button mat-raised-button color="primary" (click)="consultar()">
+      Consultar
+    </button>
+
+    <button mat-raised-button color="accent" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="reenviarVisibles()"
+      [disabled]="procesandoMasivo"
+    >
+      Reenviar visibles
+    </button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="regenerarVisibles()"
+      [disabled]="procesandoMasivo"
+    >
+      Regenerar visibles
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="reenviarSeleccionados()"
+      [disabled]="procesandoMasivo"
+    >
+      Reenviar seleccionados
+    </button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="regenerarSeleccionados()"
+      [disabled]="procesandoMasivo"
+    >
+      Regenerar seleccionados
+    </button>
+
+    <button mat-raised-button (click)="exportarJson()">Exportar JSON</button>
+
+    <button mat-raised-button (click)="exportarCsv()">Exportar CSV</button>
+  </div>
+
+  <div class="tabla-wrapper">
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      class="mat-elevation-z2 tabla-rda"
+    >
+      <ng-container matColumnDef="SELECT">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            color="primary"
+            (change)="$event ? masterToggle() : null"
+            [checked]="isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+            [aria-label]="checkboxLabel()"
+          >
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox
+            color="primary"
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)"
+            [aria-label]="checkboxLabel(row)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ID">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let row">{{ row.ID }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="FECHA_ATENCION">
+        <th mat-header-cell *matHeaderCellDef>Fecha atención</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.FECHA_ATENCION | date: "dd/MM/yyyy" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="TIPO_DOCUMENTO">
+        <th mat-header-cell *matHeaderCellDef>Tipo documento</th>
+        <td mat-cell *matCellDef="let row">{{ row.TIPO_DOCUMENTO }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="PACIENTE">
+        <th mat-header-cell *matHeaderCellDef>Paciente</th>
+        <td mat-cell *matCellDef="let row">{{ row.NOMBRE_PACIENTE }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="DOCUMENTO">
+        <th mat-header-cell *matHeaderCellDef>Documento</th>
+        <td mat-cell *matCellDef="let row">{{ row.DOCUMENTO_PACIENTE }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="DOCTOR">
+        <th mat-header-cell *matHeaderCellDef>Doctor</th>
+        <td mat-cell *matCellDef="let row">{{ row.DOCTOR || "-" }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ESTADO">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="estado-badge" [ngClass]="getEstadoClase(row.ESTADO)">
+            {{ row.ESTADO }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="INTENTOS">
+        <th mat-header-cell *matHeaderCellDef>Intentos</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="chip-simple" [ngClass]="getIntentosClase(row.INTENTOS)">
+            {{ row.INTENTOS ?? 0 }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="CODIGO_HTTP">
+        <th mat-header-cell *matHeaderCellDef>HTTP</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="chip-simple" [ngClass]="getHttpClase(row.CODIGO_HTTP)">
+            {{ row.CODIGO_HTTP || "-" }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ERROR">
+        <th mat-header-cell *matHeaderCellDef>Error</th>
+        <td mat-cell *matCellDef="let row">
+          <button
+            mat-stroked-button
+            color="warn"
+            *ngIf="row.MENSAJE_ERROR"
+            [matTooltip]="row.MENSAJE_ERROR"
+            (click)="verError(row)"
+          >
+            {{ getMensajeCorto(row.MENSAJE_ERROR) }}
+          </button>
+
+          <span *ngIf="!row.MENSAJE_ERROR">-</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ACCIONES">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button [matMenuTriggerFor]="menuAcciones">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+
+          <mat-menu #menuAcciones="matMenu">
+            <button mat-menu-item (click)="verDetalle(row)">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+
+            <button
+              mat-menu-item
+              (click)="reenviar(row)"
+              [disabled]="!puedeReenviar(row)"
+            >
+              <mat-icon>send</mat-icon>
+              <span>Reenviar</span>
+            </button>
+
+            <button
+              mat-menu-item
+              (click)="regenerar(row)"
+              [disabled]="!puedeRegenerar(row)"
+            >
+              <mat-icon>autorenew</mat-icon>
+              <span>Regenerar</span>
+            </button>
+
+            <button
+              mat-menu-item
+              (click)="verError(row)"
+              *ngIf="row.MENSAJE_ERROR"
+            >
+              <mat-icon>error</mat-icon>
+              <span>Ver error</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        (click)="selection.toggle(row)"
+        class="fila-seleccionable"
+      ></tr>
+    </table>
+  </div>
+
+  <div class="overlay-loading" *ngIf="isloading || procesandoMasivo">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>
