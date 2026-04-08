@@ -188,34 +188,52 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     this.respuestaPinService.shareddatosPersonalesParaEditarData
       .pipe(takeUntil(this.destruir$))
       .subscribe((data) => {
-        if (data) {
-          console.log(data);
-          this.resultadoBusquedaDatosPersonalesCompletos = data.datosPersonales;
-          this.respuestaPinService.updateNotaImportante(
-            this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE,
-          );
-          this.fotoFrontalBase64 = data.strFotoFrontal || this.imagenPorDefecto;
-
-          console.log(
-            this.resultadoBusquedaDatosPersonalesCompletos.HORA_INGRESO,
-          );
-          console.log(
-            this.resultadoBusquedaDatosPersonalesCompletos.FECHA_INGRESO,
-          );
-          const horaFormateada = this.convertirAHora24(
-            this.resultadoBusquedaDatosPersonalesCompletos.HORA_INGRESO.toString(),
-          );
-          console.log(horaFormateada);
-          this.formularioDatosPersonales.patchValue({
-            ...this.resultadoBusquedaDatosPersonalesCompletos,
-            HORA_INGRESO: horaFormateada,
-          });
-
-          // ✅ FIX: recalcular edad cuando cargues edición
-          this.recalcularEdadDesdeFechaNacimiento();
-        } else {
-          this.fotoFrontalBase64 = this.imagenPorDefecto;
+        if (!data || !data.datosPersonales) {
+          return;
         }
+
+        this.resultadoBusquedaDatosPersonalesCompletos = data.datosPersonales;
+        this.respuestaPinService.updateNotaImportante(
+          this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE,
+        );
+        this.fotoFrontalBase64 = data.strFotoFrontal || this.imagenPorDefecto;
+
+        const horaFormateada = this.convertirAHora24(
+          this.resultadoBusquedaDatosPersonalesCompletos.HORA_INGRESO.toString(),
+        );
+
+        this.formularioDatosPersonales.patchValue({
+          ...this.resultadoBusquedaDatosPersonalesCompletos,
+          HORA_INGRESO: horaFormateada,
+        });
+
+        this.recalcularEdadDesdeFechaNacimiento();
+      });
+
+    this.respuestaPinService.shareddatosPersonalesParaCrearDesdeInteroperabilidadData
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((data) => {
+        if (!data || !data.datosPersonales) return;
+
+        const datos = data.datosPersonales;
+
+        this.resultadoBusquedaDatosPersonalesCompletos = datos;
+        this.fotoFrontalBase64 = data.strFotoFrontal || this.imagenPorDefecto;
+
+        let horaFormateada = '';
+        if (datos.HORA_INGRESO) {
+          horaFormateada = this.convertirAHora24(String(datos.HORA_INGRESO));
+        }
+
+        this.formularioDatosPersonales.patchValue({
+          ...datos,
+          IDANAMNESIS: 0,
+          HORA_INGRESO:
+            horaFormateada ||
+            this.formularioDatosPersonales.get('HORA_INGRESO')?.value,
+        });
+
+        this.recalcularEdadDesdeFechaNacimiento();
       });
 
     this.formularioDatosPersonales
@@ -735,6 +753,11 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     this.respuestaPinService.updatedatosPersonalesParaEditar(
       new RespuestaDatosPersonales(),
     );
+
+    this.respuestaPinService.updatedatosPersonalesParaCrearDesdeInteroperabilidad(
+      new RespuestaDatosPersonales(),
+    );
+
     this.router.navigate(['/datos-personales']);
   }
 

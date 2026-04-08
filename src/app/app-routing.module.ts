@@ -36,6 +36,7 @@ import { AdmonResolucionesComponent } from './componentes/admon/admon-resolucion
 import { AdminControlComponent } from './componentes/admon/admin-control/admin-control.component';
 import { InteroperabilidadRdaComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda.component';
 import { InteroperabilidadRdaDetalleComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda-detalle.component';
+import { InteroperabilidadConsultaComponent } from './componentes/interoperabilidad-consulta/interoperabilidad-consulta.component';
 
 const routes: Routes = [
   { path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -91,6 +92,10 @@ const routes: Routes = [
   {
     path: 'interoperabilidad-rda/:id',
     component: InteroperabilidadRdaDetalleComponent,
+  },
+  {
+    path: 'interoperabilidad-consulta',
+    component: InteroperabilidadConsultaComponent,
   },
 ];
 

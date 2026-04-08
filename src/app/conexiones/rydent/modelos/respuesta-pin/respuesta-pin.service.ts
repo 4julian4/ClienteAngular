@@ -86,6 +86,20 @@ export class RespuestaPinService {
   shareddatosPersonalesParaEditarData =
     this.datosPersonalesParaEditar.asObservable();
 
+  private datosPersonalesParaCrearDesdeInteroperabilidadSource =
+    new BehaviorSubject<RespuestaDatosPersonales>(
+      new RespuestaDatosPersonales(),
+    );
+
+  shareddatosPersonalesParaCrearDesdeInteroperabilidadData =
+    this.datosPersonalesParaCrearDesdeInteroperabilidadSource.asObservable();
+
+  updatedatosPersonalesParaCrearDesdeInteroperabilidad(
+    data: RespuestaDatosPersonales,
+  ) {
+    this.datosPersonalesParaCrearDesdeInteroperabilidadSource.next(data);
+  }
+
   private antecedentesPacienteParaEditar =
     new BehaviorSubject<Antecedentes | null>(null);
   sharedantecedentesPacienteParaEditarData =
@@ -132,6 +146,12 @@ export class RespuestaPinService {
   private respuestaDockerJsonRipsPresentado = new BehaviorSubject<any[]>([]);
   sharedrespuestaDockerJsonRipsPresentado =
     this.respuestaDockerJsonRipsPresentado.asObservable();
+
+  private pacienteInteroperabilidadTemporal = new BehaviorSubject<any | null>(
+    null,
+  );
+  sharedPacienteInteroperabilidadTemporal =
+    this.pacienteInteroperabilidadTemporal.asObservable();
 
   // ✅ referencias para poder hacer off SOLO a nuestros handlers
   private onErrorConexion?: (clienteId: string, mensajeError: string) => void;
@@ -371,5 +391,17 @@ export class RespuestaPinService {
 
   async updateRespuestaDockerJsonRipsPresentado(data: any[]) {
     this.respuestaDockerJsonRipsPresentado.next(data);
+  }
+
+  async updatePacienteInteroperabilidadTemporal(data: any) {
+    this.pacienteInteroperabilidadTemporal.next(data);
+  }
+
+  getPacienteInteroperabilidadTemporal(): any | null {
+    return this.pacienteInteroperabilidadTemporal.getValue();
+  }
+
+  clearPacienteInteroperabilidadTemporal(): void {
+    this.pacienteInteroperabilidadTemporal.next(null);
   }
 }

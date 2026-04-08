@@ -1,0 +1,397 @@
+<div class="interoperabilidad-consulta-container">
+  <div class="titulo-bloque">
+    <h2>Consulta clínica interoperable</h2>
+    <p>Busque pacientes, RDA y encuentros clínicos</p>
+  </div>
+
+  <form [formGroup]="formulario" class="panel-busqueda">
+    <mat-form-field appearance="fill">
+      <mat-label>Tipo documento</mat-label>
+      <mat-select formControlName="tipoDocumento">
+        <mat-option value="CC">CC</mat-option>
+        <mat-option value="CE">CE</mat-option>
+        <mat-option value="TI">TI</mat-option>
+        <mat-option value="PA">PA</mat-option>
+        <mat-option value="RC">RC</mat-option>
+        <mat-option value="CN">CN</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Número documento</mat-label>
+      <input matInput formControlName="numeroDocumento" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Humanuser</mat-label>
+      <input matInput formControlName="humanuser" placeholder="CC-123456789" />
+    </mat-form-field>
+
+    <div class="checkbox-wrap">
+      <mat-checkbox formControlName="autoConsultarComplementos">
+        Consultar también RDA y encuentros
+      </mat-checkbox>
+    </div>
+  </form>
+
+  <div class="acciones-superiores">
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="consultarExacto()"
+    >
+      Consultar exacto
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      type="button"
+      (click)="consultarSimilar()"
+    >
+      Buscar similar
+    </button>
+
+    <button mat-raised-button type="button" (click)="consultarRda()">
+      Ver RDA
+    </button>
+
+    <button mat-raised-button type="button" (click)="consultarEncuentros()">
+      Ver encuentros
+    </button>
+
+    <button mat-raised-button color="warn" type="button" (click)="limpiar()">
+      Limpiar
+    </button>
+  </div>
+
+  <div class="tabs-simple">
+    <button
+      mat-stroked-button
+      type="button"
+      [class.activo]="tabActiva === 'PACIENTE'"
+      (click)="tabActiva = 'PACIENTE'"
+    >
+      Paciente
+    </button>
+
+    <button
+      mat-stroked-button
+      type="button"
+      [class.activo]="tabActiva === 'SIMILARES'"
+      (click)="tabActiva = 'SIMILARES'"
+    >
+      Similares
+    </button>
+
+    <button
+      mat-stroked-button
+      type="button"
+      [class.activo]="tabActiva === 'RDA'"
+      (click)="tabActiva = 'RDA'"
+    >
+      RDA
+    </button>
+
+    <button
+      mat-stroked-button
+      type="button"
+      [class.activo]="tabActiva === 'ENCUENTROS'"
+      (click)="tabActiva = 'ENCUENTROS'"
+    >
+      Encuentros
+    </button>
+  </div>
+
+  <mat-card *ngIf="paciente && tabActiva === 'PACIENTE'" class="card-paciente">
+    <mat-card-title>Resultado paciente</mat-card-title>
+    <mat-card-content>
+      <div class="estado-consulta">
+        <span *ngIf="paciente.encontrado" class="ok">
+          Paciente encontrado
+        </span>
+
+        <span *ngIf="!paciente.encontrado" class="error">
+          Paciente no encontrado
+        </span>
+      </div>
+
+      <div class="grid-paciente">
+        <div><strong>Nombre:</strong> {{ paciente.nombreCompleto || "-" }}</div>
+        <div>
+          <strong>Documento:</strong>
+          {{ paciente.tipoDocumento || "-" }}
+          {{ paciente.numeroDocumento || "-" }}
+        </div>
+        <div><strong>Sexo:</strong> {{ paciente.sexo || "-" }}</div>
+        <div>
+          <strong>Nacimiento:</strong> {{ paciente.fechaNacimiento || "-" }}
+        </div>
+        <div><strong>Teléfono:</strong> {{ paciente.telefono || "-" }}</div>
+        <div><strong>Celular:</strong> {{ paciente.celular || "-" }}</div>
+        <div><strong>Dirección:</strong> {{ paciente.direccion || "-" }}</div>
+        <div><strong>Ciudad:</strong> {{ paciente.ciudadNombre || "-" }}</div>
+        <div>
+          <strong>Departamento:</strong>
+          {{ paciente.departamentoNombre || "-" }}
+        </div>
+        <div><strong>EPS:</strong> {{ paciente.epsNombre || "-" }}</div>
+        <div><strong>Afiliación:</strong> {{ paciente.afiliacion || "-" }}</div>
+      </div>
+
+      <div class="acciones-clinicas" *ngIf="paciente.encontrado">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="crearHistoriaClinica()"
+        >
+          Crear historia clínica
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card
+    *ngIf="similares.length && tabActiva === 'SIMILARES'"
+    class="card-similares"
+  >
+    <mat-card-title>Pacientes similares</mat-card-title>
+    <mat-card-content>
+      <table
+        mat-table
+        [dataSource]="similares"
+        class="mat-elevation-z2 tabla-simple"
+      >
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.nombreCompleto || "-" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="documento">
+          <th mat-header-cell *matHeaderCellDef>Documento</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.tipoDocumento || "-" }} {{ row.numeroDocumento || "-" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaNacimiento">
+          <th mat-header-cell *matHeaderCellDef>Nacimiento</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.fechaNacimiento || "-" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acción</th>
+          <td mat-cell *matCellDef="let row">
+            <button
+              mat-button
+              color="primary"
+              type="button"
+              (click)="seleccionarSimilar(row)"
+            >
+              Seleccionar
+            </button>
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="[
+            'nombre',
+            'documento',
+            'fechaNacimiento',
+            'acciones',
+          ]"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: ['nombre', 'documento', 'fechaNacimiento', 'acciones']
+          "
+        ></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="rdas.length && tabActiva === 'RDA'" class="card-rda">
+    <mat-card-title>RDA del paciente</mat-card-title>
+    <mat-card-content>
+      <div class="lista-bonita">
+        <div class="card-info-bonita" *ngFor="let item of rdas">
+          <div class="card-info-header">
+            <div>
+              <div class="card-info-titulo">
+                {{ item.titulo || item.tipoDocumento || "RDA" }}
+              </div>
+              <div class="card-info-subtitulo">
+                {{ item.fecha || "-" }}
+              </div>
+            </div>
+
+            <div class="chips-wrap">
+              <span class="chip chip-primary">
+                {{ item.tipoDocumento || "Documento clínico" }}
+              </span>
+            </div>
+          </div>
+
+          <div class="grid-info-bonita">
+            <div class="dato-bonito">
+              <span class="label">Prestador</span>
+              <span class="valor">{{ item.prestador || "-" }}</span>
+            </div>
+
+            <div class="dato-bonito">
+              <span class="label">Autor</span>
+              <span class="valor">{{ item.autor || "-" }}</span>
+            </div>
+
+            <div class="dato-bonito" *ngIf="$any(item).resumen">
+              <span class="label">Resumen</span>
+              <span class="valor">{{ $any(item).resumen }}</span>
+            </div>
+
+            <div class="dato-bonito" *ngIf="$any(item).seccionesTexto?.length">
+              <span class="label">Secciones</span>
+              <div class="lista-tags">
+                <span
+                  class="tag-suave"
+                  *ngFor="let s of $any(item).seccionesTexto"
+                >
+                  {{ s }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <details class="details-json" *ngIf="item.rawJson">
+            <summary>Ver JSON</summary>
+            <pre>{{ item.rawJson }}</pre>
+          </details>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card
+    *ngIf="encuentros.length && tabActiva === 'ENCUENTROS'"
+    class="card-encuentros"
+  >
+    <mat-card-title>Encuentros clínicos</mat-card-title>
+    <mat-card-content>
+      <div class="lista-bonita">
+        <div class="card-info-bonita" *ngFor="let item of encuentros">
+          <div class="card-info-header">
+            <div>
+              <div class="card-info-titulo">
+                {{ item.clase || "Encuentro clínico" }}
+              </div>
+              <div class="card-info-subtitulo">
+                {{ item.fechaInicio || "-" }}
+                <span *ngIf="item.fechaFin"> · {{ item.fechaFin }}</span>
+              </div>
+            </div>
+
+            <div class="chips-wrap">
+              <span class="chip chip-primary">
+                {{ item.modalidad || "Sin modalidad" }}
+              </span>
+            </div>
+          </div>
+
+          <div class="grid-info-bonita">
+            <div class="dato-bonito">
+              <span class="label">Prestador</span>
+              <span class="valor">{{ item.prestador || "-" }}</span>
+            </div>
+
+            <div class="dato-bonito">
+              <span class="label">Doctor</span>
+              <span class="valor">{{ item.doctor || "-" }}</span>
+            </div>
+
+            <div class="dato-bonito">
+              <span class="label">Dx principal</span>
+              <span class="valor">{{ item.diagnosticoPrincipal || "-" }}</span>
+            </div>
+
+            <div class="dato-bonito">
+              <span class="label">Causa atención</span>
+              <span class="valor">{{ item.causaAtencion || "-" }}</span>
+            </div>
+
+            <div class="dato-bonito" *ngIf="$any(item).resumen">
+              <span class="label">Resumen clínico</span>
+              <span class="valor">{{ $any(item).resumen }}</span>
+            </div>
+
+            <div class="dato-bonito" *ngIf="$any(item).procedimientos?.length">
+              <span class="label">Procedimientos</span>
+              <div class="lista-tags">
+                <span
+                  class="tag-suave"
+                  *ngFor="let p of $any(item).procedimientos"
+                >
+                  {{ p }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <details class="details-json" *ngIf="item.rawJson">
+            <summary>Ver JSON</summary>
+            <pre>{{ item.rawJson }}</pre>
+          </details>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="debug-grid">
+    <details class="debug-collapse" *ngIf="rawPacienteExacto">
+      <summary>Raw paciente exacto</summary>
+      <mat-card class="debug-card">
+        <mat-card-content>
+          <pre>{{ rawPacienteExacto }}</pre>
+        </mat-card-content>
+      </mat-card>
+    </details>
+
+    <details class="debug-collapse" *ngIf="rawPacienteSimilar">
+      <summary>Raw paciente similar</summary>
+      <mat-card class="debug-card">
+        <mat-card-content>
+          <pre>{{ rawPacienteSimilar }}</pre>
+        </mat-card-content>
+      </mat-card>
+    </details>
+
+    <details class="debug-collapse" *ngIf="rawRda">
+      <summary>Raw RDA paciente</summary>
+      <mat-card class="debug-card">
+        <mat-card-content>
+          <pre>{{ rawRda }}</pre>
+        </mat-card-content>
+      </mat-card>
+    </details>
+
+    <details class="debug-collapse" *ngIf="rawEncuentros">
+      <summary>Raw encuentros</summary>
+      <mat-card class="debug-card">
+        <mat-card-content>
+          <pre>{{ rawEncuentros }}</pre>
+        </mat-card-content>
+      </mat-card>
+    </details>
+  </div>
+
+  <div class="overlay-loading" *ngIf="isloading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>
