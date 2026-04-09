@@ -135,13 +135,23 @@
           <mat-icon>admin_panel_settings</mat-icon>
           <span>Administración</span>
         </button>
+
+        <button
+          mat-menu-item
+          routerLink="/interoperabilidad-consulta"
+          (click)="setMostrarBuscarHistoriaClinica(false)"
+        >
+          <mat-icon>person_search</mat-icon>
+          <span>Consulta interoperable</span>
+        </button>
+
         <button
           mat-menu-item
           routerLink="/interoperabilidad-rda"
           (click)="setMostrarBuscarHistoriaClinica(false)"
         >
           <mat-icon>sync_alt</mat-icon>
-          <span>Interoperabilidad</span>
+          <span>Control RDA</span>
         </button>
 
         <button mat-menu-item (click)="cerrarSession()">

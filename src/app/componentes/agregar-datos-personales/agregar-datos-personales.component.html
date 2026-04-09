@@ -138,8 +138,12 @@
             width: 100%;
           "
         >
-          <button mat-button (click)="inputCamara.click()">Capturar</button>
-          <button mat-button (click)="inputFile.click()">Subir</button>
+          <button type="button" mat-button (click)="inputCamara.click()">
+            Capturar
+          </button>
+          <button type="button" mat-button (click)="inputFile.click()">
+            Subir
+          </button>
         </div>
 
         <input
@@ -489,6 +493,7 @@
   <br />
   <div class="divContenedorDeBotones">
     <button
+      type="button"
       class="BotonGuardar"
       mat-raised-button
       (click)="guardarDatosPersonales()"
@@ -496,6 +501,7 @@
       Guardar
     </button>
     <button
+      type="button"
       class="BotonCancelar"
       mat-raised-button
       (click)="cancelarDatosPersonales()"

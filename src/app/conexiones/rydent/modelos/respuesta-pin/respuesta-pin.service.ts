@@ -86,6 +86,18 @@ export class RespuestaPinService {
   shareddatosPersonalesParaEditarData =
     this.datosPersonalesParaEditar.asObservable();
 
+  private datosPersonalesParaCrearDesdeInteroperabilidadSource =
+    new BehaviorSubject<RespuestaDatosPersonales | null>(null);
+
+  shareddatosPersonalesParaCrearDesdeInteroperabilidadData =
+    this.datosPersonalesParaCrearDesdeInteroperabilidadSource.asObservable();
+
+  updatedatosPersonalesParaCrearDesdeInteroperabilidad(
+    data: RespuestaDatosPersonales,
+  ) {
+    this.datosPersonalesParaCrearDesdeInteroperabilidadSource.next(data);
+  }
+
   private antecedentesPacienteParaEditar =
     new BehaviorSubject<Antecedentes | null>(null);
   sharedantecedentesPacienteParaEditarData =
@@ -132,6 +144,12 @@ export class RespuestaPinService {
   private respuestaDockerJsonRipsPresentado = new BehaviorSubject<any[]>([]);
   sharedrespuestaDockerJsonRipsPresentado =
     this.respuestaDockerJsonRipsPresentado.asObservable();
+
+  private pacienteInteroperabilidadTemporal = new BehaviorSubject<any | null>(
+    null,
+  );
+  sharedPacienteInteroperabilidadTemporal =
+    this.pacienteInteroperabilidadTemporal.asObservable();
 
   // ✅ referencias para poder hacer off SOLO a nuestros handlers
   private onErrorConexion?: (clienteId: string, mensajeError: string) => void;
@@ -342,7 +360,10 @@ export class RespuestaPinService {
 
   async updatedatosPersonalesParaEditar(data: RespuestaDatosPersonales) {
     this.datosPersonalesParaEditar.next(data);
-    console.log('Datos personales para editar:', data);
+    console.log(
+      'SERVICE -> VALOR ACTUAL datosPersonalesParaEditar:',
+      this.datosPersonalesParaEditar.getValue(),
+    );
   }
 
   async updateantecedentesPacienteParaEditar(data: Antecedentes) {
@@ -371,5 +392,17 @@ export class RespuestaPinService {
 
   async updateRespuestaDockerJsonRipsPresentado(data: any[]) {
     this.respuestaDockerJsonRipsPresentado.next(data);
+  }
+
+  async updatePacienteInteroperabilidadTemporal(data: any) {
+    this.pacienteInteroperabilidadTemporal.next(data);
+  }
+
+  getPacienteInteroperabilidadTemporal(): any | null {
+    return this.pacienteInteroperabilidadTemporal.getValue();
+  }
+
+  clearPacienteInteroperabilidadTemporal(): void {
+    this.pacienteInteroperabilidadTemporal.next(null);
   }
 }

@@ -97,6 +97,7 @@ import { AdmonResolucionesComponent } from './componentes/admon/admon-resolucion
 import { AdminControlComponent } from './componentes/admon/admin-control/admin-control.component';
 import { InteroperabilidadRdaComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda.component';
 import { InteroperabilidadRdaDetalleComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda-detalle.component';
+import { InteroperabilidadConsultaComponent } from './componentes/interoperabilidad-consulta/interoperabilidad-consulta.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -159,6 +160,7 @@ export const MY_DATE_FORMATS = {
     AdminControlComponent,
     InteroperabilidadRdaComponent,
     InteroperabilidadRdaDetalleComponent,
+    InteroperabilidadConsultaComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
