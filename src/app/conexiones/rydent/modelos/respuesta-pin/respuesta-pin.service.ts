@@ -87,9 +87,7 @@ export class RespuestaPinService {
     this.datosPersonalesParaEditar.asObservable();
 
   private datosPersonalesParaCrearDesdeInteroperabilidadSource =
-    new BehaviorSubject<RespuestaDatosPersonales>(
-      new RespuestaDatosPersonales(),
-    );
+    new BehaviorSubject<RespuestaDatosPersonales | null>(null);
 
   shareddatosPersonalesParaCrearDesdeInteroperabilidadData =
     this.datosPersonalesParaCrearDesdeInteroperabilidadSource.asObservable();
@@ -362,7 +360,10 @@ export class RespuestaPinService {
 
   async updatedatosPersonalesParaEditar(data: RespuestaDatosPersonales) {
     this.datosPersonalesParaEditar.next(data);
-    console.log('Datos personales para editar:', data);
+    console.log(
+      'SERVICE -> VALOR ACTUAL datosPersonalesParaEditar:',
+      this.datosPersonalesParaEditar.getValue(),
+    );
   }
 
   async updateantecedentesPacienteParaEditar(data: Antecedentes) {

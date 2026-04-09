@@ -188,24 +188,45 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     this.respuestaPinService.shareddatosPersonalesParaEditarData
       .pipe(takeUntil(this.destruir$))
       .subscribe((data) => {
+        console.log('AGREGAR -> RECIBIDO PARA EDITAR:', data);
+
         if (!data || !data.datosPersonales) {
           return;
         }
 
         this.resultadoBusquedaDatosPersonalesCompletos = data.datosPersonales;
-        this.respuestaPinService.updateNotaImportante(
-          this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE,
-        );
-        this.fotoFrontalBase64 = data.strFotoFrontal || this.imagenPorDefecto;
 
-        const horaFormateada = this.convertirAHora24(
-          this.resultadoBusquedaDatosPersonalesCompletos.HORA_INGRESO.toString(),
+        const horaFormateada = this.formatHoraParaVista(
+          this.resultadoBusquedaDatosPersonalesCompletos.HORA_INGRESO,
         );
 
-        this.formularioDatosPersonales.patchValue({
+        const payloadPatch = {
+          ...this.resultadoBusquedaDatosPersonalesCompletos,
+          HORA_INGRESO: horaFormateada,
+        };
+
+        console.log('AGREGAR -> PAYLOAD PATCH:', payloadPatch);
+
+        this.patchFormConLog('EDITAR_SUBJECT', {
           ...this.resultadoBusquedaDatosPersonalesCompletos,
           HORA_INGRESO: horaFormateada,
         });
+
+        /*this.formularioDatosPersonales.patchValue(payloadPatch, {
+          emitEvent: false,
+        });*/
+
+        console.log(
+          'AGREGAR -> FORM DESPUES DEL PATCH:',
+          this.formularioDatosPersonales.getRawValue(),
+        );
+
+        setTimeout(() => {
+          console.log(
+            'AGREGAR -> FORM 300ms DESPUES:',
+            this.formularioDatosPersonales.getRawValue(),
+          );
+        }, 300);
 
         this.recalcularEdadDesdeFechaNacimiento();
       });
@@ -213,9 +234,25 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     this.respuestaPinService.shareddatosPersonalesParaCrearDesdeInteroperabilidadData
       .pipe(takeUntil(this.destruir$))
       .subscribe((data) => {
-        if (!data || !data.datosPersonales) return;
+        console.log('INTEROP -> RECIBIDO:', data);
+
+        if (!data?.datosPersonales) return;
 
         const datos = data.datosPersonales;
+
+        // ✅ ignorar payload vacío
+        const tieneContenidoReal =
+          !!datos.IDANAMNESIS ||
+          !!datos.IDANAMNESIS_TEXTO ||
+          !!datos.NOMBRES ||
+          !!datos.APELLIDOS ||
+          !!datos.NOMBRE_PACIENTE ||
+          !!datos.CEDULA_NUMERO;
+
+        if (!tieneContenidoReal) {
+          console.log('INTEROP -> IGNORADO porque viene vacío');
+          return;
+        }
 
         this.resultadoBusquedaDatosPersonalesCompletos = datos;
         this.fotoFrontalBase64 = data.strFotoFrontal || this.imagenPorDefecto;
@@ -225,7 +262,7 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
           horaFormateada = this.convertirAHora24(String(datos.HORA_INGRESO));
         }
 
-        this.formularioDatosPersonales.patchValue({
+        this.patchFormConLog('INTEROP', {
           ...datos,
           IDANAMNESIS: 0,
           HORA_INGRESO:
@@ -312,23 +349,46 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destruir$))
       .subscribe(
         async (respuestaBusquedaDatosPersonales: RespuestaDatosPersonales) => {
+          console.log(
+            '🔥 ENTRO respuestaDatosPersonalesEmit',
+            respuestaBusquedaDatosPersonales,
+          );
+
           this.resultadoBusquedaDatosPersonalesCompletos =
             respuestaBusquedaDatosPersonales.datosPersonales;
+
           this.respuestaPinService.updateNotaImportante(
             this.resultadoBusquedaDatosPersonalesCompletos.IMPORTANTE,
           );
 
           this.fotoFrontalBase64 =
             respuestaBusquedaDatosPersonales.strFotoFrontal;
+
           if (this.fotoFrontalBase64 == null || this.fotoFrontalBase64 == '') {
             this.fotoFrontalBase64 = this.imagenPorDefecto;
           }
 
-          this.formularioDatosPersonales.patchValue(
-            this.resultadoBusquedaDatosPersonalesCompletos,
+          const horaFormateada = this.convertirAHora24(
+            String(
+              this.resultadoBusquedaDatosPersonalesCompletos.HORA_INGRESO || '',
+            ),
           );
 
-          // ✅ FIX
+          console.log('🔥 VA A PATCH responseDatosPersonalesEmit', {
+            ...this.resultadoBusquedaDatosPersonalesCompletos,
+            HORA_INGRESO: horaFormateada,
+          });
+
+          this.formularioDatosPersonales.patchValue({
+            ...this.resultadoBusquedaDatosPersonalesCompletos,
+            HORA_INGRESO: horaFormateada,
+          });
+
+          console.log(
+            '🔥 FORM DESPUES responseDatosPersonalesEmit',
+            this.formularioDatosPersonales.getRawValue(),
+          );
+
           this.recalcularEdadDesdeFechaNacimiento();
         },
       );
@@ -364,31 +424,54 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     }
   }
 
-  private formatHora(hora: any): string {
+  private formatHoraParaVista(hora: any): string {
     if (!hora) return '';
 
-    let date: Date;
-
     if (hora instanceof Date) {
-      date = hora;
-    } else if (typeof hora === 'string') {
-      const [horas, minutos, segundos] = hora.split(':').map(Number);
-      if (isNaN(horas) || isNaN(minutos)) return '';
-      date = new Date();
-      date.setHours(horas, minutos, segundos || 0);
-    } else {
-      return '';
+      return this.toHora12(hora);
     }
 
-    if (isNaN(date.getTime())) return '';
+    if (typeof hora === 'string') {
+      const valor = hora.trim();
 
+      // ISO: 2026-02-19T05:00:00.000Z
+      if (valor.includes('T')) {
+        const date = new Date(valor);
+        if (isNaN(date.getTime())) return '';
+        return this.toHora12(date);
+      }
+
+      // 24h: 18:30 o 18:30:00
+      const match24 = valor.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+      if (match24) {
+        const horas = parseInt(match24[1], 10);
+        const minutos = parseInt(match24[2], 10);
+        const segundos = parseInt(match24[3] ?? '0', 10);
+
+        const date = new Date();
+        date.setHours(horas, minutos, segundos, 0);
+        return this.toHora12(date);
+      }
+
+      // ya viene 12h
+      const match12 = valor.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (match12) {
+        return `${parseInt(match12[1], 10)}:${match12[2]} ${match12[3].toUpperCase()}`;
+      }
+    }
+
+    return '';
+  }
+
+  private toHora12(date: Date): string {
     let horas = date.getHours();
-    let minutos = date.getMinutes();
+    const minutos = date.getMinutes();
     const ampm = horas >= 12 ? 'PM' : 'AM';
 
     horas = horas % 12;
     horas = horas ? horas : 12;
-    const minutosStr = minutos < 10 ? '0' + minutos : minutos;
+
+    const minutosStr = minutos < 10 ? '0' + minutos : minutos.toString();
 
     return `${horas}:${minutosStr} ${ampm}`;
   }
@@ -410,10 +493,14 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
   }
 
   inicializarFormulario() {
+    console.trace('SE EJECUTO inicializarFormulario');
     console.log(this.doctorGuardar);
     console.log(this.idDoctorGuardar);
     const fechaActual = new Date();
-    const horaActual = fechaActual.getHours() + ':' + fechaActual.getMinutes();
+    const hh = fechaActual.getHours().toString().padStart(2, '0');
+    const mm = fechaActual.getMinutes().toString().padStart(2, '0');
+    const ss = fechaActual.getSeconds().toString().padStart(2, '0');
+    const horaActual = `${hh}:${mm}:${ss}`;
 
     this.formularioDatosPersonales = this.formBuilder.group({
       IDANAMNESIS: ['0'],
@@ -422,7 +509,7 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
       COMPARACION: [0],
       FECHA_INGRESO: [fechaActual],
       FECHA_INGRESO_DATE: [fechaActual],
-      HORA_INGRESO: [this.convertirAHora24(horaActual)],
+      HORA_INGRESO: [horaActual],
       NOMBRES: [''],
       APELLIDOS: [''],
       NOMBRE_PACIENTE: [''],
@@ -622,6 +709,7 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     obj.CODIGO_EPS_LISTADO = this.clampStr(obj.CODIGO_EPS_LISTADO, 6);
     obj.CODIGO_CIUDAD = this.clampStr(obj.CODIGO_CIUDAD, 3);
     obj.CODIGO_DEPARTAMENTO = this.clampStr(obj.CODIGO_DEPARTAMENTO, 3);
+    obj.HORA_INGRESO = this.convertirAHora24(obj.HORA_INGRESO);
 
     // 5) Números (evita overflow raro por strings)
     const toInt = (v: any, def: number = 0) => {
@@ -734,19 +822,34 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
     return date.toISOString();
   }
 
-  convertirAHora24(hora12: string): string {
-    const [hora, minutosYampm] = hora12.split(':');
-    const [minutos, ampm] = minutosYampm.split(' ');
+  convertirAHora24(hora: string): string {
+    if (!hora) return '';
 
-    let horas24 = parseInt(hora);
-    if (ampm === 'PM' && horas24 < 12) {
-      horas24 += 12;
-    }
-    if (ampm === 'AM' && horas24 === 12) {
-      horas24 = 0;
+    const valor = String(hora).trim().toUpperCase();
+
+    // Caso 1: ya viene en 24h -> 18:30 o 18:30:00
+    const match24 = valor.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (match24) {
+      const h = match24[1].padStart(2, '0');
+      const m = match24[2];
+      const s = match24[3] ?? '00';
+      return `${h}:${m}:${s}`;
     }
 
-    return `${horas24.toString().padStart(2, '0')}:${minutos}`;
+    // Caso 2: viene 12h -> 6:30 PM
+    const match12 = valor.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+    if (match12) {
+      let horas = parseInt(match12[1], 10);
+      const minutos = match12[2];
+      const ampm = match12[3];
+
+      if (ampm === 'PM' && horas < 12) horas += 12;
+      if (ampm === 'AM' && horas === 12) horas = 0;
+
+      return `${horas.toString().padStart(2, '0')}:${minutos}:00`;
+    }
+
+    return '';
   }
 
   cancelarDatosPersonales() {
@@ -800,5 +903,25 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
   // Activa el clic en el input de subida
   activarSubida(): void {
     this.inputFile.nativeElement.click();
+  }
+
+  private patchFormConLog(tag: string, payload: any): void {
+    console.log(`PATCH FORM -> ${tag}`, payload);
+
+    this.formularioDatosPersonales.patchValue(payload, {
+      emitEvent: false,
+    });
+
+    console.log(
+      `PATCH FORM RESULT -> ${tag}`,
+      this.formularioDatosPersonales.getRawValue(),
+    );
+
+    setTimeout(() => {
+      console.log(
+        `PATCH FORM RESULT 300ms -> ${tag}`,
+        this.formularioDatosPersonales.getRawValue(),
+      );
+    }, 300);
   }
 }

@@ -286,15 +286,21 @@ export class DatosPersonalesComponent implements OnInit, OnDestroy {
     datosPersonales.HORA_INGRESO = this.formatHoraTo24H(
       datosPersonales.HORA_INGRESO,
     );
+    console.log('2. FORM YA TRANSFORMADO:', datosPersonales);
 
     console.log('Datos del paciente para editar:', datosPersonales);
 
     let datosPersonalesCompletos = new RespuestaDatosPersonales();
     datosPersonalesCompletos.datosPersonales = datosPersonales;
     datosPersonalesCompletos.strFotoFrontal = fotoFrontal;
+    console.log('3. OBJETO FINAL ENVIADO A EDITAR:', datosPersonalesCompletos);
 
     await this.respuestaPinService.updatedatosPersonalesParaEditar(
       datosPersonalesCompletos,
+    );
+    console.log(
+      '4. VALOR ACTUAL EN SERVICE ANTES DE NAVEGAR:',
+      this.respuestaPinService['datosPersonalesParaEditar']?.getValue?.(),
     );
     this.router.navigate(['/agregar-datos-personales']);
     console.log('Datos del paciente para editar:', datosPersonales);
