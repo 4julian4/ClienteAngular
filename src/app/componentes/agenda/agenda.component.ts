@@ -69,7 +69,7 @@ import { AgregarEvolucionAgendaComponent } from '../agregar-evolucion-agenda';
   styleUrls: ['./agenda.component.scss'],
 })
 export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
-  isloading: boolean = false;
+  isloading: boolean = true;
   //contextMenuPosition = { x: '0px', y: '0px' };
   //@ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
   @ViewChild('myTable') myTable!: MatTable<any>;
@@ -193,6 +193,9 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private nombreChangesSub?: Subscription;
   private historiaChangesSub?: Subscription;
+  private reconstruirAgendaTimer: any = null;
+  private agendaAutocompleteInicializado = false;
+  private agendaInicialCargada = false;
 
   sedeIdSeleccionada = 0;
 
@@ -293,6 +296,7 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((data) => {
         if (data != null) {
           this.idSedeActualSignalR = data;
+          this.intentarCargarAgendaInicial();
         }
       });
 
@@ -307,8 +311,7 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
     this.respuestaPinService.sharedisLoading
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        if (data != null) {
-          //alert('isloading'+ data);
+        if (data != null && this.agendaInicialCargada) {
           this.isloading = data;
         }
       });
@@ -327,286 +330,22 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((data) => {
         if (data != null) {
           this.listaNombrePacienteParaAgendar =
-            data.lstAnamnesisParaAgendayBuscadores;
-          this.lstNombrePacienteParaAgendar =
-            this.listaNombrePacienteParaAgendar!.map((item) => ({
-              id: item.IDANAMNESIS?.toString()
-                ? item.IDANAMNESIS?.toString()
-                : '',
-              nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
-            }));
-          this.filteredNombrePacienteParaAgendar = this.formularioAgregarCita
-            .get('nombre')!
-            .valueChanges.pipe(
-              startWith(''),
-              map((value) =>
-                this.desactivarFiltro
-                  ? this.lstNombrePacienteParaAgendar
-                  : this._filterNombre(
-                      value,
-                      this.lstNombrePacienteParaAgendar,
-                    ),
-              ),
-            );
+            data.lstAnamnesisParaAgendayBuscadores ?? [];
 
           this.listaDatosPacienteParaBuscarAgenda =
-            data.lstAnamnesisParaAgendayBuscadores;
-          this.lstDatosPacienteParaBuscarAgenda =
-            this.listaDatosPacienteParaBuscarAgenda!.map((item) => ({
-              idAnamnesis: item.IDANAMNESIS?.toString()
-                ? item.IDANAMNESIS?.toString()
-                : '',
-              idAnamenesisTexto: item.IDANAMNESIS_TEXTO
-                ? item.IDANAMNESIS_TEXTO
-                : '',
-              nombre: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
-              telefono: item.TELF_P ? item.TELF_P : '',
-            }));
-          this.filteredDatosPacienteParaBuscarAgenda =
-            this.datosPacienteParaBuscarAgendaControl.valueChanges.pipe(
-              startWith(''),
-              map((value) =>
-                typeof value === 'string' ? value : value.nombre,
-              ),
-              map((nombre) =>
-                nombre
-                  ? this._filterBuscarAgenda(nombre)
-                  : this.lstDatosPacienteParaBuscarAgenda.slice(),
-              ),
-            );
+            data.lstAnamnesisParaAgendayBuscadores ?? [];
 
           this.listaTelefonoPacienteParaAgendar =
-            data.lstAnamnesisParaAgendayBuscadores;
-          this.lstTelefonoPacienteParaAgendar =
-            this.listaTelefonoPacienteParaAgendar!.map((item) => ({
-              id: item.IDANAMNESIS?.toString()
-                ? item.IDANAMNESIS?.toString()
-                : '',
-              nombre: item.TELF_P ? item.TELF_P : '',
-            }));
-          this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita
-            .get('telefono')!
-            .valueChanges.pipe(
-              startWith(''),
-              map((value) =>
-                this.desactivarFiltro
-                  ? this.lstTelefonoPacienteParaAgendar
-                  : this._filterNombre(
-                      value,
-                      this.lstTelefonoPacienteParaAgendar,
-                    ),
-              ),
-            );
-
-          // this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita.get('telefono')!.valueChanges.pipe(
-          //   startWith(this.selectedRow.OUT_TELEFONO),
-          //   map(value => this._filter(value, this.lstTelefonoPacienteParaAgendar))
-          // );
+            data.lstAnamnesisParaAgendayBuscadores ?? [];
 
           this.listaCelularPacienteParaAgendar =
-            data.lstAnamnesisParaAgendayBuscadores;
-          this.lstCelularPacienteParaAgendar =
-            this.listaCelularPacienteParaAgendar!.map((item) => ({
-              id: item.IDANAMNESIS?.toString()
-                ? item.IDANAMNESIS?.toString()
-                : '',
-              nombre: item.CELULAR_P ? item.CELULAR_P : '',
-            }));
-          this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita
-            .get('celular')!
-            .valueChanges.pipe(
-              startWith(''),
-              map((value) =>
-                this.desactivarFiltro
-                  ? this.lstCelularPacienteParaAgendar
-                  : this._filterNombre(
-                      value,
-                      this.lstCelularPacienteParaAgendar,
-                    ),
-              ),
-            );
+            data.lstAnamnesisParaAgendayBuscadores ?? [];
 
           this.listaHistoriaPacienteParaAgendar =
-            data.lstAnamnesisParaAgendayBuscadores;
-          this.lstHistoriaPacienteParaAgendar =
-            this.listaHistoriaPacienteParaAgendar!.map((item) => ({
-              id: item.IDANAMNESIS?.toString()
-                ? item.IDANAMNESIS?.toString()
-                : '',
-              nombre: item.IDANAMNESIS_TEXTO ? item.IDANAMNESIS_TEXTO : '',
-            }));
-          this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita
-            .get('numHistoria')!
-            .valueChanges.pipe(
-              startWith(''),
-              map((value) =>
-                this.desactivarFiltro
-                  ? this.lstHistoriaPacienteParaAgendar
-                  : this._filterNombre(
-                      value,
-                      this.lstHistoriaPacienteParaAgendar,
-                    ),
-              ),
-            );
+            data.lstAnamnesisParaAgendayBuscadores ?? [];
 
-          // ✅ MUY IMPORTANTE: evitar duplicar handlers si el data llega varias veces
-          this.nombreChangesSub?.unsubscribe();
-          this.historiaChangesSub?.unsubscribe();
-
-          // ----------------suscribo para cambiar datos segun lo seleccionado-----------//
-
-          this.nombreChangesSub = this.formularioAgregarCita
-            .get('nombre')!
-            .valueChanges.pipe(takeUntil(this.destroy$))
-            .subscribe((value) => {
-              if (!this.suscripcionActivaFiltros) return;
-
-              const selectedPaciente = this.lstNombrePacienteParaAgendar.find(
-                (paciente) => paciente.nombre === value,
-              );
-              if (!selectedPaciente) return;
-
-              const correspondingTelefono =
-                this.lstTelefonoPacienteParaAgendar.find(
-                  (item) => item.id === selectedPaciente.id,
-                );
-              const correspondingCelular =
-                this.lstCelularPacienteParaAgendar.find(
-                  (item) => item.id === selectedPaciente.id,
-                );
-              const correspondingHistoria =
-                this.lstHistoriaPacienteParaAgendar.find(
-                  (item) => item.id === selectedPaciente.id,
-                );
-
-              if (correspondingTelefono) {
-                this.formularioAgregarCita
-                  .get('telefono')!
-                  .setValue(correspondingTelefono.nombre, { emitEvent: false });
-              }
-              if (correspondingCelular) {
-                this.formularioAgregarCita
-                  .get('celular')!
-                  .setValue(correspondingCelular.nombre, { emitEvent: false });
-              }
-              if (correspondingHistoria) {
-                this.formularioAgregarCita
-                  .get('numHistoria')!
-                  .setValue(correspondingHistoria.nombre, { emitEvent: false });
-              }
-
-              const encontrarDoctor =
-                data.lstAnamnesisParaAgendayBuscadores?.find(
-                  (item) =>
-                    item.IDANAMNESIS?.toString() === selectedPaciente.id,
-                )?.DOCTOR;
-
-              if (encontrarDoctor) {
-                this.formularioAgregarCita
-                  .get('doctor')!
-                  .setValue(encontrarDoctor, {
-                    emitEvent: false,
-                  });
-              }
-            });
-
-          this.historiaChangesSub = this.formularioAgregarCita
-            .get('numHistoria')!
-            .valueChanges.pipe(takeUntil(this.destroy$))
-            .subscribe((value) => {
-              if (!this.suscripcionActivaFiltros) return;
-
-              const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(
-                (historia) => historia.nombre === value,
-              );
-              if (!selectedHistoria) return;
-
-              const correspondingNombre =
-                this.lstNombrePacienteParaAgendar.find(
-                  (item) => item.id === selectedHistoria.id,
-                );
-              const correspondingTelefono =
-                this.lstTelefonoPacienteParaAgendar.find(
-                  (item) => item.id === selectedHistoria.id,
-                );
-              const correspondingCelular =
-                this.lstCelularPacienteParaAgendar.find(
-                  (item) => item.id === selectedHistoria.id,
-                );
-
-              if (correspondingNombre) {
-                this.formularioAgregarCita
-                  .get('nombre')!
-                  .setValue(correspondingNombre.nombre, { emitEvent: false });
-              }
-              if (correspondingTelefono) {
-                this.formularioAgregarCita
-                  .get('telefono')!
-                  .setValue(correspondingTelefono.nombre, { emitEvent: false });
-              }
-              if (correspondingCelular) {
-                this.formularioAgregarCita
-                  .get('celular')!
-                  .setValue(correspondingCelular.nombre, { emitEvent: false });
-              }
-
-              const encontrarDoctor =
-                data.lstAnamnesisParaAgendayBuscadores?.find(
-                  (item) =>
-                    item.IDANAMNESIS?.toString() === selectedHistoria.id,
-                )?.DOCTOR;
-
-              if (encontrarDoctor) {
-                this.formularioAgregarCita
-                  .get('doctor')!
-                  .setValue(encontrarDoctor, {
-                    emitEvent: false,
-                  });
-              }
-            });
-          //----------------------------------------------------------------------------//
-          //this.lstHorariosAgenda = []; // Limpiar opciones
-          this.lstHorariosAsuntos = data.lstHorariosAsuntos;
-          console.log('lstHorariosAsuntos', this.lstHorariosAsuntos);
-          this.lstHorariosAgenda = data.lstHorariosAgenda.sort(
-            (a, b) => a.SILLA - b.SILLA,
-          );
-          console.log('lstHorariosAgenda', this.lstHorariosAgenda);
-          if (this.lstHorariosAgenda.length > 0) {
-            this.sillaSeleccionada = this.lstHorariosAgenda[0].SILLA;
-            this.horaInicial = this.lstHorariosAgenda[0].HORAINICIAL;
-            this.horaFinal = this.lstHorariosAgenda[0].HORAFINAL;
-            this.intervaloDeTiempoSeleccionado =
-              this.lstHorariosAgenda[0].INTERVALO;
-            this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(
-              (x) => x.SILLAS == this.sillaSeleccionada.toString(),
-            );
-            this.lstFestivos = data.lstFestivos;
-            this.lstConfiguracionesRydent = data.lstConfiguracionesRydent;
-            this.listaDatosDoctorParaAgendar = data;
-            this.lstDatosDoctorParaAgendar =
-              this.listaDatosDoctorParaAgendar.lstDoctores.map((item) => ({
-                id: item.id.toString(),
-                nombre: item.nombre,
-              }));
-            /*this.filteredDoctorParaAgendar = this.formularioAgregarCita.get('doctor')!.valueChanges
-            .pipe(
-              startWith(''),
-              map(value => this._filterNombre(value, this.lstDatosDoctorParaAgendar))
-            );*/
-            this.filteredDoctorParaAgendar = this.formularioAgregarCita
-              .get('doctor')!
-              .valueChanges.pipe(
-                startWith(''),
-                map((value) =>
-                  this.desactivarFiltro
-                    ? this.lstDatosDoctorParaAgendar
-                    : this._filterNombre(value, this.lstDatosDoctorParaAgendar),
-                ),
-              );
-            //this.lstDoctores = data.lstDoctores.map(item => ({ id: Number(item.id), nombre: item.nombre }));
-            this.llenarIntervalos();
-          }
+          this.cargarDatosBaseAgenda(data);
+          this.programarReconstruccionAutocompleteAgenda(data);
         }
       });
 
@@ -722,7 +461,7 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollToSelectedRow(this.horaCitaSeleccionadaEvolucionada);
       await this.respuestaPinService.updateDeDondeAgregaEvolucionData('');
     } else {
-      await this.cambiarFecha(); // Si cambiarFecha es asincrónico
+      this.intentarCargarAgendaInicial();
     }
 
     this.recibirRespuestaAgendarCitaEmitida();
@@ -743,14 +482,182 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.reconstruirAgendaTimer) {
+      clearTimeout(this.reconstruirAgendaTimer);
+    }
+
     this.nombreChangesSub?.unsubscribe();
     this.historiaChangesSub?.unsubscribe();
+
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   deshabilitarPanelBuscarCita() {
     this.panelBuscarCitaDeshabilitado = true;
+  }
+
+  private intentarCargarAgendaInicial(): void {
+    if (this.agendaInicialCargada) return;
+
+    if (!this.idSedeActualSignalR || this.idSedeActualSignalR === '') return;
+    if (!this.sillaSeleccionada || this.sillaSeleccionada <= 0) return;
+
+    this.agendaInicialCargada = true;
+
+    setTimeout(async () => {
+      this.isloading = true;
+
+      try {
+        await this.cambiarFecha();
+      } finally {
+        this.isloading = false;
+      }
+    }, 0);
+  }
+
+  private programarReconstruccionAutocompleteAgenda(data: RespuestaPin): void {
+    if (this.reconstruirAgendaTimer) {
+      clearTimeout(this.reconstruirAgendaTimer);
+    }
+
+    this.reconstruirAgendaTimer = setTimeout(() => {
+      this.reconstruirAutocompleteAgenda(data);
+    }, 500);
+  }
+
+  private cargarDatosBaseAgenda(data: RespuestaPin): void {
+    this.lstHorariosAsuntos = data.lstHorariosAsuntos ?? [];
+
+    this.lstHorariosAgenda = (data.lstHorariosAgenda ?? []).sort(
+      (a, b) => a.SILLA - b.SILLA,
+    );
+
+    if (this.lstHorariosAgenda.length > 0 && !this.sillaSeleccionada) {
+      this.sillaSeleccionada = this.lstHorariosAgenda[0].SILLA;
+      this.horaInicial = this.lstHorariosAgenda[0].HORAINICIAL;
+      this.horaFinal = this.lstHorariosAgenda[0].HORAFINAL;
+      this.intervaloDeTiempoSeleccionado = this.lstHorariosAgenda[0].INTERVALO;
+
+      this.listaHorariosAsuntosPorSilla = this.lstHorariosAsuntos.filter(
+        (x) => x.SILLAS == this.sillaSeleccionada.toString(),
+      );
+
+      this.llenarIntervalos();
+    }
+
+    this.lstFestivos = data.lstFestivos ?? [];
+    this.lstConfiguracionesRydent = data.lstConfiguracionesRydent ?? [];
+    this.listaDatosDoctorParaAgendar = data;
+
+    this.lstDatosDoctorParaAgendar = (data.lstDoctores ?? []).map((item) => ({
+      id: item.id.toString(),
+      nombre: item.nombre,
+    }));
+
+    this.intentarCargarAgendaInicial();
+  }
+
+  private reconstruirAutocompleteAgenda(data: RespuestaPin): void {
+    const pacientes = data.lstAnamnesisParaAgendayBuscadores ?? [];
+
+    this.lstNombrePacienteParaAgendar = pacientes.map((item) => ({
+      id: item.IDANAMNESIS?.toString() ?? '',
+      nombre: item.NOMBRE_PACIENTE ?? '',
+    }));
+
+    this.lstDatosPacienteParaBuscarAgenda = pacientes.map((item) => ({
+      idAnamnesis: item.IDANAMNESIS?.toString() ?? '',
+      idAnamenesisTexto: item.IDANAMNESIS_TEXTO ?? '',
+      nombre: item.NOMBRE_PACIENTE ?? '',
+      telefono: item.TELF_P ?? '',
+    }));
+
+    this.lstTelefonoPacienteParaAgendar = pacientes.map((item) => ({
+      id: item.IDANAMNESIS?.toString() ?? '',
+      nombre: item.TELF_P ?? '',
+    }));
+
+    this.lstCelularPacienteParaAgendar = pacientes.map((item) => ({
+      id: item.IDANAMNESIS?.toString() ?? '',
+      nombre: item.CELULAR_P ?? '',
+    }));
+
+    this.lstHistoriaPacienteParaAgendar = pacientes.map((item) => ({
+      id: item.IDANAMNESIS?.toString() ?? '',
+      nombre: item.IDANAMNESIS_TEXTO ?? '',
+    }));
+
+    if (!this.agendaAutocompleteInicializado) {
+      this.inicializarFiltrosAutocompleteAgenda();
+      this.inicializarAutollenadoPacienteAgenda(data);
+      this.agendaAutocompleteInicializado = true;
+    }
+  }
+
+  private inicializarAutollenadoPacienteAgenda(data: RespuestaPin): void {
+    this.nombreChangesSub?.unsubscribe();
+    this.historiaChangesSub?.unsubscribe();
+
+    this.nombreChangesSub = this.formularioAgregarCita
+      .get('nombre')!
+      .valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        if (!this.suscripcionActivaFiltros) return;
+
+        const selectedPaciente = this.lstNombrePacienteParaAgendar.find(
+          (paciente) => paciente.nombre === value,
+        );
+
+        if (!selectedPaciente) return;
+
+        this.autollenarPacientePorId(selectedPaciente.id);
+      });
+
+    this.historiaChangesSub = this.formularioAgregarCita
+      .get('numHistoria')!
+      .valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        if (!this.suscripcionActivaFiltros) return;
+
+        const selectedHistoria = this.lstHistoriaPacienteParaAgendar.find(
+          (historia) => historia.nombre === value,
+        );
+
+        if (!selectedHistoria) return;
+
+        this.autollenarPacientePorId(selectedHistoria.id);
+      });
+  }
+
+  private autollenarPacientePorId(id: string): void {
+    const paciente = this.listaNombrePacienteParaAgendar?.find(
+      (x) => x.IDANAMNESIS?.toString() === id,
+    );
+
+    if (!paciente) return;
+
+    this.formularioAgregarCita
+      .get('telefono')!
+      .setValue(paciente.TELF_P ?? '', {
+        emitEvent: false,
+      });
+
+    this.formularioAgregarCita
+      .get('celular')!
+      .setValue(paciente.CELULAR_P ?? '', {
+        emitEvent: false,
+      });
+
+    this.formularioAgregarCita
+      .get('numHistoria')!
+      .setValue(paciente.IDANAMNESIS_TEXTO ?? '', { emitEvent: false });
+
+    if (paciente.DOCTOR) {
+      this.formularioAgregarCita.get('doctor')!.setValue(paciente.DOCTOR, {
+        emitEvent: false,
+      });
+    }
   }
 
   // private _filterBuscarAgenda(nombre: string): { idAnamnesis: string, idAnamenesisTexto: string, nombre: string, telefono: string }[] {
@@ -781,37 +688,118 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  private inicializarFiltrosAutocompleteAgenda(): void {
+    this.filteredNombrePacienteParaAgendar = this.formularioAgregarCita
+      .get('nombre')!
+      .valueChanges.pipe(
+        startWith(''),
+        map((value) =>
+          this.desactivarFiltro
+            ? []
+            : this._filterNombre(value, this.lstNombrePacienteParaAgendar),
+        ),
+      );
+
+    this.filteredDatosPacienteParaBuscarAgenda =
+      this.datosPacienteParaBuscarAgendaControl.valueChanges.pipe(
+        startWith(''),
+        map((value) =>
+          typeof value === 'string' ? value : (value?.nombre ?? ''),
+        ),
+        map((nombre) => this._filterBuscarAgenda(nombre)),
+      );
+
+    this.filteredTelefonoPacienteParaAgendar = this.formularioAgregarCita
+      .get('telefono')!
+      .valueChanges.pipe(
+        startWith(''),
+        map((value) =>
+          this.desactivarFiltro
+            ? []
+            : this._filterNombre(value, this.lstTelefonoPacienteParaAgendar),
+        ),
+      );
+
+    this.filteredCelularPacienteParaAgendar = this.formularioAgregarCita
+      .get('celular')!
+      .valueChanges.pipe(
+        startWith(''),
+        map((value) =>
+          this.desactivarFiltro
+            ? []
+            : this._filterNombre(value, this.lstCelularPacienteParaAgendar),
+        ),
+      );
+
+    this.filteredHistoriaPacienteParaAgendar = this.formularioAgregarCita
+      .get('numHistoria')!
+      .valueChanges.pipe(
+        startWith(''),
+        map((value) =>
+          this.desactivarFiltro
+            ? []
+            : this._filterNombre(value, this.lstHistoriaPacienteParaAgendar),
+        ),
+      );
+
+    this.filteredDoctorParaAgendar = this.formularioAgregarCita
+      .get('doctor')!
+      .valueChanges.pipe(
+        startWith(''),
+        map((value) =>
+          this.desactivarFiltro
+            ? []
+            : this._filterNombre(value, this.lstDatosDoctorParaAgendar),
+        ),
+      );
+  }
+
   private _filterBuscarAgenda(nombre: string): {
     idAnamnesis: string;
     idAnamenesisTexto: string;
     nombre: string;
     telefono: string;
   }[] {
-    const filterValues = nombre.toLowerCase().split(' ');
+    const texto = nombre ? nombre.toString().toLowerCase().trim() : '';
 
-    return this.lstDatosPacienteParaBuscarAgenda.filter((option) => {
-      const optionText = (
-        option.nombre +
-        ' ' +
-        option.idAnamnesis +
-        ' ' +
-        option.idAnamenesisTexto +
-        ' ' +
-        option.telefono
-      ).toLowerCase();
-      return filterValues.every((value) => optionText.includes(value));
-    });
+    if (texto.length < 2) {
+      return [];
+    }
+
+    const filterValues = texto.split(' ').filter((x) => x.trim().length > 0);
+
+    return this.lstDatosPacienteParaBuscarAgenda
+      .filter((option) => {
+        const optionText = (
+          (option.nombre ?? '') +
+          ' ' +
+          (option.idAnamnesis ?? '') +
+          ' ' +
+          (option.idAnamenesisTexto ?? '') +
+          ' ' +
+          (option.telefono ?? '')
+        ).toLowerCase();
+
+        return filterValues.every((value) => optionText.includes(value));
+      })
+      .slice(0, 50);
   }
 
   private _filterNombre(
     value: string,
     list: { id: string; nombre: string }[],
   ): { id: string; nombre: string }[] {
-    const filterValue = value ? value.toLowerCase() : '';
-    if (!filterValue) return [];
-    return list.filter((option) =>
-      option.nombre.toLowerCase().includes(filterValue),
-    );
+    const filterValue = value ? value.toString().toLowerCase().trim() : '';
+
+    if (filterValue.length < 2) {
+      return [];
+    }
+
+    return list
+      .filter((option) =>
+        option.nombre?.toString().toLowerCase().includes(filterValue),
+      )
+      .slice(0, 50);
   }
 
   recibirRespuestaAgendarCitaEmitida() {
@@ -1103,7 +1091,7 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
     var notaImportanteCitas = this.aplicarConfiguracion(
       'NOTA_IMPORTANTE_CITAS',
     );
-    var doctorCorrecto = this.listaDatosDoctorParaAgendar?.lstDoctores.find(
+    var doctorCorrecto = this.listaDatosDoctorParaAgendar?.lstDoctores?.find(
       (x) => x.nombre === doctor,
     );
     //var hayCronograma = this.lstConfiguracionesRydent.find(x => x.NOMBRE == "HAY_CRONOGRAMA");
@@ -1679,7 +1667,7 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
     //this.isloading = true;
     this.modoEdicion = false;
     let formulario = this.formularioAgregarCita.value;
-    var nombre = formulario.nombre.toUpperCase();
+    var nombre = (formulario.nombre ?? '').toString().toUpperCase();
     var duracion = formulario.duracion;
     /*let duracionValida = this.lstDuracion.find(x => x.nombre === formulario.duracion);
     if (!duracionValida) {
@@ -1708,8 +1696,11 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
       datosParaGurdarEnAgenda.detalleCitaEditar.SILLA = formulario.sillaEditar;
       datosParaGurdarEnAgenda.detalleCitaEditar.HORA = formulario.horaEditar;
       //datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = this.toISO88591(formulario.nombreEditar.toUpperCase());
-      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE =
-        formulario.nombreEditar.toUpperCase();
+      datosParaGurdarEnAgenda.detalleCitaEditar.NOMBRE = (
+        formulario.nombreEditar ?? ''
+      )
+        .toString()
+        .toUpperCase();
       datosParaGurdarEnAgenda.detalleCitaEditar.ID = numHistoria;
       datosParaGurdarEnAgenda.detalleCitaEditar.DURACION = duracion;
       datosParaGurdarEnAgenda.detalleCitaEditar.ASUNTO = formulario.asunto;
@@ -1927,6 +1918,15 @@ export class AgendaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async cambiarFecha() {
+    if (!this.sillaSeleccionada || this.sillaSeleccionada <= 0) {
+      console.warn('Agenda: sillaSeleccionada aún no está lista.');
+      return;
+    }
+
+    if (!this.idSedeActualSignalR || this.idSedeActualSignalR === '') {
+      console.warn('Agenda: idSedeActualSignalR aún no está listo.');
+      return;
+    }
     const fechaActual = new Date();
     fechaActual.setHours(0, 0, 0, 0); // Establece la hora a las 00:00
 

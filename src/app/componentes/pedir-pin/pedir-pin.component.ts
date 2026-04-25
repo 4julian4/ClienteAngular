@@ -104,12 +104,16 @@ export class PedirPinComponent implements OnInit, OnDestroy {
             const lista =
               this.obtenerPinRepuesta.lstAnamnesisParaAgendayBuscadores ?? [];
 
-            this.maxIdAnamnesis =
-              lista.length > 0
-                ? Math.max(
-                    ...lista.map((x) => Number((x as any).IDANAMNESIS ?? 0)),
-                  )
-                : 0;
+            let nuevoMaxId = this.maxIdAnamnesis ?? 0;
+
+            for (const item of lista) {
+              const id = Number((item as any).IDANAMNESIS ?? 0);
+              if (id > nuevoMaxId) {
+                nuevoMaxId = id;
+              }
+            }
+
+            this.maxIdAnamnesis = nuevoMaxId;
 
             // ✅ 2) Guardar el PIN completo como siempre (NO rompe nada)
             this.respuestaPinService.updatedatosRespuestaPin(
@@ -165,6 +169,14 @@ export class PedirPinComponent implements OnInit, OnDestroy {
 
             this.isloading = false;
             this.dialogRef.close(this);
+
+            setTimeout(() => {
+              this.respuestaPinService.iniciarCargaPacientesAgendaEnSegundoPlano(
+                this.sedeIdSeleccionada,
+                this.maxIdAnamnesis,
+              );
+            }, 0);
+
             return;
           },
         );

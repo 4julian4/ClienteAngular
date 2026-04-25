@@ -620,8 +620,20 @@ export class InteroperabilidadConsultaComponent implements OnInit, OnDestroy {
     return fhir?.identifier?.[0]?.value || '';
   }
 
-  private getNombreCompletoDesdeFhir(fhir: any): string {
+  /*private getNombreCompletoDesdeFhir(fhir: any): string {
     return fhir?.name?.[0]?.text || '';
+  }*/
+  private getNombreCompletoDesdeFhir(fhir: any): string {
+    const name = fhir?.name?.[0];
+    if (!name) return '';
+
+    const text = String(name?.text || '').trim();
+    if (text) return text;
+
+    const given = Array.isArray(name?.given) ? name.given.join(' ') : '';
+    const family = String(name?.family || '').trim();
+
+    return `${given} ${family}`.trim();
   }
 
   private getNombresDesdeFhir(fhir: any): string {

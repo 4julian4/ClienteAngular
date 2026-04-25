@@ -8,10 +8,12 @@ const urlPage = environment.apiUrl + '/auth/authgoogle';
 export interface LoginCallbackGoogleResponse {
   autenticado: boolean;
   respuesta: string;
-  mensaje: string;
-  mostrarRecordatorio: boolean;
-  fechaProximoPago: string | null;
-  diasParaVencer: number | null;
+  mensaje?: string;
+  mostrarRecordatorio?: boolean;
+  activoHasta?: string | null;
+  diasParaVencer?: number | null;
+  requiereConfirmacion?: boolean;
+  loginConfirmToken?: string | null;
 }
 
 @Injectable({
@@ -23,14 +25,26 @@ export class LoginCallbackGoogleService {
   public async Post(
     code: string,
     state: string,
+    forzarCerrarAnterior: boolean = false,
   ): Promise<LoginCallbackGoogleResponse> {
-    const categories$ = this.httpClient.post<LoginCallbackGoogleResponse>(
+    const req$ = this.httpClient.post<LoginCallbackGoogleResponse>(
       urlPage,
-      { code, state },
+      { code, state, forzarCerrarAnterior },
       environment.httpOptions,
     );
 
-    const res = await lastValueFrom(categories$);
-    return res;
+    return await lastValueFrom(req$);
+  }
+
+  public async ForzarLogin(
+    loginConfirmToken: string,
+  ): Promise<LoginCallbackGoogleResponse> {
+    const req$ = this.httpClient.post<LoginCallbackGoogleResponse>(
+      environment.apiUrl + '/auth/forzar-login',
+      { loginConfirmToken },
+      environment.httpOptions,
+    );
+
+    return await lastValueFrom(req$);
   }
 }

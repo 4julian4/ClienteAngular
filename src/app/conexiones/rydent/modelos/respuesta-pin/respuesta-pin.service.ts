@@ -1,5 +1,8 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
-import { RespuestaPin } from './respuesta-pin.model';
+import {
+  RespuestaDatosPacientesParaLaAgenda,
+  RespuestaPin,
+} from './respuesta-pin.model';
 import { SignalRService } from 'src/app/signalr.service';
 import { BehaviorSubject } from 'rxjs';
 import { CodigosEps } from '../../tablas/codigos-eps';
@@ -17,6 +20,15 @@ import { PacienteHeaderInfo } from '../respuesta-busqueda-paciente';
 })
 export class RespuestaPinService {
   datosDelFormulario: any;
+
+  private cargandoPacientesAgenda = false;
+  private pacientesAgendaCompleto = false;
+  private onRespuestaLotePacientesAgenda?: (
+    returnId: string,
+    payload: string,
+  ) => void;
+
+  private readonly TAMANO_LOTE_PACIENTES_AGENDA = 20000;
 
   // ✅ cache del último RespuestaPin (para mezclar updates sin perder campos)
   private lastPinData: RespuestaPin = new RespuestaPin();
@@ -60,8 +72,43 @@ export class RespuestaPinService {
   private sedeSeleccionada = new BehaviorSubject<number | null>(null);
   sharedSedeSeleccionada = this.sedeSeleccionada.asObservable();
 
+  //-----------------------Esto es para manejanr carga de pacientes en la agenda-----------------------//
   private datosRespuestaPin = new BehaviorSubject<RespuestaPin | null>(null);
   shareddatosRespuestaPinData = this.datosRespuestaPin.asObservable();
+
+  agregarPacientesAgenda(nuevos: RespuestaDatosPacientesParaLaAgenda[]): void {
+    if (!nuevos || nuevos.length === 0) return;
+
+    const actual = this.datosRespuestaPin.value;
+
+    if (!actual) return;
+
+    const existentes = actual.lstAnamnesisParaAgendayBuscadores ?? [];
+
+    const mapa = new Map<number, RespuestaDatosPacientesParaLaAgenda>();
+
+    for (const item of existentes) {
+      const id = Number(item.IDANAMNESIS ?? 0);
+      if (id > 0) {
+        mapa.set(id, item);
+      }
+    }
+
+    for (const item of nuevos) {
+      const id = Number(item.IDANAMNESIS ?? 0);
+      if (id > 0) {
+        mapa.set(id, item);
+      }
+    }
+
+    const listaFinal = Array.from(mapa.values());
+
+    this.updatedatosRespuestaPin({
+      ...actual,
+      lstAnamnesisParaAgendayBuscadores: listaFinal,
+    });
+  }
+  //---------------------------------------------------------------------------------------------------//
 
   private doctorSeleccionado = new BehaviorSubject<string | null>(null);
   shareddoctorSeleccionadoData = this.doctorSeleccionado.asObservable();
@@ -229,6 +276,125 @@ export class RespuestaPinService {
     } catch (err) {
       console.error('Error al conectar con SignalR:', err);
     }
+  }
+
+  async startConnectionLotePacientesAgenda(): Promise<void> {
+    await this.signalRService.ensureConnection();
+
+    const currentConnectionId = this.signalRService.hubConnection?.connectionId;
+
+    if (this.onRespuestaLotePacientesAgenda) {
+      this.signalRService.off(
+        'RespuestaLotePacientesAgenda',
+        this.onRespuestaLotePacientesAgenda,
+      );
+    }
+
+    this.onRespuestaLotePacientesAgenda = (
+      returnId: string,
+      payload: string,
+    ) => {
+      if (returnId !== currentConnectionId) return;
+
+      try {
+        const decompressedData =
+          this.descomprimirDatosService.decompressString(payload);
+
+        const lote = JSON.parse(
+          decompressedData,
+        ) as RespuestaDatosPacientesParaLaAgenda[];
+
+        this.agregarPacientesAgenda(lote);
+
+        if (this.resolverLotePacientesAgenda) {
+          this.resolverLotePacientesAgenda(lote);
+          this.resolverLotePacientesAgenda = null;
+        }
+      } catch (error) {
+        console.error('Error leyendo lote de pacientes agenda:', error);
+
+        if (this.resolverLotePacientesAgenda) {
+          this.resolverLotePacientesAgenda([]);
+          this.resolverLotePacientesAgenda = null;
+        }
+      }
+    };
+
+    this.signalRService.on(
+      'RespuestaLotePacientesAgenda',
+      this.onRespuestaLotePacientesAgenda,
+    );
+  }
+
+  private async solicitarLotePacientesAgenda(
+    sedeId: number,
+    maxId: number,
+  ): Promise<RespuestaDatosPacientesParaLaAgenda[]> {
+    await this.startConnectionLotePacientesAgenda();
+
+    const promesa = new Promise<RespuestaDatosPacientesParaLaAgenda[]>(
+      (resolve) => {
+        this.resolverLotePacientesAgenda = resolve;
+      },
+    );
+
+    await this.signalRService.obtenerLotePacientesAgenda(sedeId, maxId);
+
+    return await promesa;
+  }
+
+  private resolverLotePacientesAgenda:
+    | ((lote: RespuestaDatosPacientesParaLaAgenda[]) => void)
+    | null = null;
+
+  async iniciarCargaPacientesAgendaEnSegundoPlano(
+    sedeId: number,
+    maxIdInicial: number,
+  ): Promise<void> {
+    if (this.cargandoPacientesAgenda) return;
+    if (this.pacientesAgendaCompleto) return;
+
+    this.cargandoPacientesAgenda = true;
+
+    let maxId = Number(maxIdInicial ?? 0);
+
+    try {
+      while (true) {
+        const lote = await this.solicitarLotePacientesAgenda(sedeId, maxId);
+
+        if (!lote || lote.length === 0) {
+          this.pacientesAgendaCompleto = true;
+          break;
+        }
+
+        for (const item of lote) {
+          const id = Number(item.IDANAMNESIS ?? 0);
+          if (id > maxId) {
+            maxId = id;
+          }
+        }
+
+        console.log(
+          `Pacientes agenda cargados en segundo plano. Último ID: ${maxId}. Lote: ${lote.length}`,
+        );
+
+        if (lote.length < this.TAMANO_LOTE_PACIENTES_AGENDA) {
+          this.pacientesAgendaCompleto = true;
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
+    } catch (error) {
+      console.error('Error cargando pacientes agenda en segundo plano:', error);
+    } finally {
+      this.cargandoPacientesAgenda = false;
+    }
+  }
+
+  private obtenerCantidadPacientesAgenda(): number {
+    const actual = this.datosRespuestaPin.value;
+    return actual?.lstAnamnesisParaAgendayBuscadores?.length ?? 0;
   }
 
   // ===============================
