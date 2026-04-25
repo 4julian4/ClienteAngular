@@ -69,6 +69,7 @@
             [matAutocomplete]="autoDatosPacienteParaBuscar"
             class="inputBuscar"
             style="text-transform: uppercase"
+            [disabled]="buscandoPaciente"
             (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)"
           />
           <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
@@ -82,9 +83,16 @@
           <button
             mat-raised-button
             class="botonBuscarPaciente"
+            [disabled]="buscandoPaciente"
             (click)="buscarPaciente(datoPacienteParaBuscarControl.value)"
           >
-            Buscar
+            <mat-spinner
+              *ngIf="buscandoPaciente"
+              diameter="18"
+              style="display: inline-block; margin-right: 8px"
+            ></mat-spinner>
+
+            {{ buscandoPaciente ? "Buscando..." : "Buscar" }}
           </button>
 
           <button

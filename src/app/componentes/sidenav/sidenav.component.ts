@@ -39,6 +39,7 @@ import { LoginService } from '../login';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpHeaders } from '@angular/common/http';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { SessionActivityService } from 'src/app/helpers/session-activity/session-activity.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -95,12 +96,14 @@ export class SidenavComponent implements OnInit, OnDestroy {
     private interruptionService: InterruptionService,
     private sedesConectadasService: SedesConectadasService,
     private breakpointObserver: BreakpointObserver,
+    private sessionActivityService: SessionActivityService,
   ) {
     this.subscription = this.interruptionService.onInterrupt().subscribe(() => {
       this.iniciarSesion();
     });
   }
   ngOnDestroy(): void {
+    this.sessionActivityService.stop();
     this.subscription.unsubscribe();
     this.destroy$.next();
     this.destroy$.complete();
@@ -117,7 +120,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
     }
   }
 
-  cerrarSesion() {}
   async ngOnInit() {
     console.log('sidenav');
     this.mostrarTitulo = true;
@@ -181,15 +183,20 @@ export class SidenavComponent implements OnInit, OnDestroy {
 
     console.log('sidenav2');
     this.logeado = false;
+
     if (this.loginService.IsSingned()) {
-      let loginToken = this.loginService.decodeToken();
-      this.emailUsuario = loginToken.correo;
+      const loginToken = this.loginService.decodeToken();
+
       if (loginToken && loginToken.id) {
+        this.sessionActivityService.start();
+
+        this.emailUsuario = loginToken.correo;
         this.logeado = true;
-        let usuario = await this.usuariosService.Get(loginToken.id);
+
+        const usuario = await this.usuariosService.Get(loginToken.id);
+
         if (usuario.idUsuario != undefined) {
           this.usuariosService.outUsuario.emit(usuario);
-          // this.router.navigate(['/']);
         }
       }
     }
@@ -350,6 +357,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
   }
 
   async cerrarSession() {
+    await this.sessionActivityService.cerrarSesionServidor();
+    this.sessionActivityService.stop();
     await this.signalRService.stopConnection({ clearHandlers: true });
     this.loginService.signOut();
   }
