@@ -73,9 +73,17 @@
             (keyup.enter)="buscarPaciente(datoPacienteParaBuscarControl.value)"
           />
           <mat-autocomplete #autoDatosPacienteParaBuscar="matAutocomplete">
-            <!--<mat-option *ngFor="let datosPaciente of filteredDatoPacienteParaBuscar | async" [value]="datosPaciente.datoBuscar">
+            <mat-option
+              *ngFor="
+                let datosPaciente of filteredDatoPacienteParaBuscar | async
+              "
+              [value]="datosPaciente.datoBuscar"
+              (onSelectionChange)="
+                seleccionarPacienteAutocomplete(datosPaciente, $event)
+              "
+            >
               {{ datosPaciente.datoBuscar }}
-            </mat-option>-->
+            </mat-option>
           </mat-autocomplete>
         </div>
 

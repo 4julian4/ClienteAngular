@@ -1,15 +1,40 @@
-
 <mat-dialog-content class="matdialogPedirPin">
   <p>Por favor, ingrese su PIN</p>
   <mat-form-field>
     <mat-label>PIN</mat-label>
-    <input matInput [(ngModel)]="data.pin" type="password" cdkFocusInitial (keyup.enter)="confirmar()">
+    <input
+      matInput
+      [(ngModel)]="data.pin"
+      type="password"
+      cdkFocusInitial
+      (keyup.enter)="confirmar()"
+    />
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions class="matdialogPedirPin">
   <button mat-raised-button (click)="confirmar()">Confirmar</button>
   <button mat-raised-button (click)="onNoClick()">Cancelar</button>
 </mat-dialog-actions>
-<div style="display: flex; justify-content: center; align-items: center; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);" *ngIf="isloading">
-                    <mat-spinner></mat-spinner>
+<div
+  *ngIf="isloading"
+  style="
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+    color: white;
+    z-index: 9999;
+    padding: 24px;
+  "
+>
+  <mat-spinner diameter="42"></mat-spinner>
+
+  <p style="font-size: 16px; max-width: 420px">
+    {{ mensajeProgresoPacientesAgenda || "Preparando el programa..." }}
+  </p>
 </div>

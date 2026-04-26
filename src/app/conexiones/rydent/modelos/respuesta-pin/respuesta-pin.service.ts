@@ -30,6 +30,27 @@ export class RespuestaPinService {
 
   private readonly TAMANO_LOTE_PACIENTES_AGENDA = 20000;
 
+  private readonly EMITIR_PACIENTES_AGENDA_CADA = 100000;
+
+  private pacientesAgendaMap = new Map<
+    number,
+    RespuestaDatosPacientesParaLaAgenda
+  >();
+
+  private pacientesAgendaPendientesDeEmitir = 0;
+
+  private cargandoPacientesAgendaData = new BehaviorSubject<boolean>(false);
+  sharedCargandoPacientesAgenda =
+    this.cargandoPacientesAgendaData.asObservable();
+
+  private progresoPacientesAgendaData = new BehaviorSubject<number>(0);
+  sharedProgresoPacientesAgenda =
+    this.progresoPacientesAgendaData.asObservable();
+
+  private mensajeProgresoPacientesAgendaData = new BehaviorSubject<string>('');
+  sharedMensajeProgresoPacientesAgenda =
+    this.mensajeProgresoPacientesAgendaData.asObservable();
+
   // ✅ cache del último RespuestaPin (para mezclar updates sin perder campos)
   private lastPinData: RespuestaPin = new RespuestaPin();
 
@@ -76,7 +97,7 @@ export class RespuestaPinService {
   private datosRespuestaPin = new BehaviorSubject<RespuestaPin | null>(null);
   shareddatosRespuestaPinData = this.datosRespuestaPin.asObservable();
 
-  agregarPacientesAgenda(nuevos: RespuestaDatosPacientesParaLaAgenda[]): void {
+  /*agregarPacientesAgenda(nuevos: RespuestaDatosPacientesParaLaAgenda[]): void {
     if (!nuevos || nuevos.length === 0) return;
 
     const actual = this.datosRespuestaPin.value;
@@ -107,6 +128,62 @@ export class RespuestaPinService {
       ...actual,
       lstAnamnesisParaAgendayBuscadores: listaFinal,
     });
+  }*/
+
+  agregarPacientesAgenda(
+    nuevos: RespuestaDatosPacientesParaLaAgenda[] = [],
+    forzarEmitir: boolean = false,
+  ): void {
+    const actual = this.datosRespuestaPin.value;
+
+    if (!actual) return;
+
+    if (nuevos && nuevos.length > 0) {
+      for (const item of nuevos) {
+        const id = Number(item.IDANAMNESIS ?? 0);
+
+        if (id > 0) {
+          this.pacientesAgendaMap.set(id, item);
+          this.pacientesAgendaPendientesDeEmitir++;
+        }
+      }
+    }
+
+    const debeEmitir =
+      forzarEmitir ||
+      this.pacientesAgendaPendientesDeEmitir >=
+        this.EMITIR_PACIENTES_AGENDA_CADA;
+
+    if (!debeEmitir) return;
+
+    const existentes = actual.lstAnamnesisParaAgendayBuscadores ?? [];
+
+    if (this.pacientesAgendaMap.size === 0 && existentes.length > 0) {
+      this.progresoPacientesAgendaData.next(existentes.length);
+
+      this.mensajeProgresoPacientesAgendaData.next(
+        `Preparación finalizada. Pacientes cargados: ${existentes.length.toLocaleString()}`,
+      );
+
+      console.log(
+        `Agenda pacientes conserva lista inicial. Total: ${existentes.length}`,
+      );
+
+      return;
+    }
+
+    const listaFinal = Array.from(this.pacientesAgendaMap.values());
+
+    this.updatedatosRespuestaPin({
+      ...actual,
+      lstAnamnesisParaAgendayBuscadores: listaFinal,
+    });
+
+    this.pacientesAgendaPendientesDeEmitir = 0;
+
+    console.log(
+      `Agenda pacientes emitida. Total acumulado: ${listaFinal.length}`,
+    );
   }
   //---------------------------------------------------------------------------------------------------//
 
@@ -355,6 +432,11 @@ export class RespuestaPinService {
     if (this.pacientesAgendaCompleto) return;
 
     this.cargandoPacientesAgenda = true;
+    this.cargandoPacientesAgendaData.next(true);
+    this.progresoPacientesAgendaData.next(0);
+    this.mensajeProgresoPacientesAgendaData.next(
+      'Preparando el programa para trabajar con muchos datos...',
+    );
 
     let maxId = Number(maxIdInicial ?? 0);
 
@@ -363,6 +445,7 @@ export class RespuestaPinService {
         const lote = await this.solicitarLotePacientesAgenda(sedeId, maxId);
 
         if (!lote || lote.length === 0) {
+          this.agregarPacientesAgenda([], true);
           this.pacientesAgendaCompleto = true;
           break;
         }
@@ -378,7 +461,15 @@ export class RespuestaPinService {
           `Pacientes agenda cargados en segundo plano. Último ID: ${maxId}. Lote: ${lote.length}`,
         );
 
+        const totalCargados = this.pacientesAgendaMap.size;
+
+        this.progresoPacientesAgendaData.next(totalCargados);
+        this.mensajeProgresoPacientesAgendaData.next(
+          `Preparando pacientes: ${totalCargados.toLocaleString()} cargados...`,
+        );
+
         if (lote.length < this.TAMANO_LOTE_PACIENTES_AGENDA) {
+          this.agregarPacientesAgenda([], true);
           this.pacientesAgendaCompleto = true;
           break;
         }
@@ -389,6 +480,11 @@ export class RespuestaPinService {
       console.error('Error cargando pacientes agenda en segundo plano:', error);
     } finally {
       this.cargandoPacientesAgenda = false;
+      this.cargandoPacientesAgendaData.next(false);
+
+      this.mensajeProgresoPacientesAgendaData.next(
+        `Preparación finalizada. Pacientes cargados: ${this.pacientesAgendaMap.size.toLocaleString()}`,
+      );
     }
   }
 
