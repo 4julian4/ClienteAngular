@@ -38,6 +38,10 @@ export class PedirPinComponent implements OnInit, OnDestroy {
   sedeIdSeleccionada = 0;
   private destruir$ = new Subject<void>();
 
+  cargandoPacientesAgenda = false;
+  progresoPacientesAgenda = 0;
+  mensajeProgresoPacientesAgenda = '';
+
   constructor(
     private dialogRef: MatDialogRef<PedirPinComponent>,
     private signalRService: SignalRService,
@@ -57,6 +61,24 @@ export class PedirPinComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destruir$))
       .subscribe((id) => {
         this.sedeIdSeleccionada = id ?? 0;
+      });
+
+    this.respuestaPinService.sharedCargandoPacientesAgenda
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((cargando) => {
+        this.cargandoPacientesAgenda = cargando;
+      });
+
+    this.respuestaPinService.sharedProgresoPacientesAgenda
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((total) => {
+        this.progresoPacientesAgenda = total;
+      });
+
+    this.respuestaPinService.sharedMensajeProgresoPacientesAgenda
+      .pipe(takeUntil(this.destruir$))
+      .subscribe((mensaje) => {
+        this.mensajeProgresoPacientesAgenda = mensaje;
       });
   }
 
@@ -167,16 +189,15 @@ export class PedirPinComponent implements OnInit, OnDestroy {
               );
             }
 
+            this.isloading = true;
+
+            await this.respuestaPinService.iniciarCargaPacientesAgendaEnSegundoPlano(
+              this.sedeIdSeleccionada,
+              this.maxIdAnamnesis,
+            );
+
             this.isloading = false;
             this.dialogRef.close(this);
-
-            setTimeout(() => {
-              this.respuestaPinService.iniciarCargaPacientesAgendaEnSegundoPlano(
-                this.sedeIdSeleccionada,
-                this.maxIdAnamnesis,
-              );
-            }, 0);
-
             return;
           },
         );

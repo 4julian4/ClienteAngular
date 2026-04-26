@@ -245,23 +245,6 @@ export class BuscarHitoriaClinicaComponent implements OnInit, OnDestroy {
           facturaElectronica,
         );
 
-        /*this.lstDatosPacienteParaBuscar = (
-          this.listaDatosPacienteParaBuscar ?? []
-        )
-          .filter((item) => item.DOCTOR === this.nombreDoctor)
-          .map((item) => ({
-            idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
-            datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
-          }));
-
-        this.filteredDatoPacienteParaBuscar =
-          this.datoPacienteParaBuscarControl.valueChanges.pipe(
-            startWith(''),
-            map((value) =>
-              this._filterNombre(value, this.lstDatosPacienteParaBuscar),
-            ),
-          );*/
-
         this.llenarDatosPacienteParaBuscar();
       });
 
@@ -283,46 +266,22 @@ export class BuscarHitoriaClinicaComponent implements OnInit, OnDestroy {
             this.respuestaObtenerDoctorSiLoCambianModel.facturaElectronica,
           );
 
-          /*this.lstDatosPacienteParaBuscar = (
-            this.listaDatosPacienteParaBuscar ?? []
-          )
-            .filter((item) => item.DOCTOR === this.nombreDoctor)
-            .map((item) => ({
-              idAnamnesis: item.IDANAMNESIS ? item.IDANAMNESIS : 0,
-              datoBuscar: item.NOMBRE_PACIENTE ? item.NOMBRE_PACIENTE : '',
-            }));
-
-          this.filteredDatoPacienteParaBuscar =
-            this.datoPacienteParaBuscarControl.valueChanges.pipe(
-              startWith(''),
-              map((value) =>
-                this._filterNombre(value, this.lstDatosPacienteParaBuscar),
-              ),
-            );*/
           this.llenarDatosPacienteParaBuscar();
         },
       );
 
-    /*this.respuestaBusquedaPacienteService.respuestaBuquedaPacienteModel
-      .pipe(takeUntil(this.destruir$))
-      .subscribe(
-        async (respuestaBusquedaPaciente: RespuestaBusquedaPaciente[]) => {
-          this.resultadosBusqueda = respuestaBusquedaPaciente ?? [];
-          this.buscandoPaciente = false;
-        },
-      );*/
     this.respuestaBusquedaPacienteService.respuestaBuquedaPacienteModel
       .pipe(takeUntil(this.destruir$))
       .subscribe(
         async (respuestaBusquedaPaciente: RespuestaBusquedaPaciente[]) => {
           const lista = respuestaBusquedaPaciente ?? [];
 
-          this.resultadosBusqueda = lista.slice(0, 3000);
+          this.resultadosBusqueda = lista.slice(0, 1000);
           this.buscandoPaciente = false;
 
-          if (lista.length > 3000) {
+          if (lista.length > 1000) {
             await this.mensajesUsuariosService.mensajeInformativo(
-              `Se encontraron ${lista.length} resultados. Se muestran los primeros 3000. Escribe más datos para afinar la búsqueda.`,
+              `Se encontraron ${lista.length} resultados. Se muestran los primeros 1000. Escribe más datos para afinar la búsqueda.`,
             );
           }
         },
@@ -333,12 +292,6 @@ export class BuscarHitoriaClinicaComponent implements OnInit, OnDestroy {
       .subscribe(async (respuestaBusquedaAntecedentes: Antecedentes) => {
         this.resultadoBusquedaAntecedentes = respuestaBusquedaAntecedentes;
       });
-
-    /* this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit.subscribe(
-      async (respuestaEvolucionPaciente: RespuestaEvolucionPaciente) => {
-        this.resultadoBusquedaEvolucionPaciente = respuestaEvolucionPaciente;
-      },
-    );*/
 
     this.respuestaEvolucionPacienteService.respuestaEvolucionPacienteEmit
       .pipe(takeUntil(this.destruir$))
@@ -367,22 +320,6 @@ export class BuscarHitoriaClinicaComponent implements OnInit, OnDestroy {
     }, 300);
   }
 
-  /*private _filterNombre(
-    value: string,
-    list: { idAnamnesis: number; datoBuscar: string }[],
-  ): { idAnamnesis: number; datoBuscar: string }[] {
-    const filterValue = value ? value.toString().toLowerCase().trim() : '';
-
-    if (filterValue.length < 2) {
-      return [];
-    }
-
-    return list
-      .filter((option) =>
-        option.datoBuscar?.toString().toLowerCase().includes(filterValue),
-      )
-      .slice(0, 50);
-  }*/
   private _filterPacienteHistoria(
     value: string,
   ): { idAnamnesis: number; datoBuscar: string }[] {
@@ -526,27 +463,19 @@ export class BuscarHitoriaClinicaComponent implements OnInit, OnDestroy {
     });
   }
 
-  /*async buscarPaciente(nombrePaciente: string) {
-    console.log(nombrePaciente);
-    console.log(this.opcionSeleccionada);
-    if (this.idSedeActualSignalR != '') {
-      await this.respuestaBusquedaPacienteService.startConnectionRespuestaBusquedaPaciente(
-        this.sedeIdSeleccionada,
-        this.opcionSeleccionada,
-        nombrePaciente,
-      );
-    }
-  }*/
   async buscarPaciente(nombrePaciente: string) {
     const valor = (nombrePaciente ?? '').toString().trim();
 
-    if (valor.length < 2) {
+    const minimo = this.opcionSeleccionada === '1' ? 5 : 2;
+
+    if (valor.length < minimo) {
       await this.mensajesUsuariosService.mensajeInformativo(
-        'Ingrese al menos 2 caracteres para buscar.',
+        this.opcionSeleccionada === '1'
+          ? 'Para buscar por nombre, ingrese al menos 5 letras. También puede usar las sugerencias del autocompletar.'
+          : `Ingrese al menos ${minimo} caracteres para buscar.`,
       );
       return;
     }
-
     if (this.buscandoPaciente) return;
 
     if (this.idSedeActualSignalR != '') {
@@ -687,6 +616,36 @@ export class BuscarHitoriaClinicaComponent implements OnInit, OnDestroy {
     // (así no dependes de timing del Sidenav)
     this.router.navigate(['/datos-personales']);
   }*/
+
+  async seleccionarPacienteAutocomplete(
+    datosPaciente: { idAnamnesis: number; datoBuscar: string },
+    event: any,
+  ) {
+    if (!event?.isUserInput) return;
+
+    const idAnamnesis = Number(datosPaciente?.idAnamnesis ?? 0);
+    if (idAnamnesis <= 0) return;
+
+    const paciente = (this.listaDatosPacienteParaBuscar ?? []).find(
+      (x) => Number(x.IDANAMNESIS ?? 0) === idAnamnesis,
+    );
+
+    if (!paciente) return;
+
+    this.resultadosBusqueda = [
+      {
+        IDANAMNESIS: paciente.IDANAMNESIS ?? 0,
+        IDANAMNESISTEXTO: paciente.IDANAMNESIS_TEXTO ?? '',
+        NOMBRE_PACIENTE: paciente.NOMBRE_PACIENTE ?? '',
+        NUMDOCUMENTO: paciente.CEDULA_NUMERO ?? '',
+        TELEFONO:
+          paciente.CELULAR_P || paciente.TELF_P || paciente.TELF_P_OTRO || '',
+        DOCTOR: paciente.DOCTOR ?? '',
+        PERFIL: '',
+        NUMAFILIACION: paciente.NRO_AFILIACION ?? '',
+      } as RespuestaBusquedaPaciente,
+    ];
+  }
 
   guardarDatosPersonales() {
     // Lógica para guardar los datos del formulario
