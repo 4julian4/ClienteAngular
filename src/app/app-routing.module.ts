@@ -37,6 +37,7 @@ import { AdminControlComponent } from './componentes/admon/admin-control/admin-c
 import { InteroperabilidadRdaComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda.component';
 import { InteroperabilidadRdaDetalleComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda-detalle.component';
 import { InteroperabilidadConsultaComponent } from './componentes/interoperabilidad-consulta/interoperabilidad-consulta.component';
+import { PagoResultadoComponent } from './componentes/wompi/pago-resultado/pago-resultado.component';
 
 const routes: Routes = [
   { path: 'auth/login-callback', component: LoginCallBackComponent },
@@ -50,6 +51,7 @@ const routes: Routes = [
   { path: 'agenda', component: AgendaComponent },
   { path: 'agenda-responsive', component: AgendaResponsiveComponent },
   { path: 'agregar-evolucion', component: AgregarEvolucionComponent },
+  { path: 'pago-resultado', component: PagoResultadoComponent },
   {
     path: 'agregar-evolucion-agenda',
     component: AgregarEvolucionAgendaComponent,

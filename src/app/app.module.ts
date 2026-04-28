@@ -98,6 +98,8 @@ import { AdminControlComponent } from './componentes/admon/admin-control/admin-c
 import { InteroperabilidadRdaComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda.component';
 import { InteroperabilidadRdaDetalleComponent } from './componentes/interoperabilidad-rda/interoperabilidad-rda-detalle.component';
 import { InteroperabilidadConsultaComponent } from './componentes/interoperabilidad-consulta/interoperabilidad-consulta.component';
+import { WompiPaquetesComponent } from './componentes/wompi/wompi-paquetes/wompi-paquetes.component';
+import { PagoResultadoComponent } from './componentes/wompi/pago-resultado/pago-resultado.component';
 
 //-----------------Formato de fecha-------------------
 export const MY_DATE_FORMATS = {
@@ -161,6 +163,8 @@ export const MY_DATE_FORMATS = {
     InteroperabilidadRdaComponent,
     InteroperabilidadRdaDetalleComponent,
     InteroperabilidadConsultaComponent,
+    WompiPaquetesComponent,
+    PagoResultadoComponent
   ],
   bootstrap: [AppComponent],
   imports: [

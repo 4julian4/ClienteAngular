@@ -71,8 +71,8 @@
           "options": {
             "ssl": true,
             
-            "sslKey": "C:\\Trabajos\\PruebaServicioAngular\\ClienteAngular\\dev.key",
-            "sslCert": "C:\\Trabajos\\PruebaServicioAngular\\ClienteAngular\\dev.crt"
+            "sslKey": "D:\\Codigo\\Rydent\\ClienteAngular\\dev.key",
+            "sslCert": "D:\\Codigo\\Rydent\\ClienteAngular\\dev.crt"
           },
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {

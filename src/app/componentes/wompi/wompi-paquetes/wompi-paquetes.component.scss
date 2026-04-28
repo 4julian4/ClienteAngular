@@ -1,0 +1,80 @@
+.contenedor-paquetes {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.contenedor-paquetes h2 {
+  text-align: center;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.subtitulo {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.grid-paquetes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.card-paquete {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 22px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.card-paquete h3 {
+  margin-top: 0;
+  color: #1f2937;
+}
+
+.cantidad {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 16px 0 8px;
+  color: #003189;
+}
+
+.precio {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  color: #111827;
+}
+
+.descripcion {
+  min-height: 45px;
+  color: #555;
+  font-size: 14px;
+}
+
+.btn-comprar {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #003189;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-comprar:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .grid-paquetes {
+    grid-template-columns: 1fr;
+  }
+}
