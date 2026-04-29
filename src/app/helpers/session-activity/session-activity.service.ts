@@ -3,8 +3,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+
 import { environment } from 'src/environments/environment';
 import { LoginService } from 'src/app/componentes/login';
+import { SignalRService } from 'src/app/signalr.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +21,7 @@ export class SessionActivityService {
     private loginService: LoginService,
     private router: Router,
     private zone: NgZone,
+    private signalRService: SignalRService,
   ) {}
 
   start(): void {
@@ -29,7 +33,7 @@ export class SessionActivityService {
     this.zone.runOutsideAngular(() => {
       this.timer = setInterval(() => {
         this.validarAhora();
-      }, 120000); // 2 minutos
+      }, 900000); // 15 minutos
     });
 
     window.addEventListener('focus', this.onFocus);
@@ -65,52 +69,76 @@ export class SessionActivityService {
     try {
       const token = this.loginService.getToken();
 
-      const resp: any = await this.http
-        .post(
+      const resp: any = await firstValueFrom(
+        this.http.post(
           `${environment.apiUrl}/sesion/actividad`,
           {},
           {
             headers: new HttpHeaders({
               Authorization: `Bearer ${token}`,
+              'X-Skip-Loader': 'true',
             }),
           },
-        )
-        .toPromise();
+        ),
+      );
 
       if (!resp?.activa) {
-        this.stop();
-        this.loginService.signOut(false);
-
-        this.zone.run(() => {
-          alert(
-            resp?.mensaje ||
-              'Tu sesión fue cerrada porque se inició en otro equipo o expiró.',
-          );
-          this.router.navigate(['/']);
-        });
+        await this.expulsarSesionLocal(
+          resp?.mensaje ||
+            'Tu sesión fue cerrada porque se inició con tu usuario en otro equipo.',
+        );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('No fue posible validar actividad de sesión.', error);
+
+      if (error?.status === 401 || error?.status === 403) {
+        await this.expulsarSesionLocal(
+          'Tu sesión fue cerrada porque se inició con tu usuario en otro equipo.',
+        );
+      }
     } finally {
       this.ejecutando = false;
     }
+  }
+
+  private async expulsarSesionLocal(mensaje: string): Promise<void> {
+    this.stop();
+
+    try {
+      await this.signalRService.stopConnection({ clearHandlers: true });
+    } catch {
+      // No bloquear el cierre local por error de SignalR.
+    }
+
+    this.zone.run(() => {
+      alert(mensaje);
+
+      // IMPORTANTE:
+      // Aquí NO llamamos /sesion/cerrar porque podríamos cerrar la sesión nueva.
+      this.loginService.signOut();
+
+      this.router.navigate(['/']).then(() => {
+        window.location.reload();
+      });
+    });
   }
 
   async cerrarSesionServidor(): Promise<void> {
     try {
       const token = this.loginService.getToken();
 
-      await this.http
-        .post(
+      await firstValueFrom(
+        this.http.post(
           `${environment.apiUrl}/sesion/cerrar`,
           {},
           {
             headers: new HttpHeaders({
               Authorization: `Bearer ${token}`,
+              'X-Skip-Loader': 'true',
             }),
           },
-        )
-        .toPromise();
+        ),
+      );
     } catch {
       // No bloquear logout por error de red.
     }
