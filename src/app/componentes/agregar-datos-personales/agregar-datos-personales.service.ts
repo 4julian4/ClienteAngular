@@ -221,7 +221,21 @@ export class AgregarDatosPersonalesService {
           console.log('IDANAMNESIS:', idAnamnesis);
 
           if (idAnamnesis > 0) {
+            const enviado = JSON.parse(
+              datosPersonalesGurdar,
+            ) as RespuestaDatosPersonales;
+
+            const datosGuardados = {
+              ...(enviado?.datosPersonales ?? {}),
+              IDANAMNESIS: idAnamnesis,
+            };
+
+            this.respuestaPinService.upsertPacienteAgendaDesdeDatosPersonales(
+              datosGuardados,
+            );
+
             await this.respuestaPinService.updateAnamnesisData(idAnamnesis);
+
             this.router.navigate(['/datos-personales']);
           } else {
             console.warn('No llegó IDANAMNESIS válido:', respuesta);

@@ -30,4 +30,8 @@ export const environment = {
       'https://rydentclient.azurewebsites.net/auth/login-callback-google',
     RedirectURI: 'https://localhost:4200/auth/login-callback-google',
   },
+  Wompi: {
+    checkout: 'https://checkout.wompi.co/p/?',
+    URL: 'https://sandbox.wompi.co/v1/transactions/',
+  },
 };

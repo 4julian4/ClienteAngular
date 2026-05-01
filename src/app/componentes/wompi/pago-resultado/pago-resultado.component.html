@@ -1,0 +1,17 @@
+<div class="resultado-pago">
+  <h2>Resultado del pago</h2>
+
+  <p>
+    Esta pantalla recibe la respuesta de Wompi después del checkout.
+  </p>
+
+  <div class="card">
+    <p><strong>ID transacción:</strong> {{ idTransaccion || 'No recibido' }}</p>
+    <p><strong>Referencia:</strong> {{ referencia || 'No recibida' }}</p>
+    <p><strong>Estado:</strong> {{ estado || 'No recibido' }}</p>
+  </div>
+
+  <p class="nota">
+    Nota: esta pantalla es solo visual. La confirmación real del pago debe hacerse con webhook en el backend.
+  </p>
+</div>

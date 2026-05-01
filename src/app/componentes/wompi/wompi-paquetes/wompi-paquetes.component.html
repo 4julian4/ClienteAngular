@@ -1,0 +1,38 @@
+<div class="contenedor-paquetes">
+  <h2>Comprar paquete de facturas</h2>
+  <p class="subtitulo">
+    Demo de compra con Wompi Sandbox. Los pagos son de prueba.
+  </p>
+
+  <div class="grid-paquetes">
+    <div class="card-paquete" *ngFor="let paquete of paquetes">
+      <h3>{{ paquete.nombre }}</h3>
+
+      <div class="cantidad">
+        {{ paquete.cantidadFacturas }} facturas
+      </div>
+
+      <div class="precio">
+        {{ formatearPesos(paquete.precio) }}
+      </div>
+
+      <p class="descripcion">
+        {{ paquete.descripcion }}
+      </p>
+
+      <button
+        type="button"
+        class="btn-comprar"
+        [disabled]="cargando"
+        (click)="comprarPaquete(paquete)">
+        <span *ngIf="paqueteSeleccionado !== paquete.id">
+          Comprar
+        </span>
+
+        <span *ngIf="paqueteSeleccionado === paquete.id">
+          Preparando pago...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

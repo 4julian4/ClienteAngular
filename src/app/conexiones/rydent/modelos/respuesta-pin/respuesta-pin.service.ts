@@ -355,6 +355,39 @@ export class RespuestaPinService {
     }
   }
 
+  public upsertPacienteAgendaDesdeDatosPersonales(datos: any): void {
+    if (!datos) return;
+
+    const actual = this.datosRespuestaPin.value;
+    if (!actual) return;
+
+    const id = Number(datos.IDANAMNESIS ?? 0);
+    if (id <= 0) return;
+
+    const item: any = {
+      IDANAMNESIS: id,
+      NOMBRE_PACIENTE: datos.NOMBRE_PACIENTE ?? '',
+      DOCTOR: datos.DOCTOR ?? null,
+      TELF_P: datos.TELF_P ?? null,
+      TELF_P_OTRO: datos.TELF_P_OTRO ?? null,
+      CELULAR_P: datos.CELULAR_P ?? null,
+      CEDULA_NUMERO: datos.CEDULA_NUMERO ?? null,
+      NRO_AFILIACION: datos.NRO_AFILIACION ?? null,
+      IDANAMNESIS_TEXTO: datos.IDANAMNESIS_TEXTO ?? '',
+    };
+
+    this.pacientesAgendaMap.set(id, item);
+
+    const listaActual = actual.lstAnamnesisParaAgendayBuscadores ?? [];
+
+    this.updatedatosRespuestaPin({
+      ...actual,
+      lstAnamnesisParaAgendayBuscadores: [item, ...listaActual],
+    });
+
+    console.log('Paciente nuevo agregado a memoria:', item);
+  }
+
   async startConnectionLotePacientesAgenda(): Promise<void> {
     await this.signalRService.ensureConnection();
 

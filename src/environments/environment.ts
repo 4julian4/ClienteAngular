@@ -24,4 +24,8 @@ export const environment = {
     RedirectURI:
       'https://rydentweb-001-site2.jtempurl.com/auth/login-callback-google',
   },
+  Wompi: {
+    checkout: 'https://checkout.wompi.co/p/?',
+    URL: 'https://production.wompi.co/v1/transactions/',
+  },
 };

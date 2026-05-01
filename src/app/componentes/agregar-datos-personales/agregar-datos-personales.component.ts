@@ -787,9 +787,16 @@ export class AgregarDatosPersonalesComponent implements OnInit, OnDestroy {
 
     console.log(datosParaGurdarEnAnamnesis.datosPersonales);
 
-    await this.respuestaPinService.updateNombrePacienteEscogidoData(
-      datosFormularioGurdarEnAnamnesis.NOMBRE_PACIENTE,
-    );
+    await this.respuestaPinService.updatePacienteHeaderInfo({
+      nombre: datosFormularioGurdarEnAnamnesis.NOMBRE_PACIENTE ?? '',
+      documento: datosFormularioGurdarEnAnamnesis.CEDULA_NUMERO ?? '',
+      telefono:
+        datosFormularioGurdarEnAnamnesis.CELULAR_P ||
+        datosFormularioGurdarEnAnamnesis.TELF_P ||
+        datosFormularioGurdarEnAnamnesis.TELF_P_OTRO ||
+        '',
+      historia: datosFormularioGurdarEnAnamnesis.IDANAMNESIS_TEXTO ?? '',
+    });
     datosParaGurdarEnAnamnesis.strFotoFrontal = this.fotoFrontalBase64;
 
     if (idAnamnesis != 0) {
